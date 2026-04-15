@@ -1,4 +1,5 @@
 ﻿using AutoReparos.Domain.Clientes.Repositories;
+using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
 using AutoReparos.Infra.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ namespace AutoReparos.Infra.IoC
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
             services.AddScoped<IClienteRepository, ClienteRepository>();
+
+            services.AddScoped<IVeiculoRepository, VeiculoRepository>();
 
             return services;
         }
