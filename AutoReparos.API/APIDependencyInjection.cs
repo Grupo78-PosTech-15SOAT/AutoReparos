@@ -1,4 +1,6 @@
-﻿namespace AutoReparos.API
+﻿using AutoReparos.API.Handlers;
+
+namespace AutoReparos.API
 {
     public static class APIDependencyInjection
     {
@@ -23,6 +25,7 @@
                 });
             });
 
+            services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
             return services;
