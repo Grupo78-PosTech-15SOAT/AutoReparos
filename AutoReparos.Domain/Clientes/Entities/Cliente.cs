@@ -52,7 +52,7 @@ namespace AutoReparos.Domain.Clientes.Entities
                 throw new InvalidClienteException("Telefone é obrigatório");
 
             if (nome.Length > 100)
-                throw new InvalidClienteException("Nome muito longo");
+                throw new InvalidClienteException("Nome muito longo, o nome deve ter no máximo 100 caracteres.");
 
             var digitsPhone = new string(telefone.Where(char.IsDigit).ToArray());
             if (digitsPhone.Length != 9)
