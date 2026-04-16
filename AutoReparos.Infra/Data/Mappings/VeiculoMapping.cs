@@ -46,7 +46,8 @@ namespace AutoReparos.Infra.Data.Mappings
                     .HasMaxLength(7);
 
                 placa.HasIndex(p => p.Valor)
-                    .IsUnique();
+                    .IsUnique()
+                    .HasDatabaseName("IX_Veiculos_Placa");
             });
 
             builder.OwnsOne(v => v.Chassi, chassi =>
@@ -57,7 +58,8 @@ namespace AutoReparos.Infra.Data.Mappings
                     .HasMaxLength(17);
 
                 chassi.HasIndex(c => c.Valor)
-                    .IsUnique();
+                    .IsUnique()
+                    .HasDatabaseName("IX_Veiculos_Chassi");
             });
 
             builder.OwnsOne(v => v.Renavam, renavam =>
@@ -68,7 +70,8 @@ namespace AutoReparos.Infra.Data.Mappings
                     .HasMaxLength(11);
 
                 renavam.HasIndex(r => r.Valor)
-                    .IsUnique();
+                    .IsUnique()
+                    .HasDatabaseName("IX_Veiculos_Renavam");
             });
         }
     }

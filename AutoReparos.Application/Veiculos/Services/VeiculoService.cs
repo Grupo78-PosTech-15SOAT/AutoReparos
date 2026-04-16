@@ -28,12 +28,6 @@ namespace AutoReparos.Application.Veiculos.Services
             if (cliente == null)
                 throw new NotFoundException("Cliente não encontrado.");
 
-            var placaNormalizada = dto.Placa.ToUpper().Replace("-", "").Trim();
-            var veiculoExistente = await _repository.GetByPlaca(placaNormalizada);
-
-            if (veiculoExistente != null)
-                throw new Exception("Já existe um veículo com essa placa.");
-
             var veiculo = new Veiculo(
                 dto.ClienteId,
                 dto.Marca,
