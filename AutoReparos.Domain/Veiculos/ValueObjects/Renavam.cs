@@ -1,4 +1,6 @@
-﻿namespace AutoReparos.Domain.Veiculos.ValueObjects
+﻿using AutoReparos.Domain.Veiculos.ValueObjects.Exceptions;
+
+namespace AutoReparos.Domain.Veiculos.ValueObjects
 {
     public sealed record Renavam
     {
@@ -7,12 +9,12 @@
         public Renavam(string valor)
         {
             if (string.IsNullOrWhiteSpace(valor))
-                throw new Exception("Renavam é obrigatório");
+                throw new InvalidRenavamException("Renavam é obrigatório");
 
             var digits = new string(valor.Where(char.IsDigit).ToArray());
 
             if (digits.Length != 11)
-                throw new Exception("Renavam inválido");
+                throw new InvalidRenavamException("Renavam inválido");
 
             Valor = digits;
         }
