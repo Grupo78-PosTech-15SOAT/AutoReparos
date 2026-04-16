@@ -30,7 +30,9 @@ namespace AutoReparos.Infra.Data.Mappings
                     .IsRequired()
                     .HasMaxLength(200);
 
-                email.HasIndex(e => e.Address).IsUnique();
+                email.HasIndex(e => e.Address)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Clientes_Email");
             });
 
             builder.OwnsOne(e => e.Documento, doc =>
@@ -44,7 +46,9 @@ namespace AutoReparos.Infra.Data.Mappings
                     .HasColumnName("TipoDocumento")
                     .IsRequired();
 
-                doc.HasIndex(d => d.Valor).IsUnique();
+                doc.HasIndex(d => d.Valor)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Clientes_Documento");
             });
         }
     }
