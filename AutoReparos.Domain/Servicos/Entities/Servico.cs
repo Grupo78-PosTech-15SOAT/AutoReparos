@@ -1,8 +1,5 @@
 ﻿using AutoReparos.Domain.Servicos.exceptions;
 using AutoReparos.Domain.Shared;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Domain.Servicos.Entities
 {
