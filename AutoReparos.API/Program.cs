@@ -23,5 +23,8 @@ app.UseHttpsRedirection();
 
 app.MapClientesEndpoints();
 app.MapVeiculosEndpoints();
+app.MapServicosEndpoints();
+app.MapPecasEndpoints();
+app.MapOrdensServicoEndpoints();
 
 app.Run();

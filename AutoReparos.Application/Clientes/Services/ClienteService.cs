@@ -5,7 +5,7 @@ using AutoReparos.Application.Shared;
 using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.Clientes.ValueObjects;
-using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
+using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Shared.Exceptions;
 
 namespace AutoReparos.Application.Clientes.Services
@@ -52,7 +52,7 @@ namespace AutoReparos.Application.Clientes.Services
         public async Task<PagedResult<ClienteDTO>> GetAll(PagedRequest request)
         {
             var (clientes, total) = await _repository.GetAll(request.Nome, (request.PageNumber - 1) * request.PageSize, request.PageSize);
-            var items = clientes.Select(c => ToDTO(c));
+            var items = clientes.Select(ToDTO);
             return new PagedResult<ClienteDTO>(items, total, request.PageNumber, request.PageSize);
         }
 

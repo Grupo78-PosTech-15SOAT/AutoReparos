@@ -1,5 +1,5 @@
-﻿using AutoReparos.Domain.Clientes.ValueObjects;
-using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
+﻿using AutoReparos.Domain.Clientes.Exceptions;
+using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Shared;
 
 namespace AutoReparos.Domain.Clientes.Entities

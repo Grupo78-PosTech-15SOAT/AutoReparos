@@ -1,6 +1,8 @@
-﻿using AutoReparos.Application.Veiculos.DTOs.Request;
+﻿using AutoReparos.Application.Shared;
+using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
 using AutoReparos.Application.Veiculos.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AutoReparos.API.Endpoints
 {
@@ -23,6 +25,15 @@ namespace AutoReparos.API.Endpoints
             .Produces<VeiculoDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
+            group.MapGet("/", async (IVeiculoService service, [FromQuery] Guid? clienteId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) =>
+            {
+                var result = await service.GetAll(clienteId, pageNumber, pageSize);
+                return Results.Ok(result);
+            })
+            .WithName("GetAllVeiculos")
+            .WithSummary("Lista todos os veículos paginados")
+            .Produces<PagedResult<VeiculoDTO>>(StatusCodes.Status200OK);
+
             group.MapGet("/{id:guid}", async (Guid id, IVeiculoService service) =>
             {
                 var veiculo = await service.GetById(id);
@@ -37,16 +48,18 @@ namespace AutoReparos.API.Endpoints
             .Produces<VeiculoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapGet("/cliente/{clienteId:guid}", async (Guid clienteId, IVeiculoService service) =>
+            group.MapGet("/placa/{placa}", async (string placa, IVeiculoService service) =>
             {
-                var veiculos = await service.GetByClienteId(clienteId);
-
-                return Results.Ok(veiculos);
+                var veiculo = await service.GetByPlaca(placa);
+                return veiculo is null
+                    ? Results.NotFound()
+                    : Results.Ok(veiculo);
             })
-            .WithName("GetVeiculosByCliente")
-            .WithSummary("Lista veículos de um cliente")
-            .WithDescription("Endpoint responsável por retornar todos os veículos de um cliente")
-            .Produces<IEnumerable<VeiculoDTO>>(StatusCodes.Status200OK);
+            .WithName("GetVeiculoByPlaca")
+            .WithSummary("Busca veículo por placa")
+            .WithDescription("Endpoint responsável por retornar um veículo pela sua placa")
+            .Produces<VeiculoDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
             group.MapPut("/{id:guid}", async (Guid id, VeiculoUpdateDTO dto, IVeiculoService service) =>
             {

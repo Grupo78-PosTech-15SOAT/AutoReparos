@@ -1,4 +1,5 @@
-﻿using AutoReparos.Application.Veiculos.DTOs.Request;
+﻿using AutoReparos.Application.Shared;
+using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
 using AutoReparos.Application.Veiculos.Services.Interfaces;
 using AutoReparos.Domain.Clientes.Repositories;
@@ -44,6 +45,13 @@ namespace AutoReparos.Application.Veiculos.Services
             return ToDTO(veiculo);
         }
 
+        public async Task<PagedResult<VeiculoDTO>> GetAll(Guid? clienteId, int pageNumber, int pageSize)
+        {
+            var skip = (pageNumber - 1) * pageSize;
+            var (items, total) = await _repository.GetAll(clienteId, skip, pageSize);
+            return new PagedResult<VeiculoDTO>(items.Select(ToDTO), total, pageNumber, pageSize);
+        }
+
         public async Task<VeiculoDTO?> GetById(Guid id)
         {
             var veiculo = await _repository.GetById(id);
@@ -54,10 +62,14 @@ namespace AutoReparos.Application.Veiculos.Services
             return ToDTO(veiculo);
         }
 
-        public async Task<IEnumerable<VeiculoDTO>> GetByClienteId(Guid clienteId)
+        public async Task<VeiculoDTO?> GetByPlaca(string placa)
         {
-            var veiculos = await _repository.GetByClienteId(clienteId);
-            return veiculos.Select(ToDTO);
+            var veiculo = await _repository.GetByPlaca(placa);
+
+            if (veiculo == null)
+                throw new NotFoundException("Veículo não encontrado.");
+
+            return ToDTO(veiculo);
         }
 
         public async Task Update(Guid id, VeiculoUpdateDTO dto)

@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "874e99b0-bd45-4788-bd2f-90d64247d2f1",
+    "_postman_id": "a98a0c62-eadb-4b50-a35d-25a5565c493b",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "28677730",
-    "_collection_link": "https://go.postman.co/collection/28677730-874e99b0-bd45-4788-bd2f-90d64247d2f1?source=collection_link"
+    "_exporter_id": "27526426",
+    "_collection_link": "https://go.postman.co/collection/27526426-a98a0c62-eadb-4b50-a35d-25a5565c493b?source=collection_link"
   },
   "item": [
     {
@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nome\": \"Augusto Ferrari\",\r\n  \"documento\": \"968.765.700-61\",\r\n  \"telefone\": \"992528809\",\r\n  \"email\": \"augusto@gmail.com\"\r\n}",
+              "raw": "// {\r\n//   \"nome\": \"Augusto Ferrari\",\r\n//   \"documento\": \"968.765.700-61\",\r\n//   \"telefone\": \"992528809\",\r\n//   \"email\": \"augusto@gmail.com\"\r\n// }\r\n\r\n{\r\n  \"nome\": \"Marcos Chevrolet\",\r\n  \"documento\": \"679.488.610-33\",\r\n  \"telefone\": \"992457892\",\r\n  \"email\": \"marcos@gmail.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81,7 +81,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nome\": \"string\",\r\n  \"telefone\": \"string\",\r\n  \"email\": \"string\"\r\n}",
+              "raw": "{\r\n  \"nome\": \"Fernando Bughatti\",\r\n  \"telefone\": \"27992430932\",\r\n  \"email\": \"fernando@gmail.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -142,7 +142,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"clienteId\": \"46865af2-846b-421e-8f5f-1f9b693c6812\",\r\n  \"marca\": \"Ford\",\r\n  \"modelo\": \"Ka\",\r\n  \"anoFabricacao\": 2020,\r\n  \"anoModelo\": 2021,\r\n  \"placa\": \"ABC1D23\",\r\n  \"chassi\": \"12345678901234567\",\r\n  \"renavam\": \"12345678901\"\r\n}",
+              "raw": "{\r\n  \"clienteId\": \"{{clienteId}}\",\r\n  \"marca\": \"Volkswagen\",\r\n  \"modelo\": \"Jetta 2.0 TSI\",\r\n  \"anoFabricacao\": 2016,\r\n  \"anoModelo\": 2016,\r\n  \"placa\": \"ABC1M23\",\r\n  \"chassi\": \"12345678901234568\",\r\n  \"renavam\": \"12345778901\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -157,6 +157,48 @@
               "path": [
                 "api",
                 "veiculos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllVeiculos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllVeiculosByClienteId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos?clienteId={{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": "{{clienteId}}"
+                }
               ]
             }
           },
@@ -182,20 +224,20 @@
           "response": []
         },
         {
-          "name": "GetVeiculoByCliente",
+          "name": "GetVeiculoByPlaca",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/veiculos/cliente/{{clienteId}}",
+              "raw": "{{baseUrl}}/api/veiculos/placa/{{placaVeiculo}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "veiculos",
-                "cliente",
-                "{{clienteId}}"
+                "placa",
+                "{{placaVeiculo}}"
               ]
             }
           },
@@ -208,7 +250,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"marca\": \"Ford\",\r\n  \"modelo\": \"Ka Sedan\",\r\n  \"anoFabricacao\": 2020,\r\n  \"anoModelo\": 2022\r\n}",
+              "raw": "{\r\n  \"marca\": \"Volkswagen\",\r\n  \"modelo\": \"Jetta GLI - 2.0 TSI\",\r\n  \"anoFabricacao\": 2024,\r\n  \"anoModelo\": 2025\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -243,6 +285,564 @@
                 "api",
                 "veiculos",
                 "{{veiculoId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Servicos",
+      "item": [
+        {
+          "name": "CreateServico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Troca de Óleo - 5L\",\r\n  \"descricao\": \"Serviço de troca utilizando 5 litros de óleo\",\r\n  \"valorTabelado\": 129.90\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllServicos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetServicoById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos/{{servicoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos",
+                "{{servicoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateServico",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Troca de Óleo - 4 litros\",\r\n  \"descricao\": \"Serviço de troca utilizando 4 litros de óleo\",\r\n  \"valorTabelado\": 95.99\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos/{{servicoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos",
+                "{{servicoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteServico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos/{{servicoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos",
+                "{{servicoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetTempoMedioServicos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos/tempo-medio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos",
+                "tempo-medio"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetTempoMedioServicoById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicos/{{servicoId}}/tempo-medio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicos",
+                "{{servicoId}}",
+                "tempo-medio"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pecas",
+      "item": [
+        {
+          "name": "CreatePeca",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Lítro Óleo - 1L - 5w40 - Volkswagen\",\r\n  \"descricao\": \"Litro de óleo Volkswagen - 5w40, ideal para Jetta\",\r\n  \"valor\": 52.99,\r\n  \"quantidadeEstoque\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllPecas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetPecaById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas",
+                "{{pecaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdatePeca",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Lítro Óleo - 1L - 5w40 - Volkswagen - Shell\",\r\n  \"descricao\": \"Ideal para Jetta\",\r\n  \"valor\": 29.99\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas",
+                "{{pecaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeletePeca",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas",
+                "{{pecaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AdicionarEstoque",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"quantidade\": 11\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}/adicionar-estoque",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas",
+                "{{pecaId}}",
+                "adicionar-estoque"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RemoverEstoque",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"quantidade\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}/remover-estoque",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "pecas",
+                "{{pecaId}}",
+                "remover-estoque"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "OrdensServico",
+      "item": [
+        {
+          "name": "CreateOrdemServico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"clienteId\": \"{{clienteId}}\",\r\n  \"veiculoId\": \"{{veiculoId}}\",\r\n  \"observacao\": \"Observação do serviço\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AdicionarServico",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"servicoId\": \"{{servicoId}}\",\r\n  \"valorCobrado\": 21.99\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "servicos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AdicionarPeca",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"pecaId\": \"{{pecaId}}\",\r\n  \"descricao\": \"Utilizando a peça para o serviço.\",\r\n  \"valorUnitario\": 30,\r\n  \"quantidade\": 2,\r\n  \"origem\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "pecas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetAllOrdensServico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetOrdemServicoById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "IniciarDiagnostico",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/iniciar-diagnostico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "iniciar-diagnostico"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AguardarAprovacao",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/enviar-para-aprovacao",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "enviar-para-aprovacao"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "AprovarOrdemServico",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/aprovar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "aprovar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ConcluirServico",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{servicoId}}/concluir",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "servicos",
+                "{{servicoId}}",
+                "concluir"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EntregarOrdemServico",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/entregar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "entregar"
               ]
             }
           },
@@ -286,6 +886,22 @@
     },
     {
       "key": "veiculoId",
+      "value": ""
+    },
+    {
+      "key": "servicoId",
+      "value": ""
+    },
+    {
+      "key": "pecaId",
+      "value": ""
+    },
+    {
+      "key": "placaVeiculo",
+      "value": ""
+    },
+    {
+      "key": "ordemServicoId",
       "value": ""
     }
   ]

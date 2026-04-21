@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Veiculos.ValueObjects;
-using AutoReparos.Domain.Veiculos.ValueObjects.Exceptions;
+using AutoReparos.Domain.Veiculos.Exceptions;
 
 namespace AutoReparos.Domain.Veiculos.Entities
 {
@@ -19,7 +19,7 @@ namespace AutoReparos.Domain.Veiculos.Entities
         public Renavam Renavam { get; private set; }
 
         public DateTime CriadoEm { get; }
-        public DateTime AtualizadoEm { get; private set; }
+        public DateTime? AtualizadoEm { get; private set; }
 
         /// <summary>
         /// Construtor para uso do Entity Framework

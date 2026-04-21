@@ -5,12 +5,12 @@ namespace AutoReparos.Domain.Veiculos.Repositories
     public interface IVeiculoRepository
     {
         Task Create(Veiculo veiculo);
+
+        Task<(IEnumerable<Veiculo> Items, int Total)> GetAll(Guid? clienteId, int skip, int take);
+        Task<Veiculo?> GetById(Guid id);
+        Task<Veiculo?> GetByPlaca(string placa);
+
         Task Update(Veiculo veiculo);
         Task Delete(Veiculo veiculo);
-
-        Task<Veiculo?> GetById(Guid id);
-        Task<IEnumerable<Veiculo>> GetByClienteId(Guid clienteId);
-
-        Task<Veiculo?> GetByPlaca(string placa);
     }
 }

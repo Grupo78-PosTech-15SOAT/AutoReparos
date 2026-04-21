@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
+﻿using AutoReparos.Domain.Clientes.Exceptions;
 using System.Text.RegularExpressions;
 
 namespace AutoReparos.Domain.Clientes.ValueObjects

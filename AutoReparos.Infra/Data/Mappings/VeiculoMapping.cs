@@ -36,7 +36,7 @@ namespace AutoReparos.Infra.Data.Mappings
             builder.HasOne<Cliente>()
                 .WithMany()
                 .HasForeignKey(v => v.ClienteId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.OwnsOne(v => v.Placa, placa =>
             {

@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Veiculos.Entities;
 using AutoReparos.Domain.Veiculos.Repositories;
-using AutoReparos.Domain.Veiculos.ValueObjects.Exceptions;
+using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -46,16 +46,31 @@ namespace AutoReparos.Infra.Repositories
             return ex;
         }
 
+        public async Task<(IEnumerable<Veiculo> Items, int Total)> GetAll(Guid? clienteId, int skip, int take)
+        {
+            var query = _context.Veiculos.AsQueryable();
+
+            if (clienteId.HasValue)
+                query = query.Where(v => v.ClienteId == clienteId);
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderBy(v => v.Modelo)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
         public async Task<Veiculo?> GetById(Guid id)
         {
             return await _context.Veiculos.FindAsync(id);
         }
 
-        public async Task<IEnumerable<Veiculo>> GetByClienteId(Guid clienteId)
+        public async Task<Veiculo?> GetByPlaca(string placa)
         {
-            return await _context.Veiculos
-                .Where(v => v.ClienteId == clienteId)
-                .ToListAsync();
+            return await _context.Veiculos.FirstOrDefaultAsync(v => v.Placa.Valor == placa);
         }
 
         public async Task Update(Veiculo veiculo)
@@ -68,11 +83,6 @@ namespace AutoReparos.Infra.Repositories
         {
             _context.Veiculos.Remove(veiculo);
             await _context.SaveChangesAsync();
-        }
-
-        public async Task<Veiculo?> GetByPlaca(string placa)
-        {
-            return await _context.Veiculos.FirstOrDefaultAsync(v => v.Placa.Valor == placa);
         }
     }
 }
