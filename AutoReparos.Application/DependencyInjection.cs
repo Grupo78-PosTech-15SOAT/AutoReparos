@@ -1,5 +1,7 @@
 ﻿using AutoReparos.Application.Clientes.Services;
 using AutoReparos.Application.Clientes.Services.Interfaces;
+using AutoReparos.Application.Veiculos.Services;
+using AutoReparos.Application.Veiculos.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoReparos.Application
@@ -14,6 +16,8 @@ namespace AutoReparos.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IClienteService, ClienteService>();
+
+            services.AddScoped<IVeiculoService, VeiculoService>();
 
             return services;
         }

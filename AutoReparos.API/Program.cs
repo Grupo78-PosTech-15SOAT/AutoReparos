@@ -22,5 +22,6 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.MapClientesEndpoints();
+app.MapVeiculosEndpoints();
 
 app.Run();

@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "82a6c7a8-0278-464b-aae0-6c72c85cd126",
+    "_postman_id": "874e99b0-bd45-4788-bd2f-90d64247d2f1",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "27526426",
-    "_collection_link": "https://go.postman.co/collection/27526426-82a6c7a8-0278-464b-aae0-6c72c85cd126?source=collection_link"
+    "_exporter_id": "28677730",
+    "_collection_link": "https://go.postman.co/collection/28677730-874e99b0-bd45-4788-bd2f-90d64247d2f1?source=collection_link"
   },
   "item": [
     {
@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nome\": \"Augusto Ferrari\",\r\n  \"documento\": \"193.844.950-93\",\r\n  \"telefone\": \"992528809\",\r\n  \"email\": \"augusto@gmail.com\"\r\n}",
+              "raw": "{\r\n  \"nome\": \"Augusto Ferrari\",\r\n  \"documento\": \"968.765.700-61\",\r\n  \"telefone\": \"992528809\",\r\n  \"email\": \"augusto@gmail.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -25,12 +25,10 @@
               }
             },
             "url": {
-              "raw": "https://localhost:7258/api/clientes",
-              "protocol": "https",
+              "raw": "{{baseUrl}}/api/clientes",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "7258",
               "path": [
                 "api",
                 "clientes"
@@ -45,12 +43,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://localhost:7258/api/clientes",
-              "protocol": "https",
+              "raw": "{{baseUrl}}/api/clientes",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "7258",
               "path": [
                 "api",
                 "clientes"
@@ -65,16 +61,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://localhost:7258/api/clientes/356db0a1-9c22-4b53-8ee6-9d2071dca79e",
-              "protocol": "https",
+              "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "7258",
               "path": [
                 "api",
                 "clientes",
-                "356db0a1-9c22-4b53-8ee6-9d2071dca79e"
+                "{{clienteId}}"
               ]
             }
           },
@@ -95,16 +89,14 @@
               }
             },
             "url": {
-              "raw": "https://localhost:7258/api/clientes/356db0a1-9c22-4b53-8ee6-9d2071dca79e",
-              "protocol": "https",
+              "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "7258",
               "path": [
                 "api",
                 "clientes",
-                "356db0a1-9c22-4b53-8ee6-9d2071dca79e"
+                "{{clienteId}}"
               ]
             }
           },
@@ -125,22 +117,176 @@
               }
             },
             "url": {
-              "raw": "https://localhost:7258/api/clientes/356db0a1-9c22-4b53-8ee6-9d2071dca79e",
-              "protocol": "https",
+              "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "7258",
               "path": [
                 "api",
                 "clientes",
-                "356db0a1-9c22-4b53-8ee6-9d2071dca79e"
+                "{{clienteId}}"
               ]
             }
           },
           "response": []
         }
       ]
+    },
+    {
+      "name": "Veiculos",
+      "item": [
+        {
+          "name": "CreateVeiculo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"clienteId\": \"46865af2-846b-421e-8f5f-1f9b693c6812\",\r\n  \"marca\": \"Ford\",\r\n  \"modelo\": \"Ka\",\r\n  \"anoFabricacao\": 2020,\r\n  \"anoModelo\": 2021,\r\n  \"placa\": \"ABC1D23\",\r\n  \"chassi\": \"12345678901234567\",\r\n  \"renavam\": \"12345678901\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetVeiculoById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos/{{veiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos",
+                "{{veiculoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetVeiculoByCliente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos/cliente/{{clienteId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos",
+                "cliente",
+                "{{clienteId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateVeiculo",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"marca\": \"Ford\",\r\n  \"modelo\": \"Ka Sedan\",\r\n  \"anoFabricacao\": 2020,\r\n  \"anoModelo\": 2022\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos/{{veiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos",
+                "{{veiculoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DeleteVeiculo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/veiculos/{{veiculoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "veiculos",
+                "{{veiculoId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "clienteId",
+      "value": ""
+    },
+    {
+      "key": "veiculoId",
+      "value": ""
     }
   ]
 }

@@ -37,7 +37,7 @@ namespace AutoReparos.Domain.Clientes.Entities
         public DateTime AtualizadoEm { get; private set; }
 
         /// <summary>
-        /// Construtor protegido para uso do Entity Framework
+        /// Construtor para uso do Entity Framework
         /// </summary>
         protected Cliente() { }
 
