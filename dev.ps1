@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory=$true)]
-    [ValidateSet("update-tool", "run", "watch", "db-update", "mig-add")]
+    [ValidateSet("update-tool", "run", "watch", "db-update", "mig-add", "restore")]
     $Action,
 
     [Parameter(Mandatory=$false)]
@@ -17,15 +17,19 @@ switch ($Action) {
         dotnet run --project .\AutoReparos.API\
     }
     "watch" {
-        Write-Host "--- Iniciando Hot Reload (Watch) ---" -ForegroundColor Yellow
+        Write-Host "--- Iniciando Hot Reload (Watch) ---" -ForegroundColor Green
         dotnet watch --project .\AutoReparos.API\
     }
     "db-update" {
-        Write-Host "--- Aplicando Migrations no Banco de Dados ---" -ForegroundColor Blue
+        Write-Host "--- Aplicando Migrations no Banco de Dados ---" -ForegroundColor Yellow
         dotnet ef database update --project .\AutoReparos.Infra\ --startup-project .\AutoReparos.API\
     }
     "mig-add" {
-        Write-Host "--- Criando nova Migration: $Name ---" -ForegroundColor Magenta
+        Write-Host "--- Criando nova Migration: $Name ---" -ForegroundColor Yellow
         dotnet ef migrations add $Name --project .\AutoReparos.Infra\ --startup-project .\AutoReparos.API\
+    }
+    "restore" {
+        Write-Host "--- Restaurando Pacotes ---" -ForegroundColor Cyan
+        dotnet restore
     }
 }

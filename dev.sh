@@ -14,6 +14,8 @@ case $action in
     dotnet ef database update --project ./AutoReparos.Infra/ --startup-project ./AutoReparos.API/ ;;
   "mig-add")
     dotnet ef migrations add $name --project ./AutoReparos.Infra/ --startup-project ./AutoReparos.API/ ;;
+  "restore")
+    dotnet restore ;;
   *)
-    echo "Uso: ./dev.sh {run|watch|db-update|mig-add|update-tool}" ;;
+    echo "Uso: ./dev.sh {run|watch|db-update|mig-add|update-tool|restore}" ;;
 esac
