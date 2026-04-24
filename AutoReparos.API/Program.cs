@@ -49,5 +49,6 @@ app.MapServicosEndpoints();
 app.MapPecasEndpoints();
 app.MapOrdensServicoEndpoints();
 app.MapUsuariosEndpoints();
+app.MapAuthEndpoints();
 
 app.Run();

@@ -8,6 +8,39 @@
   },
   "item": [
     {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@autoreparos.com\",\n  \"password\": \"Admin@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Clientes",
       "item": [
         {
@@ -1018,6 +1051,10 @@
     },
     {
       "key": "ordemServicoId",
+      "value": ""
+    },
+    {
+      "key": "usuarioId",
       "value": ""
     }
   ]

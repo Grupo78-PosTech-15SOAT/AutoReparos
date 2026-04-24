@@ -1,4 +1,6 @@
-﻿using AutoReparos.Application.Clientes.Services;
+﻿using AutoReparos.Application.Auth.Services;
+using AutoReparos.Application.Auth.Services.Interfaces;
+using AutoReparos.Application.Clientes.Services;
 using AutoReparos.Application.Clientes.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.Services;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
@@ -29,6 +31,7 @@ namespace AutoReparos.Application
             services.AddScoped<IPecaService, PecaService>();
             services.AddScoped<IOrdemServicoService, OrdemServicoService>();
             services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

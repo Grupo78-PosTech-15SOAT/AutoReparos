@@ -1,4 +1,5 @@
 using AutoReparos.API.Handlers;
+using AutoReparos.Application.Auth.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -15,6 +16,12 @@ namespace AutoReparos.API
         /// <returns>Collection de services com os serviços da API registrados</returns>
         public static IServiceCollection AddAPI(this IServiceCollection services, IConfiguration configuration)
         {
+            services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+
+            var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
+                ?? throw new InvalidOperationException("Configurações de JWT não encontradas.");
+            var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
+
             services.AddOpenApi("v1", o =>
             {
                 o.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -31,9 +38,6 @@ namespace AutoReparos.API
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
-
-            var jwtSecret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret não encontrado.");
-            var key = Encoding.ASCII.GetBytes(jwtSecret);
 
             services.AddAuthentication(x =>
             {
