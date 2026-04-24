@@ -2,6 +2,7 @@ using AutoReparos.Application.Shared;
 using AutoReparos.Application.Usuarios.DTOs.Request;
 using AutoReparos.Application.Usuarios.DTOs.Response;
 using AutoReparos.Application.Usuarios.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AutoReparos.API.Endpoints
 {
@@ -10,7 +11,8 @@ namespace AutoReparos.API.Endpoints
         public static void MapUsuariosEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/usuarios")
-                .WithTags("Usuários");
+                .WithTags("Usuários")
+                .RequireAuthorization();
 
             group.MapPost("/", async (UsuarioCreateDTO dto, IUsuarioService service) =>
             {
@@ -23,7 +25,7 @@ namespace AutoReparos.API.Endpoints
             .Produces<UsuarioDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/", async (IUsuarioService service, string? nome, int pageNumber = 1, int pageSize = 10) =>
+            group.MapGet("/", async (IUsuarioService service, [FromQuery] string? nome, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) =>
             {
                 var request = new PagedRequest
                 {

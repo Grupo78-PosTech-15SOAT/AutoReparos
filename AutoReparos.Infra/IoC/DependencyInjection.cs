@@ -28,7 +28,8 @@ namespace AutoReparos.Infra.IoC
                 options.UseNpgsql(configuration.GetConnectionString("DbConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
 
-            services.AddIdentity<Usuario, IdentityRole<Guid>>()
+            services.AddIdentityCore<Usuario>()
+                .AddRoles<IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
