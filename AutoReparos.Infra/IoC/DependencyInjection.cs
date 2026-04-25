@@ -5,6 +5,7 @@ using AutoReparos.Domain.Servicos.Repositories;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
+using AutoReparos.Infra.Identity;
 using AutoReparos.Infra.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,7 @@ namespace AutoReparos.Infra.IoC
             services.AddIdentityCore<Usuario>()
                 .AddRoles<IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<AppDbContext>()
+                .AddErrorDescriber<IdentityErrosTranslation>()
                 .AddDefaultTokenProviders();
 
             services.AddScoped<IClienteRepository, ClienteRepository>();
