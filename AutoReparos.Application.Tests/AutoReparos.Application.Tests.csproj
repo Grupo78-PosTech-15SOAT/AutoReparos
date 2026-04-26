@@ -9,18 +9,20 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="10.0.0" />
-    <PackageReference Include="FluentAssertions" Version="8.9.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\AutoReparos.Domain\AutoReparos.Domain.csproj" />
+    <PackageReference Include="NSubstitute" Version="6.0.0-rc.1" />
+    <PackageReference Include="FluentAssertions" Version="8.9.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoReparos.Application\AutoReparos.Application.csproj" />
+    <ProjectReference Include="..\AutoReparos.Domain\AutoReparos.Domain.csproj" />
   </ItemGroup>
 
 </Project>
