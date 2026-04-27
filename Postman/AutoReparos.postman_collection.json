@@ -1184,6 +1184,38 @@
           "response": []
         },
         {
+          "name": "IniciarServico",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "servicos",
+                "{{ordemServicoServicoId}}",
+                "Iniciar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "ConcluirServico",
           "request": {
             "auth": {

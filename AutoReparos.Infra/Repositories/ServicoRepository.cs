@@ -47,58 +47,74 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task<IEnumerable<(Guid ServicoId, string NomeServico, TimeSpan TempoMedio, int TotalExecucoes)>> GetTempoMedio()
         {
-            return await _context.OrdensServicoServicos
+            var execucoes = await _context.OrdensServicoServicos
                 .Where(s => s.Status == EStatusServicoOS.Concluido
                     && s.IniciadoEm.HasValue
                     && s.ConcluidoEm.HasValue)
-                .GroupBy(s => new { s.ServicoId })
-                .Select(g => new
+                .Select(s => new
                 {
-                    ServicoId = g.Key.ServicoId,
-                    NomeServico = _context.Servicos
-                        .Where(s => s.Id == g.Key.ServicoId)
-                        .Select(s => s.Nome)
-                        .FirstOrDefault() ?? "",
-                    TempoMedioTicks = g.Average(s =>
-                        (s.ConcluidoEm!.Value - s.IniciadoEm!.Value).Ticks),
-                    TotalExecucoes = g.Count()
+                    s.ServicoId,
+                    s.IniciadoEm,
+                    s.ConcluidoEm
                 })
-                .ToListAsync()
-                .ContinueWith(t => t.Result.Select(r => (
-                    r.ServicoId,
-                    r.NomeServico,
-                    TimeSpan.FromTicks((long)r.TempoMedioTicks),
-                    r.TotalExecucoes
-                )));
+                .ToListAsync();
+
+            var servicoIds = execucoes.Select(e => e.ServicoId).Distinct().ToList();
+            var servicos = await _context.Servicos
+                .Where(s => servicoIds.Contains(s.Id))
+                .Select(s => new { s.Id, s.Nome })
+                .ToListAsync();
+
+            return execucoes
+                .GroupBy(e => e.ServicoId)
+                .Select(g => (
+                    g.Key,
+                    servicos.FirstOrDefault(s => s.Id == g.Key)?.Nome ?? "",
+                    TimeSpan.FromTicks((long)g.Average(e =>
+                        (e.ConcluidoEm!.Value - e.IniciadoEm!.Value).Ticks)),
+                    g.Count()
+                ));
         }
 
         public async Task<(Guid ServicoId, string NomeServico, TimeSpan TempoMedio, int TotalExecucoes)?> GetTempoMedioById(Guid id)
         {
-            var result = await _context.OrdensServicoServicos
+            var execucoes = await _context.OrdensServicoServicos
                 .Where(s => s.ServicoId == id
                     && s.Status == EStatusServicoOS.Concluido
                     && s.IniciadoEm.HasValue
                     && s.ConcluidoEm.HasValue)
-                .GroupBy(s => s.ServicoId)
-                .Select(g => new
+                .Select(s => new
                 {
-                    ServicoId = g.Key,
-                    TempoMedioTicks = g.Average(s =>
-                        (s.ConcluidoEm!.Value - s.IniciadoEm!.Value).Ticks),
-                    TotalExecucoes = g.Count()
+                    s.ServicoId,
+                    s.IniciadoEm,
+                    s.ConcluidoEm
+                })
+                .ToListAsync();
+
+            if (!execucoes.Any())
+                return null;
+
+            var servico = await _context.Servicos
+                .Where(s => s.Id == id)
+                .Select(s => new
+                {
+                    s.Id,
+                    s.Nome
                 })
                 .FirstOrDefaultAsync();
 
-            if (result is null) return null;
+            var resultado = execucoes
+                .GroupBy(e => e.ServicoId)
+                .Select(g => (
+                    ServicoId: g.Key,
+                    NomeServico: servico?.Nome ?? "",
+                    TempoMedio: TimeSpan.FromTicks((long)g.Average(e =>
+                        (e.ConcluidoEm!.Value - e.IniciadoEm!.Value).Ticks)),
+                    TotalExecucoes: g.Count()
+                ))
+                .FirstOrDefault();
 
-            var servico = await _context.Servicos.FindAsync(id);
-
-            return (
-                result.ServicoId,
-                servico?.Nome ?? "",
-                TimeSpan.FromTicks((long)result.TempoMedioTicks),
-                result.TotalExecucoes
-            );
+            return resultado;
         }
 
         public async Task Update(Servico servico)
