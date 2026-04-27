@@ -1,6 +1,7 @@
 using AutoReparos.API;
 using AutoReparos.API.Endpoints;
 using AutoReparos.Application;
+using AutoReparos.Domain.Servicos.Entities;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Infra.Data;
 using AutoReparos.Infra.IoC;
@@ -9,6 +10,9 @@ using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAPI(builder.Configuration);
+
+builder.Services.AddInfraestructureSwagger();
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -32,9 +36,9 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
     app.UseSwaggerUI(options =>
-        options.SwaggerEndpoint("/openapi/v1.json", "AutoReparos API v1"));
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "AutoReparos API v1"));
 }
 
 app.UseExceptionHandler();

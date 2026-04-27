@@ -14,16 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoReparos.Infra.IoC
 {
-    public static class DependencyInjection
+    public static class DependencyInjectionInfra
     {
         /// <summary>
         /// Método de extensão para registrar serviços relacionados à camada de Infraestructure
         /// </summary>
         /// <param name="services">Collection de serviços da aplicação</param>
         /// <returns>Collection de services com os serviços de Infraestructure registrados</returns>
-        public static IServiceCollection AddInfrastructure(
-            this IServiceCollection services,
-            IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DbConnection"),

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AutoReparos.API
 {
-    public static class APIDependencyInjection
+    public static class DependencyInjectionAPI
     {
         /// <summary>
         /// Método de extensão para registrar serviços relacionados à camada de API
@@ -21,20 +21,6 @@ namespace AutoReparos.API
             var jwtSettings = configuration.GetSection("Jwt").Get<JwtSettings>()
                 ?? throw new InvalidOperationException("Configurações de JWT não encontradas.");
             var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
-
-            services.AddOpenApi("v1", o =>
-            {
-                o.AddDocumentTransformer((document, context, cancellationToken) =>
-                {
-                    document.Info = new()
-                    {
-                        Title = "AutoReparos API",
-                        Description = "API criada para gestão de ordens de serviços de uma oficina de mecânica.",
-                        Version = "v1"
-                    };
-                    return Task.CompletedTask;
-                });
-            });
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
