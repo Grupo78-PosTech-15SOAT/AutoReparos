@@ -59,6 +59,16 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             if (Status != EStatusOrdemServico.Recebida && Status != EStatusOrdemServico.EmDiagnostico)
                 throw new InvalidOrdemServicoException("Peças só podem ser adicionadas quando a OS estiver recebida ou em diagnóstico.");
 
+            if (peca.Origem == EOrigemPeca.Estoque && peca.PecaId.HasValue)
+            {
+                var existente = _pecas.FirstOrDefault(p => p.PecaId == peca.PecaId);
+                if (existente is not null)
+                {
+                    existente.AdicionarQuantidade(peca.Quantidade);
+                    return;
+                }
+            }
+
             _pecas.Add(peca);
         }
 

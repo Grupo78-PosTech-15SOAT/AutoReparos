@@ -10,6 +10,7 @@ using AutoReparos.Domain.Pecas.Repositories;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoReparos.Application.OrdensServicos.Services
 {
@@ -77,6 +78,8 @@ namespace AutoReparos.Application.OrdensServicos.Services
             var os = await _repository.GetById(id)
                 ?? throw new NotFoundException("Ordem de serviço não encontrada.");
 
+            decimal valorUnitario;
+
             if (dto.Origem == EOrigemPeca.Estoque)
             {
                 var peca = await _pecaRepository.GetById(dto.PecaId!.Value)
@@ -84,9 +87,18 @@ namespace AutoReparos.Application.OrdensServicos.Services
 
                 peca.RemoverEstoque(dto.Quantidade);
                 await _pecaRepository.Update(peca);
+
+                valorUnitario = dto.ValorUnitario ?? peca.Valor;
+            }
+            else
+            {
+                if (dto.ValorUnitario == null)
+                    throw new ValidationException("Valor unitário é obrigatório para peças de compra específica.");
+
+                valorUnitario = dto.ValorUnitario.Value;
             }
 
-            var item = new OrdemServicoPeca(id, dto.PecaId, dto.Descricao, dto.ValorUnitario, dto.Quantidade, dto.Origem);
+            var item = new OrdemServicoPeca(id, dto.PecaId, dto.Descricao, valorUnitario, dto.Quantidade, dto.Origem);
             os.AdicionarPeca(item);
             await _repository.Update(os);
         }

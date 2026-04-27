@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "314d6949-2cee-479d-a015-39a33ddfb945",
+    "_postman_id": "dc257667-8757-4fd8-9165-18998f4e8158",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "27526426",
-    "_collection_link": "https://go.postman.co/collection/27526426-314d6949-2cee-479d-a015-39a33ddfb945?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/27526426-dc257667-8757-4fd8-9165-18998f4e8158?source=collection_link"
   },
   "item": [
     {
@@ -1199,7 +1199,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{servicoId}}/concluir",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/concluir",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1208,7 +1208,7 @@
                 "ordens-servico",
                 "{{ordemServicoId}}",
                 "servicos",
-                "{{servicoId}}",
+                "{{ordemServicoServicoId}}",
                 "concluir"
               ]
             }
@@ -1473,6 +1473,11 @@
     },
     {
       "key": "token",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "ordemServicoServicoId",
       "value": "",
       "type": "default"
     }

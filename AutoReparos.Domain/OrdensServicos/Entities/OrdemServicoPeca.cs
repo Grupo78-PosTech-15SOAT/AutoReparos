@@ -44,5 +44,13 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             Quantidade = quantidade;
             Origem = origem;
         }
+
+        public void AdicionarQuantidade(int quantidade)
+        {
+            if (quantidade <= 0)
+                throw new InvalidOrdemServicoException("Quantidade deve ser maior que zero.");
+
+            Quantidade += quantidade;
+        }
     }
 }
