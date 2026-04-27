@@ -100,6 +100,17 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             IniciadoEm = DateTime.UtcNow;
         }
 
+        public void IniciarServico(Guid ordemServicoServicoId)
+        {
+            if (Status != EStatusOrdemServico.EmExecucao)
+                throw new InvalidOrdemServicoException("OS deve estar em execução para iniciar serviços.");
+
+            var servico = _servicos.FirstOrDefault(s => s.Id == ordemServicoServicoId)
+                ?? throw new NotFoundException("Serviço não encontrado na OS.");
+
+            servico.Iniciar();
+        }
+
         public void ConcluirServico(Guid ordemServicoServicoId)
         {
             if (Status != EStatusOrdemServico.EmExecucao)

@@ -130,6 +130,15 @@ namespace AutoReparos.Application.OrdensServicos.Services
             await _repository.Update(os);
         }
 
+        public async Task IniciarServicoAsync(Guid ordemServicoId, Guid ordemServicoServicoId)
+        {
+            var os = await _repository.GetById(ordemServicoId)
+                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+
+            os.IniciarServico(ordemServicoServicoId);
+            await _repository.Update(os);
+        }
+
         public async Task ConcluirServico(Guid ordemServicoId, Guid ordemServicoServicoId)
         {
             var os = await _repository.GetById(ordemServicoId)

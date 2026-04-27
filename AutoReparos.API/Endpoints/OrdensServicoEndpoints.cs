@@ -114,6 +114,21 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
+            group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/iniciar", async (
+                Guid id,
+                Guid servicoId,
+                IOrdemServicoService service) =>
+            {
+                await service.IniciarServicoAsync(id, servicoId);
+                return Results.NoContent();
+            })
+            .WithName("IniciarServico")
+            .WithSummary("Inicia a execução de um serviço da OS")
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest);
+
             group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/concluir", async (
                 Guid id,
                 Guid servicoId,
