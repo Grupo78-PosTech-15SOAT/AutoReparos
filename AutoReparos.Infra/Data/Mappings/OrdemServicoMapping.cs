@@ -11,6 +11,7 @@ namespace AutoReparos.Infra.Data.Mappings
         public void Configure(EntityTypeBuilder<OrdemServico> builder)
         {
             builder.HasKey(os => os.Id);
+            builder.Property(p => p.Id).ValueGeneratedNever();
 
             builder.Property(os => os.ClienteId)
                 .IsRequired();

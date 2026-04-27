@@ -43,12 +43,12 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapAuthEndpoints();
+app.MapUsuariosEndpoints();
 app.MapClientesEndpoints();
 app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
 app.MapPecasEndpoints();
 app.MapOrdensServicoEndpoints();
-app.MapUsuariosEndpoints();
-app.MapAuthEndpoints();
 
 app.Run();
