@@ -11,7 +11,8 @@ namespace AutoReparos.API.Endpoints
         public static void MapPecasEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/pecas")
-                .WithTags("Pecas");
+                .WithTags("Pecas")
+                .RequireAuthorization();
 
             group.MapPost("/", async (CriarPecaDTO dto, IPecaService service) =>
             {

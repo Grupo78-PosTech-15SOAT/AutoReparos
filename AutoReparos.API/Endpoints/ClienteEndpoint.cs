@@ -10,7 +10,8 @@ namespace AutoReparos.API.Endpoints
         public static void MapClientesEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/clientes")
-                .WithTags("Clientes");
+                .WithTags("Clientes")
+                .RequireAuthorization();
 
             group.MapPost("/", async (ClienteCreateDTO dto, IClienteService service) =>
             {

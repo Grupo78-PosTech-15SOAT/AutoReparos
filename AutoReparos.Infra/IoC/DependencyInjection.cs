@@ -2,9 +2,12 @@
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Pecas.Repositories;
 using AutoReparos.Domain.Servicos.Repositories;
+using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
+using AutoReparos.Infra.Identity;
 using AutoReparos.Infra.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +28,12 @@ namespace AutoReparos.Infra.IoC
             services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("DbConnection"),
                 b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+
+            services.AddIdentityCore<Usuario>()
+                .AddRoles<IdentityRole<Guid>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddErrorDescriber<IdentityErrosTranslation>()
+                .AddDefaultTokenProviders();
 
             services.AddScoped<IClienteRepository, ClienteRepository>();
             services.AddScoped<IVeiculoRepository, VeiculoRepository>();

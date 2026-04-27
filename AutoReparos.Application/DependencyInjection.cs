@@ -1,4 +1,6 @@
-﻿using AutoReparos.Application.Clientes.Services;
+﻿using AutoReparos.Application.Auth.Services;
+using AutoReparos.Application.Auth.Services.Interfaces;
+using AutoReparos.Application.Clientes.Services;
 using AutoReparos.Application.Clientes.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.Services;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
@@ -6,6 +8,8 @@ using AutoReparos.Application.Pecas.Services;
 using AutoReparos.Application.Pecas.Services.Interfaces;
 using AutoReparos.Application.Servicos.Services;
 using AutoReparos.Application.Servicos.Services.Interfaces;
+using AutoReparos.Application.Usuarios.Services;
+using AutoReparos.Application.Usuarios.Services.Interfaces;
 using AutoReparos.Application.Veiculos.Services;
 using AutoReparos.Application.Veiculos.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +30,8 @@ namespace AutoReparos.Application
             services.AddScoped<IServicoService, ServicoService>();
             services.AddScoped<IPecaService, PecaService>();
             services.AddScoped<IOrdemServicoService, OrdemServicoService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

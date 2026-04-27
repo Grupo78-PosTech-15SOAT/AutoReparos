@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="AutoReparos.API/AutoReparos.API.csproj" />
+  <Project Path="AutoReparos.Application.Tests/AutoReparos.Application.Tests.csproj" />
   <Project Path="AutoReparos.Application/AutoReparos.Application.csproj" />
   <Project Path="AutoReparos.Domain.Tests/AutoReparos.Domain.Tests.csproj" Id="6658fb98-8936-4a5b-a9e3-009fd37847ec" />
   <Project Path="AutoReparos.Domain/AutoReparos.Domain.csproj" />

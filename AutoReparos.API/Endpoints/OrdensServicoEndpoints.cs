@@ -12,7 +12,8 @@ namespace AutoReparos.API.Endpoints
         public static void MapOrdensServicoEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/ordens-servico")
-                .WithTags("OrdensServico");
+                .WithTags("OrdensServico")
+                .RequireAuthorization();
 
             group.MapPost("/", async (CriarOrdemServicoDTO dto, IOrdemServicoService service) =>
             {
