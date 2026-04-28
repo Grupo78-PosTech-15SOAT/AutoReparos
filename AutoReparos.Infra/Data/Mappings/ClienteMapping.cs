@@ -14,9 +14,17 @@ namespace AutoReparos.Infra.Data.Mappings
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(e => e.Telefone)
-                .IsRequired()
-                .HasMaxLength(20);
+            builder.OwnsOne(e => e.Telefone, telefone =>
+            {
+                telefone.Property(e => e.Numero)
+                    .HasColumnName("Telefone")
+                    .IsRequired()
+                    .HasMaxLength(16);
+
+                telefone.HasIndex(e => e.Numero)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Clientes_Telefone");
+            });
 
             builder.Property(e => e.CriadoEm)
                 .IsRequired();
@@ -25,12 +33,12 @@ namespace AutoReparos.Infra.Data.Mappings
 
             builder.OwnsOne(e => e.Email, email =>
             {
-                email.Property(e => e.Address)
+                email.Property(e => e.Endereco)
                     .HasColumnName("Email")
                     .IsRequired()
                     .HasMaxLength(200);
 
-                email.HasIndex(e => e.Address)
+                email.HasIndex(e => e.Endereco)
                     .IsUnique()
                     .HasDatabaseName("IX_Clientes_Email");
             });

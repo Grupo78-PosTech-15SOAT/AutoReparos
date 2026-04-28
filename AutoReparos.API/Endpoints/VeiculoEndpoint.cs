@@ -29,7 +29,7 @@ namespace AutoReparos.API.Endpoints
             group.MapGet("/", async (IVeiculoService service, [FromQuery] Guid? clienteId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) =>
             {
                 var result = await service.GetAll(clienteId, pageNumber, pageSize);
-                return Results.Ok(result); 
+                return Results.Ok(result);
             })
             .WithName("GetAllVeiculos")
             .WithSummary("Lista todos os veículos paginados")

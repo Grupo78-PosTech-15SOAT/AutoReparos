@@ -5,9 +5,6 @@ using AutoReparos.Application.Shared;
 using AutoReparos.Domain.Pecas.Entities;
 using AutoReparos.Domain.Pecas.Repositories;
 using AutoReparos.Domain.Shared.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Application.Pecas.Services
 {

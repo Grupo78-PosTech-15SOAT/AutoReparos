@@ -1,7 +1,6 @@
 using AutoReparos.API;
 using AutoReparos.API.Endpoints;
 using AutoReparos.Application;
-using AutoReparos.Domain.Servicos.Entities;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Infra.Data;
 using AutoReparos.Infra.IoC;

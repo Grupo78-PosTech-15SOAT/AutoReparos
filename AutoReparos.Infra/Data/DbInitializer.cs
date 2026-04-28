@@ -1,6 +1,6 @@
+using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
-using AutoReparos.Domain.Clientes.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,10 +19,9 @@ namespace AutoReparos.Infra.Data
 
             if (!await userManager.Users.AnyAsync())
             {
-                var adminEmail = Email.Create(adminEmailStr);
                 var adminUser = new Usuario(
                     "Administrador do Sistema",
-                    adminEmail,
+                    adminEmailStr,
                     ETipoUsuario.Administrador
                 );
 

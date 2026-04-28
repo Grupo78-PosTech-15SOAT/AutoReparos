@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Identity;
 using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Usuarios.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace AutoReparos.Domain.Usuarios.Entities
 {
@@ -33,13 +33,14 @@ namespace AutoReparos.Domain.Usuarios.Entities
         /// Construtor para uso do Entity Framework
         /// </summary>
         protected Usuario() { }
+
         /// <summary>
         /// Construtor da classe Usuario
         /// </summary>
         /// <param name="nomeCompleto">Nome completo do usuário</param>
         /// <param name="email">E-mail do usuário (usado para validação via Value Object)</param>
         /// <param name="tipo">Perfil de acesso do usuário</param>
-        public Usuario(string nomeCompleto, Email email, ETipoUsuario tipo) : base()
+        public Usuario(string nomeCompleto, string email, ETipoUsuario tipo) : base()
         {
             if (string.IsNullOrWhiteSpace(nomeCompleto))
                 throw new ArgumentException("Nome completo é obrigatório", nameof(nomeCompleto));
@@ -49,11 +50,12 @@ namespace AutoReparos.Domain.Usuarios.Entities
 
             Id = Guid.NewGuid();
             NomeCompleto = nomeCompleto;
-            Email = email.Address;
-            UserName = email.Address;
+            var emailVO = Shared.ValueObjects.Email.Create(email);
+            Email = emailVO;
+            UserName = emailVO.Endereco;
             Tipo = tipo;
-            NormalizedEmail = email.Address.ToUpperInvariant();
-            NormalizedUserName = email.Address.ToUpperInvariant();
+            NormalizedEmail = emailVO.Endereco.ToUpperInvariant();
+            NormalizedUserName = emailVO.Endereco.ToUpperInvariant();
             CriadoEm = DateTime.UtcNow;
         }
 

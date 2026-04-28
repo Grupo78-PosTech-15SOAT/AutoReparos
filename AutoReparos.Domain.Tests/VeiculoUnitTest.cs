@@ -5,7 +5,7 @@ using FluentAssertions;
 
 namespace AutoReparos.Domain.Tests
 {
-    public class VehicleUnitTest
+    public class VeiculoUnitTest
     {
         [Fact(DisplayName = "Create Vehicle With Cliente Empty")]
         public void CreateVehicle_WithClienteEmpty()

@@ -1,5 +1,7 @@
 ﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Clientes.Repositories;
+using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +39,7 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task<Cliente?> GetByDocumentoOrEmail(string documento, string email)
         {
-            return await _context.Clientes.FirstOrDefaultAsync(c => c.Documento.Valor == documento || c.Email.Address == email);
+            return await _context.Clientes.FirstOrDefaultAsync(c => c.Documento.Valor == documento || c.Email.Endereco == email);
         }
 
         public async Task<Cliente?> GetById(Guid id)
@@ -53,8 +55,15 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task Delete(Cliente cliente)
         {
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Clientes.Remove(cliente);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new RelatedEntityException("clientes", "veículos ou ordens de serviços");
+            }
         }
     }
 }

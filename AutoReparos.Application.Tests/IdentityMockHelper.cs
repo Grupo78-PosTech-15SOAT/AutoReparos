@@ -1,4 +1,3 @@
-using AutoReparos.Domain.Usuarios.Entities;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 

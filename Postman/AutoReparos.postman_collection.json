@@ -74,7 +74,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "// {\r\n//   \"nome\": \"Augusto Ferrari\",\r\n//   \"documento\": \"968.765.700-61\",\r\n//   \"telefone\": \"992528809\",\r\n//   \"email\": \"augusto@gmail.com\"\r\n// }\r\n\r\n{\r\n  \"nome\": \"Marcos Chevrolet\",\r\n  \"documento\": \"679.488.610-33\",\r\n  \"telefone\": \"992457892\",\r\n  \"email\": \"marcos@gmail.com\"\r\n}",
+              "raw": "// {\r\n//   \"nome\": \"Augusto Ferrari\",\r\n//   \"documento\": \"968.765.700-61\",\r\n//   \"telefone\": \"992528809\",\r\n//   \"email\": \"augusto@gmail.com\"\r\n// }\r\n\r\n// {\r\n//     \"nome\": \"Marcos Chevrolet\",\r\n//     \"documento\": \"718.504.820-63\",\r\n//     \"telefone\": \"11992522343\",\r\n//     \"email\": \"marcos@gmail.com\"\r\n// }\r\n\r\n{\r\n    \"nome\": \"Fernando Bughatti\",\r\n    \"documento\": \"67948861033\",\r\n    \"telefone\": \"11999987532\",\r\n    \"email\": \"fernando@gmail.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -168,7 +168,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"nome\": \"Fernando Bughatti\",\r\n  \"telefone\": \"27992430932\",\r\n  \"email\": \"fernando@gmail.com\"\r\n}",
+              "raw": "{\r\n  \"nome\": \"Fernando Bughatti\",\r\n  \"telefone\": \"11999987532\",\r\n  \"email\": \"fernando@gmail.com\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -204,15 +204,6 @@
             },
             "method": "DELETE",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"nome\": \"string\",\r\n  \"telefone\": \"string\",\r\n  \"email\": \"string\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
             "url": {
               "raw": "{{baseUrl}}/api/clientes/{{clienteId}}",
               "host": [
@@ -453,6 +444,70 @@
       "name": "Servicos",
       "item": [
         {
+          "name": "TempoMedio",
+          "item": [
+            {
+              "name": "GetTempoMedioServicos",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/servicos/tempo-medio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "servicos",
+                    "tempo-medio"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "GetTempoMedioServicoById",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/servicos/{{servicoId}}/tempo-medio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "servicos",
+                    "{{servicoId}}",
+                    "tempo-medio"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "CreateServico",
           "request": {
             "auth": {
@@ -608,65 +663,6 @@
                 "api",
                 "servicos",
                 "{{servicoId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "GetTempoMedioServicos",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/servicos/tempo-medio",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "servicos",
-                "tempo-medio"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "GetTempoMedioServicoById",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/servicos/{{servicoId}}/tempo-medio",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "servicos",
-                "{{servicoId}}",
-                "tempo-medio"
               ]
             }
           },

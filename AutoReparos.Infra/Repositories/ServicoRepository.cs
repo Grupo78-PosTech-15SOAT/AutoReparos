@@ -3,9 +3,6 @@ using AutoReparos.Domain.Servicos.Entities;
 using AutoReparos.Domain.Servicos.Repositories;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Infra.Repositories
 {

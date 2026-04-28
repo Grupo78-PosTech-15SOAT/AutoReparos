@@ -1,17 +1,17 @@
 ﻿using AutoReparos.Domain.Clientes.Exceptions;
 using System.Text.RegularExpressions;
 
-namespace AutoReparos.Domain.Clientes.ValueObjects
+namespace AutoReparos.Domain.Shared.ValueObjects
 {
     public sealed partial record Email
     {
         private const string Pattern = @"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
 
-        public string Address { get; }
+        public string Endereco { get; }
 
-        private Email(string address)
+        private Email(string endereco)
         {
-            Address = address;
+            Endereco = endereco;
         }
 
         public static Email Create(string address)
@@ -34,7 +34,7 @@ namespace AutoReparos.Domain.Clientes.ValueObjects
 
         public static implicit operator string(Email email) => email.ToString();
 
-        public override string ToString() => Address;
+        public override string ToString() => Endereco;
 
         [GeneratedRegex(Pattern)]
         private static partial Regex EmailRegex();

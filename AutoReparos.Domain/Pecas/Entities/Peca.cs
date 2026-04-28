@@ -1,9 +1,5 @@
 ﻿using AutoReparos.Domain.Pecas.Exceptions;
 using AutoReparos.Domain.Shared;
-using AutoReparos.Domain.Veiculos.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Domain.Pecas.Entities
 {

@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Infra.IoC
 {

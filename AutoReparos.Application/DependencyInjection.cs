@@ -25,13 +25,15 @@ namespace AutoReparos.Application
         /// <returns>Collection de services com os serviços de Application registrados</returns>
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IVeiculoService, VeiculoService>();
             services.AddScoped<IServicoService, ServicoService>();
             services.AddScoped<IPecaService, PecaService>();
             services.AddScoped<IOrdemServicoService, OrdemServicoService>();
-            services.AddScoped<IUsuarioService, UsuarioService>();
-            services.AddScoped<IAuthService, AuthService>();
+
+            services.AddScoped<INotificacaoService, NotificacaoServiceMock>();
 
             return services;
         }

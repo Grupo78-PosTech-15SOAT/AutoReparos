@@ -3,9 +3,6 @@ using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Infra.Repositories
 {
@@ -37,7 +34,10 @@ namespace AutoReparos.Infra.Repositories
             int skip,
             int take)
         {
-            var query = _context.OrdensServico.AsQueryable();
+            var query = _context.OrdensServico
+                .Include(os => os.Servicos)
+                .Include(os => os.Pecas)
+                .AsQueryable();
 
             if (clienteId.HasValue)
                 query = query.Where(os => os.ClienteId == clienteId);

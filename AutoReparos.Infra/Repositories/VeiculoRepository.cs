@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Veiculos.Entities;
-using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Domain.Veiculos.Exceptions;
+using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;

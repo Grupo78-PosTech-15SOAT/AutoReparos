@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AutoReparos.Domain.OrdensServicos.Enums
+﻿namespace AutoReparos.Domain.OrdensServicos.Enums
 {
     public enum EStatusOrdemServico
     {

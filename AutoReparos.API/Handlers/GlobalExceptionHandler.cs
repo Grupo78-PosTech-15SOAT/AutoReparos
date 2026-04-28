@@ -1,5 +1,6 @@
 ﻿using AutoReparos.Domain.Shared.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutoReparos.API.Handlers
 {

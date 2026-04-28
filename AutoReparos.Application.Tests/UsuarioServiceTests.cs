@@ -51,7 +51,7 @@ namespace AutoReparos.Application.Tests
         public async Task GetById_WhenUserExists_ShouldReturnDto()
         {
             var userId = Guid.NewGuid();
-            var user = new Usuario("Test", Domain.Clientes.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
+            var user = new Usuario("Test", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
             _userManager.FindByIdAsync(userId.ToString()).Returns(user);
 
             var result = await _usuarioService.GetById(userId);
@@ -75,7 +75,7 @@ namespace AutoReparos.Application.Tests
         public async Task Update_WhenUserExists_ShouldUpdateAndCallUpdateAsync()
         {
             var userId = Guid.NewGuid();
-            var user = new Usuario("Antigo", Domain.Clientes.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Atendente);
+            var user = new Usuario("Antigo", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Atendente);
             var dto = new UsuarioUpdateDTO("Novo Nome", ETipoUsuario.Administrador);
 
             _userManager.FindByIdAsync(userId.ToString()).Returns(user);
@@ -104,7 +104,7 @@ namespace AutoReparos.Application.Tests
         public async Task Delete_WhenUserExists_ShouldCallDelete()
         {
             var userId = Guid.NewGuid();
-            var user = new Usuario("Test", Domain.Clientes.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
+            var user = new Usuario("Test", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
             _userManager.FindByIdAsync(userId.ToString()).Returns(user);
             _userManager.DeleteAsync(user).Returns(IdentityResult.Success);
 

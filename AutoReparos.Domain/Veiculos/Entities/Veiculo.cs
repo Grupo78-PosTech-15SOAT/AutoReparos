@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Shared;
-using AutoReparos.Domain.Veiculos.ValueObjects;
 using AutoReparos.Domain.Veiculos.Exceptions;
+using AutoReparos.Domain.Veiculos.ValueObjects;
 
 namespace AutoReparos.Domain.Veiculos.Entities
 {

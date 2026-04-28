@@ -16,14 +16,14 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 
         [Required(ErrorMessage = "Origem é obrigatória.")]
         EOrigemPeca Origem
-    ): IValidatableObject
-{
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    ) : IValidatableObject
     {
-        if (ValorUnitario.HasValue && ValorUnitario <= 0)
-            yield return new ValidationResult(
-                "Valor unitário deve ser maior que zero.",
-                [nameof(ValorUnitario)]);
-    }
-};
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (ValorUnitario.HasValue && ValorUnitario <= 0)
+                yield return new ValidationResult(
+                    "Valor unitário deve ser maior que zero.",
+                    [nameof(ValorUnitario)]);
+        }
+    };
 }

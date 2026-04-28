@@ -20,17 +20,20 @@ namespace AutoReparos.Application.OrdensServicos.Services
         private readonly IClienteRepository _clienteRepository;
         private readonly IVeiculoRepository _veiculoRepository;
         private readonly IPecaRepository _pecaRepository;
+        private readonly INotificacaoService _notificacaoService;
 
         public OrdemServicoService(
             IOrdemServicoRepository repository,
             IClienteRepository clienteRepository,
             IVeiculoRepository veiculoRepository,
-            IPecaRepository pecaRepository)
+            IPecaRepository pecaRepository,
+            INotificacaoService notificacaoService)
         {
             _repository = repository;
             _clienteRepository = clienteRepository;
             _veiculoRepository = veiculoRepository;
             _pecaRepository = pecaRepository;
+            _notificacaoService = notificacaoService;
         }
 
         public async Task<OrdemServicoDTO> Create(CriarOrdemServicoDTO dto)
@@ -55,8 +58,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
             return os is null ? null : ToDetalheDto(os);
         }
 
-        public async Task<PagedResult<OrdemServicoDTO>> GetAll(
-            Guid? clienteId, Guid? veiculoId, EStatusOrdemServico? status, int pageNumber, int pageSize)
+        public async Task<PagedResult<OrdemServicoDTO>> GetAll(Guid? clienteId, Guid? veiculoId, EStatusOrdemServico? status, int pageNumber, int pageSize)
         {
             var skip = (pageNumber - 1) * pageSize;
             var (items, total) = await _repository.GetAll(clienteId, veiculoId, status, skip, pageSize);
@@ -119,6 +121,9 @@ namespace AutoReparos.Application.OrdensServicos.Services
 
             os.AguardarAprovacao();
             await _repository.Update(os);
+
+            // mock de envio de email para cliente
+            await _notificacaoService.EnviarOrcamento(os.Id, os.ValorTotal);
         }
 
         public async Task Aprovar(Guid id)

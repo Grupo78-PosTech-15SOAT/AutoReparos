@@ -30,7 +30,7 @@ namespace AutoReparos.Application.Tests
         public async Task Login_WithValidCredentials_ShouldReturnToken()
         {
             var request = new LoginRequestDTO("test@test.com", "Password123!");
-            var user = new Usuario("Test User", Email.Create(request.Email), ETipoUsuario.Mecanico);
+            var user = new Usuario("Test User", request.Email, ETipoUsuario.Mecanico);
 
             _userManager.FindByEmailAsync(request.Email).Returns(user);
             _userManager.CheckPasswordAsync(user, request.Password).Returns(true);
@@ -58,7 +58,7 @@ namespace AutoReparos.Application.Tests
         public async Task Login_WithWrongPassword_ShouldReturnNull()
         {
             var request = new LoginRequestDTO("test@test.com", "WrongPassword!");
-            var user = new Usuario("Test User", Email.Create(request.Email), ETipoUsuario.Mecanico);
+            var user = new Usuario("Test User", request.Email, ETipoUsuario.Mecanico);
 
             _userManager.FindByEmailAsync(request.Email).Returns(user);
             _userManager.CheckPasswordAsync(user, request.Password).Returns(false);

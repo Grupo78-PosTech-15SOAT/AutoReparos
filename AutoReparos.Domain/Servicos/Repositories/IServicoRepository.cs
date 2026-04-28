@@ -1,7 +1,4 @@
 ﻿using AutoReparos.Domain.Servicos.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Domain.Servicos.Repositories
 {

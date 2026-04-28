@@ -17,9 +17,7 @@ namespace AutoReparos.Application.Usuarios.Services
 
         public async Task<UsuarioDTO> Create(UsuarioCreateDTO dto)
         {
-            var email = Email.Create(dto.Email);
-
-            var usuario = new Usuario(dto.NomeCompleto, email, dto.Tipo);
+            var usuario = new Usuario(dto.NomeCompleto, dto.Email, dto.Tipo);
 
             var result = await _userManager.CreateAsync(usuario, dto.Password);
 

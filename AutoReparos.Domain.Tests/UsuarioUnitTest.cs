@@ -1,4 +1,5 @@
 using AutoReparos.Domain.Clientes.ValueObjects;
+using AutoReparos.Domain.Shared.ValueObjects;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using FluentAssertions;
@@ -16,8 +17,8 @@ namespace AutoReparos.Domain.Tests
             var usuario = new Usuario(nome, email, tipo);
 
             usuario.NomeCompleto.Should().Be(nome);
-            usuario.Email.Should().Be(email.Address);
-            usuario.UserName.Should().Be(email.Address);
+            usuario.Email.Should().Be(email.Endereco);
+            usuario.UserName.Should().Be(email.Endereco);
             usuario.Tipo.Should().Be(tipo);
             usuario.CriadoEm.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
         }

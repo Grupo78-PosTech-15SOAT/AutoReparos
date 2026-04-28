@@ -2,9 +2,6 @@
 using AutoReparos.Domain.OrdensServicos.Exceptions;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AutoReparos.Domain.OrdensServicos.Entities
 {
@@ -49,7 +46,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void AdicionarServico(OrdemServicoServico servico)
         {
             if (Status != EStatusOrdemServico.Recebida && Status != EStatusOrdemServico.EmDiagnostico)
-                throw new InvalidOrdemServicoException("Serviços só podem ser adicionados quando a OS estiver recebida ou em diagnóstico.");
+                throw new InvalidOrdemServicoException("Serviços só podem ser adicionados quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
 
             _servicos.Add(servico);
         }
@@ -57,7 +54,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void AdicionarPeca(OrdemServicoPeca peca)
         {
             if (Status != EStatusOrdemServico.Recebida && Status != EStatusOrdemServico.EmDiagnostico)
-                throw new InvalidOrdemServicoException("Peças só podem ser adicionadas quando a OS estiver recebida ou em diagnóstico.");
+                throw new InvalidOrdemServicoException("Peças só podem ser adicionadas quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
 
             if (peca.Origem == EOrigemPeca.Estoque && peca.PecaId.HasValue)
             {
@@ -75,7 +72,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void IniciarDiagnostico()
         {
             if (Status != EStatusOrdemServico.Recebida)
-                throw new InvalidOrdemServicoException("OS só pode ir para diagnóstico quando estiver recebida.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ir para diagnóstico quando estiver recebida.");
 
             Status = EStatusOrdemServico.EmDiagnostico;
         }
@@ -83,10 +80,10 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void AguardarAprovacao()
         {
             if (Status != EStatusOrdemServico.EmDiagnostico)
-                throw new InvalidOrdemServicoException("OS só pode aguardar aprovação após o diagnóstico.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço só pode aguardar aprovação após o diagnóstico.");
 
             if (!_servicos.Any())
-                throw new InvalidOrdemServicoException("OS deve ter pelo menos um serviço para aguardar aprovação.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço deve ter pelo menos um serviço para aguardar aprovação.");
 
             Status = EStatusOrdemServico.AguardandoAprovacao;
         }
@@ -94,7 +91,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void Aprovar()
         {
             if (Status != EStatusOrdemServico.AguardandoAprovacao)
-                throw new InvalidOrdemServicoException("OS só pode ser aprovada quando estiver aguardando aprovação.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ser aprovada quando estiver aguardando aprovação.");
 
             Status = EStatusOrdemServico.EmExecucao;
             IniciadoEm = DateTime.UtcNow;
@@ -103,10 +100,10 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void IniciarServico(Guid ordemServicoServicoId)
         {
             if (Status != EStatusOrdemServico.EmExecucao)
-                throw new InvalidOrdemServicoException("OS deve estar em execução para iniciar serviços.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço deve estar em execução para iniciar serviços.");
 
             var servico = _servicos.FirstOrDefault(s => s.Id == ordemServicoServicoId)
-                ?? throw new NotFoundException("Serviço não encontrado na OS.");
+                ?? throw new NotFoundException("Serviço não encontrado na Ordem de Serviço.");
 
             servico.Iniciar();
         }
@@ -114,10 +111,10 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void ConcluirServico(Guid ordemServicoServicoId)
         {
             if (Status != EStatusOrdemServico.EmExecucao)
-                throw new InvalidOrdemServicoException("OS deve estar em execução para concluir serviços.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço deve estar em execução para concluir serviços.");
 
             var servico = _servicos.FirstOrDefault(s => s.Id == ordemServicoServicoId)
-                ?? throw new NotFoundException("Serviço não encontrado na OS.");
+                ?? throw new NotFoundException("Serviço não encontrado na Ordem de Serviço.");
 
             servico.Concluir();
 
@@ -131,7 +128,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public void Entregar()
         {
             if (Status != EStatusOrdemServico.Finalizada)
-                throw new InvalidOrdemServicoException("OS só pode ser entregue quando estiver finalizada.");
+                throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ser entregue quando estiver finalizada.");
 
             Status = EStatusOrdemServico.Entregue;
             EntregueEm = DateTime.UtcNow;

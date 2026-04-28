@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AutoReparos.Application.OrdensServicos.DTOs.Response
+﻿namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 {
     public record OrdemServicoPecaDTO(
         Guid Id,
