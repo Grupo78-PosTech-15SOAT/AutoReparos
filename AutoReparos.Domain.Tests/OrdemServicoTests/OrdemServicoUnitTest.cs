@@ -52,7 +52,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             Action action = () => os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
 
             action.Should().Throw<InvalidOrdemServicoException>()
-                .WithMessage("Serviços só podem ser adicionados quando a OS estiver recebida ou em diagnóstico.");
+                .WithMessage("Serviços só podem ser adicionados quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
         }
 
         [Fact(DisplayName = "Start Diagnosis Successfully")]
@@ -74,7 +74,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             Action action = () => os.AguardarAprovacao();
 
             action.Should().Throw<InvalidOrdemServicoException>()
-                .WithMessage("OS deve ter pelo menos um serviço para aguardar aprovação.");
+                .WithMessage("A Ordem de Serviço deve ter pelo menos um serviço para aguardar aprovação.");
         }
 
         [Fact(DisplayName = "Approve OS Should Set Start Date")]
@@ -121,7 +121,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
 
             Action action = () => os.ConcluirServico(Guid.NewGuid());
 
-            action.Should().Throw<NotFoundException>().WithMessage("Serviço não encontrado na OS.");
+            action.Should().Throw<NotFoundException>().WithMessage("Serviço não encontrado na Ordem de Serviço.");
         }
 
         [Fact(DisplayName = "Deliver OS Successfully")]
