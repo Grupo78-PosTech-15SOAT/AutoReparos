@@ -1,32 +1,32 @@
-﻿using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
+﻿using AutoReparos.Domain.Clientes.Enums;
+using AutoReparos.Domain.Clientes.Exceptions;
 
 namespace AutoReparos.Domain.Clientes.ValueObjects
 {
     public sealed record Documento
     {
         public string Valor { get; }
-        public TipoDocumento Tipo { get; }
+        public ETipoDocumento Tipo { get; }
 
-        public Documento(string valor)
+        private Documento(string valor, ETipoDocumento tipo)
+        {
+            Valor = valor;
+            Tipo = tipo;
+        }
+        public static Documento Create(string valor)
         {
             if (string.IsNullOrEmpty(valor) || string.IsNullOrWhiteSpace(valor))
                 throw new InvalidDocumentoException("O CPF ou CNPJ é obrigatório.");
+
             var digits = new string(valor.Where(char.IsDigit).ToArray());
 
             if (digits.Length == 11 && ValidarCpf(digits))
-            {
-                Valor = digits;
-                Tipo = TipoDocumento.CPF;
-            }
-            else if (digits.Length == 14 && ValidarCnpj(digits))
-            {
-                Valor = digits;
-                Tipo = TipoDocumento.CNPJ;
-            }
-            else
-            {
-                throw new InvalidDocumentoException("CPF ou CNPJ inválido.");
-            }
+                return new Documento(digits, ETipoDocumento.CPF);
+            
+            if (digits.Length == 14 && ValidarCnpj(digits))
+                return new Documento(digits, ETipoDocumento.CNPJ);
+            
+            throw new InvalidDocumentoException("CPF ou CNPJ inválido.");
         }
 
         #region Validação
@@ -74,14 +74,15 @@ namespace AutoReparos.Domain.Clientes.ValueObjects
         }
 
         #endregion
-        public string Formatado => Tipo == TipoDocumento.CPF
+
+        public string Formatado => Tipo == ETipoDocumento.CPF
             ? $"{Valor[..3]}.{Valor[3..6]}.{Valor[6..9]}-{Valor[9..11]}"
             : $"{Valor[..2]}.{Valor[2..5]}.{Valor[5..8]}/{Valor[8..12]}-{Valor[12..14]}";
+
+        public static implicit operator string(Documento documento) => documento.Valor;
 
         public override string ToString() => Formatado;
 
         public static string Normalizar(string valor) => new string(valor.Where(char.IsDigit).ToArray());
     }
-
-    public enum TipoDocumento { CPF, CNPJ }
 }

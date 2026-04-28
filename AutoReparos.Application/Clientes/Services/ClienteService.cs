@@ -3,9 +3,9 @@ using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.Clientes.Services.Interfaces;
 using AutoReparos.Application.Shared;
 using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.Clientes.ValueObjects;
-using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
 using AutoReparos.Domain.Shared.Exceptions;
 
 namespace AutoReparos.Application.Clientes.Services
@@ -34,7 +34,7 @@ namespace AutoReparos.Application.Clientes.Services
                 throw new InvalidEmailException("E-mail já cadastrado.");
             }
 
-            var cliente = new Cliente(dto.Nome, new Documento(dto.Documento), dto.Telefone, Email.Create(dto.Email));
+            var cliente = new Cliente(dto.Nome, dto.Documento, dto.Telefone, dto.Email);
 
             await _repository.Create(cliente);
             return ToDTO(cliente);
@@ -52,7 +52,7 @@ namespace AutoReparos.Application.Clientes.Services
         public async Task<PagedResult<ClienteDTO>> GetAll(PagedRequest request)
         {
             var (clientes, total) = await _repository.GetAll(request.Nome, (request.PageNumber - 1) * request.PageSize, request.PageSize);
-            var items = clientes.Select(c => ToDTO(c));
+            var items = clientes.Select(ToDTO);
             return new PagedResult<ClienteDTO>(items, total, request.PageNumber, request.PageSize);
         }
 
@@ -62,7 +62,7 @@ namespace AutoReparos.Application.Clientes.Services
             if (cliente == null)
                 throw new NotFoundException("Cliente não encontrado.");
 
-            cliente.Atualizar(dto.Nome, Email.Create(dto.Email), dto.Telefone);
+            cliente.Atualizar(dto.Nome, dto.Email, dto.Telefone);
             await _repository.Update(cliente);
         }
 

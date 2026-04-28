@@ -1,6 +1,7 @@
-﻿using AutoReparos.Domain.Clientes.ValueObjects;
-using AutoReparos.Domain.Clientes.ValueObjects.Exceptions;
+﻿using AutoReparos.Domain.Clientes.Exceptions;
+using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Shared;
+using AutoReparos.Domain.Shared.ValueObjects;
 
 namespace AutoReparos.Domain.Clientes.Entities
 {
@@ -19,7 +20,7 @@ namespace AutoReparos.Domain.Clientes.Entities
         /// <summary>
         /// Número de telefone do cliente
         /// </summary>
-        public string Telefone { get; private set; }
+        public Telefone Telefone { get; private set; }
 
         /// <summary>
         /// E-mail do cliente
@@ -44,26 +45,18 @@ namespace AutoReparos.Domain.Clientes.Entities
         /// <summary>
         /// Construtor da classe
         /// </summary>
-        public Cliente(string nome, Documento documento, string telefone, Email email) : base()
+        public Cliente(string nome, string documento, string telefone, string email) : base()
         {
             if (string.IsNullOrWhiteSpace(nome))
                 throw new InvalidClienteException("Nome é obrigatório");
-            if (string.IsNullOrWhiteSpace(telefone))
-                throw new InvalidClienteException("Telefone é obrigatório");
 
             if (nome.Length > 100)
                 throw new InvalidClienteException("Nome muito longo, o nome deve ter no máximo 100 caracteres.");
 
-            var digitsPhone = new string(telefone.Where(char.IsDigit).ToArray());
-            if (digitsPhone.Length != 9)
-                throw new InvalidClienteException("Telefone inválido. O número deve conter 9 dígitos");
-            else if (digitsPhone.FirstOrDefault() != '9')
-                throw new InvalidClienteException("Telefone inválido. O número deve começar com 9");
-
             Nome = nome;
-            Documento = documento;
-            Telefone = telefone;
-            Email = email;
+            Documento = Documento.Create(documento);
+            Telefone = Telefone.Create(telefone);
+            Email = Email.Create(email);
             CriadoEm = DateTime.UtcNow;
         }
 
@@ -73,11 +66,14 @@ namespace AutoReparos.Domain.Clientes.Entities
         /// <param name="nome">Nome do cliente</param>
         /// <param name="email">Endereço de e-mail do cliente</param>
         /// <param name="telefone">Número de telefone do cliente</param>
-        public void Atualizar(string nome, Email email, string telefone)
+        public void Atualizar(string nome, string email, string telefone)
         {
+            if (nome.Length > 100)
+                throw new InvalidClienteException("Nome muito longo, o nome deve ter no máximo 100 caracteres.");
+
             Nome = nome;
-            Email = email;
-            Telefone = telefone;
+            Email = Email.Create(email);
+            Telefone = Telefone.Create(telefone);
             AtualizadoEm = DateTime.UtcNow;
         }
     }

@@ -1,4 +1,5 @@
-﻿using AutoReparos.Application.Veiculos.DTOs.Request;
+﻿using AutoReparos.Application.Shared;
+using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
 
 namespace AutoReparos.Application.Veiculos.Services.Interfaces
@@ -6,8 +7,11 @@ namespace AutoReparos.Application.Veiculos.Services.Interfaces
     public interface IVeiculoService
     {
         Task<VeiculoDTO> Create(VeiculoCreateDTO dto);
+
+        Task<PagedResult<VeiculoDTO>> GetAll(Guid? clienteId, int pageNumber, int pageSize);
         Task<VeiculoDTO?> GetById(Guid id);
-        Task<IEnumerable<VeiculoDTO>> GetByClienteId(Guid clienteId);
+        Task<VeiculoDTO?> GetByPlaca(string placa);
+
         Task Update(Guid id, VeiculoUpdateDTO dto);
         Task Delete(Guid id);
     }

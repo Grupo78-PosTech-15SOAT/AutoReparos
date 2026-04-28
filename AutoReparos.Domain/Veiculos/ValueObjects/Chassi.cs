@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Veiculos.ValueObjects.Exceptions;
+﻿using AutoReparos.Domain.Veiculos.Exceptions;
 
 namespace AutoReparos.Domain.Veiculos.ValueObjects
 {
