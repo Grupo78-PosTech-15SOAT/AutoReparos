@@ -4,8 +4,8 @@ using AutoReparos.Application.Clientes.Services;
 using AutoReparos.Application.Clientes.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.Services;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
-using AutoReparos.Application.Pecas.Services;
-using AutoReparos.Application.Pecas.Services.Interfaces;
+using AutoReparos.Application.Insumos.Services;
+using AutoReparos.Application.Insumos.Services.Interfaces;
 using AutoReparos.Application.Servicos.Services;
 using AutoReparos.Application.Servicos.Services.Interfaces;
 using AutoReparos.Application.Usuarios.Services;
@@ -30,7 +30,7 @@ namespace AutoReparos.Application
             services.AddScoped<IClienteService, ClienteService>();
             services.AddScoped<IVeiculoService, VeiculoService>();
             services.AddScoped<IServicoService, ServicoService>();
-            services.AddScoped<IPecaService, PecaService>();
+            services.AddScoped<IInsumoService, InsumoService>();
             services.AddScoped<IOrdemServicoService, OrdemServicoService>();
 
             services.AddScoped<INotificacaoService, NotificacaoServiceMock>();

@@ -1,31 +1,31 @@
-﻿using AutoReparos.Domain.Pecas.Entities;
-using AutoReparos.Domain.Pecas.Repositories;
+﻿using AutoReparos.Domain.Insumos.Entities;
+using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoReparos.Infra.Repositories
 {
-    public class PecaRepository : IPecaRepository
+    public class InsumoRepository : IInsumoRepository
     {
         private readonly AppDbContext _context;
 
-        public PecaRepository(AppDbContext context)
+        public InsumoRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task Create(Peca peca)
+        public async Task Create(Insumo insumo)
         {
-            await _context.Pecas.AddAsync(peca);
+            await _context.Insumos.AddAsync(insumo);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Peca?> GetById(Guid id)
-            => await _context.Pecas.FindAsync(id);
+        public async Task<Insumo?> GetById(Guid id)
+            => await _context.Insumos.FindAsync(id);
 
-        public async Task<(IEnumerable<Peca> Items, int Total)> GetAll(string? nome, int skip, int take)
+        public async Task<(IEnumerable<Insumo> Items, int Total)> GetAll(string? nome, int skip, int take)
         {
-            var query = _context.Pecas.AsQueryable();
+            var query = _context.Insumos.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(nome))
                 query = query.Where(p => p.Nome.Contains(nome));
@@ -40,15 +40,15 @@ namespace AutoReparos.Infra.Repositories
             return (items, total);
         }
 
-        public async Task Update(Peca peca)
+        public async Task Update(Insumo insumo)
         {
-            _context.Pecas.Update(peca);
+            _context.Insumos.Update(insumo);
             await _context.SaveChangesAsync();
         }
 
-        public async Task Delete(Peca peca)
+        public async Task Delete(Insumo insumo)
         {
-            _context.Pecas.Remove(peca);
+            _context.Insumos.Remove(insumo);
             await _context.SaveChangesAsync();
         }
     }

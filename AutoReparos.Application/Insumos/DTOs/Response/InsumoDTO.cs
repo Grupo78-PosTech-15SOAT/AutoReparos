@@ -1,6 +1,6 @@
-﻿namespace AutoReparos.Application.Pecas.DTOs.Response
+﻿namespace AutoReparos.Application.Insumos.DTOs.Response
 {
-    public record PecaDTO(
+    public record InsumoDTO(
         Guid Id,
         string Nome,
         string? Descricao,

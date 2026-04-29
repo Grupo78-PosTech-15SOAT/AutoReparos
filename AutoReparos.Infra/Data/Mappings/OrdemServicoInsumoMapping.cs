@@ -1,13 +1,13 @@
 ﻿using AutoReparos.Domain.OrdensServicos.Entities;
-using AutoReparos.Domain.Pecas.Entities;
+using AutoReparos.Domain.Insumos.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoReparos.Infra.Data.Mappings
 {
-    public class OrdemServicoPecaMapping : IEntityTypeConfiguration<OrdemServicoPeca>
+    public class OrdemServicoInsumoMapping : IEntityTypeConfiguration<OrdemServicoInsumo>
     {
-        public void Configure(EntityTypeBuilder<OrdemServicoPeca> builder)
+        public void Configure(EntityTypeBuilder<OrdemServicoInsumo> builder)
         {
             builder.HasKey(p => p.Id);
             builder.Property(p => p.Id).ValueGeneratedNever();
@@ -15,7 +15,7 @@ namespace AutoReparos.Infra.Data.Mappings
             builder.Property(p => p.OrdemServicoId)
                 .IsRequired();
 
-            builder.Property(p => p.PecaId);
+            builder.Property(p => p.InsumoId);
 
             builder.Property(p => p.Descricao)
                 .IsRequired()
@@ -33,9 +33,9 @@ namespace AutoReparos.Infra.Data.Mappings
 
             builder.Ignore(p => p.ValorTotal);
 
-            builder.HasOne<Peca>()
+            builder.HasOne<Insumo>()
                 .WithMany()
-                .HasForeignKey(p => p.PecaId)
+                .HasForeignKey(p => p.InsumoId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

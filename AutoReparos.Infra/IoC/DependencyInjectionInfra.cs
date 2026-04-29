@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.OrdensServicos.Repositories;
-using AutoReparos.Domain.Pecas.Repositories;
+using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.Servicos.Repositories;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Veiculos.Repositories;
@@ -36,7 +36,7 @@ namespace AutoReparos.Infra.IoC
             services.AddScoped<IClienteRepository, ClienteRepository>();
             services.AddScoped<IVeiculoRepository, VeiculoRepository>();
             services.AddScoped<IServicoRepository, ServicoRepository>();
-            services.AddScoped<IPecaRepository, PecaRepository>();
+            services.AddScoped<IInsumoRepository, InsumoRepository>();
             services.AddScoped<IOrdemServicoRepository, OrdemServicoRepository>();
 
             return services;

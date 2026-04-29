@@ -8,7 +8,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
     public class OrdemServico : Entity
     {
         private readonly List<OrdemServicoServico> _servicos = [];
-        private readonly List<OrdemServicoPeca> _pecas = [];
+        private readonly List<OrdemServicoInsumo> _insumos = [];
 
         public Guid ClienteId { get; private set; }
         public Guid VeiculoId { get; private set; }
@@ -20,11 +20,11 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public DateTime? EntregueEm { get; private set; }
 
         public IReadOnlyCollection<OrdemServicoServico> Servicos => _servicos.AsReadOnly();
-        public IReadOnlyCollection<OrdemServicoPeca> Pecas => _pecas.AsReadOnly();
+        public IReadOnlyCollection<OrdemServicoInsumo> Insumos => _insumos.AsReadOnly();
 
         public decimal ValorTotal =>
             _servicos.Sum(s => s.ValorCobrado) +
-            _pecas.Sum(p => p.ValorTotal);
+            _insumos.Sum(p => p.ValorTotal);
 
         protected OrdemServico() { }
 
@@ -51,22 +51,22 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             _servicos.Add(servico);
         }
 
-        public void AdicionarPeca(OrdemServicoPeca peca)
+        public void AdicionarInsumo(OrdemServicoInsumo insumo)
         {
             if (Status != EStatusOrdemServico.Recebida && Status != EStatusOrdemServico.EmDiagnostico)
-                throw new InvalidOrdemServicoException("Peças só podem ser adicionadas quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
+                throw new InvalidOrdemServicoException("Insumos só podem ser adicionados quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
 
-            if (peca.Origem == EOrigemPeca.Estoque && peca.PecaId.HasValue)
+            if (insumo.Origem == EOrigemInsumo.Estoque && insumo.InsumoId.HasValue)
             {
-                var existente = _pecas.FirstOrDefault(p => p.PecaId == peca.PecaId);
+                var existente = _insumos.FirstOrDefault(p => p.InsumoId == insumo.InsumoId);
                 if (existente is not null)
                 {
-                    existente.AdicionarQuantidade(peca.Quantidade);
+                    existente.AdicionarQuantidade(insumo.Quantidade);
                     return;
                 }
             }
 
-            _pecas.Add(peca);
+            _insumos.Add(insumo);
         }
 
         public void IniciarDiagnostico()

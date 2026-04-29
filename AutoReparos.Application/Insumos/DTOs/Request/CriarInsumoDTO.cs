@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AutoReparos.Application.Pecas.DTOs.Request
+namespace AutoReparos.Application.Insumos.DTOs.Request
 {
-    public record CriarPecaDTO(
+    public record CriarInsumoDTO(
         [Required(ErrorMessage = "Nome é obrigatório.")]
         [MaxLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres.")]
         string Nome,

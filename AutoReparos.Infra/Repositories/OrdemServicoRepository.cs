@@ -24,7 +24,7 @@ namespace AutoReparos.Infra.Repositories
         public async Task<OrdemServico?> GetById(Guid id)
             => await _context.OrdensServico
                 .Include(os => os.Servicos)
-                .Include(os => os.Pecas)
+                .Include(os => os.Insumos)
                 .FirstOrDefaultAsync(os => os.Id == id);
 
         public async Task<(IEnumerable<OrdemServico> Items, int Total)> GetAll(
@@ -36,7 +36,7 @@ namespace AutoReparos.Infra.Repositories
         {
             var query = _context.OrdensServico
                 .Include(os => os.Servicos)
-                .Include(os => os.Pecas)
+                .Include(os => os.Insumos)
                 .AsQueryable();
 
             if (clienteId.HasValue)

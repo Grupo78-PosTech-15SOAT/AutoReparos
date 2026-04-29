@@ -1,6 +1,6 @@
 ﻿using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.OrdensServicos.Entities;
-using AutoReparos.Domain.Pecas.Entities;
+using AutoReparos.Domain.Insumos.Entities;
 using AutoReparos.Domain.Servicos.Entities;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Veiculos.Entities;
@@ -16,10 +16,10 @@ namespace AutoReparos.Infra.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Veiculo> Veiculos { get; set; }
         public DbSet<Servico> Servicos { get; set; }
-        public DbSet<Peca> Pecas { get; set; }
+        public DbSet<Insumo> Insumos { get; set; }
         public DbSet<OrdemServico> OrdensServico { get; set; }
         public DbSet<OrdemServicoServico> OrdensServicoServicos { get; set; }
-        public DbSet<OrdemServicoPeca> OrdensServicoPecas { get; set; }
+        public DbSet<OrdemServicoInsumo> OrdensServicoInsumos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
 

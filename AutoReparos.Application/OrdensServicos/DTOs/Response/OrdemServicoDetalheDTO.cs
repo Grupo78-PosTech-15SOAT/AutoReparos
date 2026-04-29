@@ -12,6 +12,6 @@
         DateTime? FinalizadoEm,
         DateTime? EntregueEm,
         IEnumerable<OrdemServicoServicoDTO> Servicos,
-        IEnumerable<OrdemServicoPecaDTO> Pecas
+        IEnumerable<OrdemServicoInsumoDTO> Insumos
     );
 }

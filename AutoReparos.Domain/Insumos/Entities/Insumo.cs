@@ -1,9 +1,9 @@
-﻿using AutoReparos.Domain.Pecas.Exceptions;
+﻿using AutoReparos.Domain.Insumos.Exceptions;
 using AutoReparos.Domain.Shared;
 
-namespace AutoReparos.Domain.Pecas.Entities
+namespace AutoReparos.Domain.Insumos.Entities
 {
-    public class Peca : Entity
+    public class Insumo : Entity
     {
         public string Nome { get; private set; }
         public string? Descricao { get; private set; }
@@ -12,9 +12,9 @@ namespace AutoReparos.Domain.Pecas.Entities
         public DateTime CriadoEm { get; }
         public DateTime? AtualizadoEm { get; private set; }
 
-        protected Peca() { }
+        protected Insumo() { }
 
-        public Peca(string nome, string? descricao, decimal valor, int quantidadeEstoque) : base()
+        public Insumo(string nome, string? descricao, decimal valor, int quantidadeEstoque) : base()
         {
             Validar(nome, valor, quantidadeEstoque);
 
@@ -38,7 +38,7 @@ namespace AutoReparos.Domain.Pecas.Entities
         public void AdicionarEstoque(int quantidade)
         {
             if (quantidade <= 0)
-                throw new InvalidPecaException("Quantidade deve ser maior que zero.");
+                throw new InvalidInsumoException("Quantidade deve ser maior que zero.");
 
             QuantidadeEstoque += quantidade;
             AtualizadoEm = DateTime.UtcNow;
@@ -47,10 +47,10 @@ namespace AutoReparos.Domain.Pecas.Entities
         public void RemoverEstoque(int quantidade)
         {
             if (quantidade <= 0)
-                throw new InvalidPecaException("Quantidade deve ser maior que zero.");
+                throw new InvalidInsumoException("Quantidade deve ser maior que zero.");
 
             if (quantidade > QuantidadeEstoque)
-                throw new InvalidPecaException("Quantidade insuficiente em estoque.");
+                throw new InvalidInsumoException("Quantidade insuficiente em estoque.");
 
             QuantidadeEstoque -= quantidade;
             AtualizadoEm = DateTime.UtcNow;
@@ -59,16 +59,16 @@ namespace AutoReparos.Domain.Pecas.Entities
         private static void Validar(string nome, decimal valor, int quantidadeEstoque)
         {
             if (string.IsNullOrWhiteSpace(nome))
-                throw new InvalidPecaException("Nome é obrigatório.");
+                throw new InvalidInsumoException("Nome é obrigatório.");
 
             if (nome.Length > 100)
-                throw new InvalidPecaException("Nome deve ter no máximo 100 caracteres.");
+                throw new InvalidInsumoException("Nome deve ter no máximo 100 caracteres.");
 
             if (valor <= 0)
-                throw new InvalidPecaException("Valor deve ser maior que zero.");
+                throw new InvalidInsumoException("Valor deve ser maior que zero.");
 
             if (quantidadeEstoque < 0)
-                throw new InvalidPecaException("Quantidade em estoque não pode ser negativa.");
+                throw new InvalidInsumoException("Quantidade em estoque não pode ser negativa.");
         }
     }
 }

@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 {
-    public record AdicionarPecaDTO(
-        Guid? PecaId,
+    public record AdicionarInsumoDTO(
+        Guid? InsumoId,
 
         [Required(ErrorMessage = "Descrição é obrigatória.")]
         string Descricao,
@@ -15,7 +15,7 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Request
         int Quantidade,
 
         [Required(ErrorMessage = "Origem é obrigatória.")]
-        EOrigemPeca Origem
+        EOrigemInsumo Origem
     ) : IValidatableObject
     {
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

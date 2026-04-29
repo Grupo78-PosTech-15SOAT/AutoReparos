@@ -1,12 +1,12 @@
-﻿using AutoReparos.Domain.Pecas.Entities;
+﻿using AutoReparos.Domain.Insumos.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoReparos.Infra.Data.Mappings
 {
-    public class PecaMapping : IEntityTypeConfiguration<Peca>
+    public class InsumoMapping : IEntityTypeConfiguration<Insumo>
     {
-        public void Configure(EntityTypeBuilder<Peca> builder)
+        public void Configure(EntityTypeBuilder<Insumo> builder)
         {
             builder.HasKey(p => p.Id);
 

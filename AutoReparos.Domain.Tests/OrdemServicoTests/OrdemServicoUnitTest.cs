@@ -148,7 +148,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
             os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100.50m));
             os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 50.00m));
-            os.AdicionarPeca(new OrdemServicoPeca(Guid.NewGuid(), Guid.NewGuid(), "descricao", 25.00m, 2, new())); // 2 * 25 = 50
+            os.AdicionarInsumo(new OrdemServicoInsumo(Guid.NewGuid(), Guid.NewGuid(), "descricao", 25.00m, 2, new())); // 2 * 25 = 50
 
             os.ValorTotal.Should().Be(200.50m);
         }

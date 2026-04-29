@@ -1,8 +1,8 @@
 ﻿namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 {
-    public record OrdemServicoPecaDTO(
+    public record OrdemServicoInsumoDTO(
         Guid Id,
-        Guid? PecaId,
+        Guid? InsumoId,
         string Descricao,
         decimal ValorUnitario,
         int Quantidade,

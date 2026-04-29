@@ -5,65 +5,65 @@ using FluentAssertions;
 
 namespace AutoReparos.Domain.Tests.OrdemServicoTests
 {
-    public class OrdemServicoPecaUnitTest
+    public class OrdemServicoInsumoUnitTest
     {
         private readonly Guid _osId = Guid.NewGuid();
-        private readonly Guid _pecaId = Guid.NewGuid();
+        private readonly Guid _insumoId = Guid.NewGuid();
 
         [Fact(DisplayName = "Create Valid External Part")]
-        public void CreatePeca_WithValidExternalData_ShouldSuccess()
+        public void CreateInsumo_WithValidExternalData_ShouldSuccess()
         {
-            var action = () => new OrdemServicoPeca(
+            var action = () => new OrdemServicoInsumo(
                 _osId,
                 null,
                 "Filtro Amortecedor",
                 150.00m,
                 2,
-                EOrigemPeca.CompraEspecifica);
+                EOrigemInsumo.CompraEspecifica);
 
-            var peca = action.Should().NotThrow().Subject;
-            peca.ValorTotal.Should().Be(300.00m);
+            var insumo = action.Should().NotThrow().Subject;
+            insumo.ValorTotal.Should().Be(300.00m);
         }
 
         [Fact(DisplayName = "Create Valid Stock Part")]
-        public void CreatePeca_WithValidStockData_ShouldSuccess()
+        public void CreateInsumo_WithValidStockData_ShouldSuccess()
         {
-            var action = () => new OrdemServicoPeca(
+            var action = () => new OrdemServicoInsumo(
                 _osId,
-                _pecaId,
+                _insumoId,
                 "Pastilha de Freio",
                 80.00m,
                 1,
-                EOrigemPeca.Estoque);
+                EOrigemInsumo.Estoque);
 
             action.Should().NotThrow();
         }
 
         [Fact(DisplayName = "Create Stock Part Without Reference")]
-        public void CreatePeca_StockOriginWithoutId_ShouldThrowException()
+        public void CreateInsumo_StockOriginWithoutId_ShouldThrowException()
         {
-            Action action = () => new OrdemServicoPeca(
+            Action action = () => new OrdemServicoInsumo(
                 _osId,
                 null,
                 "Óleo 5W30",
                 45.00m,
                 4,
-                EOrigemPeca.Estoque);
+                EOrigemInsumo.Estoque);
 
             action.Should().Throw<InvalidOrdemServicoException>()
-                .WithMessage("Peça do estoque deve ter referência ao cadastro.");
+                .WithMessage("Insumo do estoque deve ter referência ao cadastro.");
         }
 
         [Fact(DisplayName = "Create Part With Empty Description")]
-        public void CreatePeca_WithEmptyDescription_ShouldThrowException()
+        public void CreateInsumo_WithEmptyDescription_ShouldThrowException()
         {
-            Action action = () => new OrdemServicoPeca(
+            Action action = () => new OrdemServicoInsumo(
                 _osId,
                 null,
                 "",
                 10.00m,
                 1,
-                EOrigemPeca.CompraEspecifica);
+                EOrigemInsumo.CompraEspecifica);
 
             action.Should().Throw<InvalidOrdemServicoException>()
                 .WithMessage("Descrição é obrigatória.");
@@ -72,15 +72,15 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         [Theory(DisplayName = "Create Part With Invalid Price")]
         [InlineData(0)]
         [InlineData(-10)]
-        public void CreatePeca_WithInvalidPrice_ShouldThrowException(decimal valorInvalido)
+        public void CreateInsumo_WithInvalidPrice_ShouldThrowException(decimal valorInvalido)
         {
-            Action action = () => new OrdemServicoPeca(
+            Action action = () => new OrdemServicoInsumo(
                 _osId,
                 null,
-                "Peca Teste",
+                "Insumo Teste",
                 valorInvalido,
                 1,
-                EOrigemPeca.CompraEspecifica);
+                EOrigemInsumo.CompraEspecifica);
 
             action.Should().Throw<InvalidOrdemServicoException>()
                 .WithMessage("Valor unitário deve ser maior que zero.");
@@ -89,15 +89,15 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         [Theory(DisplayName = "Create Part With Invalid Quantity")]
         [InlineData(0)]
         [InlineData(-1)]
-        public void CreatePeca_WithInvalidQuantity_ShouldThrowException(int qtdInvalida)
+        public void CreateInsumo_WithInvalidQuantity_ShouldThrowException(int qtdInvalida)
         {
-            Action action = () => new OrdemServicoPeca(
+            Action action = () => new OrdemServicoInsumo(
                 _osId,
                 null,
-                "Peca Teste",
+                "Insumo Teste",
                 100.00m,
                 qtdInvalida,
-                EOrigemPeca.CompraEspecifica);
+                EOrigemInsumo.CompraEspecifica);
 
             action.Should().Throw<InvalidOrdemServicoException>()
                 .WithMessage("Quantidade deve ser maior que zero.");
@@ -110,15 +110,15 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             var quantidade = 4;
             var esperado = 50.00m;
 
-            var peca = new OrdemServicoPeca(
+            var insumo = new OrdemServicoInsumo(
                 _osId,
                 null,
                 "Parafuso",
                 valorUnitario,
                 quantidade,
-                EOrigemPeca.CompraEspecifica);
+                EOrigemInsumo.CompraEspecifica);
 
-            peca.ValorTotal.Should().Be(esperado);
+            insumo.ValorTotal.Should().Be(esperado);
         }
     }
 }

@@ -64,13 +64,13 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPost("/{id:guid}/pecas", async (Guid id, AdicionarPecaDTO dto, IOrdemServicoService service) =>
+            group.MapPost("/{id:guid}/insumos", async (Guid id, AdicionarInsumoDTO dto, IOrdemServicoService service) =>
             {
-                await service.AdicionarPeca(id, dto);
+                await service.AdicionarInsumo(id, dto);
                 return Results.NoContent();
             })
-            .WithName("AdicionarPeca")
-            .WithSummary("Adiciona uma peça à ordem de serviço")
+            .WithName("AdicionarInsumo")
+            .WithSummary("Adiciona um insumo à ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);

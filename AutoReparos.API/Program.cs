@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAPI(builder.Configuration);
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddInfraestructureSwagger();
 
 builder.Services.AddApplication();
@@ -51,7 +52,7 @@ app.MapUsuariosEndpoints();
 app.MapClientesEndpoints();
 app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
-app.MapPecasEndpoints();
+app.MapInsumosEndpoints();
 app.MapOrdensServicoEndpoints();
 
 app.Run();

@@ -4,29 +4,29 @@ using AutoReparos.Domain.Shared;
 
 namespace AutoReparos.Domain.OrdensServicos.Entities
 {
-    public class OrdemServicoPeca : Entity
+    public class OrdemServicoInsumo : Entity
     {
         public Guid OrdemServicoId { get; private set; }
-        public Guid? PecaId { get; private set; }
+        public Guid? InsumoId { get; private set; }
         public string Descricao { get; private set; }
         public decimal ValorUnitario { get; private set; }
         public int Quantidade { get; private set; }
-        public EOrigemPeca Origem { get; private set; }
+        public EOrigemInsumo Origem { get; private set; }
 
         public decimal ValorTotal => ValorUnitario * Quantidade;
 
-        protected OrdemServicoPeca() { }
+        protected OrdemServicoInsumo() { }
 
-        public OrdemServicoPeca(
+        public OrdemServicoInsumo(
             Guid ordemServicoId,
-            Guid? pecaId,
+            Guid? insumoId,
             string descricao,
             decimal valorUnitario,
             int quantidade,
-            EOrigemPeca origem) : base()
+            EOrigemInsumo origem) : base()
         {
-            if (origem == EOrigemPeca.Estoque && pecaId is null)
-                throw new InvalidOrdemServicoException("Peça do estoque deve ter referência ao cadastro.");
+            if (origem == EOrigemInsumo.Estoque && insumoId is null)
+                throw new InvalidOrdemServicoException("Insumo do estoque deve ter referência ao cadastro.");
 
             if (string.IsNullOrWhiteSpace(descricao))
                 throw new InvalidOrdemServicoException("Descrição é obrigatória.");
@@ -38,7 +38,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
                 throw new InvalidOrdemServicoException("Quantidade deve ser maior que zero.");
 
             OrdemServicoId = ordemServicoId;
-            PecaId = pecaId;
+            InsumoId = insumoId;
             Descricao = descricao;
             ValorUnitario = valorUnitario;
             Quantidade = quantidade;
