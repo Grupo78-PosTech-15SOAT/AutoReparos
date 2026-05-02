@@ -56,3 +56,5 @@ app.MapInsumosEndpoints();
 app.MapOrdensServicoEndpoints();
 
 app.Run();
+
+public partial class Program { }

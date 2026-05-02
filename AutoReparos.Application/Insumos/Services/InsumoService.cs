@@ -40,7 +40,7 @@ namespace AutoReparos.Application.Insumos.Services
         public async Task Update(Guid id, AtualizarInsumoDTO dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Peça não encontrada.");
+                ?? throw new NotFoundException("Insumo não encontrado.");
 
             insumo.Atualizar(dto.Nome, dto.Descricao, dto.Valor);
             await _repository.Update(insumo);
@@ -49,7 +49,7 @@ namespace AutoReparos.Application.Insumos.Services
         public async Task AdicionarEstoque(Guid id, AtualizarEstoqueDTO dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Peça não encontrada.");
+                ?? throw new NotFoundException("Insumo não encontrado.");
 
             insumo.AdicionarEstoque(dto.Quantidade);
             await _repository.Update(insumo);
@@ -58,7 +58,7 @@ namespace AutoReparos.Application.Insumos.Services
         public async Task RemoverEstoque(Guid id, AtualizarEstoqueDTO dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Peça não encontrada.");
+                ?? throw new NotFoundException("Insumo não encontrado.");
 
             insumo.RemoverEstoque(dto.Quantidade);
             await _repository.Update(insumo);
@@ -67,7 +67,7 @@ namespace AutoReparos.Application.Insumos.Services
         public async Task Delete(Guid id)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Peça não encontrada.");
+                ?? throw new NotFoundException("Insumo não encontrado.");
 
             await _repository.Delete(insumo);
         }
