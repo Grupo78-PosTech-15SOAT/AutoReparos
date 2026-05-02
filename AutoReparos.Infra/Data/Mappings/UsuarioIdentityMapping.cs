@@ -1,12 +1,12 @@
-using AutoReparos.Domain.Usuarios.Entities;
+using AutoReparos.Infra.Identity.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AutoReparos.Infra.Data.Mappings
 {
-    public class UsuarioMapping : IEntityTypeConfiguration<Usuario>
+    public class UsuarioMapping : IEntityTypeConfiguration<UsuarioIdentity>
     {
-        public void Configure(EntityTypeBuilder<Usuario> builder)
+        public void Configure(EntityTypeBuilder<UsuarioIdentity> builder)
         {
             builder.Property(u => u.NomeCompleto)
                 .IsRequired()
@@ -19,12 +19,6 @@ namespace AutoReparos.Infra.Data.Mappings
                 .IsRequired();
 
             builder.Property(u => u.AtualizadoEm);
-
-            builder.Property(u => u.Email)
-                .HasMaxLength(256);
-
-            builder.Property(u => u.UserName)
-                .HasMaxLength(256);
 
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
