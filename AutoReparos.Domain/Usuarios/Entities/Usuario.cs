@@ -1,18 +1,23 @@
-using AutoReparos.Domain.Clientes.ValueObjects;
+using AutoReparos.Domain.Shared;
+using AutoReparos.Domain.Shared.ValueObjects;
 using AutoReparos.Domain.Usuarios.Enums;
-using Microsoft.AspNetCore.Identity;
 
 namespace AutoReparos.Domain.Usuarios.Entities
 {
     /// <summary>
     /// Representa um usuário do sistema (Mecânico, Atendente ou Administrador)
     /// </summary>
-    public class Usuario : IdentityUser<Guid>
+    public class Usuario : Entity
     {
         /// <summary>
         /// Nome completo do usuário
         /// </summary>
         public string NomeCompleto { get; private set; }
+
+        /// <summary>
+        /// E-mail do usuário
+        /// </summary>
+        public Email Email { get; private set; }
 
         /// <summary>
         /// Tipo de perfil do usuário no sistema
@@ -38,7 +43,7 @@ namespace AutoReparos.Domain.Usuarios.Entities
         /// Construtor da classe Usuario
         /// </summary>
         /// <param name="nomeCompleto">Nome completo do usuário</param>
-        /// <param name="email">E-mail do usuário (usado para validação via Value Object)</param>
+        /// <param name="email">E-mail do usuário</param>
         /// <param name="tipo">Perfil de acesso do usuário</param>
         public Usuario(string nomeCompleto, string email, ETipoUsuario tipo) : base()
         {
@@ -48,15 +53,27 @@ namespace AutoReparos.Domain.Usuarios.Entities
             if (nomeCompleto.Length > 150)
                 throw new ArgumentException("Nome completo muito longo, o nome deve ter no máximo 150 caracteres.", nameof(nomeCompleto));
 
-            Id = Guid.NewGuid();
             NomeCompleto = nomeCompleto;
-            var emailVO = Shared.ValueObjects.Email.Create(email);
-            Email = emailVO;
-            UserName = emailVO.Endereco;
+            Email = Email.Create(email);
             Tipo = tipo;
-            NormalizedEmail = emailVO.Endereco.ToUpperInvariant();
-            NormalizedUserName = emailVO.Endereco.ToUpperInvariant();
             CriadoEm = DateTime.UtcNow;
+        }
+
+        private Usuario(Guid id, string nomeCompleto, Email email, ETipoUsuario tipo, DateTime criadoEm, DateTime? atualizadoEm) : base(id)
+        {
+            NomeCompleto = nomeCompleto;
+            Email = email;
+            Tipo = tipo;
+            CriadoEm = criadoEm;
+            AtualizadoEm = atualizadoEm;
+        }
+
+        /// <summary>
+        /// Factory para carregar um usuário existente da persistência
+        /// </summary>
+        public static Usuario Load(Guid id, string nomeCompleto, string email, ETipoUsuario tipo, DateTime criadoEm, DateTime? atualizadoEm)
+        {
+            return new Usuario(id, nomeCompleto, Email.Create(email), tipo, criadoEm, atualizadoEm);
         }
 
         /// <summary>
