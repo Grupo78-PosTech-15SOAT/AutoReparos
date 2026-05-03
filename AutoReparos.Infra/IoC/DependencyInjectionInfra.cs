@@ -7,6 +7,8 @@ using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
 using AutoReparos.Infra.Identity;
 using AutoReparos.Infra.Identity.Models;
+using AutoReparos.Domain.Shared.Interfaces;
+using AutoReparos.Infra.Identity.Services;
 using AutoReparos.Infra.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -24,9 +26,12 @@ namespace AutoReparos.Infra.IoC
         /// <returns>Collection de services com os serviços de Infraestructure registrados</returns>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DbConnection"),
-                b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+            services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+            {
+                var config = serviceProvider.GetRequiredService<IConfiguration>();
+                options.UseNpgsql(config.GetConnectionString("DbConnection"),
+                    b => b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
+            });
 
             services.AddIdentityCore<UsuarioIdentity>()
                 .AddRoles<IdentityRole<Guid>>()
@@ -41,6 +46,7 @@ namespace AutoReparos.Infra.IoC
             services.AddScoped<IOrdemServicoRepository, OrdemServicoRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IAuthRepository, AuthRepository>();
+            services.AddScoped<IJwtService, JwtService>();
 
             return services;
         }
