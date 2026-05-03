@@ -1,11 +1,10 @@
-using AutoReparos.Application.Auth.Configurations;
 using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.Services;
+using AutoReparos.Domain.Shared.Interfaces;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using AutoReparos.Domain.Usuarios.Repositories;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace AutoReparos.Application.Tests
@@ -13,16 +12,14 @@ namespace AutoReparos.Application.Tests
     public class AuthServiceTests
     {
         private readonly IAuthRepository _authRepository;
-        private readonly IOptions<JwtSettings> _jwtOptions;
+        private readonly IJwtService _jwtService;
         private readonly AuthService _authService;
-        private readonly JwtSettings _settings;
 
         public AuthServiceTests()
         {
             _authRepository = Substitute.For<IAuthRepository>();
-            _settings = new JwtSettings { Secret = "super_secret_key_with_enough_length_for_hmac256", ExpiryHours = 2 };
-            _jwtOptions = Options.Create(_settings);
-            _authService = new AuthService(_authRepository, _jwtOptions);
+            _jwtService = Substitute.For<IJwtService>();
+            _authService = new AuthService(_authRepository, _jwtService);
         }
 
         [Fact(DisplayName = "Login With Valid Credentials Should Return Token")]
@@ -30,13 +27,15 @@ namespace AutoReparos.Application.Tests
         {
             var request = new LoginRequestDTO("test@test.com", "Password123!");
             var usuario = new Usuario("Test Usuario", request.Email, ETipoUsuario.Mecanico);
+            var expectedToken = "mocked-jwt-token";
 
             _authRepository.ValidateCredentialsAsync(request.Email, request.Password).Returns(usuario);
+            _jwtService.GenerateToken(usuario).Returns(expectedToken);
 
             var result = await _authService.Login(request);
 
             result.Should().NotBeNull();
-            result.Token.Should().NotBeNullOrEmpty();
+            result.Token.Should().Be(expectedToken);
             result.Email.Should().Be(usuario.Email.Endereco);
             result.NomeCompleto.Should().Be(usuario.NomeCompleto);
         }
