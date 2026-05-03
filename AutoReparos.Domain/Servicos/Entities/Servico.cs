@@ -5,7 +5,7 @@ namespace AutoReparos.Domain.Servicos.Entities
 {
     public class Servico : Entity
     {
-        public string Nome { get; private set; }
+        public string Nome { get; private set; } = null!;
         public string? Descricao { get; private set; }
         public decimal? ValorTabelado { get; private set; }
         public DateTime CriadoEm { get; }

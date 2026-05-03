@@ -10,22 +10,22 @@ namespace AutoReparos.Domain.Clientes.Entities
         /// <summary>
         /// Nome completo do cliente
         /// </summary>
-        public string Nome { get; private set; }
+        public string Nome { get; private set; } = null!;
 
         /// <summary>
         /// CPF/CNPJ do cliente
         /// </summary>
-        public Documento Documento { get; }
+        public Documento Documento { get; private set; } = null!;
 
         /// <summary>
         /// Número de telefone do cliente
         /// </summary>
-        public Telefone Telefone { get; private set; }
+        public Telefone Telefone { get; private set; } = null!;
 
         /// <summary>
         /// E-mail do cliente
         /// </summary>
-        public Email Email { get; private set; }
+        public Email Email { get; private set; } = null!;
 
         /// <summary>
         /// Data de criação

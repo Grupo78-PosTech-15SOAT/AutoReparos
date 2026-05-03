@@ -8,15 +8,15 @@ namespace AutoReparos.Domain.Veiculos.Entities
     {
         public Guid ClienteId { get; private set; }
 
-        public string Marca { get; private set; }
-        public string Modelo { get; private set; }
+        public string Marca { get; private set; } = null!;
+        public string Modelo { get; private set; } = null!;
 
         public int AnoFabricacao { get; private set; }
         public int AnoModelo { get; private set; }
 
-        public Placa Placa { get; private set; }
-        public Chassi Chassi { get; private set; }
-        public Renavam Renavam { get; private set; }
+        public Placa Placa { get; private set; } = null!;
+        public Chassi Chassi { get; private set; } = null!;
+        public Renavam Renavam { get; private set; } = null!;
 
         public DateTime CriadoEm { get; }
         public DateTime? AtualizadoEm { get; private set; }

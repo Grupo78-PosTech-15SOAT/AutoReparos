@@ -12,12 +12,12 @@ namespace AutoReparos.Domain.Usuarios.Entities
         /// <summary>
         /// Nome completo do usuário
         /// </summary>
-        public string NomeCompleto { get; private set; }
+        public string NomeCompleto { get; private set; } = null!;
 
         /// <summary>
         /// E-mail do usuário
         /// </summary>
-        public Email Email { get; private set; }
+        public Email Email { get; private set; } = null!;
 
         /// <summary>
         /// Tipo de perfil do usuário no sistema

@@ -8,7 +8,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
     {
         public Guid OrdemServicoId { get; private set; }
         public Guid? InsumoId { get; private set; }
-        public string Descricao { get; private set; }
+        public string Descricao { get; private set; } = null!;
         public decimal ValorUnitario { get; private set; }
         public int Quantidade { get; private set; }
         public EOrigemInsumo Origem { get; private set; }
