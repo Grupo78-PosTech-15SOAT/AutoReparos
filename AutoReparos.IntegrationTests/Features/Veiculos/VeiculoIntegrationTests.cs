@@ -1,4 +1,4 @@
-﻿using AutoReparos.Application.Auth.DTOs.Request;
+using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.Shared;
@@ -11,26 +11,16 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace AutoReparos.IntegrationTests.Endpoints;
+using AutoReparos.IntegrationTests.Infrastructure;
 
-[Collection("Integration Tests")]
-public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factory) : IClassFixture<CustomWebApplicationFactory<Program>>
+namespace AutoReparos.IntegrationTests.Features.Veiculos;
+
+public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factory)
+    : IntegrationTestBase(factory)
 {
-    private readonly HttpClient _client = factory.CreateClient();
-
-    private async Task AutenticarClienteAsync()
-    {
-        var loginRequest = new LoginRequestDTO("admin@autoreparos.com", "Admin@123");
-
-        var authResponse = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
-        var authData = await authResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
-
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authData!.Token);
-    }
-
     private async Task<Guid> ObterIdClientePadraoAsync()
     {
-        var response = await _client.GetAsync("/api/clientes?pageNumber=1&pageSize=10");
+        var response = await Client.GetAsync("/api/clientes?pageNumber=1&pageSize=10");
         var clientes = await response.Content.ReadFromJsonAsync<PagedResult<ClienteDTO>>();
 
         return clientes?.Items.FirstOrDefault()?.Id ?? throw new Exception("Cliente de teste não encontrado no banco!");
@@ -53,8 +43,8 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
             anoFabricacao,
             anoModelo,
             placa,
-            faker.Random.AlphaNumeric(17).ToUpper(),     
-            faker.Random.ReplaceNumbers("###########")  
+            faker.Random.AlphaNumeric(17).ToUpper(),
+            faker.Random.ReplaceNumbers("###########")
         );
     }
 
@@ -64,7 +54,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         var createDto = GerarVeiculoAleatorioDto(clientePadraoId);
 
-        var response = await _client.PostAsJsonAsync("/api/veiculos", createDto);
+        var response = await Client.PostAsJsonAsync("/api/veiculos", createDto);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -78,12 +68,12 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "POST /api/veiculos - Criar veículo válido deve retornar 201 Created")]
     public async Task CreateVeiculo_ComDadosValidos_DeveRetornarCreated()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var clientePadraoId = await ObterIdClientePadraoAsync();
 
         var requestDto = GerarVeiculoAleatorioDto(clientePadraoId);
 
-        var response = await _client.PostAsJsonAsync("/api/veiculos", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/veiculos", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"A API rejeitou os dados gerados: {erro}");
@@ -97,10 +87,10 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/veiculos - Deve retornar lista paginada e 200 OK")]
     public async Task GetAllVeiculos_DeveRetornarOkEListaPaginada()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         await CriarVeiculoAuxiliarAsync();
 
-        var response = await _client.GetAsync("/api/veiculos?pageNumber=1&pageSize=10");
+        var response = await Client.GetAsync("/api/veiculos?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<PagedResult<VeiculoDTO>>();
@@ -112,9 +102,9 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/veiculos/{id} - Veículo inexistente deve retornar 404 NotFound")]
     public async Task GetVeiculoById_QuandoNaoExiste_DeveRetornarNotFound()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
 
-        var response = await _client.GetAsync($"/api/veiculos/{Guid.NewGuid()}");
+        var response = await Client.GetAsync($"/api/veiculos/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -122,10 +112,10 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/veiculos/placa/{placa} - Quando veículo existe deve retornar 200 OK")]
     public async Task GetVeiculoByPlaca_QuandoExiste_DeveRetornarOk()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var veiculoCriado = await CriarVeiculoAuxiliarAsync();
 
-        var response = await _client.GetAsync($"/api/veiculos/placa/{veiculoCriado.Placa}");
+        var response = await Client.GetAsync($"/api/veiculos/placa/{veiculoCriado.Placa}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<VeiculoDTO>();
@@ -136,12 +126,12 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "PUT /api/veiculos/{id} - Atualizar veículo deve retornar 204 NoContent")]
     public async Task UpdateVeiculo_ComDadosValidos_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var veiculoCriado = await CriarVeiculoAuxiliarAsync();
 
         var updateDto = new VeiculoUpdateDTO("Corolla Cross", "Preto", 1995, 1999);
 
-        var response = await _client.PutAsJsonAsync($"/api/veiculos/{veiculoCriado.Id}", updateDto);
+        var response = await Client.PutAsJsonAsync($"/api/veiculos/{veiculoCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, because: erro);
@@ -150,10 +140,10 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "DELETE /api/veiculos/{id} - Deletar veículo deve retornar 204 NoContent")]
     public async Task DeleteVeiculo_QuandoExiste_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var veiculoCriado = await CriarVeiculoAuxiliarAsync();
 
-        var response = await _client.DeleteAsync($"/api/veiculos/{veiculoCriado.Id}");
+        var response = await Client.DeleteAsync($"/api/veiculos/{veiculoCriado.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }

@@ -1,4 +1,4 @@
-﻿using AutoReparos.Application.Auth.DTOs.Request;
+using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
@@ -15,23 +15,12 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace AutoReparos.IntegrationTests.Endpoints;
+using AutoReparos.IntegrationTests.Infrastructure;
 
-[Collection("Integration Tests")]
-public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factory) : IClassFixture<CustomWebApplicationFactory<Program>>
-{
-    private readonly HttpClient _client = factory.CreateClient();
+namespace AutoReparos.IntegrationTests.Features.Servicos;
 
-    private async Task AutenticarClienteAsync()
-    {
-        var loginRequest = new LoginRequestDTO("admin@autoreparos.com", "Admin@123");
-
-        var authResponse = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
-        var authData = await authResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
-
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authData!.Token);
-    }
-
+public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factory)
+    : IntegrationTestBase(factory){
     private async Task<ServicoDTO> CriarServicoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
@@ -43,7 +32,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
             Math.Round(faker.Random.Decimal(50, 1000), 2) 
         );
 
-        var response = await _client.PostAsJsonAsync("/api/servicos", createDto);
+        var response = await Client.PostAsJsonAsync("/api/servicos", createDto);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -57,7 +46,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     {
         var faker = new Faker("pt_BR");
 
-        var resCliente = await _client.GetFromJsonAsync<PagedResult<ClienteDTO>>("/api/clientes?pageNumber=1&pageSize=1");
+        var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDTO>>("/api/clientes?pageNumber=1&pageSize=1");
         var clienteId = resCliente!.Items.First().Id;
 
         var requestDto = new VeiculoCreateDTO(
@@ -70,8 +59,8 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
             "8Wz32v68wN7vf6617",
             "38579863163"
         );
-        await _client.PostAsJsonAsync("/api/veiculos", requestDto);
-        var resVeiculo = await _client.GetFromJsonAsync<PagedResult<VeiculoDTO>>($"/api/veiculos?clienteId={clienteId}&pageNumber=1&pageSize=1");
+        await Client.PostAsJsonAsync("/api/veiculos", requestDto);
+        var resVeiculo = await Client.GetFromJsonAsync<PagedResult<VeiculoDTO>>($"/api/veiculos?clienteId={clienteId}&pageNumber=1&pageSize=1");
         var veiculoId = resVeiculo!.Items.First().Id;
 
         var createDto = new CriarServicoDTO
@@ -81,8 +70,8 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
            Math.Round(faker.Random.Decimal(50, 1000), 2)
        );
 
-        await _client.PostAsJsonAsync("/api/servicos", createDto);
-        var resServico = await _client.GetFromJsonAsync<PagedResult<ServicoDTO>>("/api/servicos?pageNumber=1&pageSize=1");
+        await Client.PostAsJsonAsync("/api/servicos", createDto);
+        var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDTO>>("/api/servicos?pageNumber=1&pageSize=1");
         var servicoId = resServico!.Items.First().Id;
 
         return (clienteId, veiculoId, servicoId);
@@ -92,7 +81,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "POST /api/servicos - Criar serviço válido deve retornar 201 Created")]
     public async Task CreateServico_ComDadosValidos_DeveRetornarCreated()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
 
         var requestDto = new CriarServicoDTO(
             "Troca de Óleo",
@@ -100,7 +89,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
             150.00m
         );
 
-        var response = await _client.PostAsJsonAsync("/api/servicos", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/servicos", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"Erro retornado pela API: {erro}");
@@ -114,10 +103,10 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos - Deve retornar lista paginada e 200 OK")]
     public async Task GetAllServicos_DeveRetornarOkEListaPaginada()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         await CriarServicoAuxiliarAsync();
 
-        var response = await _client.GetAsync("/api/servicos?pageNumber=1&pageSize=10");
+        var response = await Client.GetAsync("/api/servicos?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<PagedResult<ServicoDTO>>();
@@ -129,9 +118,9 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos/{id} - Serviço inexistente deve retornar 404 NotFound")]
     public async Task GetServicoById_QuandoNaoExiste_DeveRetornarNotFound()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
 
-        var response = await _client.GetAsync($"/api/servicos/{Guid.NewGuid()}");
+        var response = await Client.GetAsync($"/api/servicos/{Guid.NewGuid()}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -139,10 +128,10 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos/{id} - Quando serviço existe deve retornar 200 OK")]
     public async Task GetServicoById_QuandoExiste_DeveRetornarOk()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var servicoCriado = await CriarServicoAuxiliarAsync();
 
-        var response = await _client.GetAsync($"/api/servicos/{servicoCriado.Id}");
+        var response = await Client.GetAsync($"/api/servicos/{servicoCriado.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<ServicoDTO>();
@@ -153,10 +142,10 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos/tempo-medio - Deve retornar lista de tempo médio e 200 OK")]
     public async Task GetTempoMedioServicos_DeveRetornarOk()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         await CriarServicoAuxiliarAsync();
 
-        var response = await _client.GetAsync("/api/servicos/tempo-medio");
+        var response = await Client.GetAsync("/api/servicos/tempo-medio");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<IEnumerable<TempoMedioServicoDTO>>();
@@ -166,10 +155,10 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos/{id}/tempo-medio - Quando serviço não tem histórico, deve retornar 404 NotFound")]
     public async Task GetTempoMedioServicoById_QuandoSemHistorico_DeveRetornarNotFound()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var servicoCriado = await CriarServicoAuxiliarAsync();
 
-        var response = await _client.GetAsync($"/api/servicos/{servicoCriado.Id}/tempo-medio");
+        var response = await Client.GetAsync($"/api/servicos/{servicoCriado.Id}/tempo-medio");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -177,35 +166,35 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "GET /api/servicos/{id}/tempo-medio - Quando serviço possui histórico, deve retornar 200 OK")]
     public async Task GetTempoMedioServicoById_QuandoComHistorico_DeveRetornarOk()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
 
         var deps = await ObterIdsDependenciasAsync();
 
         var criarOsDto = new CriarOrdemServicoDTO(deps.ClienteId, deps.VeiculoId, "Teste para forçar tempo médio");
-        var resOs = await _client.PostAsJsonAsync("/api/ordens-servico", criarOsDto);
+        var resOs = await Client.PostAsJsonAsync("/api/ordens-servico", criarOsDto);
         var osCriada = await resOs.Content.ReadFromJsonAsync<OrdemServicoDTO>();
 
-        await _client.PatchAsync($"/api/ordens-servico/{osCriada!.Id}/iniciar-diagnostico", null);
+        await Client.PatchAsync($"/api/ordens-servico/{osCriada!.Id}/iniciar-diagnostico", null);
 
-        await _client.PostAsJsonAsync($"/api/ordens-servico/{osCriada.Id}/servicos", new
+        await Client.PostAsJsonAsync($"/api/ordens-servico/{osCriada.Id}/servicos", new
         {
             ServicoId = deps.ServicoId,
             ValorCobrado = 150.00m
         });
 
-        await _client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/enviar-para-aprovacao", null);
-        await _client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/aprovar", null);
+        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/enviar-para-aprovacao", null);
+        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/aprovar", null);
 
-        var osDetalhe = await _client.GetFromJsonAsync<OrdemServicoDetalheDTO>($"/api/ordens-servico/{osCriada.Id}");
+        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDTO>($"/api/ordens-servico/{osCriada.Id}");
         var osServicoId = osDetalhe!.Servicos.First().Id;
 
-        await _client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/iniciar", null);
+        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/iniciar", null);
 
         await Task.Delay(100);
 
-        await _client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/concluir", null);
+        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/concluir", null);
 
-        var response = await _client.GetAsync($"/api/servicos/{deps.ServicoId}/tempo-medio");
+        var response = await Client.GetAsync($"/api/servicos/{deps.ServicoId}/tempo-medio");
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.OK, because: erro);
@@ -217,7 +206,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "PUT /api/servicos/{id} - Atualizar serviço deve retornar 204 NoContent")]
     public async Task UpdateServico_ComDadosValidos_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var servicoCriado = await CriarServicoAuxiliarAsync();
 
         var updateDto = new AtualizarServicoDTO(
@@ -226,7 +215,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
             250.00m
         );
 
-        var response = await _client.PutAsJsonAsync($"/api/servicos/{servicoCriado.Id}", updateDto);
+        var response = await Client.PutAsJsonAsync($"/api/servicos/{servicoCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, because: erro);
@@ -235,9 +224,9 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "DELETE /api/servicos/{id} - Deletar serviço deve retornar 204 NoContent")]
     public async Task DeleteServico_QuandoExiste_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var servicoCriado = await CriarServicoAuxiliarAsync();
-        var response = await _client.DeleteAsync($"/api/servicos/{servicoCriado.Id}");
+        var response = await Client.DeleteAsync($"/api/servicos/{servicoCriado.Id}");
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

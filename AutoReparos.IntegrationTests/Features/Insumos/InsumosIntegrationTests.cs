@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AutoReparos.Application.Auth.DTOs.Request;
@@ -10,23 +10,12 @@ using Bogus;
 using FluentAssertions;
 using Xunit;
 
-namespace AutoReparos.IntegrationTests.Endpoints;
+using AutoReparos.IntegrationTests.Infrastructure;
 
-[Collection("Integration Tests")]
-public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory) : IClassFixture<CustomWebApplicationFactory<Program>>
-{
-    private readonly HttpClient _client = factory.CreateClient();
+namespace AutoReparos.IntegrationTests.Features.Insumos;
 
-    private async Task AutenticarClienteAsync()
-    {
-        var loginRequest = new LoginRequestDTO("admin@autoreparos.com", "Admin@123");
-
-        var authResponse = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
-        var authData = await authResponse.Content.ReadFromJsonAsync<LoginResponseDTO>();
-
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authData!.Token);
-    }
-
+public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory)
+    : IntegrationTestBase(factory){
     private async Task<InsumoDTO> CriarInsumoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
@@ -39,7 +28,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
             faker.Random.Int(10, 50) 
         );
 
-        var response = await _client.PostAsJsonAsync("/api/insumos", createDto);
+        var response = await Client.PostAsJsonAsync("/api/insumos", createDto);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -53,12 +42,12 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "POST /api/insumos - Criar insumo válido deve retornar 201 Created")]
     public async Task CreateInsumo_ComDadosValidos_DeveRetornarCreated()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var faker = new Faker("pt_BR");
 
         var requestDto = new CriarInsumoDTO(faker.Commerce.ProductName(), faker.Commerce.ProductDescription(), 150.50m, 100);
 
-        var response = await _client.PostAsJsonAsync("/api/insumos", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/insumos", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"Erro retornado pela API: {erro}");
@@ -72,18 +61,18 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "GET /api/insumos/{id} - Insumo inexistente deve retornar 404 NotFound")]
     public async Task GetInsumoById_QuandoNaoExiste_DeveRetornarNotFound()
     {
-        await AutenticarClienteAsync();
-        var response = await _client.GetAsync($"/api/insumos/{Guid.NewGuid()}");
+        await AuthenticateAsync();
+        var response = await Client.GetAsync($"/api/insumos/{Guid.NewGuid()}");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "GET /api/insumos - Deve retornar lista paginada e 200 OK")]
     public async Task GetAllInsumos_DeveRetornarOkEListaPaginada()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         await CriarInsumoAuxiliarAsync();
 
-        var response = await _client.GetAsync("/api/insumos?pageNumber=1&pageSize=10");
+        var response = await Client.GetAsync("/api/insumos?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseData = await response.Content.ReadFromJsonAsync<PagedResult<InsumoDTO>>();
@@ -95,12 +84,12 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "PUT /api/insumos/{id} - Atualizar insumo deve retornar 204 NoContent")]
     public async Task UpdateInsumo_ComDadosValidos_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
         var updateDto = new AtualizarInsumoDTO("Insumo Atualizado Pelo Teste", "Nova descrição para atualização", 199.99m);
 
-        var response = await _client.PutAsJsonAsync($"/api/insumos/{insumoCriado.Id}", updateDto);
+        var response = await Client.PutAsJsonAsync($"/api/insumos/{insumoCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, because: erro);
@@ -109,12 +98,12 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "PATCH /api/insumos/{id}/adicionar-estoque - Deve retornar 204 NoContent")]
     public async Task AdicionarEstoque_ComDadosValidos_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
         var estoqueDto = new AtualizarEstoqueDTO(5);
 
-        var response = await _client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/adicionar-estoque", estoqueDto);
+        var response = await Client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/adicionar-estoque", estoqueDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, because: erro);
@@ -123,12 +112,12 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "PATCH /api/insumos/{id}/remover-estoque - Deve retornar 204 NoContent")]
     public async Task RemoverEstoque_ComDadosValidos_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
 
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
         var estoqueDto = new AtualizarEstoqueDTO(5);
-        var response = await _client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/remover-estoque", estoqueDto);
+        var response = await Client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/remover-estoque", estoqueDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent, because: erro);
@@ -137,10 +126,10 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
     [Fact(DisplayName = "DELETE /api/insumos/{id} - Deletar insumo deve retornar 204 NoContent")]
     public async Task DeleteInsumo_QuandoExiste_DeveRetornarNoContent()
     {
-        await AutenticarClienteAsync();
+        await AuthenticateAsync();
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
-        var response = await _client.DeleteAsync($"/api/insumos/{insumoCriado.Id}");
+        var response = await Client.DeleteAsync($"/api/insumos/{insumoCriado.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
