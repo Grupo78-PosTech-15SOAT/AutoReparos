@@ -32,7 +32,11 @@ namespace AutoReparos.Infra.Repositories
             }
 
             var total = await query.CountAsync();
-            var items = await query.Skip(skip).Take(take).ToListAsync();
+            var items = await query
+                .OrderBy(c => c.Nome)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
 
             return (items, total);
         }

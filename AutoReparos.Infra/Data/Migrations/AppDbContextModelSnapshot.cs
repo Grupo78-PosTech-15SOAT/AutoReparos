@@ -39,20 +39,46 @@ namespace AutoReparos.Infra.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("Telefone")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServico", b =>
+            modelBuilder.Entity("AutoReparos.Domain.Insumos.Entities.Insumo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("QuantidadeEstoque")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Valor")
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Insumos");
+                });
+
+            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServico", b =>
+                {
+                    b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ClienteId")
@@ -89,10 +115,9 @@ namespace AutoReparos.Infra.Migrations
                     b.ToTable("OrdensServico");
                 });
 
-            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoPeca", b =>
+            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoInsumo", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Descricao")
@@ -100,14 +125,14 @@ namespace AutoReparos.Infra.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<Guid?>("InsumoId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("OrdemServicoId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Origem")
                         .HasColumnType("integer");
-
-                    b.Property<Guid?>("PecaId")
-                        .HasColumnType("uuid");
 
                     b.Property<int>("Quantidade")
                         .HasColumnType("integer");
@@ -117,17 +142,16 @@ namespace AutoReparos.Infra.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InsumoId");
+
                     b.HasIndex("OrdemServicoId");
 
-                    b.HasIndex("PecaId");
-
-                    b.ToTable("OrdensServicoPecas");
+                    b.ToTable("OrdensServicoInsumos");
                 });
 
             modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoServico", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ConcluidoEm")
@@ -155,38 +179,6 @@ namespace AutoReparos.Infra.Migrations
                     b.HasIndex("ServicoId");
 
                     b.ToTable("OrdensServicoServicos");
-                });
-
-            modelBuilder.Entity("AutoReparos.Domain.Pecas.Entities.Peca", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("AtualizadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Descricao")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("QuantidadeEstoque")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Valor")
-                        .HasColumnType("numeric(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Pecas");
                 });
 
             modelBuilder.Entity("AutoReparos.Domain.Servicos.Entities.Servico", b =>
@@ -218,7 +210,45 @@ namespace AutoReparos.Infra.Migrations
                     b.ToTable("Servicos");
                 });
 
-            modelBuilder.Entity("AutoReparos.Domain.Usuarios.Entities.Usuario", b =>
+            modelBuilder.Entity("AutoReparos.Domain.Veiculos.Entities.Veiculo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AnoFabricacao")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AnoModelo")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("AtualizadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ClienteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Marca")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Modelo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClienteId");
+
+                    b.ToTable("Veiculos");
+                });
+
+            modelBuilder.Entity("AutoReparos.Infra.Identity.Models.UsuarioIdentity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -296,44 +326,6 @@ namespace AutoReparos.Infra.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("AutoReparos.Domain.Veiculos.Entities.Veiculo", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("AnoFabricacao")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AnoModelo")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("AtualizadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ClienteId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CriadoEm")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Marca")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Modelo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClienteId");
-
-                    b.ToTable("Veiculos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -495,12 +487,35 @@ namespace AutoReparos.Infra.Migrations
                                 .HasForeignKey("ClienteId");
                         });
 
-                    b.OwnsOne("AutoReparos.Domain.Clientes.ValueObjects.Email", "Email", b1 =>
+                    b.OwnsOne("AutoReparos.Domain.Clientes.ValueObjects.Telefone", "Telefone", b1 =>
                         {
                             b1.Property<Guid>("ClienteId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<string>("Address")
+                            b1.Property<string>("Numero")
+                                .IsRequired()
+                                .HasMaxLength(16)
+                                .HasColumnType("character varying(16)")
+                                .HasColumnName("Telefone");
+
+                            b1.HasKey("ClienteId");
+
+                            b1.HasIndex("Numero")
+                                .IsUnique()
+                                .HasDatabaseName("IX_Clientes_Telefone");
+
+                            b1.ToTable("Clientes");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ClienteId");
+                        });
+
+                    b.OwnsOne("AutoReparos.Domain.Shared.ValueObjects.Email", "Email", b1 =>
+                        {
+                            b1.Property<Guid>("ClienteId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Endereco")
                                 .IsRequired()
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)")
@@ -508,7 +523,7 @@ namespace AutoReparos.Infra.Migrations
 
                             b1.HasKey("ClienteId");
 
-                            b1.HasIndex("Address")
+                            b1.HasIndex("Endereco")
                                 .IsUnique()
                                 .HasDatabaseName("IX_Clientes_Email");
 
@@ -522,6 +537,9 @@ namespace AutoReparos.Infra.Migrations
                         .IsRequired();
 
                     b.Navigation("Email")
+                        .IsRequired();
+
+                    b.Navigation("Telefone")
                         .IsRequired();
                 });
 
@@ -540,18 +558,18 @@ namespace AutoReparos.Infra.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoPeca", b =>
+            modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoInsumo", b =>
                 {
+                    b.HasOne("AutoReparos.Domain.Insumos.Entities.Insumo", null)
+                        .WithMany()
+                        .HasForeignKey("InsumoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AutoReparos.Domain.OrdensServicos.Entities.OrdemServico", null)
-                        .WithMany("Pecas")
+                        .WithMany("Insumos")
                         .HasForeignKey("OrdemServicoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("AutoReparos.Domain.Pecas.Entities.Peca", null)
-                        .WithMany()
-                        .HasForeignKey("PecaId")
-                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServicoServico", b =>
@@ -667,7 +685,7 @@ namespace AutoReparos.Infra.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("AutoReparos.Domain.Usuarios.Entities.Usuario", null)
+                    b.HasOne("AutoReparos.Infra.Identity.Models.UsuarioIdentity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -676,7 +694,7 @@ namespace AutoReparos.Infra.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("AutoReparos.Domain.Usuarios.Entities.Usuario", null)
+                    b.HasOne("AutoReparos.Infra.Identity.Models.UsuarioIdentity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -691,7 +709,7 @@ namespace AutoReparos.Infra.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AutoReparos.Domain.Usuarios.Entities.Usuario", null)
+                    b.HasOne("AutoReparos.Infra.Identity.Models.UsuarioIdentity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -700,7 +718,7 @@ namespace AutoReparos.Infra.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("AutoReparos.Domain.Usuarios.Entities.Usuario", null)
+                    b.HasOne("AutoReparos.Infra.Identity.Models.UsuarioIdentity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -709,7 +727,7 @@ namespace AutoReparos.Infra.Migrations
 
             modelBuilder.Entity("AutoReparos.Domain.OrdensServicos.Entities.OrdemServico", b =>
                 {
-                    b.Navigation("Pecas");
+                    b.Navigation("Insumos");
 
                     b.Navigation("Servicos");
                 });

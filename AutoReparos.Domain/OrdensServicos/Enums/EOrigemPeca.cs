@@ -1,6 +1,6 @@
 ﻿namespace AutoReparos.Domain.OrdensServicos.Enums
 {
-    public enum EOrigemPeca
+    public enum EOrigemInsumo
     {
         Estoque = 1,
         CompraEspecifica = 2

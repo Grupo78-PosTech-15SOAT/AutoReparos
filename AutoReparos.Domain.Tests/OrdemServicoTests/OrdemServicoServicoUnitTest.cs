@@ -70,7 +70,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
 
             servico.Status.Should().Be(EStatusServicoOS.Concluido);
             servico.ConcluidoEm.Should().NotBeNull();
-            servico.ConcluidoEm.Value.Should().BeOnOrAfter(servico.IniciadoEm.Value);
+            servico.ConcluidoEm.Value.Should().BeOnOrAfter(servico.IniciadoEm!.Value);
         }
 
         [Fact(DisplayName = "Conclude Service Without Starting")]

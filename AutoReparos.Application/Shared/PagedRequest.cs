@@ -19,5 +19,7 @@
         }
 
         public string? Nome { get; init; }
+
+        public int Skip => (PageNumber - 1) * PageSize;
     }
 }

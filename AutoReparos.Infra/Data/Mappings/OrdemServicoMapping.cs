@@ -51,11 +51,11 @@ namespace AutoReparos.Infra.Data.Mappings
                 .HasForeignKey(os => os.OrdemServicoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Navigation(os => os.Pecas)
-                .HasField("_pecas")
+            builder.Navigation(os => os.Insumos)
+                .HasField("_insumos")
                 .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-            builder.HasMany(os => os.Pecas)
+            builder.HasMany(os => os.Insumos)
                 .WithOne()
                 .HasForeignKey(os => os.OrdemServicoId)
                 .OnDelete(DeleteBehavior.Cascade);
