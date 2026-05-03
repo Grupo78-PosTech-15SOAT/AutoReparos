@@ -1,10 +1,14 @@
+using AutoReparos.Infra.Settings;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using AutoReparos.Domain.Usuarios.Repositories;
-using Microsoft.Extensions.Configuration;
+using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace AutoReparos.Infra.Data
 {
@@ -13,44 +17,86 @@ namespace AutoReparos.Infra.Data
         /// <summary>
         /// Método de extensão para orquestrar o Seed do banco de dados
         /// </summary>
-        public static async Task SeedDatabase(this IHost host)
+        /// <param name="serviceProvider">ServiceProvider da aplicação</param>
+        /// <param name="skipMigration">Se verdadeiro, pula a execução das migrações (útil em testes onde a migração já ocorreu)</param>
+        public static async Task SeedDataAsync(IServiceProvider serviceProvider, bool skipMigration = false)
         {
-            using var scope = host.Services.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             try
             {
+                var context = services.GetRequiredService<AppDbContext>();
+                var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger("DbInitializer");
+
+                if (!skipMigration)
+                {
+                    logger.LogInformation("Iniciando migração do banco de dados...");
+                    await context.Database.MigrateAsync();
+                    logger.LogInformation("Migração concluída.");
+                }
+
+                logger.LogInformation("Iniciando Seed...");
+
                 var userRepository = services.GetRequiredService<IUsuarioRepository>();
-                var configuration = services.GetRequiredService<IConfiguration>();
-                
-                await SeedUsuariosAsync(userRepository, configuration);
+                var clienteRepository = services.GetRequiredService<IClienteRepository>();
+                var seedSettings = services.GetRequiredService<IOptions<SeedUsuarioSettings>>().Value;
+                var environment = services.GetRequiredService<IHostEnvironment>();
+
+                await SeedUsuariosAsync(userRepository, seedSettings, logger);
+
+                if (environment.IsDevelopment() || environment.IsEnvironment("Testing") || environment.IsStaging())
+                {
+                    await SeedClientesAsync(clienteRepository, logger);
+                }
             }
             catch (Exception ex)
             {
                 var loggerFactory = services.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger("DbInitializer");
-                logger.LogError(ex, "Ocorreu um erro ao popular o banco de dados.");
+                logger.LogError(ex, "Ocorreu um erro ao inicializar ou popular o banco de dados.");
+                throw;
             }
         }
-
-        private static async Task SeedUsuariosAsync(IUsuarioRepository userRepository, IConfiguration configuration)
+        private static async Task SeedUsuariosAsync(IUsuarioRepository userRepository, SeedUsuarioSettings settings, ILogger logger)
         {
-            var adminEmailStr = configuration["SeedUser:Email"];
-            var adminPassword = configuration["SeedUser:Password"];
-
-            if (string.IsNullOrEmpty(adminEmailStr) || string.IsNullOrEmpty(adminPassword))
+            if (string.IsNullOrEmpty(settings.Email) || string.IsNullOrEmpty(settings.Password))
+            {
+                logger.LogWarning("Configurações de Seed de usuário não encontradas ou incompletas.");
                 return;
+            }
 
-            var existingAdmin = await userRepository.GetByEmailAsync(adminEmailStr);
+            var existingAdmin = await userRepository.GetByEmailAsync(settings.Email);
 
             if (existingAdmin == null)
             {
+                logger.LogInformation("Criando usuário administrador padrão: {Email}", settings.Email);
                 var adminUser = new Usuario(
                     "Administrador do Sistema",
-                    adminEmailStr,
+                    settings.Email,
                     ETipoUsuario.Administrador
                 );
 
-                await userRepository.CreateAsync(adminUser, adminPassword);
+                await userRepository.CreateAsync(adminUser, settings.Password);
+                logger.LogInformation("Usuário administrador criado com sucesso.");
+            }
+        }
+
+        private static async Task SeedClientesAsync(IClienteRepository clienteRepository, ILogger logger)
+        {
+            var (_, total) = await clienteRepository.GetAll(null, 0, 1);
+
+            if (total == 0)
+            {
+                logger.LogInformation("Criando cliente padrão para ambiente de desenvolvimento/testes.");
+                var clientePadrao = new Cliente(
+                    "Cliente Teste Padrão",
+                    "98765432100",
+                    "11999999999",
+                    "cliente@teste.com"
+                );
+                await clienteRepository.Create(clientePadrao);
+                logger.LogInformation("Cliente padrão criado com sucesso.");
             }
         }
     }

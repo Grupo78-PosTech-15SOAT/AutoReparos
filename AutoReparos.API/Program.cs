@@ -12,11 +12,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddInfraestructureSwagger();
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
-await app.SeedDatabase();
+await DbInitializer.SeedDataAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {

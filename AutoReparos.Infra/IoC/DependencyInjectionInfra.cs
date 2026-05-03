@@ -24,7 +24,7 @@ namespace AutoReparos.Infra.IoC
         /// </summary>
         /// <param name="services">Collection de serviços da aplicação</param>
         /// <returns>Collection de services com os serviços de Infraestructure registrados</returns>
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>((serviceProvider, options) =>
             {
