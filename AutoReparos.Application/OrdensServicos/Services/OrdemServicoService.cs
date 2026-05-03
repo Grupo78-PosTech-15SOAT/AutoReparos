@@ -7,6 +7,7 @@ using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Insumos.Repositories;
+using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
@@ -39,10 +40,10 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task<OrdemServicoDTO> Create(CriarOrdemServicoDTO dto)
         {
             var cliente = await _clienteRepository.GetById(dto.ClienteId)
-                ?? throw new NotFoundException("Cliente não encontrado.");
+                ?? throw new NotFoundException(ErrorMessages.ClienteNotFound);
 
             var veiculo = await _veiculoRepository.GetById(dto.VeiculoId)
-                ?? throw new NotFoundException("Veículo não encontrado.");
+                ?? throw new NotFoundException(ErrorMessages.VeiculoNotFound);
 
             if (veiculo.ClienteId != dto.ClienteId)
                 throw new InvalidVeiculoException("Veículo não pertence ao cliente informado.");
@@ -68,7 +69,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task AdicionarServico(Guid id, AdicionarServicoDTO dto)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             var item = new OrdemServicoServico(id, dto.ServicoId, dto.ValorCobrado);
             os.AdicionarServico(item);
@@ -78,14 +79,14 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task AdicionarInsumo(Guid id, AdicionarInsumoDTO dto)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             decimal valorUnitario;
 
             if (dto.Origem == EOrigemInsumo.Estoque)
             {
                 var insumo = await _insumoRepository.GetById(dto.InsumoId!.Value)
-                    ?? throw new NotFoundException("Peça não encontrada.");
+                    ?? throw new NotFoundException(ErrorMessages.InsumoNotFound);
 
                 insumo.RemoverEstoque(dto.Quantidade);
                 await _insumoRepository.Update(insumo);
@@ -108,7 +109,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task IniciarDiagnostico(Guid id)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.IniciarDiagnostico();
             await _repository.Update(os);
@@ -117,7 +118,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task AguardarAprovacao(Guid id)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.AguardarAprovacao();
             await _repository.Update(os);
@@ -129,16 +130,16 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task Aprovar(Guid id)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.Aprovar();
             await _repository.Update(os);
         }
 
-        public async Task IniciarServicoAsync(Guid ordemServicoId, Guid ordemServicoServicoId)
+        public async Task IniciarServico(Guid ordemServicoId, Guid ordemServicoServicoId)
         {
             var os = await _repository.GetById(ordemServicoId)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.IniciarServico(ordemServicoServicoId);
             await _repository.Update(os);
@@ -147,7 +148,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task ConcluirServico(Guid ordemServicoId, Guid ordemServicoServicoId)
         {
             var os = await _repository.GetById(ordemServicoId)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.ConcluirServico(ordemServicoServicoId);
             await _repository.Update(os);
@@ -156,7 +157,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         public async Task Entregar(Guid id)
         {
             var os = await _repository.GetById(id)
-                ?? throw new NotFoundException("Ordem de serviço não encontrada.");
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.Entregar();
             await _repository.Update(os);

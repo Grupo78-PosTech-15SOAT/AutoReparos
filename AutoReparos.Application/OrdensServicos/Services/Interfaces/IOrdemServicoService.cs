@@ -15,7 +15,7 @@ namespace AutoReparos.Application.OrdensServicos.Services.Interfaces
         Task IniciarDiagnostico(Guid id);
         Task AguardarAprovacao(Guid id);
         Task Aprovar(Guid id);
-        Task IniciarServicoAsync(Guid ordemServicoId, Guid ordemServicoServicoId);
+        Task IniciarServico(Guid ordemServicoId, Guid ordemServicoServicoId);
         Task ConcluirServico(Guid ordemServicoId, Guid ordemServicoServicoId);
         Task Entregar(Guid id);
     }

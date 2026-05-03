@@ -119,7 +119,7 @@ namespace AutoReparos.API.Endpoints
                 Guid servicoId,
                 IOrdemServicoService service) =>
             {
-                await service.IniciarServicoAsync(id, servicoId);
+                await service.IniciarServico(id, servicoId);
                 return Results.NoContent();
             })
             .WithName("IniciarServico")
