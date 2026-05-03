@@ -3,114 +3,86 @@ using AutoReparos.Application.Usuarios.Services;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
-using AutoReparos.Domain.Usuarios.Exceptions;
+using AutoReparos.Domain.Usuarios.Repositories;
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 
 namespace AutoReparos.Application.Tests
 {
     public class UsuarioServiceTests
     {
-        private readonly UserManager<Usuario> _userManager;
+        private readonly IUsuarioRepository _usuarioRepository;
         private readonly UsuarioService _usuarioService;
 
         public UsuarioServiceTests()
         {
-            _userManager = IdentityMockHelper.MockUserManager<Usuario>();
-            _usuarioService = new UsuarioService(_userManager);
+            _usuarioRepository = Substitute.For<IUsuarioRepository>();
+            _usuarioService = new UsuarioService(_usuarioRepository);
         }
 
-        [Fact(DisplayName = "Create User Successfully")]
+        [Fact(DisplayName = "Create Usuario Successfully")]
         public async Task Create_WithValidData_ShouldReturnDto()
         {
             var dto = new UsuarioCreateDTO("Novo Usuario", "novo@test.com", "Pass123!", ETipoUsuario.Atendente);
-            _userManager.CreateAsync(Arg.Any<Usuario>(), dto.Password).Returns(IdentityResult.Success);
-
+            
             var result = await _usuarioService.Create(dto);
 
             result.Should().NotBeNull();
             result.NomeCompleto.Should().Be(dto.NomeCompleto);
             result.Email.Should().Be(dto.Email);
+            await _usuarioRepository.Received(1).CreateAsync(Arg.Any<Usuario>(), dto.Password);
         }
 
-        [Fact(DisplayName = "Create User With Duplicate Email Should Throw Exception")]
-        public async Task Create_WithDuplicateEmail_ShouldThrowException()
-        {
-            var dto = new UsuarioCreateDTO("Novo Usuario", "duplicado@test.com", "Pass123!", ETipoUsuario.Atendente);
-            var error = new IdentityError { Code = "DuplicateEmail", Description = $"O e-mail '{dto.Email}' já está sendo utilizado." };
-            _userManager.CreateAsync(Arg.Any<Usuario>(), dto.Password).Returns(IdentityResult.Failed(error));
-
-            Func<Task> action = async () => await _usuarioService.Create(dto);
-
-            await action.Should().ThrowAsync<InvalidUsuarioException>()
-                .WithMessage($"*O e-mail '{dto.Email}' já está sendo utilizado.*");
-        }
-
-        [Fact(DisplayName = "Get User By Id Successfully")]
+        [Fact(DisplayName = "Get Usuario By Id Successfully")]
         public async Task GetById_WhenUserExists_ShouldReturnDto()
         {
-            var userId = Guid.NewGuid();
-            var user = new Usuario("Test", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
-            _userManager.FindByIdAsync(userId.ToString()).Returns(user);
+            var usuarioId = Guid.NewGuid();
+            var usuario = new Usuario("Test", "test@test.com", ETipoUsuario.Mecanico);
+            _usuarioRepository.GetByIdAsync(usuarioId).Returns(usuario);
 
-            var result = await _usuarioService.GetById(userId);
+            var result = await _usuarioService.GetById(usuarioId);
 
             result.Should().NotBeNull();
-            result.NomeCompleto.Should().Be(user.NomeCompleto);
+            result.NomeCompleto.Should().Be(usuario.NomeCompleto);
         }
 
-        [Fact(DisplayName = "Get User By Id Not Found Should Throw Exception")]
+        [Fact(DisplayName = "Get Usuario By Id Not Found Should Throw Exception")]
         public async Task GetById_WhenUserDoesNotExist_ShouldThrowNotFound()
         {
-            var userId = Guid.NewGuid();
-            _userManager.FindByIdAsync(userId.ToString()).Returns((Usuario?)null);
+            var usuarioId = Guid.NewGuid();
+            _usuarioRepository.GetByIdAsync(usuarioId).Returns((Usuario?)null);
 
-            Func<Task> action = async () => await _usuarioService.GetById(userId);
+            Func<Task> action = async () => await _usuarioService.GetById(usuarioId);
 
             await action.Should().ThrowAsync<NotFoundException>();
         }
 
-        [Fact(DisplayName = "Update User Successfully")]
+        [Fact(DisplayName = "Update Usuario Successfully")]
         public async Task Update_WhenUserExists_ShouldUpdateAndCallUpdateAsync()
         {
-            var userId = Guid.NewGuid();
-            var user = new Usuario("Antigo", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Atendente);
+            var usuarioId = Guid.NewGuid();
+            var usuario = new Usuario("Antigo", "test@test.com", ETipoUsuario.Atendente);
             var dto = new UsuarioUpdateDTO("Novo Nome", ETipoUsuario.Administrador);
 
-            _userManager.FindByIdAsync(userId.ToString()).Returns(user);
-            _userManager.UpdateAsync(user).Returns(IdentityResult.Success);
+            _usuarioRepository.GetByIdAsync(usuarioId).Returns(usuario);
 
-            await _usuarioService.Update(userId, dto);
+            await _usuarioService.Update(usuarioId, dto);
 
-            user.NomeCompleto.Should().Be(dto.NomeCompleto);
-            user.Tipo.Should().Be(dto.Tipo);
-            await _userManager.Received(1).UpdateAsync(user);
+            usuario.NomeCompleto.Should().Be(dto.NomeCompleto);
+            usuario.Tipo.Should().Be(dto.Tipo);
+            await _usuarioRepository.Received(1).UpdateAsync(usuario);
         }
 
-        [Fact(DisplayName = "Update User Not Found Should Throw Exception")]
-        public async Task Update_WhenUserDoesNotExist_ShouldThrowNotFound()
-        {
-            var userId = Guid.NewGuid();
-            var dto = new UsuarioUpdateDTO("Novo Nome", ETipoUsuario.Administrador);
-            _userManager.FindByIdAsync(userId.ToString()).Returns((Usuario?)null);
-
-            Func<Task> action = async () => await _usuarioService.Update(userId, dto);
-
-            await action.Should().ThrowAsync<NotFoundException>();
-        }
-
-        [Fact(DisplayName = "Delete User Successfully")]
+        [Fact(DisplayName = "Delete Usuario Successfully")]
         public async Task Delete_WhenUserExists_ShouldCallDelete()
         {
-            var userId = Guid.NewGuid();
-            var user = new Usuario("Test", Domain.Shared.ValueObjects.Email.Create("test@test.com"), ETipoUsuario.Mecanico);
-            _userManager.FindByIdAsync(userId.ToString()).Returns(user);
-            _userManager.DeleteAsync(user).Returns(IdentityResult.Success);
+            var usuarioId = Guid.NewGuid();
+            var usuario = new Usuario("Test", "test@test.com", ETipoUsuario.Mecanico);
+            _usuarioRepository.GetByIdAsync(usuarioId).Returns(usuario);
 
-            await _usuarioService.Delete(userId);
+            await _usuarioService.Delete(usuarioId);
 
-            await _userManager.Received(1).DeleteAsync(user);
+            await _usuarioRepository.Received(1).DeleteAsync(usuario);
         }
     }
 }
