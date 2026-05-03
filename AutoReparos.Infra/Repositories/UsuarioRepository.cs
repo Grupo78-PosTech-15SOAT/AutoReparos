@@ -63,13 +63,13 @@ namespace AutoReparos.Infra.Repositories
         public async Task<Usuario?> GetByIdAsync(Guid id)
         {
             var identityUser = await _userManager.FindByIdAsync(id.ToString());
-            return identityUser == null ? null : MapToDomain(identityUser);
+            return identityUser?.ToDomain();
         }
 
         public async Task<Usuario?> GetByEmailAsync(string email)
         {
             var identityUser = await _userManager.FindByEmailAsync(email);
-            return identityUser == null ? null : MapToDomain(identityUser);
+            return identityUser?.ToDomain();
         }
 
         public async Task<(IEnumerable<Usuario> Items, int TotalCount)> GetAllAsync(string? nome, int skip, int take)
@@ -88,18 +88,7 @@ namespace AutoReparos.Infra.Repositories
                 .Take(take)
                 .ToListAsync();
 
-            return (users.Select(MapToDomain), total);
-        }
-
-        private static Usuario MapToDomain(UsuarioIdentity identityUser)
-        {
-            return Usuario.Load(
-                identityUser.Id,
-                identityUser.NomeCompleto,
-                identityUser.Email!,
-                identityUser.Tipo,
-                identityUser.CriadoEm,
-                identityUser.AtualizadoEm);
+            return (users.Select(u => u.ToDomain()), total);
         }
     }
 }

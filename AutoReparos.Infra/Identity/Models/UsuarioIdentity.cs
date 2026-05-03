@@ -1,3 +1,4 @@
+using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using Microsoft.AspNetCore.Identity;
 
@@ -28,6 +29,17 @@ namespace AutoReparos.Infra.Identity.Models
             CriadoEm = criadoEm;
             NormalizedEmail = email.ToUpperInvariant();
             NormalizedUserName = email.ToUpperInvariant();
+        }
+
+        public Usuario ToDomain()
+        {
+            return Usuario.Load(
+                Id,
+                NomeCompleto,
+                Email!,
+                Tipo,
+                CriadoEm,
+                AtualizadoEm);
         }
     }
 }

@@ -25,18 +25,7 @@ namespace AutoReparos.Infra.Repositories
                 return null;
             }
 
-            return MapToDomain(identityUser);
-        }
-
-        private static Usuario MapToDomain(UsuarioIdentity identityUser)
-        {
-            return Usuario.Load(
-                identityUser.Id,
-                identityUser.NomeCompleto,
-                identityUser.Email!,
-                identityUser.Tipo,
-                identityUser.CriadoEm,
-                identityUser.AtualizadoEm);
+            return identityUser.ToDomain();
         }
     }
 }
