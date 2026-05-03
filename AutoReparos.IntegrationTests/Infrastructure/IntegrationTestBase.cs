@@ -11,6 +11,9 @@ namespace AutoReparos.IntegrationTests.Infrastructure
     [Collection("IntegrationTests")]
     public abstract class IntegrationTestBase : IAsyncLifetime
     {
+        protected const string DefaultAdminEmail = "admin@autoreparos.com";
+        protected const string DefaultAdminPassword = "Admin@123";
+
         protected readonly CustomWebApplicationFactory<Program> Factory;
         protected readonly HttpClient Client;
         protected readonly IServiceProvider Services;
@@ -24,7 +27,7 @@ namespace AutoReparos.IntegrationTests.Infrastructure
 
         protected async Task AuthenticateAsync()
         {
-            var loginRequest = new LoginRequestDTO("admin@autoreparos.com", "Admin@123");
+            var loginRequest = new LoginRequestDTO(DefaultAdminEmail, DefaultAdminPassword);
             var response = await Client.PostAsJsonAsync("/api/auth/login", loginRequest);
 
             if (response.IsSuccessStatusCode)
