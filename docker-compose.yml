@@ -1,4 +1,4 @@
-# Docker compose - PostgreSQL - penas para desenvolvimento
+# Docker compose - PostgreSQL e API
 services:
   postgres:
     image: postgres:16
@@ -12,6 +12,23 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - autoreparos-network
+
+  api:
+    image: autoreparos-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoreparos-api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnection=Host=postgres;Database=autoreparos;Username=admin;Password=1q2w3e4r@#$
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
     networks:
       - autoreparos-network
 
