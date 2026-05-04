@@ -59,11 +59,22 @@ namespace AutoReparos.Application.OrdensServicos.Services
             return os is null ? null : ToDetalheDto(os);
         }
 
-        public async Task<PagedResult<OrdemServicoDTO>> GetAll(Guid? clienteId, Guid? veiculoId, EStatusOrdemServico? status, int pageNumber, int pageSize)
+        public async Task<OrdemServicoPublicoDetalheDTO?> GetPublicById(Guid id)
         {
-            var skip = (pageNumber - 1) * pageSize;
-            var (items, total) = await _repository.GetAll(clienteId, veiculoId, status, skip, pageSize);
-            return new PagedResult<OrdemServicoDTO>(items.Select(ToDTO), total, pageNumber, pageSize);
+            var os = await _repository.GetById(id);
+            return os is null ? null : ToPublicDetalheDto(os);
+        }
+
+        public async Task<PagedResult<OrdemServicoDTO>> GetAll(OrdemServicoPagedRequest request)
+        {
+            var (items, total) = await _repository.GetAll(request.ClienteId, request.VeiculoId, request.Status, request.Skip, request.PageSize);
+            return new PagedResult<OrdemServicoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+        }
+
+        public async Task<PagedResult<OrdemServicoPublicoDTO>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request)
+        {
+            var (items, total) = await _repository.GetByDocumentoOuPlaca(request.Documento, request.Placa, request.Skip, request.PageSize);
+            return new PagedResult<OrdemServicoPublicoDTO>(items.Select(ToPublicDTO), total, request.PageNumber, request.PageSize);
         }
 
         public async Task AdicionarServico(Guid id, AdicionarServicoDTO dto)
@@ -169,6 +180,11 @@ namespace AutoReparos.Application.OrdensServicos.Services
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm
         );
 
+        private static OrdemServicoPublicoDTO ToPublicDTO(OrdemServico os) => new(
+            os.Id, os.Status.ToString(), os.Observacao, os.CriadoEm,
+            os.IniciadoEm, os.FinalizadoEm, os.EntregueEm
+        );
+
         private static OrdemServicoDetalheDTO ToDetalheDto(OrdemServico os) => new(
             os.Id, os.ClienteId, os.VeiculoId, os.Status.ToString(),
             os.Observacao, os.ValorTotal, os.CriadoEm,
@@ -179,6 +195,15 @@ namespace AutoReparos.Application.OrdensServicos.Services
             os.Insumos.Select(p => new OrdemServicoInsumoDTO(
                 p.Id, p.InsumoId, p.Descricao, p.ValorUnitario,
                 p.Quantidade, p.ValorTotal, p.Origem.ToString()))
+        );
+
+        private static OrdemServicoPublicoDetalheDTO ToPublicDetalheDto(OrdemServico os) => new(
+            os.Id, os.Status.ToString(), os.Observacao, os.CriadoEm,
+            os.IniciadoEm, os.FinalizadoEm, os.EntregueEm,
+            os.Servicos.Select(s => new OrdemServicoServicoPublicoDTO(
+                s.Id, s.Status.ToString(), s.IniciadoEm, s.ConcluidoEm)),
+            os.Insumos.Select(p => new OrdemServicoInsumoPublicoDTO(
+                p.Id, p.Descricao, p.Quantidade))
         );
     }
 }
