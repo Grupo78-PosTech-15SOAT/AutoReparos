@@ -30,11 +30,10 @@ namespace AutoReparos.Application.Insumos.Services
             return insumo is null ? null : ToDTO(insumo);
         }
 
-        public async Task<PagedResult<InsumoDTO>> GetAll(string? nome, int pageNumber, int pageSize)
+        public async Task<PagedResult<InsumoDTO>> GetAll(InsumoPagedRequest request)
         {
-            var skip = (pageNumber - 1) * pageSize;
-            var (items, total) = await _repository.GetAll(nome, skip, pageSize);
-            return new PagedResult<InsumoDTO>(items.Select(ToDTO), total, pageNumber, pageSize);
+            var (items, total) = await _repository.GetAll(request.Nome, request.Skip, request.PageSize);
+            return new PagedResult<InsumoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
         public async Task Update(Guid id, AtualizarInsumoDTO dto)

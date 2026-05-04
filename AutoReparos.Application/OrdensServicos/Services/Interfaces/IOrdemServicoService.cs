@@ -9,7 +9,9 @@ namespace AutoReparos.Application.OrdensServicos.Services.Interfaces
     {
         Task<OrdemServicoDTO> Create(CriarOrdemServicoDTO dto);
         Task<OrdemServicoDetalheDTO?> GetById(Guid id);
-        Task<PagedResult<OrdemServicoDTO>> GetAll(Guid? clienteId, Guid? veiculoId, EStatusOrdemServico? status, int pageNumber, int pageSize);
+        Task<OrdemServicoPublicoDetalheDTO?> GetPublicById(Guid id);
+        Task<PagedResult<OrdemServicoDTO>> GetAll(OrdemServicoPagedRequest request);
+        Task<PagedResult<OrdemServicoPublicoDTO>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request);
         Task AdicionarServico(Guid id, AdicionarServicoDTO dto);
         Task AdicionarInsumo(Guid id, AdicionarInsumoDTO dto);
         Task IniciarDiagnostico(Guid id);

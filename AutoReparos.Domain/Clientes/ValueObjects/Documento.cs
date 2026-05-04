@@ -18,14 +18,14 @@ namespace AutoReparos.Domain.Clientes.ValueObjects
             if (string.IsNullOrEmpty(valor) || string.IsNullOrWhiteSpace(valor))
                 throw new InvalidDocumentoException("O CPF ou CNPJ é obrigatório.");
 
-            var digits = new string(valor.Where(char.IsDigit).ToArray());
+            var digits = Normalizar(valor);
 
             if (digits.Length == 11 && ValidarCpf(digits))
                 return new Documento(digits, ETipoDocumento.CPF);
-            
+
             if (digits.Length == 14 && ValidarCnpj(digits))
                 return new Documento(digits, ETipoDocumento.CNPJ);
-            
+
             throw new InvalidDocumentoException("CPF ou CNPJ inválido.");
         }
 

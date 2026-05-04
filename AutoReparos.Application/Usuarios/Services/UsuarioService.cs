@@ -28,11 +28,11 @@ namespace AutoReparos.Application.Usuarios.Services
             return ToDTO(usuario);
         }
 
-        public async Task<PagedResult<UsuarioDTO>> GetAll(PagedRequest request)
+        public async Task<PagedResult<UsuarioDTO>> GetAll(UsuarioPagedRequest request)
         {
             var (usuarios, total) = await _usuarioRepository.GetAllAsync(
                 request.Nome,
-                (request.PageNumber - 1) * request.PageSize,
+                request.Skip,
                 request.PageSize);
 
             var items = usuarios.Select(ToDTO);

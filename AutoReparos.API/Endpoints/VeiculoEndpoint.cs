@@ -26,9 +26,11 @@ namespace AutoReparos.API.Endpoints
             .Produces<VeiculoDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/", async (IVeiculoService service, [FromQuery] Guid? clienteId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) =>
+            group.MapGet("/", async (
+                IVeiculoService service,
+                [AsParameters] VeiculoPagedRequest request) =>
             {
-                var result = await service.GetAll(clienteId, pageNumber, pageSize);
+                var result = await service.GetAll(request);
                 return Results.Ok(result);
             })
             .WithName("GetAllVeiculos")

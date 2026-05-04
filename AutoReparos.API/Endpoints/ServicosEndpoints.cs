@@ -34,9 +34,11 @@ namespace AutoReparos.API.Endpoints
             .Produces<ServicoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapGet("/", async (IServicoService service, [FromQuery] string? nome, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10) =>
+            group.MapGet("/", async (
+                IServicoService service,
+                [AsParameters] ServicoPagedRequest request) =>
             {
-                var result = await service.GetAll(nome, pageNumber, pageSize);
+                var result = await service.GetAll(request);
                 return Results.Ok(result);
             })
             .WithName("GetAllServicos")

@@ -8,7 +8,7 @@ namespace AutoReparos.Application.Veiculos.Services.Interfaces
     {
         Task<VeiculoDTO> Create(VeiculoCreateDTO dto);
 
-        Task<PagedResult<VeiculoDTO>> GetAll(Guid? clienteId, int pageNumber, int pageSize);
+        Task<PagedResult<VeiculoDTO>> GetAll(VeiculoPagedRequest request);
         Task<VeiculoDTO?> GetById(Guid id);
         Task<VeiculoDTO?> GetByPlaca(string placa);
 

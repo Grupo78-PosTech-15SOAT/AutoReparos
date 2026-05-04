@@ -36,11 +36,9 @@ namespace AutoReparos.API.Endpoints
 
             group.MapGet("/", async (
                 IInsumoService service,
-                [FromQuery] string? nome,
-                [FromQuery] int pageNumber = 1,
-                [FromQuery] int pageSize = 10) =>
+                [AsParameters] InsumoPagedRequest request) =>
             {
-                var result = await service.GetAll(nome, pageNumber, pageSize);
+                var result = await service.GetAll(request);
                 return Results.Ok(result);
             })
             .WithName("GetAllInsumos")
