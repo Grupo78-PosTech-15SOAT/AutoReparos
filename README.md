@@ -106,7 +106,7 @@ dotnet test
   - José Dotta - rm372959
   - Júlia Santos - rm370364
   - Lucas Bastos - rm370749
-  - Matheus Lecchi - rm
+  - Mateus Lecchi - rm371085
 
 ---
 Desenvolvido para fins educacionais - FIAP SOAT.
