@@ -12,7 +12,7 @@ namespace AutoReparos.Domain.Veiculos.ValueObjects
             if (string.IsNullOrWhiteSpace(valor))
                 throw new InvalidPlacaException("Placa é obrigatória");
 
-            valor = valor.ToUpper().Replace("-", "").Trim();
+            valor = Normalizar(valor);
 
             // Mercosul ou antigo
             var regexAntiga = new Regex(@"^[A-Z]{3}[0-9]{4}$");
@@ -23,6 +23,8 @@ namespace AutoReparos.Domain.Veiculos.ValueObjects
 
             Valor = valor;
         }
+
+        public static string Normalizar(string valor) => valor.ToUpper().Replace("-", "").Trim();
 
         public override string ToString() => Valor;
     }
