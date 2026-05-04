@@ -18,8 +18,6 @@
             init => _pageSize = value > MaxPageSize ? MaxPageSize : value < 1 ? 1 : value;
         }
 
-        public string? Nome { get; init; }
-
         public int Skip => (PageNumber - 1) * PageSize;
     }
 }
