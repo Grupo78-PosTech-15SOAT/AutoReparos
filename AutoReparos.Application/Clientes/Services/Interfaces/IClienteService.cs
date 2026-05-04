@@ -8,7 +8,7 @@ namespace AutoReparos.Application.Clientes.Services.Interfaces
     {
         Task<ClienteDTO> Create(ClienteCreateDTO dto);
         Task<ClienteDTO?> GetById(Guid id);
-        Task<PagedResult<ClienteDTO>> GetAll(PagedRequest request);
+        Task<PagedResult<ClienteDTO>> GetAll(ClientePagedRequest request);
         Task Update(Guid id, ClienteUpdateDTO dto);
         Task Delete(Guid id);
     }

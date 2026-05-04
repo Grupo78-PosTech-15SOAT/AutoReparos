@@ -8,7 +8,7 @@ namespace AutoReparos.Application.Insumos.Services.Interfaces
     {
         Task<InsumoDTO> Create(CriarInsumoDTO dto);
         Task<InsumoDTO?> GetById(Guid id);
-        Task<PagedResult<InsumoDTO>> GetAll(string? nome, int pageNumber, int pageSize);
+        Task<PagedResult<InsumoDTO>> GetAll(InsumoPagedRequest request);
         Task Update(Guid id, AtualizarInsumoDTO dto);
         Task AdicionarEstoque(Guid id, AtualizarEstoqueDTO dto);
         Task RemoverEstoque(Guid id, AtualizarEstoqueDTO dto);

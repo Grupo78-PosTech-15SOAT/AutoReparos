@@ -8,7 +8,7 @@ namespace AutoReparos.Application.Servicos.Services.Interfaces
     {
         Task<ServicoDTO> Create(CriarServicoDTO dto);
         Task<ServicoDTO?> GetById(Guid id);
-        Task<PagedResult<ServicoDTO>> GetAll(string? nome, int pageNumber, int pageSize);
+        Task<PagedResult<ServicoDTO>> GetAll(ServicoPagedRequest request);
         Task<IEnumerable<TempoMedioServicoDTO>> GetTempoMedio();
         Task<TempoMedioServicoDTO?> GetTempoMedioById(Guid id);
         Task Update(Guid id, AtualizarServicoDTO dto);

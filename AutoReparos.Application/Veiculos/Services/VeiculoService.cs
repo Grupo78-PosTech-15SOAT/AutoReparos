@@ -45,11 +45,10 @@ namespace AutoReparos.Application.Veiculos.Services
             return ToDTO(veiculo);
         }
 
-        public async Task<PagedResult<VeiculoDTO>> GetAll(Guid? clienteId, int pageNumber, int pageSize)
+        public async Task<PagedResult<VeiculoDTO>> GetAll(VeiculoPagedRequest request)
         {
-            var skip = (pageNumber - 1) * pageSize;
-            var (items, total) = await _repository.GetAll(clienteId, skip, pageSize);
-            return new PagedResult<VeiculoDTO>(items.Select(ToDTO), total, pageNumber, pageSize);
+            var (items, total) = await _repository.GetAll(request.ClienteId, request.Skip, request.PageSize);
+            return new PagedResult<VeiculoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
         public async Task<VeiculoDTO?> GetById(Guid id)

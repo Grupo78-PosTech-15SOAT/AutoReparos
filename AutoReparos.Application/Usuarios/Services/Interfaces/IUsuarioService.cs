@@ -8,7 +8,7 @@ namespace AutoReparos.Application.Usuarios.Services.Interfaces
     {
         Task<UsuarioDTO> Create(UsuarioCreateDTO dto);
         Task<UsuarioDTO?> GetById(Guid id);
-        Task<PagedResult<UsuarioDTO>> GetAll(PagedRequest request);
+        Task<PagedResult<UsuarioDTO>> GetAll(UsuarioPagedRequest request);
         Task Update(Guid id, UsuarioUpdateDTO dto);
         Task Delete(Guid id);
     }

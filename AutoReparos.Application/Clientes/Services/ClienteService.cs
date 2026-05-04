@@ -49,7 +49,7 @@ namespace AutoReparos.Application.Clientes.Services
         }
 
 
-        public async Task<PagedResult<ClienteDTO>> GetAll(PagedRequest request)
+        public async Task<PagedResult<ClienteDTO>> GetAll(ClientePagedRequest request)
         {
             var (clientes, total) = await _repository.GetAll(request.Nome, request.Skip, request.PageSize);
             var items = clientes.Select(ToDTO);

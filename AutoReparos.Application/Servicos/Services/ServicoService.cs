@@ -30,11 +30,10 @@ namespace AutoReparos.Application.Servicos.Services
             return servico is null ? null : ToDto(servico);
         }
 
-        public async Task<PagedResult<ServicoDTO>> GetAll(string? nome, int pageNumber, int pageSize)
+        public async Task<PagedResult<ServicoDTO>> GetAll(ServicoPagedRequest request)
         {
-            var skip = (pageNumber - 1) * pageSize;
-            var (servicos, total) = await _repository.GetAll(nome, skip, pageSize);
-            return new PagedResult<ServicoDTO>(servicos.Select(ToDto), total, pageNumber, pageSize);
+            var (servicos, total) = await _repository.GetAll(request.Nome, request.Skip, request.PageSize);
+            return new PagedResult<ServicoDTO>(servicos.Select(ToDto), total, request.PageNumber, request.PageSize);
         }
 
         public async Task<IEnumerable<TempoMedioServicoDTO>> GetTempoMedio()
