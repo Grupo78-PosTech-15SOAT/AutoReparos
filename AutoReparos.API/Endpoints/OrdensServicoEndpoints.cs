@@ -15,6 +15,30 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("OrdensServico")
                 .RequireAuthorization();
 
+            group.MapGet("/consulta", async (
+                IOrdemServicoService service,
+                [AsParameters] OrdemServicoConsultaPagedRequest request) =>
+            {
+                var result = await service.GetByDocumentoOuPlaca(request);
+                return Results.Ok(result);
+            })
+            .WithName("GetOrdensServicoByDocumentoOuPlaca")
+            .WithSummary("Pesquisa ordens de serviço por documento ou placa (Público)")
+            .Produces<PagedResult<OrdemServicoPublicoDTO>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .AllowAnonymous();
+
+            group.MapGet("/consulta/{id:guid}", async (Guid id, IOrdemServicoService service) =>
+            {
+                var os = await service.GetPublicById(id);
+                return os is null ? Results.NotFound() : Results.Ok(os);
+            })
+            .WithName("GetPublicOrdemServicoById")
+            .WithSummary("Busca uma ordem de serviço por ID com detalhes (Público)")
+            .Produces<OrdemServicoPublicoDetalheDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .AllowAnonymous();
+
             group.MapPost("/", async (CriarOrdemServicoDTO dto, IOrdemServicoService service) =>
             {
                 var os = await service.Create(dto);
@@ -37,13 +61,9 @@ namespace AutoReparos.API.Endpoints
 
             group.MapGet("/", async (
                 IOrdemServicoService service,
-                [FromQuery] Guid? clienteId,
-                [FromQuery] Guid? veiculoId,
-                [FromQuery] EStatusOrdemServico? status,
-                [FromQuery] int pageNumber = 1,
-                [FromQuery] int pageSize = 10) =>
+                [AsParameters] OrdemServicoPagedRequest request) =>
             {
-                var result = await service.GetAll(clienteId, veiculoId, status, pageNumber, pageSize);
+                var result = await service.GetAll(request);
                 return Results.Ok(result);
             })
             .WithName("GetAllOrdensServico")

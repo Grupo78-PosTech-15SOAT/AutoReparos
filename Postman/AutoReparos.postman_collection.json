@@ -1,10 +1,9 @@
 {
   "info": {
-    "_postman_id": "dc257667-8757-4fd8-9165-18998f4e8158",
+    "_postman_id": "466c954f-2114-476f-879b-a9211a1f4fb5",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "27526426",
-    "_collection_link": "https://go.postman.co/collection/27526426-dc257667-8757-4fd8-9165-18998f4e8158?source=collection_link"
+    "_exporter_id": "28630587"
   },
   "item": [
     {
@@ -17,8 +16,26 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "const response = pm.response.json();\r",
-                  "pm.environment.set(\"token\", response.token);"
+                  "if (pm.response.code === 200) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.token) {\r",
+                  "        pm.collectionVariables.set(\"token\", response.token);\r",
+                  "        console.log(\"Variável 'token' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'token' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
                 ],
                 "type": "text/javascript",
                 "packages": {},
@@ -59,6 +76,34 @@
       "item": [
         {
           "name": "CreateCliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"clienteId\", response.id);\r",
+                  "        console.log(\"Variável 'clienteId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'clienteId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -110,13 +155,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/clientes",
+              "raw": "{{baseUrl}}/api/clientes?nome=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "clientes"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -225,6 +284,34 @@
       "item": [
         {
           "name": "CreateVeiculo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"veiculoId\", response.id);\r",
+                  "        console.log(\"Variável 'veiculoId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'veiculoId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -276,35 +363,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/veiculos",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "veiculos"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "GetAllVeiculosByClienteId",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/veiculos?clienteId={{clienteId}}",
+              "raw": "{{baseUrl}}/api/veiculos?clienteId=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -315,7 +374,15 @@
               "query": [
                 {
                   "key": "clienteId",
-                  "value": "{{clienteId}}"
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
                 }
               ]
             }
@@ -509,6 +576,34 @@
         },
         {
           "name": "CreateServico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"servicoId\", response.id);\r",
+                  "        console.log(\"Variável 'servicoId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'servicoId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -560,13 +655,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/servicos",
+              "raw": "{{baseUrl}}/api/servicos?nome=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "servicos"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -671,10 +780,38 @@
       ]
     },
     {
-      "name": "Pecas",
+      "name": "Insumos",
       "item": [
         {
-          "name": "CreatePeca",
+          "name": "CreateInsumo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"insumoId\", response.id);\r",
+                  "        console.log(\"Variável 'insumoId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'insumoId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -698,20 +835,20 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/pecas",
+              "raw": "{{baseUrl}}/api/insumos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas"
+                "insumos"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "GetAllPecas",
+          "name": "GetAllInsumos",
           "request": {
             "auth": {
               "type": "bearer",
@@ -726,20 +863,34 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pecas",
+              "raw": "{{baseUrl}}/api/insumos?nome=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas"
+                "insumos"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
               ]
             }
           },
           "response": []
         },
         {
-          "name": "GetPecaById",
+          "name": "GetInsumoById",
           "request": {
             "auth": {
               "type": "bearer",
@@ -754,21 +905,21 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "raw": "{{baseUrl}}/api/insumos/{{insumoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas",
-                "{{pecaId}}"
+                "insumos",
+                "{{insumoId}}"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "UpdatePeca",
+          "name": "UpdateInsumo",
           "request": {
             "auth": {
               "type": "bearer",
@@ -792,21 +943,21 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "raw": "{{baseUrl}}/api/insumos/{{insumoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas",
-                "{{pecaId}}"
+                "insumos",
+                "{{insumoId}}"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "DeletePeca",
+          "name": "DeleteInsumo",
           "request": {
             "auth": {
               "type": "bearer",
@@ -821,14 +972,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}",
+              "raw": "{{baseUrl}}/api/insumos/{{insumoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas",
-                "{{pecaId}}"
+                "insumos",
+                "{{insumoId}}"
               ]
             }
           },
@@ -859,14 +1010,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}/adicionar-estoque",
+              "raw": "{{baseUrl}}/api/insumos/{{insumoId}}/adicionar-estoque",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas",
-                "{{pecaId}}",
+                "insumos",
+                "{{insumoId}}",
                 "adicionar-estoque"
               ]
             }
@@ -874,7 +1025,7 @@
           "response": []
         },
         {
-          "name": "RemoverEstoque",
+          "name": "Remover Estoque",
           "request": {
             "auth": {
               "type": "bearer",
@@ -898,14 +1049,14 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/pecas/{{pecaId}}/remover-estoque",
+              "raw": "{{baseUrl}}/api/insumos/{{insumoId}}/remover-estoque",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "pecas",
-                "{{pecaId}}",
+                "insumos",
+                "{{insumoId}}",
                 "remover-estoque"
               ]
             }
@@ -919,6 +1070,34 @@
       "item": [
         {
           "name": "CreateOrdemServico",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"ordemServicoId\", response.id);\r",
+                  "        console.log(\"Variável 'ordemServicoId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'ordemServicoId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -994,7 +1173,7 @@
           "response": []
         },
         {
-          "name": "AdicionarPeca",
+          "name": "AdicionarInsumo",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1010,7 +1189,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"pecaId\": \"{{pecaId}}\",\r\n  \"descricao\": \"Utilizando a peça para o serviço.\",\r\n  \"valorUnitario\": 30,\r\n  \"quantidade\": 2,\r\n  \"origem\": 1\r\n}",
+              "raw": "{\r\n  \"insumoId\": \"{{insumoId}}\",\r\n  \"descricao\": \"Utilizando o insumo para o serviço.\",\r\n  \"valorUnitario\": 30,\r\n  \"quantidade\": 2,\r\n  \"origem\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1018,7 +1197,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/pecas",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/insumos",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1026,7 +1205,7 @@
                 "api",
                 "ordens-servico",
                 "{{ordemServicoId}}",
-                "pecas"
+                "insumos"
               ]
             }
           },
@@ -1048,13 +1227,82 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico",
+              "raw": "{{baseUrl}}/api/ordens-servico?clienteId=&veiculoId=&status=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "ordens-servico"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": ""
+                },
+                {
+                  "key": "veiculoId",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetOrdensServicoByDocumentoOuPlaca",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/consulta?documento=11999987532&placa=&pageNumber=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "consulta"
+              ],
+              "query": [
+                {
+                  "key": "documento",
+                  "value": "11999987532"
+                },
+                {
+                  "key": "placa",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -1083,6 +1331,26 @@
               "path": [
                 "api",
                 "ordens-servico",
+                "{{ordemServicoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetPublicOrdemServicoById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordens-servico/consulta/{{ordemServicoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordens-servico",
+                "consulta",
                 "{{ordemServicoId}}"
               ]
             }
@@ -1280,6 +1548,34 @@
       "item": [
         {
           "name": "CreateUsuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {\r",
+                  "    const response = pm.response.json();\r",
+                  "    if (response.id) {\r",
+                  "        pm.collectionVariables.set(\"usuarioId\", response.id);\r",
+                  "        console.log(\"Variável 'usuarioId' atualizada com sucesso!\");\r",
+                  "    } else {\r",
+                  "        console.warn(\"A propriedade 'usuarioId' não foi encontrada no corpo da resposta.\");\r",
+                  "    }\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -1331,13 +1627,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/usuarios",
+              "raw": "{{baseUrl}}/api/usuarios?nome=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "usuarios"
+              ],
+              "query": [
+                {
+                  "key": "nome",
+                  "value": ""
+                },
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
               ]
             }
           },
@@ -1469,7 +1779,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": ""
+      "value": "http://localhost:5137"
     },
     {
       "key": "clienteId",
@@ -1484,7 +1794,7 @@
       "value": ""
     },
     {
-      "key": "pecaId",
+      "key": "insumoId",
       "value": ""
     },
     {
@@ -1496,18 +1806,16 @@
       "value": ""
     },
     {
+      "key": "ordemServicoServicoId",
+      "value": ""
+    },
+    {
       "key": "usuarioId",
       "value": ""
     },
     {
       "key": "token",
-      "value": "",
-      "type": "default"
-    },
-    {
-      "key": "ordemServicoServicoId",
-      "value": "",
-      "type": "default"
+      "value": ""
     }
   ]
 }
