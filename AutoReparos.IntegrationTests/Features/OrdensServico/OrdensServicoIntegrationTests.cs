@@ -27,10 +27,10 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
     {
         var faker = new Faker("pt_BR");
 
-        var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDTO>>("/api/clientes?pageNumber=1&pageSize=1");
+        var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDto>>("/api/clientes?pageNumber=1&pageSize=1");
         var clienteId = resCliente!.Items.First().Id;
 
-        var requestDto = new VeiculoCreateDTO(
+        var requestDto = new VeiculoCreateDto(
             clienteId,
             "Toyota",
             "Corolla",
@@ -41,10 +41,10 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
             "38579863163"
         );
         await Client.PostAsJsonAsync("/api/veiculos", requestDto);
-        var resVeiculo = await Client.GetFromJsonAsync<PagedResult<VeiculoDTO>>($"/api/veiculos?clienteId={clienteId}&pageNumber=1&pageSize=1");
+        var resVeiculo = await Client.GetFromJsonAsync<PagedResult<VeiculoDto>>($"/api/veiculos?clienteId={clienteId}&pageNumber=1&pageSize=1");
         var veiculoId = resVeiculo!.Items.First().Id;
 
-        var createDto = new CriarServicoDTO
+        var createDto = new CriarServicoDto
        (
            faker.Commerce.ProductName(),
            faker.Commerce.ProductDescription(),
@@ -52,24 +52,24 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
        );
 
         await Client.PostAsJsonAsync("/api/servicos", createDto);
-        var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDTO>>("/api/servicos?pageNumber=1&pageSize=1");
+        var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDto>>("/api/servicos?pageNumber=1&pageSize=1");
         var servicoId = resServico!.Items.First().Id;
 
         return (clienteId, veiculoId, servicoId);
     }
 
-    private async Task<OrdemServicoDTO> CriarOrdemServicoAuxiliarAsync()
+    private async Task<OrdemServicoDto> CriarOrdemServicoAuxiliarAsync()
     {
         var deps = await ObterIdsDependenciasAsync();
         var faker = new Faker();
 
-        var createDto = new CriarOrdemServicoDTO(deps.ClienteId, deps.VeiculoId, faker.Lorem.Sentence());
+        var createDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, faker.Lorem.Sentence());
         var response = await Client.PostAsJsonAsync("/api/ordens-servico", createDto);
 
         if (!response.IsSuccessStatusCode)
             throw new Exception("Falha ao criar OS auxiliar.");
 
-        return (await response.Content.ReadFromJsonAsync<OrdemServicoDTO>())!;
+        return (await response.Content.ReadFromJsonAsync<OrdemServicoDto>())!;
     }
 
     private async Task<(Guid OsId, Guid OsServicoId)> PrepararOsEmExecucaoAsync()
@@ -79,14 +79,14 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
 
         await Client.PatchAsync($"/api/ordens-servico/{os.Id}/iniciar-diagnostico", null);
 
-        var dtoServico = new AdicionarServicoDTO(deps.ServicoId, 150.00m);
+        var dtoServico = new AdicionarServicoDto(deps.ServicoId, 150.00m);
         await Client.PostAsJsonAsync($"/api/ordens-servico/{os.Id}/servicos", dtoServico);
 
         await Client.PatchAsync($"/api/ordens-servico/{os.Id}/enviar-para-aprovacao", null);
 
         await Client.PatchAsync($"/api/ordens-servico/{os.Id}/aprovar", null);
 
-        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDTO>($"/api/ordens-servico/{os.Id}");
+        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDto>($"/api/ordens-servico/{os.Id}");
         var osServicoId = osDetalhe!.Servicos.First().Id;
 
         return (os.Id, osServicoId);
@@ -99,13 +99,13 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         await AuthenticateAsync();
         var deps = await ObterIdsDependenciasAsync();
 
-        var requestDto = new CriarOrdemServicoDTO(deps.ClienteId, deps.VeiculoId, "Barulho na suspensão");
+        var requestDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, "Barulho na suspensão");
 
         var response = await Client.PostAsJsonAsync("/api/ordens-servico", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: erro);
-        var responseData = await response.Content.ReadFromJsonAsync<OrdemServicoDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<OrdemServicoDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().NotBeEmpty();
     }
@@ -119,7 +119,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var response = await Client.GetAsync($"/api/ordens-servico/{osCriada.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<OrdemServicoDetalheDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<OrdemServicoDetalheDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().Be(osCriada.Id);
     }
@@ -133,7 +133,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var response = await Client.GetAsync("/api/ordens-servico?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<OrdemServicoDTO>>();
+        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<OrdemServicoDto>>();
         responseData.Should().NotBeNull();
         responseData!.Items.Should().NotBeEmpty();
     }
@@ -146,7 +146,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var deps = await ObterIdsDependenciasAsync();
         var osCriada = await CriarOrdemServicoAuxiliarAsync();
 
-        var dto = new AdicionarServicoDTO(deps.ServicoId, 200.50m);
+        var dto = new AdicionarServicoDto(deps.ServicoId, 200.50m);
         var response = await Client.PostAsJsonAsync($"/api/ordens-servico/{osCriada.Id}/servicos", dto);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -158,7 +158,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         await AuthenticateAsync();
         var osCriada = await CriarOrdemServicoAuxiliarAsync();
 
-        var dto = new AdicionarInsumoDTO(null, "Óleo de Motor 5W40", 50.00m, 4, EOrigemInsumo.CompraEspecifica);
+        var dto = new AdicionarInsumoDto(null, "Óleo de Motor 5W40", 50.00m, 4, EOrigemInsumo.CompraEspecifica);
         var response = await Client.PostAsJsonAsync($"/api/ordens-servico/{osCriada.Id}/insumos", dto);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -183,7 +183,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var os = await CriarOrdemServicoAuxiliarAsync();
 
         await Client.PatchAsync($"/api/ordens-servico/{os.Id}/iniciar-diagnostico", null);
-        await Client.PostAsJsonAsync($"/api/ordens-servico/{os.Id}/servicos", new AdicionarServicoDTO(deps.ServicoId, 100m));
+        await Client.PostAsJsonAsync($"/api/ordens-servico/{os.Id}/servicos", new AdicionarServicoDto(deps.ServicoId, 100m));
 
         var response = await Client.PatchAsync($"/api/ordens-servico/{os.Id}/enviar-para-aprovacao", null);
 

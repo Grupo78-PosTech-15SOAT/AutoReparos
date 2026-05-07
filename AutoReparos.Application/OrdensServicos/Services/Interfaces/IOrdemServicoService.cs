@@ -7,13 +7,13 @@ namespace AutoReparos.Application.OrdensServicos.Services.Interfaces
 {
     public interface IOrdemServicoService
     {
-        Task<OrdemServicoDTO> Create(CriarOrdemServicoDTO dto);
-        Task<OrdemServicoDetalheDTO?> GetById(Guid id);
-        Task<OrdemServicoPublicoDetalheDTO?> GetPublicById(Guid id);
-        Task<PagedResult<OrdemServicoDTO>> GetAll(OrdemServicoPagedRequest request);
-        Task<PagedResult<OrdemServicoPublicoDTO>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request);
-        Task AdicionarServico(Guid id, AdicionarServicoDTO dto);
-        Task AdicionarInsumo(Guid id, AdicionarInsumoDTO dto);
+        Task<OrdemServicoDto> Create(CriarOrdemServicoDto dto);
+        Task<OrdemServicoDetalheDto?> GetById(Guid id);
+        Task<OrdemServicoPublicoDetalheDto?> GetPublicById(Guid id);
+        Task<PagedResult<OrdemServicoDto>> GetAll(OrdemServicoPagedRequest request);
+        Task<PagedResult<OrdemServicoPublicoDto>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request);
+        Task AdicionarServico(Guid id, AdicionarServicoDto dto);
+        Task AdicionarInsumo(Guid id, AdicionarInsumoDto dto);
         Task IniciarDiagnostico(Guid id);
         Task AguardarAprovacao(Guid id);
         Task Aprovar(Guid id);

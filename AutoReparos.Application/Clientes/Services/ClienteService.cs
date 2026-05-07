@@ -19,7 +19,7 @@ namespace AutoReparos.Application.Clientes.Services
             _repository = repository;
         }
 
-        public async Task<ClienteDTO> Create(ClienteCreateDTO dto)
+        public async Task<ClienteDto> Create(ClienteCreateDto dto)
         {
             var normalizedDocumento = Documento.Normalizar(dto.Documento);
             var normalizedEmail = dto.Email.Trim().ToLower();
@@ -40,7 +40,7 @@ namespace AutoReparos.Application.Clientes.Services
             return ToDTO(cliente);
         }
 
-        public async Task<ClienteDTO?> GetById(Guid id)
+        public async Task<ClienteDto?> GetById(Guid id)
         {
             var cliente = await _repository.GetById(id);
             if (cliente == null)
@@ -49,14 +49,14 @@ namespace AutoReparos.Application.Clientes.Services
         }
 
 
-        public async Task<PagedResult<ClienteDTO>> GetAll(ClientePagedRequest request)
+        public async Task<PagedResult<ClienteDto>> GetAll(ClientePagedRequest request)
         {
             var (clientes, total) = await _repository.GetAll(request.Nome, request.Skip, request.PageSize);
             var items = clientes.Select(ToDTO);
-            return new PagedResult<ClienteDTO>(items, total, request.PageNumber, request.PageSize);
+            return new PagedResult<ClienteDto>(items, total, request.PageNumber, request.PageSize);
         }
 
-        public async Task Update(Guid id, ClienteUpdateDTO dto)
+        public async Task Update(Guid id, ClienteUpdateDto dto)
         {
             var cliente = await _repository.GetById(id);
             if (cliente == null)
@@ -75,7 +75,7 @@ namespace AutoReparos.Application.Clientes.Services
             await _repository.Delete(cliente);
         }
 
-        private static ClienteDTO ToDTO(Cliente c) => new(
+        private static ClienteDto ToDTO(Cliente c) => new(
             c.Id,
             c.Nome,
             c.Documento.Valor,

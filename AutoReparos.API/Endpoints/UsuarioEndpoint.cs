@@ -14,7 +14,7 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Usuários")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (UsuarioCreateDTO dto, IUsuarioService service) =>
+            group.MapPost("/", async (UsuarioCreateDto dto, IUsuarioService service) =>
             {
                 var usuario = await service.Create(dto);
                 return Results.Created($"/api/usuarios/{usuario.Id}", usuario);
@@ -22,7 +22,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("CreateUsuario")
             .WithSummary("Cadastra um novo usuário")
             .WithDescription("Cria um novo usuário no sistema (Administrador, Atendente ou Mecânico)")
-            .Produces<UsuarioDTO>(StatusCodes.Status201Created)
+            .Produces<UsuarioDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/", async (IUsuarioService service, [AsParameters] UsuarioPagedRequest request) =>
@@ -32,7 +32,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetAllUsuarios")
             .WithSummary("Lista todos os usuários")
-            .Produces<PagedResult<UsuarioDTO>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<UsuarioDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/{id:guid}", async (Guid id, IUsuarioService service) =>
             {
@@ -41,10 +41,10 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetUsuarioById")
             .WithSummary("Busca um usuário por Id")
-            .Produces<UsuarioDTO>(StatusCodes.Status200OK)
+            .Produces<UsuarioDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPut("/{id:guid}", async (Guid id, UsuarioUpdateDTO dto, IUsuarioService service) =>
+            group.MapPut("/{id:guid}", async (Guid id, UsuarioUpdateDto dto, IUsuarioService service) =>
             {
                 await service.Update(id, dto);
                 return Results.NoContent();

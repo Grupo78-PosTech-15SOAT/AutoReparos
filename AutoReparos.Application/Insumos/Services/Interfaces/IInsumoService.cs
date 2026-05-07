@@ -6,12 +6,12 @@ namespace AutoReparos.Application.Insumos.Services.Interfaces
 {
     public interface IInsumoService
     {
-        Task<InsumoDTO> Create(CriarInsumoDTO dto);
-        Task<InsumoDTO?> GetById(Guid id);
-        Task<PagedResult<InsumoDTO>> GetAll(InsumoPagedRequest request);
-        Task Update(Guid id, AtualizarInsumoDTO dto);
-        Task AdicionarEstoque(Guid id, AtualizarEstoqueDTO dto);
-        Task RemoverEstoque(Guid id, AtualizarEstoqueDTO dto);
+        Task<InsumoDto> Create(CriarInsumoDto dto);
+        Task<InsumoDto?> GetById(Guid id);
+        Task<PagedResult<InsumoDto>> GetAll(InsumoPagedRequest request);
+        Task Update(Guid id, AtualizarInsumoDto dto);
+        Task AdicionarEstoque(Guid id, AtualizarEstoqueDto dto);
+        Task RemoverEstoque(Guid id, AtualizarEstoqueDto dto);
         Task Delete(Guid id);
     }
 }

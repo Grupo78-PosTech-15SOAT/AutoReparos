@@ -5,6 +5,6 @@ namespace AutoReparos.Application.Auth.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<LoginResponseDTO?> Login(LoginRequestDTO loginRequest);
+        Task<LoginResponseDto?> Login(LoginRequestDto loginRequest);
     }
 }

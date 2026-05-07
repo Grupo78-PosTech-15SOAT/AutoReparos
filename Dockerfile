@@ -21,12 +21,12 @@ RUN dotnet restore "AutoReparos.API/AutoReparos.API.csproj"
 # Copy the rest of the code
 COPY . .
 WORKDIR "/src/AutoReparos.API"
-RUN dotnet build "AutoReparos.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "AutoReparos.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 # Stage 3: Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "AutoReparos.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AutoReparos.API.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 # Stage 4: Final image
 FROM base AS final

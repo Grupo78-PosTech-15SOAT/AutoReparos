@@ -18,30 +18,24 @@ namespace AutoReparos.Application.OrdensServicos.Services
     public class OrdemServicoService : IOrdemServicoService
     {
         private readonly IOrdemServicoRepository _repository;
-        private readonly IClienteRepository _clienteRepository;
         private readonly IVeiculoRepository _veiculoRepository;
         private readonly IInsumoRepository _insumoRepository;
         private readonly INotificacaoService _notificacaoService;
 
         public OrdemServicoService(
             IOrdemServicoRepository repository,
-            IClienteRepository clienteRepository,
             IVeiculoRepository veiculoRepository,
             IInsumoRepository insumoRepository,
             INotificacaoService notificacaoService)
         {
             _repository = repository;
-            _clienteRepository = clienteRepository;
             _veiculoRepository = veiculoRepository;
             _insumoRepository = insumoRepository;
             _notificacaoService = notificacaoService;
         }
 
-        public async Task<OrdemServicoDTO> Create(CriarOrdemServicoDTO dto)
+        public async Task<OrdemServicoDto> Create(CriarOrdemServicoDto dto)
         {
-            var cliente = await _clienteRepository.GetById(dto.ClienteId)
-                ?? throw new NotFoundException(ErrorMessages.ClienteNotFound);
-
             var veiculo = await _veiculoRepository.GetById(dto.VeiculoId)
                 ?? throw new NotFoundException(ErrorMessages.VeiculoNotFound);
 
@@ -53,31 +47,31 @@ namespace AutoReparos.Application.OrdensServicos.Services
             return ToDTO(ordemServico);
         }
 
-        public async Task<OrdemServicoDetalheDTO?> GetById(Guid id)
+        public async Task<OrdemServicoDetalheDto?> GetById(Guid id)
         {
             var os = await _repository.GetById(id);
             return os is null ? null : ToDetalheDto(os);
         }
 
-        public async Task<OrdemServicoPublicoDetalheDTO?> GetPublicById(Guid id)
+        public async Task<OrdemServicoPublicoDetalheDto?> GetPublicById(Guid id)
         {
             var os = await _repository.GetById(id);
             return os is null ? null : ToPublicDetalheDto(os);
         }
 
-        public async Task<PagedResult<OrdemServicoDTO>> GetAll(OrdemServicoPagedRequest request)
+        public async Task<PagedResult<OrdemServicoDto>> GetAll(OrdemServicoPagedRequest request)
         {
             var (items, total) = await _repository.GetAll(request.ClienteId, request.VeiculoId, request.Status, request.Skip, request.PageSize);
-            return new PagedResult<OrdemServicoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+            return new PagedResult<OrdemServicoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
-        public async Task<PagedResult<OrdemServicoPublicoDTO>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request)
+        public async Task<PagedResult<OrdemServicoPublicoDto>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request)
         {
             var (items, total) = await _repository.GetByDocumentoOuPlaca(request.Documento, request.Placa, request.Skip, request.PageSize);
-            return new PagedResult<OrdemServicoPublicoDTO>(items.Select(ToPublicDTO), total, request.PageNumber, request.PageSize);
+            return new PagedResult<OrdemServicoPublicoDto>(items.Select(ToPublicDTO), total, request.PageNumber, request.PageSize);
         }
 
-        public async Task AdicionarServico(Guid id, AdicionarServicoDTO dto)
+        public async Task AdicionarServico(Guid id, AdicionarServicoDto dto)
         {
             var os = await _repository.GetById(id)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
@@ -87,7 +81,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
             await _repository.Update(os);
         }
 
-        public async Task AdicionarInsumo(Guid id, AdicionarInsumoDTO dto)
+        public async Task AdicionarInsumo(Guid id, AdicionarInsumoDto dto)
         {
             var os = await _repository.GetById(id)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
@@ -174,30 +168,30 @@ namespace AutoReparos.Application.OrdensServicos.Services
             await _repository.Update(os);
         }
 
-        private static OrdemServicoDTO ToDTO(OrdemServico os) => new(
+        private static OrdemServicoDto ToDTO(OrdemServico os) => new(
             os.Id, os.ClienteId, os.VeiculoId, os.Status.ToString(),
             os.Observacao, os.ValorTotal, os.CriadoEm,
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm
         );
 
-        private static OrdemServicoPublicoDTO ToPublicDTO(OrdemServico os) => new(
+        private static OrdemServicoPublicoDto ToPublicDTO(OrdemServico os) => new(
             os.Id, os.Status.ToString(), os.Observacao, os.CriadoEm,
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm
         );
 
-        private static OrdemServicoDetalheDTO ToDetalheDto(OrdemServico os) => new(
+        private static OrdemServicoDetalheDto ToDetalheDto(OrdemServico os) => new(
             os.Id, os.ClienteId, os.VeiculoId, os.Status.ToString(),
             os.Observacao, os.ValorTotal, os.CriadoEm,
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm,
-            os.Servicos.Select(s => new OrdemServicoServicoDTO(
+            os.Servicos.Select(s => new OrdemServicoServicoDto(
                 s.Id, s.ServicoId, s.ValorCobrado, s.Status.ToString(),
                 s.IniciadoEm, s.ConcluidoEm, s.TempoExecucao)),
-            os.Insumos.Select(p => new OrdemServicoInsumoDTO(
+            os.Insumos.Select(p => new OrdemServicoInsumoDto(
                 p.Id, p.InsumoId, p.Descricao, p.ValorUnitario,
                 p.Quantidade, p.ValorTotal, p.Origem.ToString()))
         );
 
-        private static OrdemServicoPublicoDetalheDTO ToPublicDetalheDto(OrdemServico os) => new(
+        private static OrdemServicoPublicoDetalheDto ToPublicDetalheDto(OrdemServico os) => new(
             os.Id, os.Status.ToString(), os.Observacao, os.CriadoEm,
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm,
             os.Servicos.Select(s => new OrdemServicoServicoPublicoDTO(

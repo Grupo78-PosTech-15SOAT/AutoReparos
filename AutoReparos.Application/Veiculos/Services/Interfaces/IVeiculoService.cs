@@ -6,13 +6,13 @@ namespace AutoReparos.Application.Veiculos.Services.Interfaces
 {
     public interface IVeiculoService
     {
-        Task<VeiculoDTO> Create(VeiculoCreateDTO dto);
+        Task<VeiculoDto> Create(VeiculoCreateDto dto);
 
-        Task<PagedResult<VeiculoDTO>> GetAll(VeiculoPagedRequest request);
-        Task<VeiculoDTO?> GetById(Guid id);
-        Task<VeiculoDTO?> GetByPlaca(string placa);
+        Task<PagedResult<VeiculoDto>> GetAll(VeiculoPagedRequest request);
+        Task<VeiculoDto?> GetById(Guid id);
+        Task<VeiculoDto?> GetByPlaca(string placa);
 
-        Task Update(Guid id, VeiculoUpdateDTO dto);
+        Task Update(Guid id, VeiculoUpdateDto dto);
         Task Delete(Guid id);
     }
 }

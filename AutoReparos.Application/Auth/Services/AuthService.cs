@@ -11,7 +11,7 @@ namespace AutoReparos.Application.Auth.Services
         private readonly IAuthRepository _authRepository = authRepository;
         private readonly IJwtService _jwtService = jwtService;
 
-        public async Task<LoginResponseDTO?> Login(LoginRequestDTO loginRequest)
+        public async Task<LoginResponseDto?> Login(LoginRequestDto loginRequest)
         {
             var user = await _authRepository.ValidateCredentialsAsync(loginRequest.Email, loginRequest.Password);
 
@@ -22,7 +22,7 @@ namespace AutoReparos.Application.Auth.Services
 
             var token = _jwtService.GenerateToken(user);
 
-            return new LoginResponseDTO(token, user.Email.Endereco, user.NomeCompleto);
+            return new LoginResponseDto(token, user.Email.Endereco, user.NomeCompleto);
         }
     }
 }

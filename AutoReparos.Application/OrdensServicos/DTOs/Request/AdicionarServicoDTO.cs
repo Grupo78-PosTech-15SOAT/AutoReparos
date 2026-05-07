@@ -2,7 +2,7 @@
 
 namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 {
-    public record AdicionarServicoDTO(
+    public record AdicionarServicoDto(
         [Required(ErrorMessage = "Serviço é obrigatório.")]
         Guid ServicoId,
 

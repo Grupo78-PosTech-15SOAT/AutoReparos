@@ -27,12 +27,12 @@ namespace AutoReparos.IntegrationTests.Infrastructure
 
         protected async Task AuthenticateAsync()
         {
-            var loginRequest = new LoginRequestDTO(DefaultAdminEmail, DefaultAdminPassword);
+            var loginRequest = new LoginRequestDto(DefaultAdminEmail, DefaultAdminPassword);
             var response = await Client.PostAsJsonAsync("/api/auth/login", loginRequest);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<LoginResponseDTO>();
+                var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
                 Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result!.Token);
             }
         }

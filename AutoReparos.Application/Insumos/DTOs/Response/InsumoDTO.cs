@@ -1,6 +1,6 @@
 ﻿namespace AutoReparos.Application.Insumos.DTOs.Response
 {
-    public record InsumoDTO(
+    public record InsumoDto(
         Guid Id,
         string Nome,
         string? Descricao,

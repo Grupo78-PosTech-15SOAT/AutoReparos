@@ -1,6 +1,6 @@
 ﻿namespace AutoReparos.Application.Clientes.DTOs.Response
 {
-    public record ClienteDTO(
+    public record ClienteDto(
         Guid Id,
         string Nome,
         string Documento,

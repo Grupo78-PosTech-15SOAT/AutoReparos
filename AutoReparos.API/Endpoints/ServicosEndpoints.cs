@@ -14,14 +14,14 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Servicos")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (CriarServicoDTO dto, IServicoService service) =>
+            group.MapPost("/", async (CriarServicoDto dto, IServicoService service) =>
             {
                 var servico = await service.Create(dto);
                 return Results.CreatedAtRoute("GetServicoById", new { id = servico.Id }, servico);
             })
             .WithName("CreateServico")
             .WithSummary("Cadastra um novo serviço")
-            .Produces<ServicoDTO>(StatusCodes.Status201Created)
+            .Produces<ServicoDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/{id:guid}", async (Guid id, IServicoService service) =>
@@ -31,7 +31,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetServicoById")
             .WithSummary("Busca um serviço por ID")
-            .Produces<ServicoDTO>(StatusCodes.Status200OK)
+            .Produces<ServicoDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", async (
@@ -43,7 +43,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetAllServicos")
             .WithSummary("Lista todos os serviços paginados")
-            .Produces<PagedResult<ServicoDTO>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<ServicoDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/tempo-medio", async (IServicoService service) =>
             {
@@ -52,7 +52,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetTempoMedioServicos")
             .WithSummary("Lista o tempo médio de execução de todos os serviços")
-            .Produces<IEnumerable<TempoMedioServicoDTO>>(StatusCodes.Status200OK);
+            .Produces<IEnumerable<TempoMedioServicoDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/{id:guid}/tempo-medio", async (Guid id, IServicoService service) =>
             {
@@ -61,10 +61,10 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetTempoMedioServicoById")
             .WithSummary("Busca o tempo médio de execução de um serviço específico")
-            .Produces<TempoMedioServicoDTO>(StatusCodes.Status200OK)
+            .Produces<TempoMedioServicoDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPut("/{id:guid}", async (Guid id, AtualizarServicoDTO dto, IServicoService service) =>
+            group.MapPut("/{id:guid}", async (Guid id, AtualizarServicoDto dto, IServicoService service) =>
             {
                 await service.Update(id, dto);
                 return Results.NoContent();

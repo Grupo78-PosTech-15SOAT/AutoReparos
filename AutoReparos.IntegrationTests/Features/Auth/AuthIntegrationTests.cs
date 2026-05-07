@@ -17,7 +17,7 @@ public class AuthIntegrationTests(CustomWebApplicationFactory<Program> factory)
     public async Task Login_ComCredenciaisInvalidas_DeveRetornarUnauthorized()
     {
         var faker = new Faker("pt_BR");
-        var loginRequest = new LoginRequestDTO(faker.Internet.Email(), faker.Internet.Password());
+        var loginRequest = new LoginRequestDto(faker.Internet.Email(), faker.Internet.Password());
 
         var response = await Client.PostAsJsonAsync("/api/auth/login", loginRequest);
 
@@ -27,13 +27,13 @@ public class AuthIntegrationTests(CustomWebApplicationFactory<Program> factory)
     [Fact(DisplayName = "Login com credenciais válidas deve retornar 200 OK e o Token")]
     public async Task Login_ComCredenciaisValidas_DeveRetornarOkEToken()
     {
-        var loginRequest = new LoginRequestDTO("admin@autoreparos.com", "Admin@123");
+        var loginRequest = new LoginRequestDto("admin@autoreparos.com", "Admin@123");
 
         var response = await Client.PostAsJsonAsync("/api/auth/login", loginRequest);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var responseData = await response.Content.ReadFromJsonAsync<LoginResponseDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
         responseData.Should().NotBeNull();
         responseData.Token.Should().NotBeNullOrWhiteSpace();
         responseData.Email.Should().Be("admin@autoreparos.com");

@@ -1,4 +1,4 @@
 namespace AutoReparos.Application.Auth.DTOs.Response
 {
-    public record LoginResponseDTO(string Token, string Email, string NomeCompleto);
+    public record LoginResponseDto(string Token, string Email, string NomeCompleto);
 }

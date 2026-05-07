@@ -6,10 +6,10 @@ namespace AutoReparos.Application.Clientes.Services.Interfaces
 {
     public interface IClienteService
     {
-        Task<ClienteDTO> Create(ClienteCreateDTO dto);
-        Task<ClienteDTO?> GetById(Guid id);
-        Task<PagedResult<ClienteDTO>> GetAll(ClientePagedRequest request);
-        Task Update(Guid id, ClienteUpdateDTO dto);
+        Task<ClienteDto> Create(ClienteCreateDto dto);
+        Task<ClienteDto?> GetById(Guid id);
+        Task<PagedResult<ClienteDto>> GetAll(ClientePagedRequest request);
+        Task Update(Guid id, ClienteUpdateDto dto);
         Task Delete(Guid id);
     }
 }

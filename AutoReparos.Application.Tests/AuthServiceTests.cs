@@ -25,7 +25,7 @@ namespace AutoReparos.Application.Tests
         [Fact(DisplayName = "Login With Valid Credentials Should Return Token")]
         public async Task Login_WithValidCredentials_ShouldReturnToken()
         {
-            var request = new LoginRequestDTO("test@test.com", "Password123!");
+            var request = new LoginRequestDto("test@test.com", "Password123!");
             var usuario = new Usuario("Test Usuario", request.Email, ETipoUsuario.Mecanico);
             var expectedToken = "mocked-jwt-token";
 
@@ -43,7 +43,7 @@ namespace AutoReparos.Application.Tests
         [Fact(DisplayName = "Login With Invalid Email Should Return Null")]
         public async Task Login_WithInvalidEmail_ShouldReturnNull()
         {
-            var request = new LoginRequestDTO("wrong@test.com", "Password123!");
+            var request = new LoginRequestDto("wrong@test.com", "Password123!");
             _authRepository.ValidateCredentialsAsync(request.Email, request.Password).Returns((Usuario?)null);
 
             var result = await _authService.Login(request);
@@ -54,7 +54,7 @@ namespace AutoReparos.Application.Tests
         [Fact(DisplayName = "Login With Wrong Password Should Return Null")]
         public async Task Login_WithWrongPassword_ShouldReturnNull()
         {
-            var request = new LoginRequestDTO("test@test.com", "WrongPassword!");
+            var request = new LoginRequestDto("test@test.com", "WrongPassword!");
             
             _authRepository.ValidateCredentialsAsync(request.Email, request.Password).Returns((Usuario?)null);
 

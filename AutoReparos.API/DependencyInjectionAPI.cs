@@ -6,7 +6,7 @@ using System.Text;
 
 namespace AutoReparos.API
 {
-    public static class DependencyInjectionAPI
+    public static class DependencyInjectionApi
     {
         /// <summary>
         /// Método de extensão para registrar serviços relacionados à camada de API

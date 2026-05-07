@@ -2,7 +2,7 @@
 
 namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 {
-    public record CriarOrdemServicoDTO(
+    public record CriarOrdemServicoDto(
         [Required(ErrorMessage = "Cliente é obrigatório.")]
         Guid ClienteId,
 

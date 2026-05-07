@@ -55,7 +55,7 @@ namespace AutoReparos.Infra.Data
                 var loggerFactory = services.GetRequiredService<ILoggerFactory>();
                 var logger = loggerFactory.CreateLogger("DbInitializer");
                 logger.LogError(ex, "Ocorreu um erro ao inicializar ou popular o banco de dados.");
-                throw;
+                throw new InvalidOperationException("Erro durante a inicialização e seed do banco de dados.", ex);
             }
         }
         private static async Task SeedUsuariosAsync(IUsuarioRepository userRepository, SeedUsuarioSettings settings, ILogger logger)

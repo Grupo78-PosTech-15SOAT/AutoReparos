@@ -18,11 +18,11 @@ namespace AutoReparos.IntegrationTests.Features.Usuarios;
 public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factory)
     : IntegrationTestBase(factory)
 {
-    private async Task<UsuarioDTO> CriarUsuarioAuxiliarAsync()
+    private async Task<UsuarioDto> CriarUsuarioAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
 
-        var createDto = new UsuarioCreateDTO
+        var createDto = new UsuarioCreateDto
         (
             faker.Person.FullName,
             faker.Internet.Email(),
@@ -38,7 +38,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
             throw new Exception($"Falha ao criar usuário auxiliar: {erro}");
         }
 
-        return (await response.Content.ReadFromJsonAsync<UsuarioDTO>())!;
+        return (await response.Content.ReadFromJsonAsync<UsuarioDto>())!;
     }
 
     [Fact(DisplayName = "POST /api/usuarios - Criar usuário válido deve retornar 201 Created")]
@@ -47,7 +47,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
         await AuthenticateAsync();
         var faker = new Faker("pt_BR");
 
-        var requestDto = new UsuarioCreateDTO(
+        var requestDto = new UsuarioCreateDto(
             faker.Person.FullName,
             faker.Internet.Email(),
             "Senha@123",
@@ -59,7 +59,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"Erro retornado pela API: {erro}");
 
-        var responseData = await response.Content.ReadFromJsonAsync<UsuarioDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<UsuarioDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().NotBeEmpty();
         response.Headers.Location.Should().NotBeNull();
@@ -74,7 +74,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
         var response = await Client.GetAsync("/api/usuarios?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<UsuarioDTO>>();
+        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<UsuarioDto>>();
 
         responseData.Should().NotBeNull();
         responseData!.Items.Should().NotBeEmpty();
@@ -99,7 +99,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
         var response = await Client.GetAsync($"/api/usuarios/{usuarioCriado.Id}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<UsuarioDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<UsuarioDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().Be(usuarioCriado.Id);
     }
@@ -110,7 +110,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
         await AuthenticateAsync();
         var usuarioCriado = await CriarUsuarioAuxiliarAsync();
 
-        var updateDto = new UsuarioUpdateDTO("Nome Atualizado Pelo Teste", ETipoUsuario.Atendente);
+        var updateDto = new UsuarioUpdateDto("Nome Atualizado Pelo Teste", ETipoUsuario.Atendente);
 
         var response = await Client.PutAsJsonAsync($"/api/usuarios/{usuarioCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();
@@ -132,7 +132,7 @@ public class UsuarioIntegrationTests(CustomWebApplicationFactory<Program> factor
     [Fact(DisplayName = "Create Usuario Without Authentication Should Return Unauthorized")]
     public async Task CreateUsuario_WithoutAuth_ShouldReturnUnauthorized()
     {
-        var createDto = new UsuarioCreateDTO("Unauthorized", "unauth@test.com", "Pass123!", ETipoUsuario.Mecanico);
+        var createDto = new UsuarioCreateDto("Unauthorized", "unauth@test.com", "Pass123!", ETipoUsuario.Mecanico);
         var response = await Client.PostAsJsonAsync("/api/usuarios", createDto);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

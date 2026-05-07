@@ -6,10 +6,10 @@ namespace AutoReparos.Application.Usuarios.Services.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<UsuarioDTO> Create(UsuarioCreateDTO dto);
-        Task<UsuarioDTO?> GetById(Guid id);
-        Task<PagedResult<UsuarioDTO>> GetAll(UsuarioPagedRequest request);
-        Task Update(Guid id, UsuarioUpdateDTO dto);
+        Task<UsuarioDto> Create(UsuarioCreateDto dto);
+        Task<UsuarioDto?> GetById(Guid id);
+        Task<PagedResult<UsuarioDto>> GetAll(UsuarioPagedRequest request);
+        Task Update(Guid id, UsuarioUpdateDto dto);
         Task Delete(Guid id);
     }
 }

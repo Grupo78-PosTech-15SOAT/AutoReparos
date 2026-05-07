@@ -21,12 +21,12 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
     private async Task<Guid> ObterIdClientePadraoAsync()
     {
         var response = await Client.GetAsync("/api/clientes?pageNumber=1&pageSize=10");
-        var clientes = await response.Content.ReadFromJsonAsync<PagedResult<ClienteDTO>>();
+        var clientes = await response.Content.ReadFromJsonAsync<PagedResult<ClienteDto>>();
 
         return clientes?.Items.FirstOrDefault()?.Id ?? throw new Exception("Cliente de teste não encontrado no banco!");
     }
 
-    private static VeiculoCreateDTO GerarVeiculoAleatorioDto(Guid clienteId)
+    private static VeiculoCreateDto GerarVeiculoAleatorioDto(Guid clienteId)
     {
         var faker = new Faker("pt_BR");
 
@@ -35,7 +35,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         var placa = $"{faker.Random.String2(3, "ABCDEFGHIJKLMNOPQRSTUVWXYZ")}{faker.Random.String2(4, "0123456789")}";
 
-        return new VeiculoCreateDTO
+        return new VeiculoCreateDto
         (
             clienteId,
             faker.Vehicle.Manufacturer(),
@@ -48,7 +48,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
         );
     }
 
-    private async Task<VeiculoDTO> CriarVeiculoAuxiliarAsync()
+    private async Task<VeiculoDto> CriarVeiculoAuxiliarAsync()
     {
         var clientePadraoId = await ObterIdClientePadraoAsync();
 
@@ -62,7 +62,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
             throw new Exception($"Falha ao criar veículo auxiliar: {erro}");
         }
 
-        return (await response.Content.ReadFromJsonAsync<VeiculoDTO>())!;
+        return (await response.Content.ReadFromJsonAsync<VeiculoDto>())!;
     }
 
     [Fact(DisplayName = "POST /api/veiculos - Criar veículo válido deve retornar 201 Created")]
@@ -78,7 +78,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"A API rejeitou os dados gerados: {erro}");
 
-        var responseData = await response.Content.ReadFromJsonAsync<VeiculoDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<VeiculoDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().NotBeEmpty();
         response.Headers.Location.Should().NotBeNull();
@@ -93,7 +93,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
         var response = await Client.GetAsync("/api/veiculos?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<VeiculoDTO>>();
+        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<VeiculoDto>>();
 
         responseData.Should().NotBeNull();
         responseData!.Items.Should().NotBeEmpty();
@@ -118,7 +118,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
         var response = await Client.GetAsync($"/api/veiculos/placa/{veiculoCriado.Placa}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<VeiculoDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<VeiculoDto>();
         responseData.Should().NotBeNull();
         responseData!.Placa.Should().Be(veiculoCriado.Placa);
     }
@@ -129,7 +129,7 @@ public class VeiculoIntegrationTests(CustomWebApplicationFactory<Program> factor
         await AuthenticateAsync();
         var veiculoCriado = await CriarVeiculoAuxiliarAsync();
 
-        var updateDto = new VeiculoUpdateDTO("Corolla Cross", "Preto", 1995, 1999);
+        var updateDto = new VeiculoUpdateDto("Corolla Cross", "Preto", 1995, 1999);
 
         var response = await Client.PutAsJsonAsync($"/api/veiculos/{veiculoCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();

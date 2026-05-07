@@ -2,7 +2,7 @@
 
 namespace AutoReparos.Application.Veiculos.DTOs.Request
 {
-    public record VeiculoUpdateDTO(
+    public record VeiculoUpdateDto(
         [Required(ErrorMessage = "Marca é obrigatória.")]
         string Marca,
 

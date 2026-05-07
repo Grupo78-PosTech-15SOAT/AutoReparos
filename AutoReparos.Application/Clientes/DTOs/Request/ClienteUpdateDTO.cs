@@ -2,7 +2,7 @@
 
 namespace AutoReparos.Application.Clientes.DTOs.Request
 {
-    public record ClienteUpdateDTO(
+    public record ClienteUpdateDto(
         [Required(ErrorMessage = "Nome é obrigatório.")]
         [MaxLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres.")]
         string Nome,

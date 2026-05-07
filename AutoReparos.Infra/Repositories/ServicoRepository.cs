@@ -109,7 +109,7 @@ namespace AutoReparos.Infra.Repositories
                         (e.ConcluidoEm!.Value - e.IniciadoEm!.Value).Ticks)),
                     TotalExecucoes: g.Count()
                 ))
-                .FirstOrDefault();
+                .First();
 
             return resultado;
         }

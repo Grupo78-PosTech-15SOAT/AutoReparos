@@ -13,7 +13,7 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Clientes")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (ClienteCreateDTO dto, IClienteService service) =>
+            group.MapPost("/", async (ClienteCreateDto dto, IClienteService service) =>
             {
                 var cliente = await service.Create(dto);
                 return Results.CreatedAtRoute("GetClienteById", new { id = cliente.Id }, cliente);
@@ -21,7 +21,7 @@ namespace AutoReparos.API.Endpoints
                 .WithName("CreateCliente")
                 .WithSummary("Cadastra um novo cliente")
                 .WithDescription("Endpoint responsável por cadastrar um novo cliente no sistema")
-                .Produces<ClienteDTO>(StatusCodes.Status201Created)
+                .Produces<ClienteDto>(StatusCodes.Status201Created)
                 .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/", async (IClienteService service, [AsParameters] ClientePagedRequest request) =>
@@ -32,7 +32,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("GetAllClientes")
             .WithSummary("Lista todos os clientes")
             .WithDescription("Endpoint responsável por retornar todos os clientes ou filtrar por nome quando o parâmetro é informado")
-            .Produces<IEnumerable<ClienteDTO>>(StatusCodes.Status200OK);
+            .Produces<IEnumerable<ClienteDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/{id:guid}", async (Guid id, IClienteService service) =>
             {
@@ -42,10 +42,10 @@ namespace AutoReparos.API.Endpoints
             .WithName("GetClienteById")
             .WithSummary("Busca cliente por Id")
             .WithDescription("Endpoint responsável por retornar um cliente específico pelo seu id")
-            .Produces<ClienteDTO>(StatusCodes.Status200OK)
+            .Produces<ClienteDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPut("/{id:guid}", async (Guid id, ClienteUpdateDTO dto, IClienteService service) =>
+            group.MapPut("/{id:guid}", async (Guid id, ClienteUpdateDto dto, IClienteService service) =>
             {
                 await service.Update(id, dto);
                 return Results.NoContent();

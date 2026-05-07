@@ -9,13 +9,13 @@
         public int PageNumber
         {
             get => _pageNumber;
-            init => _pageNumber = value < 1 ? 1 : value;
+            init => _pageNumber = Math.Max(value, 1);
         }
 
         public int PageSize
         {
             get => _pageSize;
-            init => _pageSize = value > MaxPageSize ? MaxPageSize : value < 1 ? 1 : value;
+            init => _pageSize = Math.Clamp(value, 1, MaxPageSize);
         }
 
         public int Skip => (PageNumber - 1) * PageSize;

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 {
-    public record AdicionarInsumoDTO(
+    public record AdicionarInsumoDto(
         Guid? InsumoId,
 
         [Required(ErrorMessage = "Descrição é obrigatória.")]

@@ -29,7 +29,7 @@ namespace AutoReparos.Infra.Repositories
             }
         }
 
-        private Exception HandleDuplicatedException(DbUpdateException ex)
+        static private Exception HandleDuplicatedException(DbUpdateException ex)
         {
             if (ex.InnerException is PostgresException pgEx &&
                 pgEx.SqlState == "23505")

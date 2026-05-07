@@ -14,7 +14,7 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Veiculos")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (VeiculoCreateDTO dto, IVeiculoService service) =>
+            group.MapPost("/", async (VeiculoCreateDto dto, IVeiculoService service) =>
             {
                 var veiculo = await service.Create(dto);
 
@@ -23,7 +23,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("CreateVeiculo")
             .WithSummary("Cadastra um novo veículo")
             .WithDescription("Endpoint responsável por cadastrar um novo veículo no sistema")
-            .Produces<VeiculoDTO>(StatusCodes.Status201Created)
+            .Produces<VeiculoDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/", async (
@@ -35,7 +35,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetAllVeiculos")
             .WithSummary("Lista todos os veículos paginados")
-            .Produces<PagedResult<VeiculoDTO>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<VeiculoDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/{id:guid}", async (Guid id, IVeiculoService service) =>
             {
@@ -48,7 +48,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("GetVeiculoById")
             .WithSummary("Busca veículo por Id")
             .WithDescription("Endpoint responsável por retornar um veículo pelo seu id")
-            .Produces<VeiculoDTO>(StatusCodes.Status200OK)
+            .Produces<VeiculoDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/placa/{placa}", async (string placa, IVeiculoService service) =>
@@ -61,10 +61,10 @@ namespace AutoReparos.API.Endpoints
             .WithName("GetVeiculoByPlaca")
             .WithSummary("Busca veículo por placa")
             .WithDescription("Endpoint responsável por retornar um veículo pela sua placa")
-            .Produces<VeiculoDTO>(StatusCodes.Status200OK)
+            .Produces<VeiculoDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPut("/{id:guid}", async (Guid id, VeiculoUpdateDTO dto, IVeiculoService service) =>
+            group.MapPut("/{id:guid}", async (Guid id, VeiculoUpdateDto dto, IVeiculoService service) =>
             {
                 await service.Update(id, dto);
 

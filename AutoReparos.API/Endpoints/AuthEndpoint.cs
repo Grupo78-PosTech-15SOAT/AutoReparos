@@ -11,7 +11,7 @@ namespace AutoReparos.API.Endpoints
             var group = app.MapGroup("/api/auth")
                 .WithTags("Autenticação");
 
-            group.MapPost("/login", async (LoginRequestDTO loginRequest, IAuthService authService) =>
+            group.MapPost("/login", async (LoginRequestDto loginRequest, IAuthService authService) =>
             {
                 var result = await authService.Login(loginRequest);
 
@@ -25,7 +25,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("Login")
             .WithSummary("Realiza o login do usuário")
             .WithDescription("Valida as credenciais e retorna o token JWT")
-            .Produces<LoginResponseDTO>(StatusCodes.Status200OK)
+            .Produces<LoginResponseDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
         }
     }

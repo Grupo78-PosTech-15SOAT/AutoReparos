@@ -16,11 +16,11 @@ namespace AutoReparos.IntegrationTests.Features.Insumos;
 
 public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory)
     : IntegrationTestBase(factory){
-    private async Task<InsumoDTO> CriarInsumoAuxiliarAsync()
+    private async Task<InsumoDto> CriarInsumoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
 
-        var createDto = new CriarInsumoDTO
+        var createDto = new CriarInsumoDto
         (
             faker.Commerce.ProductName().PadRight(100).Substring(0, 50).Trim(),
             faker.Commerce.ProductDescription(),
@@ -36,7 +36,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
             throw new Exception($"Falha ao criar insumo auxiliar: {erro}");
         }
 
-        return (await response.Content.ReadFromJsonAsync<InsumoDTO>())!;
+        return (await response.Content.ReadFromJsonAsync<InsumoDto>())!;
     }
 
     [Fact(DisplayName = "POST /api/insumos - Criar insumo válido deve retornar 201 Created")]
@@ -45,14 +45,14 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
         await AuthenticateAsync();
         var faker = new Faker("pt_BR");
 
-        var requestDto = new CriarInsumoDTO(faker.Commerce.ProductName(), faker.Commerce.ProductDescription(), 150.50m, 100);
+        var requestDto = new CriarInsumoDto(faker.Commerce.ProductName(), faker.Commerce.ProductDescription(), 150.50m, 100);
 
         var response = await Client.PostAsJsonAsync("/api/insumos", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"Erro retornado pela API: {erro}");
 
-        var responseData = await response.Content.ReadFromJsonAsync<InsumoDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<InsumoDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().NotBeEmpty();
         response.Headers.Location.Should().NotBeNull();
@@ -75,7 +75,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
         var response = await Client.GetAsync("/api/insumos?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<InsumoDTO>>();
+        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<InsumoDto>>();
 
         responseData.Should().NotBeNull();
         responseData!.Items.Should().NotBeEmpty();
@@ -87,7 +87,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
         await AuthenticateAsync();
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
-        var updateDto = new AtualizarInsumoDTO("Insumo Atualizado Pelo Teste", "Nova descrição para atualização", 199.99m);
+        var updateDto = new AtualizarInsumoDto("Insumo Atualizado Pelo Teste", "Nova descrição para atualização", 199.99m);
 
         var response = await Client.PutAsJsonAsync($"/api/insumos/{insumoCriado.Id}", updateDto);
         var erro = await response.Content.ReadAsStringAsync();
@@ -101,7 +101,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
         await AuthenticateAsync();
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
-        var estoqueDto = new AtualizarEstoqueDTO(5);
+        var estoqueDto = new AtualizarEstoqueDto(5);
 
         var response = await Client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/adicionar-estoque", estoqueDto);
         var erro = await response.Content.ReadAsStringAsync();
@@ -116,7 +116,7 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
 
         var insumoCriado = await CriarInsumoAuxiliarAsync();
 
-        var estoqueDto = new AtualizarEstoqueDTO(5);
+        var estoqueDto = new AtualizarEstoqueDto(5);
         var response = await Client.PatchAsJsonAsync($"/api/insumos/{insumoCriado.Id}/remover-estoque", estoqueDto);
         var erro = await response.Content.ReadAsStringAsync();
 

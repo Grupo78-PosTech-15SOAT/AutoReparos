@@ -6,12 +6,12 @@ namespace AutoReparos.Application.Servicos.Services.Interfaces
 {
     public interface IServicoService
     {
-        Task<ServicoDTO> Create(CriarServicoDTO dto);
-        Task<ServicoDTO?> GetById(Guid id);
-        Task<PagedResult<ServicoDTO>> GetAll(ServicoPagedRequest request);
-        Task<IEnumerable<TempoMedioServicoDTO>> GetTempoMedio();
-        Task<TempoMedioServicoDTO?> GetTempoMedioById(Guid id);
-        Task Update(Guid id, AtualizarServicoDTO dto);
+        Task<ServicoDto> Create(CriarServicoDto dto);
+        Task<ServicoDto?> GetById(Guid id);
+        Task<PagedResult<ServicoDto>> GetAll(ServicoPagedRequest request);
+        Task<IEnumerable<TempoMedioServicoDto>> GetTempoMedio();
+        Task<TempoMedioServicoDto?> GetTempoMedioById(Guid id);
+        Task Update(Guid id, AtualizarServicoDto dto);
         Task Delete(Guid id);
     }
 }

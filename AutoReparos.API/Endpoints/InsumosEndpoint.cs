@@ -14,14 +14,14 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Insumos")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (CriarInsumoDTO dto, IInsumoService service) =>
+            group.MapPost("/", async (CriarInsumoDto dto, IInsumoService service) =>
             {
                 var insumo = await service.Create(dto);
                 return Results.CreatedAtRoute("GetInsumoById", new { id = insumo.Id }, insumo);
             })
             .WithName("CreateInsumo")
             .WithSummary("Cadastra um novo insumo")
-            .Produces<InsumoDTO>(StatusCodes.Status201Created)
+            .Produces<InsumoDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/{id:guid}", async (Guid id, IInsumoService service) =>
@@ -31,7 +31,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetInsumoById")
             .WithSummary("Busca um insumo por ID")
-            .Produces<InsumoDTO>(StatusCodes.Status200OK)
+            .Produces<InsumoDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", async (
@@ -43,9 +43,9 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetAllInsumos")
             .WithSummary("Lista paginada de todos os insumos")
-            .Produces<PagedResult<InsumoDTO>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<InsumoDto>>(StatusCodes.Status200OK);
 
-            group.MapPut("/{id:guid}", async (Guid id, AtualizarInsumoDTO dto, IInsumoService service) =>
+            group.MapPut("/{id:guid}", async (Guid id, AtualizarInsumoDto dto, IInsumoService service) =>
             {
                 await service.Update(id, dto);
                 return Results.NoContent();
@@ -58,7 +58,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapPatch("/{id:guid}/adicionar-estoque", async (
                 Guid id,
-                AtualizarEstoqueDTO dto,
+                AtualizarEstoqueDto dto,
                 IInsumoService service) =>
             {
                 await service.AdicionarEstoque(id, dto);
@@ -72,7 +72,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapPatch("/{id:guid}/remover-estoque", async (
                 Guid id,
-                AtualizarEstoqueDTO dto,
+                AtualizarEstoqueDto dto,
                 IInsumoService service) =>
             {
                 await service.RemoverEstoque(id, dto);

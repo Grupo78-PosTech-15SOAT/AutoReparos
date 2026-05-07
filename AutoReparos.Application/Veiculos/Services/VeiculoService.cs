@@ -15,6 +15,8 @@ namespace AutoReparos.Application.Veiculos.Services
         private readonly IVeiculoRepository _repository;
         private readonly IClienteRepository _clienteRepository;
 
+        private const string mensagemException = "Veículo não encontrado.";
+
         public VeiculoService(
             IVeiculoRepository repository,
             IClienteRepository clienteRepository)
@@ -23,7 +25,7 @@ namespace AutoReparos.Application.Veiculos.Services
             _clienteRepository = clienteRepository;
         }
 
-        public async Task<VeiculoDTO> Create(VeiculoCreateDTO dto)
+        public async Task<VeiculoDto> Create(VeiculoCreateDto dto)
         {
             var cliente = await _clienteRepository.GetById(dto.ClienteId);
             if (cliente == null)
@@ -45,38 +47,38 @@ namespace AutoReparos.Application.Veiculos.Services
             return ToDTO(veiculo);
         }
 
-        public async Task<PagedResult<VeiculoDTO>> GetAll(VeiculoPagedRequest request)
+        public async Task<PagedResult<VeiculoDto>> GetAll(VeiculoPagedRequest request)
         {
             var (items, total) = await _repository.GetAll(request.ClienteId, request.Skip, request.PageSize);
-            return new PagedResult<VeiculoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+            return new PagedResult<VeiculoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
-        public async Task<VeiculoDTO?> GetById(Guid id)
+        public async Task<VeiculoDto?> GetById(Guid id)
         {
             var veiculo = await _repository.GetById(id);
 
             if (veiculo == null)
-                throw new NotFoundException("Veículo não encontrado.");
+                throw new NotFoundException(mensagemException);
 
             return ToDTO(veiculo);
         }
 
-        public async Task<VeiculoDTO?> GetByPlaca(string placa)
+        public async Task<VeiculoDto?> GetByPlaca(string placa)
         {
             var veiculo = await _repository.GetByPlaca(placa);
 
             if (veiculo == null)
-                throw new NotFoundException("Veículo não encontrado.");
+                throw new NotFoundException(mensagemException);
 
             return ToDTO(veiculo);
         }
 
-        public async Task Update(Guid id, VeiculoUpdateDTO dto)
+        public async Task Update(Guid id, VeiculoUpdateDto dto)
         {
             var veiculo = await _repository.GetById(id);
 
             if (veiculo == null)
-                throw new NotFoundException("Veículo não encontrado.");
+                throw new NotFoundException(mensagemException);
 
             veiculo.Atualizar(
                 dto.Marca,
@@ -93,12 +95,12 @@ namespace AutoReparos.Application.Veiculos.Services
             var veiculo = await _repository.GetById(id);
 
             if (veiculo == null)
-                throw new NotFoundException("Veículo não encontrado.");
+                throw new NotFoundException(mensagemException);
 
             await _repository.Delete(veiculo);
         }
 
-        private static VeiculoDTO ToDTO(Veiculo v) => new(
+        private static VeiculoDto ToDTO(Veiculo v) => new(
             v.Id,
             v.ClienteId,
             v.Marca,

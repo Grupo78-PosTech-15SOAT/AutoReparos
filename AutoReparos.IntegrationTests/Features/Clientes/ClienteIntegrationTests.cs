@@ -18,14 +18,14 @@ namespace AutoReparos.IntegrationTests.Features.Clientes;
 public class ClienteIntegrationTests(CustomWebApplicationFactory<Program> factory)
     : IntegrationTestBase(factory)
 {
-    private static ClienteCreateDTO GerarClienteAleatorioDto()
+    private static ClienteCreateDto GerarClienteAleatorioDto()
     {
         var faker = new Faker("pt_BR");
 
         var cpfValido = faker.Person.Cpf();
         var telefoneValido = faker.Random.ReplaceNumbers("119########");
 
-        return new ClienteCreateDTO(
+        return new ClienteCreateDto(
             faker.Person.FullName,
             cpfValido,
             telefoneValido,
@@ -47,7 +47,7 @@ public class ClienteIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, because: $"A API rejeitou os dados: {erro}");
 
-        var responseData = await response.Content.ReadFromJsonAsync<ClienteDTO>();
+        var responseData = await response.Content.ReadFromJsonAsync<ClienteDto>();
         responseData.Should().NotBeNull();
         responseData!.Id.Should().NotBeEmpty();
         response.Headers.Location.Should().NotBeNull();
@@ -62,7 +62,7 @@ public class ClienteIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<ClienteDTO>>();
+        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<ClienteDto>>();
 
         responseData.Should().NotBeNull();
         responseData!.Items.Should().NotBeNull();
@@ -88,7 +88,7 @@ public class ClienteIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         var createDto = GerarClienteAleatorioDto();
         var createResponse = await Client.PostAsJsonAsync("/api/clientes", createDto);
-        var clienteCriado = await createResponse.Content.ReadFromJsonAsync<ClienteDTO>();
+        var clienteCriado = await createResponse.Content.ReadFromJsonAsync<ClienteDto>();
 
         var updateDto = GerarClienteAleatorioDto();
 
@@ -103,7 +103,7 @@ public class ClienteIntegrationTests(CustomWebApplicationFactory<Program> factor
         await AuthenticateAsync();
         var createDto = GerarClienteAleatorioDto();
         var createResponse = await Client.PostAsJsonAsync("/api/clientes", createDto);
-        var clienteCriado = await createResponse.Content.ReadFromJsonAsync<ClienteDTO>();
+        var clienteCriado = await createResponse.Content.ReadFromJsonAsync<ClienteDto>();
 
         var response = await Client.DeleteAsync($"/api/clientes/{clienteCriado!.Id}");
 

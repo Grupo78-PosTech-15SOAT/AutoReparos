@@ -12,52 +12,54 @@ namespace AutoReparos.Application.Insumos.Services
     {
         private readonly IInsumoRepository _repository;
 
+        private const string mensagemException = "Insumo não encontrado.";
+
         public InsumoService(IInsumoRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<InsumoDTO> Create(CriarInsumoDTO dto)
+        public async Task<InsumoDto> Create(CriarInsumoDto dto)
         {
             var insumo = new Insumo(dto.Nome, dto.Descricao, dto.Valor, dto.QuantidadeEstoque);
             await _repository.Create(insumo);
             return ToDTO(insumo);
         }
 
-        public async Task<InsumoDTO?> GetById(Guid id)
+        public async Task<InsumoDto?> GetById(Guid id)
         {
             var insumo = await _repository.GetById(id);
             return insumo is null ? null : ToDTO(insumo);
         }
 
-        public async Task<PagedResult<InsumoDTO>> GetAll(InsumoPagedRequest request)
+        public async Task<PagedResult<InsumoDto>> GetAll(InsumoPagedRequest request)
         {
             var (items, total) = await _repository.GetAll(request.Nome, request.Skip, request.PageSize);
-            return new PagedResult<InsumoDTO>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+            return new PagedResult<InsumoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
-        public async Task Update(Guid id, AtualizarInsumoDTO dto)
+        public async Task Update(Guid id, AtualizarInsumoDto dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Insumo não encontrado.");
+                ?? throw new NotFoundException(mensagemException);
 
             insumo.Atualizar(dto.Nome, dto.Descricao, dto.Valor);
             await _repository.Update(insumo);
         }
 
-        public async Task AdicionarEstoque(Guid id, AtualizarEstoqueDTO dto)
+        public async Task AdicionarEstoque(Guid id, AtualizarEstoqueDto dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Insumo não encontrado.");
+                ?? throw new NotFoundException(mensagemException);
 
             insumo.AdicionarEstoque(dto.Quantidade);
             await _repository.Update(insumo);
         }
 
-        public async Task RemoverEstoque(Guid id, AtualizarEstoqueDTO dto)
+        public async Task RemoverEstoque(Guid id, AtualizarEstoqueDto dto)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Insumo não encontrado.");
+                ?? throw new NotFoundException(mensagemException);
 
             insumo.RemoverEstoque(dto.Quantidade);
             await _repository.Update(insumo);
@@ -66,12 +68,12 @@ namespace AutoReparos.Application.Insumos.Services
         public async Task Delete(Guid id)
         {
             var insumo = await _repository.GetById(id)
-                ?? throw new NotFoundException("Insumo não encontrado.");
+                ?? throw new NotFoundException(mensagemException);
 
             await _repository.Delete(insumo);
         }
 
-        private static InsumoDTO ToDTO(Insumo p) => new(
+        private static InsumoDto ToDTO(Insumo p) => new(
             p.Id, p.Nome, p.Descricao, p.Valor, p.QuantidadeEstoque, p.CriadoEm, p.AtualizadoEm
         );
     }

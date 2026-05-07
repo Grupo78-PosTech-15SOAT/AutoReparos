@@ -1,6 +1,6 @@
 ﻿namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 {
-    public record OrdemServicoDetalheDTO(
+    public record OrdemServicoDetalheDto(
         Guid Id,
         Guid ClienteId,
         Guid VeiculoId,
@@ -11,7 +11,7 @@
         DateTime? IniciadoEm,
         DateTime? FinalizadoEm,
         DateTime? EntregueEm,
-        IEnumerable<OrdemServicoServicoDTO> Servicos,
-        IEnumerable<OrdemServicoInsumoDTO> Insumos
+        IEnumerable<OrdemServicoServicoDto> Servicos,
+        IEnumerable<OrdemServicoInsumoDto> Insumos
     );
 }

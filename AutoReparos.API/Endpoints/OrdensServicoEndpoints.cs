@@ -24,7 +24,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetOrdensServicoByDocumentoOuPlaca")
             .WithSummary("Pesquisa ordens de serviço por documento ou placa (Público)")
-            .Produces<PagedResult<OrdemServicoPublicoDTO>>(StatusCodes.Status200OK)
+            .Produces<PagedResult<OrdemServicoPublicoDto>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .AllowAnonymous();
 
@@ -35,18 +35,18 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetPublicOrdemServicoById")
             .WithSummary("Busca uma ordem de serviço por ID com detalhes (Público)")
-            .Produces<OrdemServicoPublicoDetalheDTO>(StatusCodes.Status200OK)
+            .Produces<OrdemServicoPublicoDetalheDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .AllowAnonymous();
 
-            group.MapPost("/", async (CriarOrdemServicoDTO dto, IOrdemServicoService service) =>
+            group.MapPost("/", async (CriarOrdemServicoDto dto, IOrdemServicoService service) =>
             {
                 var os = await service.Create(dto);
                 return Results.CreatedAtRoute("GetOrdemServicoById", new { id = os.Id }, os);
             })
             .WithName("CreateOrdemServico")
             .WithSummary("Cria uma nova ordem de serviço")
-            .Produces<OrdemServicoDTO>(StatusCodes.Status201Created)
+            .Produces<OrdemServicoDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
             group.MapGet("/{id:guid}", async (Guid id, IOrdemServicoService service) =>
@@ -56,7 +56,7 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetOrdemServicoById")
             .WithSummary("Busca uma ordem de serviço por ID com detalhes")
-            .Produces<OrdemServicoDetalheDTO>(StatusCodes.Status200OK)
+            .Produces<OrdemServicoDetalheDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
             group.MapGet("/", async (
@@ -68,11 +68,11 @@ namespace AutoReparos.API.Endpoints
             })
             .WithName("GetAllOrdensServico")
             .WithSummary("Lista todas as ordens de serviço paginadas")
-            .Produces<PagedResult<OrdemServicoDTO>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
             group.MapPost("/{id:guid}/servicos", async (
                 Guid id,
-                AdicionarServicoDTO dto,
+                AdicionarServicoDto dto,
                 IOrdemServicoService service) =>
             {
                 await service.AdicionarServico(id, dto);
@@ -84,7 +84,7 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPost("/{id:guid}/insumos", async (Guid id, AdicionarInsumoDTO dto, IOrdemServicoService service) =>
+            group.MapPost("/{id:guid}/insumos", async (Guid id, AdicionarInsumoDto dto, IOrdemServicoService service) =>
             {
                 await service.AdicionarInsumo(id, dto);
                 return Results.NoContent();

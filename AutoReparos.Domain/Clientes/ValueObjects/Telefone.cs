@@ -34,7 +34,7 @@ namespace AutoReparos.Domain.Clientes.ValueObjects
                 return false;
 
             // DDD não pode começar com 0
-            if (telefone.StartsWith("0"))
+            if (telefone.StartsWith('0'))
                 return false;
 
             return true;

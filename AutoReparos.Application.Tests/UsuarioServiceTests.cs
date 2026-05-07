@@ -23,7 +23,7 @@ namespace AutoReparos.Application.Tests
         [Fact(DisplayName = "Create Usuario Successfully")]
         public async Task Create_WithValidData_ShouldReturnDto()
         {
-            var dto = new UsuarioCreateDTO("Novo Usuario", "novo@test.com", "Pass123!", ETipoUsuario.Atendente);
+            var dto = new UsuarioCreateDto("Novo Usuario", "novo@test.com", "Pass123!", ETipoUsuario.Atendente);
             
             var result = await _usuarioService.Create(dto);
 
@@ -62,7 +62,7 @@ namespace AutoReparos.Application.Tests
         {
             var usuarioId = Guid.NewGuid();
             var usuario = new Usuario("Antigo", "test@test.com", ETipoUsuario.Atendente);
-            var dto = new UsuarioUpdateDTO("Novo Nome", ETipoUsuario.Administrador);
+            var dto = new UsuarioUpdateDto("Novo Nome", ETipoUsuario.Administrador);
 
             _usuarioRepository.GetByIdAsync(usuarioId).Returns(usuario);
 

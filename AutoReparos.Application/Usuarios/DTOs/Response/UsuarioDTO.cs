@@ -2,7 +2,7 @@ using AutoReparos.Domain.Usuarios.Enums;
 
 namespace AutoReparos.Application.Usuarios.DTOs.Response
 {
-    public record UsuarioDTO(
+    public record UsuarioDto(
         Guid Id,
         string NomeCompleto,
         string Email,

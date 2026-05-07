@@ -12,7 +12,7 @@ namespace AutoReparos.Application.Usuarios.Services
     {
         private readonly IUsuarioRepository _usuarioRepository = usuarioRepository;
 
-        public async Task<UsuarioDTO> Create(UsuarioCreateDTO dto)
+        public async Task<UsuarioDto> Create(UsuarioCreateDto dto)
         {
             var usuario = new Usuario(dto.NomeCompleto, dto.Email, dto.Tipo);
 
@@ -21,14 +21,14 @@ namespace AutoReparos.Application.Usuarios.Services
             return ToDTO(usuario);
         }
 
-        public async Task<UsuarioDTO?> GetById(Guid id)
+        public async Task<UsuarioDto?> GetById(Guid id)
         {
             var usuario = await _usuarioRepository.GetByIdAsync(id) ?? throw new NotFoundException("Usuário não encontrado no sistema.");
 
             return ToDTO(usuario);
         }
 
-        public async Task<PagedResult<UsuarioDTO>> GetAll(UsuarioPagedRequest request)
+        public async Task<PagedResult<UsuarioDto>> GetAll(UsuarioPagedRequest request)
         {
             var (usuarios, total) = await _usuarioRepository.GetAllAsync(
                 request.Nome,
@@ -36,10 +36,10 @@ namespace AutoReparos.Application.Usuarios.Services
                 request.PageSize);
 
             var items = usuarios.Select(ToDTO);
-            return new PagedResult<UsuarioDTO>(items, total, request.PageNumber, request.PageSize);
+            return new PagedResult<UsuarioDto>(items, total, request.PageNumber, request.PageSize);
         }
 
-        public async Task Update(Guid id, UsuarioUpdateDTO dto)
+        public async Task Update(Guid id, UsuarioUpdateDto dto)
         {
             var usuario = await _usuarioRepository.GetByIdAsync(id) ?? throw new NotFoundException("Usuário não encontrado para atualização.");
 
@@ -55,7 +55,7 @@ namespace AutoReparos.Application.Usuarios.Services
             await _usuarioRepository.DeleteAsync(usuario);
         }
 
-        private static UsuarioDTO ToDTO(Usuario u) => new(
+        private static UsuarioDto ToDTO(Usuario u) => new(
             u.Id,
             u.NomeCompleto,
             u.Email.Endereco,

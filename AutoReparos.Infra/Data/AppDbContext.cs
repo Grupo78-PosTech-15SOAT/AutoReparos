@@ -22,10 +22,10 @@ namespace AutoReparos.Infra.Data
         public DbSet<OrdemServicoInsumo> OrdensServicoInsumos { get; set; }
         public DbSet<UsuarioIdentity> Usuarios { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(builder);
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
