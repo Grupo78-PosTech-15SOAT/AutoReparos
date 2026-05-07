@@ -32,7 +32,7 @@ namespace AutoReparos.API.Endpoints
             .WithName("GetAllClientes")
             .WithSummary("Lista todos os clientes")
             .WithDescription("Endpoint responsável por retornar todos os clientes ou filtrar por nome quando o parâmetro é informado")
-            .Produces<IEnumerable<ClienteDto>>(StatusCodes.Status200OK);
+            .Produces<PagedResult<ClienteDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/{id:guid}", async (Guid id, IClienteService service) =>
             {

@@ -8,18 +8,18 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
         DateTime? IniciadoEm,
         DateTime? FinalizadoEm,
         DateTime? EntregueEm,
-        IEnumerable<OrdemServicoServicoPublicoDTO> Servicos,
-        IEnumerable<OrdemServicoInsumoPublicoDTO> Insumos
+        IEnumerable<OrdemServicoServicoPublicoDto> Servicos,
+        IEnumerable<OrdemServicoInsumoPublicoDto> Insumos
     );
 
-    public record OrdemServicoServicoPublicoDTO(
+    public record OrdemServicoServicoPublicoDto(
         Guid Id,
         string Status,
         DateTime? IniciadoEm,
         DateTime? ConcluidoEm
     );
 
-    public record OrdemServicoInsumoPublicoDTO(
+    public record OrdemServicoInsumoPublicoDto(
         Guid Id,
         string Descricao,
         int Quantidade

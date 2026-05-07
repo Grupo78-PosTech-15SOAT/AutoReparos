@@ -1,5 +1,5 @@
 ﻿using AutoReparos.Domain.Servicos.Entities;
-using AutoReparos.Domain.Servicos.exceptions;
+using AutoReparos.Domain.Servicos.Exceptions;
 using FluentAssertions;
 
 namespace AutoReparos.Domain.Tests

@@ -1,6 +1,7 @@
 ﻿using AutoReparos.Domain.Veiculos.Entities;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
+using AutoReparos.Domain.Veiculos.ValueObjects;
 using AutoReparos.Infra.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -70,7 +71,7 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task<Veiculo?> GetByPlaca(string placa)
         {
-            return await _context.Veiculos.FirstOrDefaultAsync(v => v.Placa.Valor == placa);
+            return await _context.Veiculos.FirstOrDefaultAsync(v => v.Placa.Valor == Placa.Normalizar(placa));
         }
 
         public async Task Update(Veiculo veiculo)
