@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Servicos.exceptions;
+﻿using AutoReparos.Domain.Servicos.Exceptions;
 using AutoReparos.Domain.Shared;
 
 namespace AutoReparos.Domain.Servicos.Entities

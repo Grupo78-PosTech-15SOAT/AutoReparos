@@ -194,9 +194,9 @@ namespace AutoReparos.Application.OrdensServicos.Services
         private static OrdemServicoPublicoDetalheDto ToPublicDetalheDto(OrdemServico os) => new(
             os.Id, os.Status.ToString(), os.Observacao, os.CriadoEm,
             os.IniciadoEm, os.FinalizadoEm, os.EntregueEm,
-            os.Servicos.Select(s => new OrdemServicoServicoPublicoDTO(
+            os.Servicos.Select(s => new OrdemServicoServicoPublicoDto(
                 s.Id, s.Status.ToString(), s.IniciadoEm, s.ConcluidoEm)),
-            os.Insumos.Select(p => new OrdemServicoInsumoPublicoDTO(
+            os.Insumos.Select(p => new OrdemServicoInsumoPublicoDto(
                 p.Id, p.Descricao, p.Quantidade))
         );
     }

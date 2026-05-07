@@ -1,5 +1,6 @@
 # AutoReparos - Sistema Integrado de Oficina Mecânica
 
+<div>
 <img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
 <img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled"></div>
 <img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
