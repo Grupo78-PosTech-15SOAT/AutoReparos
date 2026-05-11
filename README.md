@@ -70,7 +70,9 @@ O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Desig
 2. Certifique-se de configurar as variáveis de ambiente necessárias (pode ser via arquivo `.env` na raiz ou variáveis de sistema):
    - `DB_PASSWORD`: Senha do banco de dados PostgreSQL.
    - `JWT_SECRET`: Chave secreta para geração dos tokens JWT.
+   - `JWT_EXPIRY_HOURS`: Tempo (em horas) para expiração do Token
    - `SEED_USER_EMAIL` e `SEED_USER_PASSWORD`: Credenciais do usuário administrativo inicial.
+   - 
 3. No terminal, execute:
 
    ```bash
