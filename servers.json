@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Auto Reparos DB",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "autoreparos",
+      "Username": "admin",
+      "SSLMode": "prefer"
+    }
+  }
+}

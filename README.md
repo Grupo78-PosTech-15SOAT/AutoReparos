@@ -1,11 +1,11 @@
 # AutoReparos - Sistema Integrado de Oficina Mecânica
 
-<div>
+<p align="center">
 <img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
 <img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled"></div>
 <img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
 <img src="https://img.shields.io/badge/Architecture-DDD%20%2F%20Clean-blue" alt="Architecture DDD/Clean">
-</div>
+</p>
 
 ## 📌 Sobre o Projeto
 
@@ -70,7 +70,9 @@ O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Desig
 2. Certifique-se de configurar as variáveis de ambiente necessárias (pode ser via arquivo `.env` na raiz ou variáveis de sistema):
    - `DB_PASSWORD`: Senha do banco de dados PostgreSQL.
    - `JWT_SECRET`: Chave secreta para geração dos tokens JWT.
+   - `JWT_EXPIRY_HOURS`: Tempo (em horas) para expiração do Token
    - `SEED_USER_EMAIL` e `SEED_USER_PASSWORD`: Credenciais do usuário administrativo inicial.
+   - `PGADMIN_EMAIL` e `PGADMIN_PASSWORD`: Credenciais de acesso do usuário ao pgAdmin.
 3. No terminal, execute:
 
    ```bash
@@ -101,7 +103,7 @@ dotnet test
 - **Análise de Vulnerabilidades:** Relatórios de segurança incluídos na documentação de entrega.
 
 ## 👥 Grupo
-
+<i>Grupo78-PosTech-15SOAT</i>
 - **Participantes:**
   - Enrico Gollner - rm370737
   - José Dotta - rm372959
