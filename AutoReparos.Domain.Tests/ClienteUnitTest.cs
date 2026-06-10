@@ -1,8 +1,6 @@
 ﻿using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Exceptions;
-using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Shared.Exceptions;
-using AutoReparos.Domain.Shared.ValueObjects;
 using FluentAssertions;
 
 namespace AutoReparos.Domain.Tests

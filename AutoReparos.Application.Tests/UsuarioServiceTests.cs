@@ -24,7 +24,7 @@ namespace AutoReparos.Application.Tests
         public async Task Create_WithValidData_ShouldReturnDto()
         {
             var dto = new UsuarioCreateDto("Novo Usuario", "novo@test.com", "Pass123!", ETipoUsuario.Atendente);
-            
+
             var result = await _usuarioService.Create(dto);
 
             result.Should().NotBeNull();

@@ -1,13 +1,13 @@
 using AutoReparos.Domain.Clientes.Repositories;
-using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Insumos.Repositories;
+using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Servicos.Repositories;
+using AutoReparos.Domain.Shared.Interfaces;
 using AutoReparos.Domain.Usuarios.Repositories;
 using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Infra.Data;
 using AutoReparos.Infra.Identity;
 using AutoReparos.Infra.Identity.Models;
-using AutoReparos.Domain.Shared.Interfaces;
 using AutoReparos.Infra.Identity.Services;
 using AutoReparos.Infra.Repositories;
 using Microsoft.AspNetCore.Identity;

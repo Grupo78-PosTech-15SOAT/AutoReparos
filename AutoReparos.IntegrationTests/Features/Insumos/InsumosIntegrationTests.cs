@@ -1,21 +1,18 @@
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Insumos.DTOs.Request;
 using AutoReparos.Application.Insumos.DTOs.Response;
 using AutoReparos.Application.Shared;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using FluentAssertions;
+using System.Net;
+using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.Insumos;
 
 public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory)
-    : IntegrationTestBase(factory){
+    : IntegrationTestBase(factory)
+{
     private async Task<InsumoDto> CriarInsumoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
@@ -24,8 +21,8 @@ public class InsumoIntegrationTests(CustomWebApplicationFactory<Program> factory
         (
             faker.Commerce.ProductName().PadRight(100).Substring(0, 50).Trim(),
             faker.Commerce.ProductDescription(),
-            Math.Round(faker.Random.Decimal(10, 500), 2), 
-            faker.Random.Int(10, 50) 
+            Math.Round(faker.Random.Decimal(10, 500), 2),
+            faker.Random.Int(10, 50)
         );
 
         var response = await Client.PostAsJsonAsync("/api/insumos", createDto);

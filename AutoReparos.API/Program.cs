@@ -37,6 +37,6 @@ app.MapClientesEndpoints();
 app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
 app.MapInsumosEndpoints();
-app.MapOrdensServicoEndpoints();
+app.MapOrdemServicoEndpoints();
 
 app.Run();

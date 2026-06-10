@@ -1,5 +1,3 @@
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
@@ -9,14 +7,12 @@ using AutoReparos.Application.Shared;
 using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
 using AutoReparos.Domain.OrdensServicos.Enums;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using FluentAssertions;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.OrdensServico;
 
