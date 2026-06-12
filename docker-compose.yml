@@ -15,26 +15,26 @@ services:
     networks:
       - autoreparos-network
 
-  api:
-    image: autoreparos-api
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: autoreparos-api
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DbConnection=Host=postgres;Database=autoreparos;Username=admin;Password=${DB_PASSWORD}
-      - Jwt__Secret=${JWT_SECRET}
-      - Jwt__ExpiryHours=${JWT_EXPIRY_HOURS}
-      - SeedUser__Email=${SEED_USER_EMAIL}
-      - SeedUser__Password=${SEED_USER_PASSWORD}
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-    networks:
-      - autoreparos-network
+  # api:
+  #   image: autoreparos-api
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: autoreparos-api
+  #   restart: always
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ConnectionStrings__DbConnection=Host=postgres;Database=autoreparos;Username=admin;Password=${DB_PASSWORD}
+  #     - Jwt__Secret=${JWT_SECRET}
+  #     - Jwt__ExpiryHours=${JWT_EXPIRY_HOURS}
+  #     - SeedUser__Email=${SEED_USER_EMAIL}
+  #     - SeedUser__Password=${SEED_USER_PASSWORD}
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - autoreparos-network
 
   pgadmin:
     image: dpage/pgadmin4:latest

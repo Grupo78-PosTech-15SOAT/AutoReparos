@@ -1,5 +1,5 @@
-﻿using AutoReparos.Domain.OrdensServicos.Entities;
-using AutoReparos.Domain.Insumos.Entities;
+﻿using AutoReparos.Domain.Insumos.Entities;
+using AutoReparos.Domain.OrdensServicos.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

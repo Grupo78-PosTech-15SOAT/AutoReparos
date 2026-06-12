@@ -1,12 +1,11 @@
-using System.Net;
-using System.Net.Http.Json;
 using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.DTOs.Response;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using FluentAssertions;
+using System.Net;
+using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.Auth;
 

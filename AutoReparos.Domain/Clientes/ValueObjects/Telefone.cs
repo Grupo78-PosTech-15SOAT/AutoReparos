@@ -1,5 +1,4 @@
 ﻿using AutoReparos.Domain.Clientes.Exceptions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AutoReparos.Domain.Clientes.ValueObjects
 {

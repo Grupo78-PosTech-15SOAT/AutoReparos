@@ -12,7 +12,7 @@ namespace AutoReparos.Infra.Repositories
         public async Task<Usuario?> ValidateCredentialsAsync(string email, string password)
         {
             var identityUser = await _userManager.FindByEmailAsync(email);
-            
+
             if (identityUser == null)
             {
                 return null;

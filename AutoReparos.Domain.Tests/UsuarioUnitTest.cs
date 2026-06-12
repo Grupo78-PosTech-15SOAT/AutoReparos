@@ -1,4 +1,3 @@
-using AutoReparos.Domain.Shared.ValueObjects;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using FluentAssertions;

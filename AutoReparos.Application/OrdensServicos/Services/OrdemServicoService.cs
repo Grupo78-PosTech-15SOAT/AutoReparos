@@ -2,11 +2,10 @@
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.Shared;
-using AutoReparos.Domain.Clientes.Repositories;
+using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Repositories;
-using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Veiculos.Exceptions;
@@ -47,6 +46,18 @@ namespace AutoReparos.Application.OrdensServicos.Services
             return ToDTO(ordemServico);
         }
 
+        public async Task<PagedResult<OrdemServicoDto>> GetAll(OrdemServicoPagedRequest request)
+        {
+            var (items, total) = await _repository.GetAll(request.ClienteId, request.VeiculoId, request.Status, request.Skip, request.PageSize);
+            return new PagedResult<OrdemServicoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+        }
+
+        public async Task<PagedResult<OrdemServicoDto>> GetFila(PagedRequest request)
+        {
+            var (items, total) = await _repository.GetFila(request.Skip, request.PageSize);
+            return new PagedResult<OrdemServicoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
+        }
+
         public async Task<OrdemServicoDetalheDto?> GetById(Guid id)
         {
             var os = await _repository.GetById(id);
@@ -57,12 +68,6 @@ namespace AutoReparos.Application.OrdensServicos.Services
         {
             var os = await _repository.GetById(id);
             return os is null ? null : ToPublicDetalheDto(os);
-        }
-
-        public async Task<PagedResult<OrdemServicoDto>> GetAll(OrdemServicoPagedRequest request)
-        {
-            var (items, total) = await _repository.GetAll(request.ClienteId, request.VeiculoId, request.Status, request.Skip, request.PageSize);
-            return new PagedResult<OrdemServicoDto>(items.Select(ToDTO), total, request.PageNumber, request.PageSize);
         }
 
         public async Task<PagedResult<OrdemServicoPublicoDto>> GetByDocumentoOuPlaca(OrdemServicoConsultaPagedRequest request)

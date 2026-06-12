@@ -2,18 +2,38 @@
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.Shared;
-using AutoReparos.Domain.OrdensServicos.Enums;
-using Microsoft.AspNetCore.Mvc;
 
 namespace AutoReparos.API.Endpoints
 {
-    public static class OrdensServicoEndpoints
+    public static class OrdemServicoEndpoint
     {
-        public static void MapOrdensServicoEndpoints(this WebApplication app)
+        public static void MapOrdemServicoEndpoints(this WebApplication app)
         {
-            var group = app.MapGroup("/api/ordens-servico")
+            var group = app.MapGroup("/api/ordem-servico")
                 .WithTags("OrdensServico")
                 .RequireAuthorization();
+
+            group.MapGet("/", async (
+                IOrdemServicoService service,
+                [AsParameters] OrdemServicoPagedRequest request) =>
+            {
+                var result = await service.GetAll(request);
+                return Results.Ok(result);
+            })
+            .WithName("GetAllOrdensServico")
+            .WithSummary("Lista todas as ordens de serviço paginada")
+            .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
+
+            group.MapGet("/fila", async (
+                IOrdemServicoService service,
+                [AsParameters] PagedRequest request) =>
+            {
+                var result = await service.GetFila(request);
+                return Results.Ok(result);
+            })
+            .WithName("GetFilaOrdensServico")
+            .WithSummary("Lista a fila de trabalho da oficina ordenada por prioridade (exclui LOGICAMENTE os status \"Finalizada\" e \"Entregue\")")
+            .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/consulta", async (
                 IOrdemServicoService service,
@@ -58,17 +78,6 @@ namespace AutoReparos.API.Endpoints
             .WithSummary("Busca uma ordem de serviço por ID com detalhes")
             .Produces<OrdemServicoDetalheDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
-
-            group.MapGet("/", async (
-                IOrdemServicoService service,
-                [AsParameters] OrdemServicoPagedRequest request) =>
-            {
-                var result = await service.GetAll(request);
-                return Results.Ok(result);
-            })
-            .WithName("GetAllOrdensServico")
-            .WithSummary("Lista todas as ordens de serviço paginadas")
-            .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
             group.MapPost("/{id:guid}/servicos", async (
                 Guid id,
@@ -115,7 +124,7 @@ namespace AutoReparos.API.Endpoints
                 await service.AguardarAprovacao(id);
                 return Results.NoContent();
             })
-            .WithName("AguardarAprovacao")
+            .WithName("EnviarParaAprovacao")
             .WithSummary("Envia a ordem de serviço para aprovação do cliente")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)

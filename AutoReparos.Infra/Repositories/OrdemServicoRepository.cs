@@ -23,12 +23,6 @@ namespace AutoReparos.Infra.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<OrdemServico?> GetById(Guid id)
-            => await _context.OrdensServico
-                .Include(os => os.Servicos)
-                .Include(os => os.Insumos)
-                .FirstOrDefaultAsync(os => os.Id == id);
-
         public async Task<(IEnumerable<OrdemServico> Items, int Total)> GetAll(
             Guid? clienteId,
             Guid? veiculoId,
@@ -59,6 +53,37 @@ namespace AutoReparos.Infra.Repositories
 
             return (items, total);
         }
+
+        public async Task<(IEnumerable<OrdemServico> Items, int Total)> GetFila(int skip, int take)
+        {
+            var query = _context.OrdensServico
+                .Include(os => os.Servicos)
+                .Include(os => os.Insumos)
+                .Where(os =>
+                    os.Status != EStatusOrdemServico.Finalizada &&
+                    os.Status != EStatusOrdemServico.Entregue)
+                .AsQueryable();
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(os => os.Status == EStatusOrdemServico.EmExecucao ? 1
+                             : os.Status == EStatusOrdemServico.AguardandoAprovacao ? 2
+                             : os.Status == EStatusOrdemServico.EmDiagnostico ? 3
+                             : 4)
+                .ThenBy(os => os.CriadoEm)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
+        public async Task<OrdemServico?> GetById(Guid id)
+            => await _context.OrdensServico
+                .Include(os => os.Servicos)
+                .Include(os => os.Insumos)
+                .FirstOrDefaultAsync(os => os.Id == id);
 
         public async Task<(IEnumerable<OrdemServico> Items, int Total)> GetByDocumentoOuPlaca(string? documento, string? placa, int skip, int take)
         {

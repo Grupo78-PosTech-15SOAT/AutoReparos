@@ -2,7 +2,6 @@
 using AutoReparos.Application.Servicos.DTOs.Response;
 using AutoReparos.Application.Servicos.Services.Interfaces;
 using AutoReparos.Application.Shared;
-using Microsoft.AspNetCore.Mvc;
 
 namespace AutoReparos.API.Endpoints
 {

@@ -1,5 +1,4 @@
 ﻿using AutoReparos.Domain.Clientes.Entities;
-using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Infra.Data;

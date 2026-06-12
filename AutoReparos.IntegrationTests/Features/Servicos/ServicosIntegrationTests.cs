@@ -1,5 +1,3 @@
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
@@ -8,28 +6,27 @@ using AutoReparos.Application.Servicos.DTOs.Response;
 using AutoReparos.Application.Shared;
 using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using FluentAssertions;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.Servicos;
 
 public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factory)
-    : IntegrationTestBase(factory){
+    : IntegrationTestBase(factory)
+{
     private async Task<ServicoDto> CriarServicoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
 
         var createDto = new CriarServicoDto
         (
-            faker.Commerce.ProductName(),             
-            faker.Commerce.ProductDescription(),      
-            Math.Round(faker.Random.Decimal(50, 1000), 2) 
+            faker.Commerce.ProductName(),
+            faker.Commerce.ProductDescription(),
+            Math.Round(faker.Random.Decimal(50, 1000), 2)
         );
 
         var response = await Client.PostAsJsonAsync("/api/servicos", createDto);

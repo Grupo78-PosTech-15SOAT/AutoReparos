@@ -55,7 +55,7 @@ namespace AutoReparos.Application.Tests
         public async Task Login_WithWrongPassword_ShouldReturnNull()
         {
             var request = new LoginRequestDto("test@test.com", "WrongPassword!");
-            
+
             _authRepository.ValidateCredentialsAsync(request.Email, request.Password).Returns((Usuario?)null);
 
             var result = await _authService.Login(request);
