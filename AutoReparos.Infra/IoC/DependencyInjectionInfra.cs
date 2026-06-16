@@ -1,3 +1,4 @@
+using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.OrdensServicos.Repositories;
@@ -10,6 +11,7 @@ using AutoReparos.Infra.Identity;
 using AutoReparos.Infra.Identity.Models;
 using AutoReparos.Infra.Identity.Services;
 using AutoReparos.Infra.Repositories;
+using AutoReparos.Infra.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,6 +49,7 @@ namespace AutoReparos.Infra.IoC
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IAprovacaoTokenService, AprovacaoTokenService>();
 
             return services;
         }

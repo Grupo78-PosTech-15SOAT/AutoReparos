@@ -2,6 +2,6 @@
 {
     public interface INotificacaoService
     {
-        Task EnviarOrcamento(Guid ordemServicoId, decimal valorTotal);
+        Task EnviarOrcamento(string token, decimal valorTotal, IEnumerable<string> servicos);
     }
 }

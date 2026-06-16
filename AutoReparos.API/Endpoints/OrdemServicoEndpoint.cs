@@ -130,18 +130,33 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPatch("/{id:guid}/aprovar", async (
-                Guid id,
+            group.MapGet("/aprovar", async (
+                string token,
                 IOrdemServicoService service) =>
             {
-                await service.Aprovar(id);
+                await service.Aprovar(token);
                 return Results.NoContent();
             })
             .WithName("AprovarOrdemServico")
             .WithSummary("Aprova a ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .AllowAnonymous();
+
+            group.MapGet("/recusar", async (
+                string token,
+                IOrdemServicoService service) =>
+            {
+                await service.Recusar(token);
+                return Results.NoContent();
+            })
+            .WithName("RecusarOrdemServico")
+            .WithSummary("Recusa a ordem de serviço")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
+            .AllowAnonymous();
 
             group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/iniciar", async (
                 Guid id,

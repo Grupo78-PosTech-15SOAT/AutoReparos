@@ -2,15 +2,18 @@
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.Shared;
+using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Repositories;
+using AutoReparos.Domain.Servicos.Repositories;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace AutoReparos.Application.OrdensServicos.Services
 {
@@ -20,17 +23,23 @@ namespace AutoReparos.Application.OrdensServicos.Services
         private readonly IVeiculoRepository _veiculoRepository;
         private readonly IInsumoRepository _insumoRepository;
         private readonly INotificacaoService _notificacaoService;
+        private readonly IServicoRepository _servicoRepository;
+        private readonly IAprovacaoTokenService _aprovacaoTokenService;
 
         public OrdemServicoService(
             IOrdemServicoRepository repository,
             IVeiculoRepository veiculoRepository,
             IInsumoRepository insumoRepository,
-            INotificacaoService notificacaoService)
+            INotificacaoService notificacaoService,
+            IServicoRepository servicoRepository,
+            IAprovacaoTokenService aprovacaoTokenService)
         {
             _repository = repository;
             _veiculoRepository = veiculoRepository;
             _insumoRepository = insumoRepository;
             _notificacaoService = notificacaoService;
+            _servicoRepository = servicoRepository;
+            _aprovacaoTokenService = aprovacaoTokenService;
         }
 
         public async Task<OrdemServicoDto> Create(CriarOrdemServicoDto dto)
@@ -133,15 +142,40 @@ namespace AutoReparos.Application.OrdensServicos.Services
             os.AguardarAprovacao();
             await _repository.Update(os);
 
-            await _notificacaoService.EnviarOrcamento(os.Id, os.ValorTotal);
+            var token = _aprovacaoTokenService.GerarToken(os.Id);
+
+            var servicosDescricao = new List<string>();
+
+            foreach (var item in os.Servicos)
+            {
+                var servico = await _servicoRepository.GetById(item.ServicoId);
+
+                if (servico is not null)
+                {
+                    servicosDescricao.Add($"{servico.Nome} - {servico.Descricao} - {item.ValorCobrado.ToString("C2", new CultureInfo("pt-BR"))}");
+                }
+            }
+
+            await _notificacaoService.EnviarOrcamento(token, os.ValorTotal, servicosDescricao);
         }
 
-        public async Task Aprovar(Guid id)
+        public async Task Aprovar(string token)
         {
-            var os = await _repository.GetById(id)
+            var ordemServicoId = _aprovacaoTokenService.ValidarToken(token);
+            var os = await _repository.GetById(ordemServicoId)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
             os.Aprovar();
+            await _repository.Update(os);
+        }
+
+        public async Task Recusar(string token)
+        {
+            var ordemServicoId = _aprovacaoTokenService.ValidarToken(token);
+            var os = await _repository.GetById(ordemServicoId)
+                ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
+
+            os.Recusar();
             await _repository.Update(os);
         }
 
