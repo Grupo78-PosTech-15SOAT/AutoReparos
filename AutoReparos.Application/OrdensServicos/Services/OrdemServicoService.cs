@@ -133,7 +133,6 @@ namespace AutoReparos.Application.OrdensServicos.Services
             os.AguardarAprovacao();
             await _repository.Update(os);
 
-            // mock de envio de email para cliente
             await _notificacaoService.EnviarOrcamento(os.Id, os.ValorTotal);
         }
 
