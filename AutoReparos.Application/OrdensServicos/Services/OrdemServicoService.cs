@@ -15,7 +15,6 @@ using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 
 namespace AutoReparos.Application.OrdensServicos.Services
 {
@@ -139,7 +138,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
             await _repository.Update(os);
         }
 
-        public async Task<string> AguardarAprovacao(Guid id)
+        public async Task AguardarAprovacao(Guid id)
         {
             var os = await _repository.GetById(id)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
@@ -163,8 +162,6 @@ namespace AutoReparos.Application.OrdensServicos.Services
             }
 
             await _notificacaoService.EnviarOrcamento(token, os.ValorTotal, servicosDescricao);
-
-            return token;
         }
 
         public async Task Aprovar(string token)

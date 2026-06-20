@@ -27,7 +27,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
 
             var client = new SendGridClient(_configuration["SendGrid:ApiKey"]);
             var from = new EmailAddress(_configuration["SendGrid:FromEmail"], _configuration["SendGrid:FromName"]);
-            var to = new EmailAddress("mateuslecchidev@gmail.com", "Dev");
+            var to = new EmailAddress("autoreparosfiap@gmail.com", "AutoReparos");
             var subject = $"Orçamento da Ordem de Serviço";
             var plainTextContent = $"Olá! O orçamento da sua ordem de serviço ficou em {valorTotal.ToString("C2", new CultureInfo("pt-BR"))}.";
 

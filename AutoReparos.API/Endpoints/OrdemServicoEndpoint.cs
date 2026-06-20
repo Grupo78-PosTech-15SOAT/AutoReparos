@@ -121,12 +121,12 @@ namespace AutoReparos.API.Endpoints
                 Guid id,
                 IOrdemServicoService service) =>
             {
-                var token = await service.AguardarAprovacao(id);
-                return Results.Ok(new { tokenAprovacao = token });
+                await service.AguardarAprovacao(id);
+                return Results.NoContent();
             })
             .WithName("EnviarParaAprovacao")
             .WithSummary("Envia a ordem de serviço para aprovação do cliente")
-            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
