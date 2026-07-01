@@ -11,7 +11,7 @@
 
 O **AutoReparos** é um Sistema Integrado de Atendimento e Execução de Serviços desenvolvido para oficinas mecânicas de médio porte. O objetivo é modernizar o processo de atendimento, diagnóstico, execução de serviços e entrega de veículos, eliminando anotações manuais e planilhas ineficientes.
 
-Este projeto faz parte do **Tech Challenge - Fase 1** do curso de Pós-Graduação em Software Architecture da FIAP (SOAT).
+Este projeto faz parte do **Tech Challenge - Fase 2** do curso de Pós-Graduação em Software Architecture da FIAP (SOAT).
 
 ## 🚀 Funcionalidades Principais
 
@@ -21,6 +21,7 @@ Este projeto faz parte do **Tech Challenge - Fase 1** do curso de Pós-Graduaç�
   - Inclusão de serviços e insumos/peças.
   - Geração automática de orçamento.
   - Acompanhamento de status em tempo real.
+  - Envio de email com orçamento para aprovação;
 - **Gestão Administrativa (CRUDs):**
   - Clientes, Veículos, Serviços e Insumos (Peças).
   - Controle de estoque de insumos.
@@ -38,6 +39,7 @@ Este projeto faz parte do **Tech Challenge - Fase 1** do curso de Pós-Graduaç�
 - **ORM:** Entity Framework Core
 - **Segurança:** ASP.NET Core Identity & JWT
 - **Documentação:** Swagger (OpenAPI)
+- **Integração:** Sendgrid
 
 ### Justificativa da escolha do Banco de Dados
 
@@ -63,6 +65,76 @@ O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Desig
 
 - [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) instalados.
 - .NET 10 SDK (opcional, apenas para desenvolvimento local sem Docker).
+
+### Antes de Executar a aplicação, configure os User Secrets:
+```json
+{
+  "ConnectionStrings:DbConnection": "Host=localhost;Port=5433;Database=autoreparos;Username=admin;Password=12w3e4r@#$",
+
+  "SeedUser": {
+    "Email": "admin@autoreparos.com",
+    "Password": "Admin@123"
+  },
+
+  "Jwt": {
+    "Secret": "super_secret_key_with_enough_length_for_hmac256",
+    "ExpiryHours": "2"
+  },
+
+  "SendGrid": {
+    "ApiKey": "SUA_API_KEY",
+    "FromEmail": "remetente@email.com",
+    "FromName": "AutoReparos"
+  },
+
+  "AprovacaoToken": {
+    "Secret": "another_super_secret_key_for_approval_tokens_with_enough_length"
+  },
+
+  "App": {
+    "BaseUrl": "https://seu-endereco-ngrok.ngrok-free.app"
+  }
+}
+```
+
+### Configuração do SendGrid
+
+Para habilitar o envio de e-mails de orçamento:
+
+1. Criar conta no SendGrid.
+2. Criar uma API Key.
+3. Configurar um remetente validado (Sender Identity).
+4. Preencher os campos da seção SendGrid nos User Secrets.
+
+Após a aprovação do orçamento, o cliente receberá um e-mail contendo:
+
+- Valor total do orçamento
+- Lista de serviços
+- Botão Aprovar
+- Botão Recusar
+
+### Configuração do Ngrok
+
+O Ngrok é utilizado para expor a API local para a internet, permitindo que os links enviados por e-mail funcionem fora do ambiente local.
+
+1. Criar uma conta gratuita:
+- https://ngrok.com/
+
+2. Instalar:
+```bash
+winget install ngrok.ngrok
+```
+
+3. Adicionar seu Auth Token:
+```bash
+ngrok config add-authtoken SEU_AUTH_TOKEN
+```
+
+4. Iniciar túnel
+```bash
+ngrok http https://localhost:7258
+```
+- Irá ser gerado uma URL pública, basta adicionar em BaseUrl no UserSecrets
 
 ### Execução usando Docker
 

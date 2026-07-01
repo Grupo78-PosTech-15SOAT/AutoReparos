@@ -24,6 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\AutoReparos.Application\AutoReparos.Application.csproj" />
 		<ProjectReference Include="..\AutoReparos.Domain\AutoReparos.Domain.csproj" />
 	</ItemGroup>
 

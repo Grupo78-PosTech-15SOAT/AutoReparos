@@ -16,7 +16,8 @@ namespace AutoReparos.Application.OrdensServicos.Services.Interfaces
         Task AdicionarInsumo(Guid id, AdicionarInsumoDto dto);
         Task IniciarDiagnostico(Guid id);
         Task AguardarAprovacao(Guid id);
-        Task Aprovar(Guid id);
+        Task Aprovar(string token);
+        Task Recusar(string token);
         Task IniciarServico(Guid ordemServicoId, Guid ordemServicoServicoId);
         Task ConcluirServico(Guid ordemServicoId, Guid ordemServicoServicoId);
         Task Entregar(Guid id);

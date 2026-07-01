@@ -33,7 +33,7 @@ namespace AutoReparos.Application
             services.AddScoped<IInsumoService, InsumoService>();
             services.AddScoped<IOrdemServicoService, OrdemServicoService>();
 
-            services.AddScoped<INotificacaoService, NotificacaoServiceMock>();
+            services.AddScoped<INotificacaoService, NotificacaoService>();
 
             return services;
         }

@@ -97,6 +97,15 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             IniciadoEm = DateTime.UtcNow;
         }
 
+        public void Recusar()
+        {
+            if (Status != EStatusOrdemServico.AguardandoAprovacao)
+                throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ser recusada quando estiver aguardando aprovação.");
+
+            Status = EStatusOrdemServico.EmDiagnostico;
+            IniciadoEm = DateTime.UtcNow;
+        }
+
         public void IniciarServico(Guid ordemServicoServicoId)
         {
             if (Status != EStatusOrdemServico.EmExecucao)
