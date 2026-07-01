@@ -16,6 +16,7 @@ using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
+using System.Transactions;
 
 namespace AutoReparos.Application.OrdensServicos.Services
 {
@@ -52,6 +53,8 @@ namespace AutoReparos.Application.OrdensServicos.Services
 
         public async Task<OrdemServicoDto> Create(CriarOrdemServicoDto dto)
         {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
             var veiculo = await _veiculoRepository.GetById(dto.VeiculoId)
                 ?? throw new NotFoundException(ErrorMessages.VeiculoNotFound);
 
@@ -62,7 +65,54 @@ namespace AutoReparos.Application.OrdensServicos.Services
                 ?? throw new NotFoundException(ErrorMessages.ClienteNotFound);
 
             var ordemServico = new OrdemServico(dto.ClienteId, dto.VeiculoId, dto.Observacao);
+
+            if (dto.Servicos != null)
+            {
+                foreach (var servicoDto in dto.Servicos)
+                {
+                    var servico = await _servicoRepository.GetById(servicoDto.ServicoId)
+                        ?? throw new NotFoundException(ErrorMessages.ServicoNotFound);
+
+                    var item = new OrdemServicoServico(ordemServico.Id, servicoDto.ServicoId, servicoDto.ValorCobrado);
+                    ordemServico.AdicionarServico(item);
+                }
+            }
+
+            if (dto.Insumos != null)
+            {
+                foreach (var insumoDto in dto.Insumos)
+                {
+                    decimal valorUnitario;
+
+                    if (insumoDto.Origem == EOrigemInsumo.Estoque)
+                    {
+                        if (!insumoDto.InsumoId.HasValue)
+                            throw new ValidationException("InsumoId é obrigatório para insumos de estoque.");
+
+                        var insumo = await _insumoRepository.GetById(insumoDto.InsumoId.Value)
+                            ?? throw new NotFoundException(ErrorMessages.InsumoNotFound);
+
+                        insumo.RemoverEstoque(insumoDto.Quantidade);
+                        await _insumoRepository.Update(insumo);
+
+                        valorUnitario = insumoDto.ValorUnitario ?? insumo.Valor;
+                    }
+                    else
+                    {
+                        if (insumoDto.ValorUnitario == null)
+                            throw new ValidationException("Valor unitário é obrigatório para insumos de compra específica.");
+
+                        valorUnitario = insumoDto.ValorUnitario.Value;
+                    }
+
+                    var item = new OrdemServicoInsumo(ordemServico.Id, insumoDto.InsumoId, insumoDto.Descricao, valorUnitario, insumoDto.Quantidade, insumoDto.Origem);
+                    ordemServico.AdicionarInsumo(item);
+                }
+            }
+
             await _repository.Create(ordemServico);
+
+            scope.Complete();
 
             try
             {

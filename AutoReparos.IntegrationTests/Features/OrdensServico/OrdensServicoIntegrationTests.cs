@@ -1,4 +1,5 @@
 using AutoReparos.Application.Clientes.DTOs.Response;
+using AutoReparos.Application.Insumos.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
 using AutoReparos.Application.Servicos.DTOs.Request;
@@ -228,5 +229,44 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var response = await Client.PatchAsync($"/api/ordem-servico/{os.Id}/entregar", null);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "POST /api/ordem-servico - Criar OS completa com serviços e peças deve retornar 201 Created e salvar dependências")]
+    public async Task CreateOrdemServico_ComServicosEPeças_DeveRetornarCreatedESalvarItens()
+    {
+        await AuthenticateAsync();
+        var deps = await ObterIdsDependenciasAsync();
+
+        var resInsumo = await Client.GetFromJsonAsync<PagedResult<InsumoDto>>("/api/insumos?pageNumber=1&pageSize=1");
+        var insumoEstoque = resInsumo!.Items.First();
+        var estoqueInicial = insumoEstoque.QuantidadeEstoque;
+
+        var servicoDto = new AdicionarServicoDto(deps.ServicoId, 250.00m);
+        var insumoDto = new AdicionarInsumoDto(insumoEstoque.Id, insumoEstoque.Nome, null, 2, EOrigemInsumo.Estoque);
+
+        var requestDto = new CriarOrdemServicoDto(
+            deps.ClienteId,
+            deps.VeiculoId,
+            "Revisão completa inicial com peças e serviços no payload",
+            new[] { servicoDto },
+            new[] { insumoDto }
+        );
+
+        var response = await Client.PostAsJsonAsync("/api/ordem-servico", requestDto);
+        var erro = await response.Content.ReadAsStringAsync();
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created, because: erro);
+        var responseData = await response.Content.ReadFromJsonAsync<OrdemServicoDto>();
+        responseData.Should().NotBeNull();
+        responseData!.Id.Should().NotBeEmpty();
+
+        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDto>($"/api/ordem-servico/{responseData.Id}");
+        osDetalhe.Should().NotBeNull();
+        osDetalhe!.Servicos.Should().ContainSingle(s => s.ServicoId == deps.ServicoId && s.ValorCobrado == 250.00m);
+        osDetalhe.Insumos.Should().ContainSingle(i => i.InsumoId == insumoEstoque.Id && i.Quantidade == 2 && i.Origem == EOrigemInsumo.Estoque.ToString());
+
+        var resInsumoAtualizado = await Client.GetFromJsonAsync<PagedResult<InsumoDto>>("/api/insumos?pageNumber=1&pageSize=1");
+        var insumoEstoqueAtualizado = resInsumoAtualizado!.Items.First(i => i.Id == insumoEstoque.Id);
+        insumoEstoqueAtualizado.QuantidadeEstoque.Should().Be(estoqueInicial - 2);
     }
 }

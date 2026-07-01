@@ -16,9 +16,9 @@ Este projeto faz parte do **Tech Challenge - Fase 2** do curso de Pós-Graduaç�
 ## 🚀 Funcionalidades Principais
 
 - **Gestão de Ordens de Serviço:**
-  - Abertura de Ordens de Serviço com identificação de cliente (CPF/CNPJ).
+  - Abertura de Ordens de Serviço completa (associando Cliente, Veículo, Serviços e Peças/Insumos em uma única operação transacional).
   - Cadastro e vínculo de veículos.
-  - Inclusão de serviços e insumos/peças.
+  - Inclusão avulsa de serviços e insumos/peças na OS.
   - Geração automática de orçamento.
   - Acompanhamento de status em tempo real.
   - Envio de email com orçamento para aprovação;
@@ -66,7 +66,8 @@ O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Desig
 - [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) instalados.
 - .NET 10 SDK (opcional, apenas para desenvolvimento local sem Docker).
 
-### Antes de Executar a aplicação, configure os User Secrets:
+### Antes de Executar a aplicação, configure os User Secrets
+
 ```json
 {
   "ConnectionStrings:DbConnection": "Host=localhost;Port=5433;Database=autoreparos;Username=admin;Password=12w3e4r@#$",
@@ -118,22 +119,27 @@ Após a aprovação do orçamento, o cliente receberá um e-mail contendo:
 O Ngrok é utilizado para expor a API local para a internet, permitindo que os links enviados por e-mail funcionem fora do ambiente local.
 
 1. Criar uma conta gratuita:
-- https://ngrok.com/
 
-2. Instalar:
+- <https://ngrok.com/>
+
+1. Instalar:
+
 ```bash
 winget install ngrok.ngrok
 ```
 
-3. Adicionar seu Auth Token:
+1. Adicionar seu Auth Token:
+
 ```bash
 ngrok config add-authtoken SEU_AUTH_TOKEN
 ```
 
-4. Iniciar túnel
+1. Iniciar túnel
+
 ```bash
 ngrok http https://localhost:7258
 ```
+
 - Irá ser gerado uma URL pública, basta adicionar em BaseUrl no UserSecrets
 
 ### Execução usando Docker
@@ -175,7 +181,9 @@ dotnet test
 - **Análise de Vulnerabilidades:** Relatórios de segurança incluídos na documentação de entrega.
 
 ## 👥 Grupo
+
 <i>Grupo78-PosTech-15SOAT</i>
+
 - **Participantes:**
   - Enrico Gollner - rm370737
   - José Dotta - rm372959
