@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AutoReparos.Application.OrdensServicos.DTOs.Request
 {
@@ -9,6 +9,8 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Request
         [Required(ErrorMessage = "Veículo é obrigatório.")]
         Guid VeiculoId,
 
-        string? Observacao
+        string? Observacao,
+        IEnumerable<AdicionarServicoDto>? Servicos = null,
+        IEnumerable<AdicionarInsumoDto>? Insumos = null
     );
 }
