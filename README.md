@@ -125,7 +125,7 @@ O Ngrok é utilizado para expor a API local para a internet, permitindo que os l
 1. Instalar:
 
 ```bash
-winget install ngrok.ngrok
+winget install ngrok -s msstore
 ```
 
 1. Adicionar seu Auth Token:
