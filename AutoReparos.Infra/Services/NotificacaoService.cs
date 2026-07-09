@@ -6,7 +6,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Globalization;
 
-namespace AutoReparos.Application.OrdensServicos.Services
+namespace AutoReparos.Infra.Services
 {
     public class NotificacaoService : INotificacaoService
     {
@@ -119,7 +119,7 @@ namespace AutoReparos.Application.OrdensServicos.Services
         <h2 style='color: #1e293b; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.025em;'>AutoReparos</h2>
         <p style='color: #64748b; margin: 4px 0 0 0; font-size: 14px;'>Atualização da Ordem de Serviço</p>
     </div>
-    
+
     <div style='margin-bottom: 24px;'>
         <p style='color: #334155; font-size: 16px; line-height: 1.6; margin: 0;'>Olá, <strong>{nomeDestinatario}</strong>,</p>
         <p style='color: #334155; font-size: 16px; line-height: 1.6; margin: 8px 0 0 0;'>

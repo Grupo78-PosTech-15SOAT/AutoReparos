@@ -1,7 +1,6 @@
 using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Auth.Services.Interfaces;
-using AutoReparos.Domain.Shared.Interfaces;
 using AutoReparos.Domain.Usuarios.Repositories;
 
 namespace AutoReparos.Application.Auth.Services

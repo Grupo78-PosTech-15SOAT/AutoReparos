@@ -1,4 +1,4 @@
-using AutoReparos.Domain.Shared.Interfaces;
+using AutoReparos.Application.Auth.Services.Interfaces;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Infra.Settings;
 using Microsoft.Extensions.Options;

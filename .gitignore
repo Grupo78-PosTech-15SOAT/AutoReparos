@@ -502,3 +502,6 @@ terraform.rc
 .sonarqube/
 .sonar/
 k8s-renderizado.yaml
+
+# Claude Code
+CLAUDE.md

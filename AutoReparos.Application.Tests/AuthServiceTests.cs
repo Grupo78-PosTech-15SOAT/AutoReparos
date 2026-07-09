@@ -1,6 +1,6 @@
 using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.Services;
-using AutoReparos.Domain.Shared.Interfaces;
+using AutoReparos.Application.Auth.Services.Interfaces;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using AutoReparos.Domain.Usuarios.Repositories;
