@@ -145,13 +145,16 @@ ngrok http https://localhost:7258
 ### Execução usando Docker
 
 1. Clone o repositório.
-2. Certifique-se de configurar as variáveis de ambiente necessárias (pode ser via arquivo `.env` na raiz ou variáveis de sistema):
+2. Copie o arquivo `.env.example` para `.env` na raiz do projeto e preencha os valores:
    - `DB_PASSWORD`: Senha do banco de dados PostgreSQL.
    - `JWT_SECRET`: Chave secreta para geração dos tokens JWT.
    - `JWT_EXPIRY_HOURS`: Tempo (em horas) para expiração do Token
    - `SEED_USER_EMAIL` e `SEED_USER_PASSWORD`: Credenciais do usuário administrativo inicial.
    - `PGADMIN_EMAIL` e `PGADMIN_PASSWORD`: Credenciais de acesso do usuário ao pgAdmin.
    - `ASPNETCORE_ENVIRONMENT`: Define o ambiente de execução do ASP.NET Core (ex: `Development` ou `Production`).
+   - `APROVACAO_TOKEN_SECRET`: Chave secreta usada para assinar o token do link de aprovação/recusa de orçamento enviado por e-mail.
+   - `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL` e `SENDGRID_FROM_NAME`: Credenciais e remetente usados para o envio de e-mails via SendGrid (ver seção "Configuração do SendGrid").
+   - `APP_BASE_URL`: URL pública da API usada nos links de aprovação/recusa enviados por e-mail (ver seção "Configuração do Ngrok").
 3. No terminal, execute:
 
    ```bash
