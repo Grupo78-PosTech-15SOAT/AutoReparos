@@ -10,16 +10,7 @@ namespace AutoReparos.API.Controllers
         IListarFilaOrdensServicoUseCase listarFilaOrdensServicoUseCase,
         IObterOrdemServicoPorIdUseCase obterOrdemServicoPorIdUseCase,
         IObterOrdemServicoPublicaPorIdUseCase obterOrdemServicoPublicaPorIdUseCase,
-        IConsultarOrdensServicoPorDocumentoOuPlacaUseCase consultarOrdensServicoPorDocumentoOuPlacaUseCase,
-        IAdicionarServicoOrdemServicoUseCase adicionarServicoOrdemServicoUseCase,
-        IAdicionarInsumoOrdemServicoUseCase adicionarInsumoOrdemServicoUseCase,
-        IIniciarDiagnosticoOrdemServicoUseCase iniciarDiagnosticoOrdemServicoUseCase,
-        IEnviarOrdemServicoParaAprovacaoUseCase enviarOrdemServicoParaAprovacaoUseCase,
-        IAprovarOrdemServicoUseCase aprovarOrdemServicoUseCase,
-        IRecusarOrdemServicoUseCase recusarOrdemServicoUseCase,
-        IIniciarServicoOrdemServicoUseCase iniciarServicoOrdemServicoUseCase,
-        IConcluirServicoOrdemServicoUseCase concluirServicoOrdemServicoUseCase,
-        IEntregarOrdemServicoUseCase entregarOrdemServicoUseCase)
+        IConsultarOrdensServicoPorDocumentoOuPlacaUseCase consultarOrdensServicoPorDocumentoOuPlacaUseCase)
     {
         public async Task<IResult> GetAll(OrdemServicoPagedRequest request)
         {
@@ -55,60 +46,6 @@ namespace AutoReparos.API.Controllers
         {
             var os = await obterOrdemServicoPorIdUseCase.ExecuteAsync(id);
             return os is null ? Results.NotFound() : Results.Ok(os);
-        }
-
-        public async Task<IResult> AdicionarServico(Guid id, AdicionarServicoDto dto)
-        {
-            await adicionarServicoOrdemServicoUseCase.ExecuteAsync(id, dto);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> AdicionarInsumo(Guid id, AdicionarInsumoDto dto)
-        {
-            await adicionarInsumoOrdemServicoUseCase.ExecuteAsync(id, dto);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> IniciarDiagnostico(Guid id)
-        {
-            await iniciarDiagnosticoOrdemServicoUseCase.ExecuteAsync(id);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> EnviarParaAprovacao(Guid id)
-        {
-            await enviarOrdemServicoParaAprovacaoUseCase.ExecuteAsync(id);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> Aprovar(string token)
-        {
-            await aprovarOrdemServicoUseCase.ExecuteAsync(token);
-            return Results.Content("Orçamento aprovado");
-        }
-
-        public async Task<IResult> Recusar(string token)
-        {
-            await recusarOrdemServicoUseCase.ExecuteAsync(token);
-            return Results.Content("Orçamento recusado");
-        }
-
-        public async Task<IResult> IniciarServico(Guid id, Guid servicoId)
-        {
-            await iniciarServicoOrdemServicoUseCase.ExecuteAsync(id, servicoId);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> ConcluirServico(Guid id, Guid servicoId)
-        {
-            await concluirServicoOrdemServicoUseCase.ExecuteAsync(id, servicoId);
-            return Results.NoContent();
-        }
-
-        public async Task<IResult> Entregar(Guid id)
-        {
-            await entregarOrdemServicoUseCase.ExecuteAsync(id);
-            return Results.NoContent();
         }
     }
 }

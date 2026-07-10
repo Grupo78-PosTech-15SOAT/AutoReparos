@@ -58,14 +58,14 @@ namespace AutoReparos.API.Endpoints
             group.MapPost("/{id:guid}/servicos", (
                 Guid id,
                 AdicionarServicoDto dto,
-                OrdemServicoController controller) => controller.AdicionarServico(id, dto))
+                OrdemServicoFluxoController controller) => controller.AdicionarServico(id, dto))
             .WithName("AdicionarServico")
             .WithSummary("Adiciona um serviço à ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPost("/{id:guid}/insumos", (Guid id, AdicionarInsumoDto dto, OrdemServicoController controller) => controller.AdicionarInsumo(id, dto))
+            group.MapPost("/{id:guid}/insumos", (Guid id, AdicionarInsumoDto dto, OrdemServicoFluxoController controller) => controller.AdicionarInsumo(id, dto))
             .WithName("AdicionarInsumo")
             .WithSummary("Adiciona um insumo à ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
@@ -74,7 +74,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapPatch("/{id:guid}/iniciar-diagnostico", (
                 Guid id,
-                OrdemServicoController controller) => controller.IniciarDiagnostico(id))
+                OrdemServicoFluxoController controller) => controller.IniciarDiagnostico(id))
             .WithName("IniciarDiagnostico")
             .WithSummary("Inicia o diagnóstico da ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
@@ -83,7 +83,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapPatch("/{id:guid}/enviar-para-aprovacao", (
                 Guid id,
-                OrdemServicoController controller) => controller.EnviarParaAprovacao(id))
+                OrdemServicoFluxoController controller) => controller.EnviarParaAprovacao(id))
             .WithName("EnviarParaAprovacao")
             .WithSummary("Envia a ordem de serviço para aprovação do cliente")
             .Produces(StatusCodes.Status204NoContent)
@@ -92,7 +92,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapGet("/aprovar", (
                 string token,
-                OrdemServicoController controller) => controller.Aprovar(token))
+                OrdemServicoAprovacaoController controller) => controller.Aprovar(token))
             .WithName("AprovarOrdemServico")
             .WithSummary("Aprova a ordem de serviço")
             .Produces(StatusCodes.Status200OK)
@@ -102,7 +102,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapGet("/recusar", (
                 string token,
-                OrdemServicoController controller) => controller.Recusar(token))
+                OrdemServicoAprovacaoController controller) => controller.Recusar(token))
             .WithName("RecusarOrdemServico")
             .WithSummary("Recusa a ordem de serviço")
             .Produces(StatusCodes.Status200OK)
@@ -113,7 +113,7 @@ namespace AutoReparos.API.Endpoints
             group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/iniciar", (
                 Guid id,
                 Guid servicoId,
-                OrdemServicoController controller) => controller.IniciarServico(id, servicoId))
+                OrdemServicoFluxoController controller) => controller.IniciarServico(id, servicoId))
             .WithName("IniciarServico")
             .WithSummary("Inicia a execução de um serviço da OS")
             .RequireAuthorization()
@@ -124,7 +124,7 @@ namespace AutoReparos.API.Endpoints
             group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/concluir", (
                 Guid id,
                 Guid servicoId,
-                OrdemServicoController controller) => controller.ConcluirServico(id, servicoId))
+                OrdemServicoFluxoController controller) => controller.ConcluirServico(id, servicoId))
             .WithName("ConcluirServico")
             .WithSummary("Marca um serviço da OS como concluído")
             .Produces(StatusCodes.Status204NoContent)
@@ -133,7 +133,7 @@ namespace AutoReparos.API.Endpoints
 
             group.MapPatch("/{id:guid}/entregar", (
                 Guid id,
-                OrdemServicoController controller) => controller.Entregar(id))
+                OrdemServicoFluxoController controller) => controller.Entregar(id))
             .WithName("EntregarOrdemServico")
             .WithSummary("Registra a entrega do veículo ao cliente")
             .Produces(StatusCodes.Status204NoContent)

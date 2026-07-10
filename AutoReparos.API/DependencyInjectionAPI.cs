@@ -58,6 +58,8 @@ namespace AutoReparos.API
             services.AddScoped<ServicoController>();
             services.AddScoped<InsumoController>();
             services.AddScoped<OrdemServicoController>();
+            services.AddScoped<OrdemServicoFluxoController>();
+            services.AddScoped<OrdemServicoAprovacaoController>();
 
             return services;
         }
