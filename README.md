@@ -55,9 +55,9 @@ O **PostgreSQL** foi escolhido por ser um banco de dados relacional de código a
 O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Design (DDD)**:
 
 - **AutoReparos.Domain:** Núcleo da aplicação contendo Entidades, Value Objects, Enums, Exceções de Domínio e Interfaces de Repositório.
-- **AutoReparos.Application:** Camada de lógica de aplicação, DTOs e serviços.
+- **AutoReparos.Application:** Camada de lógica de aplicação, com um Caso de Uso (UseCase) por operação de negócio, DTOs e Mappers.
 - **AutoReparos.Infra:** Implementação de persistência (EF Core), Repositórios, Identidade e configurações de infraestrutura.
-- **AutoReparos.API:** Ponto de entrada da aplicação, contendo os Endpoints e Handlers de exceção global.
+- **AutoReparos.API:** Ponto de entrada da aplicação, contendo os Endpoints (Minimal APIs), Controllers que orquestram os Casos de Uso e Handlers de exceção global.
 
 ## ▶️ Como Executar
 
