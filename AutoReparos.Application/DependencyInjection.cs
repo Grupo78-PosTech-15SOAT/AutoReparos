@@ -1,17 +1,17 @@
-﻿using AutoReparos.Application.Auth.Services;
-using AutoReparos.Application.Auth.Services.Interfaces;
-using AutoReparos.Application.Clientes.Services;
-using AutoReparos.Application.Clientes.Services.Interfaces;
-using AutoReparos.Application.Insumos.Services;
-using AutoReparos.Application.Insumos.Services.Interfaces;
-using AutoReparos.Application.OrdensServicos.Services;
-using AutoReparos.Application.OrdensServicos.Services.Interfaces;
-using AutoReparos.Application.Servicos.Services;
-using AutoReparos.Application.Servicos.Services.Interfaces;
-using AutoReparos.Application.Usuarios.Services;
-using AutoReparos.Application.Usuarios.Services.Interfaces;
-using AutoReparos.Application.Veiculos.Services;
-using AutoReparos.Application.Veiculos.Services.Interfaces;
+using AutoReparos.Application.Auth.UseCases;
+using AutoReparos.Application.Auth.UseCases.Interfaces;
+using AutoReparos.Application.Clientes.UseCases;
+using AutoReparos.Application.Clientes.UseCases.Interfaces;
+using AutoReparos.Application.Insumos.UseCases;
+using AutoReparos.Application.Insumos.UseCases.Interfaces;
+using AutoReparos.Application.OrdensServicos.UseCases;
+using AutoReparos.Application.OrdensServicos.UseCases.Interfaces;
+using AutoReparos.Application.Servicos.UseCases;
+using AutoReparos.Application.Servicos.UseCases.Interfaces;
+using AutoReparos.Application.Usuarios.UseCases;
+using AutoReparos.Application.Usuarios.UseCases.Interfaces;
+using AutoReparos.Application.Veiculos.UseCases;
+using AutoReparos.Application.Veiculos.UseCases.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoReparos.Application
@@ -19,19 +19,71 @@ namespace AutoReparos.Application
     public static class DependencyInjection
     {
         /// <summary>
-        /// Método de extensão para registrar serviços relacionados à camada de Application
+        /// Método de extensão para registrar os casos de uso da camada de Application
         /// </summary>
         /// <param name="services">Collection de serviços da aplicação</param>
-        /// <returns>Collection de services com os serviços de Application registrados</returns>
+        /// <returns>Collection de services com os casos de uso de Application registrados</returns>
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUsuarioService, UsuarioService>();
-            services.AddScoped<IClienteService, ClienteService>();
-            services.AddScoped<IVeiculoService, VeiculoService>();
-            services.AddScoped<IServicoService, ServicoService>();
-            services.AddScoped<IInsumoService, InsumoService>();
-            services.AddScoped<IOrdemServicoService, OrdemServicoService>();
+            // Auth
+            services.AddScoped<ILoginUseCase, LoginUseCase>();
+
+            // Usuários
+            services.AddScoped<ICriarUsuarioUseCase, CriarUsuarioUseCase>();
+            services.AddScoped<IObterUsuarioPorIdUseCase, ObterUsuarioPorIdUseCase>();
+            services.AddScoped<IListarUsuariosUseCase, ListarUsuariosUseCase>();
+            services.AddScoped<IAtualizarUsuarioUseCase, AtualizarUsuarioUseCase>();
+            services.AddScoped<IExcluirUsuarioUseCase, ExcluirUsuarioUseCase>();
+
+            // Clientes
+            services.AddScoped<ICriarClienteUseCase, CriarClienteUseCase>();
+            services.AddScoped<IObterClientePorIdUseCase, ObterClientePorIdUseCase>();
+            services.AddScoped<IListarClientesUseCase, ListarClientesUseCase>();
+            services.AddScoped<IAtualizarClienteUseCase, AtualizarClienteUseCase>();
+            services.AddScoped<IExcluirClienteUseCase, ExcluirClienteUseCase>();
+
+            // Veículos
+            services.AddScoped<ICriarVeiculoUseCase, CriarVeiculoUseCase>();
+            services.AddScoped<IListarVeiculosUseCase, ListarVeiculosUseCase>();
+            services.AddScoped<IObterVeiculoPorIdUseCase, ObterVeiculoPorIdUseCase>();
+            services.AddScoped<IObterVeiculoPorPlacaUseCase, ObterVeiculoPorPlacaUseCase>();
+            services.AddScoped<IAtualizarVeiculoUseCase, AtualizarVeiculoUseCase>();
+            services.AddScoped<IExcluirVeiculoUseCase, ExcluirVeiculoUseCase>();
+
+            // Serviços
+            services.AddScoped<ICriarServicoUseCase, CriarServicoUseCase>();
+            services.AddScoped<IObterServicoPorIdUseCase, ObterServicoPorIdUseCase>();
+            services.AddScoped<IListarServicosUseCase, ListarServicosUseCase>();
+            services.AddScoped<IObterTempoMedioServicosUseCase, ObterTempoMedioServicosUseCase>();
+            services.AddScoped<IObterTempoMedioServicoPorIdUseCase, ObterTempoMedioServicoPorIdUseCase>();
+            services.AddScoped<IAtualizarServicoUseCase, AtualizarServicoUseCase>();
+            services.AddScoped<IExcluirServicoUseCase, ExcluirServicoUseCase>();
+
+            // Insumos
+            services.AddScoped<ICriarInsumoUseCase, CriarInsumoUseCase>();
+            services.AddScoped<IObterInsumoPorIdUseCase, ObterInsumoPorIdUseCase>();
+            services.AddScoped<IListarInsumosUseCase, ListarInsumosUseCase>();
+            services.AddScoped<IAtualizarInsumoUseCase, AtualizarInsumoUseCase>();
+            services.AddScoped<IAdicionarEstoqueUseCase, AdicionarEstoqueUseCase>();
+            services.AddScoped<IRemoverEstoqueUseCase, RemoverEstoqueUseCase>();
+            services.AddScoped<IExcluirInsumoUseCase, ExcluirInsumoUseCase>();
+
+            // Ordens de Serviço
+            services.AddScoped<ICriarOrdemServicoUseCase, CriarOrdemServicoUseCase>();
+            services.AddScoped<IListarOrdensServicoUseCase, ListarOrdensServicoUseCase>();
+            services.AddScoped<IListarFilaOrdensServicoUseCase, ListarFilaOrdensServicoUseCase>();
+            services.AddScoped<IObterOrdemServicoPorIdUseCase, ObterOrdemServicoPorIdUseCase>();
+            services.AddScoped<IObterOrdemServicoPublicaPorIdUseCase, ObterOrdemServicoPublicaPorIdUseCase>();
+            services.AddScoped<IConsultarOrdensServicoPorDocumentoOuPlacaUseCase, ConsultarOrdensServicoPorDocumentoOuPlacaUseCase>();
+            services.AddScoped<IAdicionarServicoOrdemServicoUseCase, AdicionarServicoOrdemServicoUseCase>();
+            services.AddScoped<IAdicionarInsumoOrdemServicoUseCase, AdicionarInsumoOrdemServicoUseCase>();
+            services.AddScoped<IIniciarDiagnosticoOrdemServicoUseCase, IniciarDiagnosticoOrdemServicoUseCase>();
+            services.AddScoped<IEnviarOrdemServicoParaAprovacaoUseCase, EnviarOrdemServicoParaAprovacaoUseCase>();
+            services.AddScoped<IAprovarOrdemServicoUseCase, AprovarOrdemServicoUseCase>();
+            services.AddScoped<IRecusarOrdemServicoUseCase, RecusarOrdemServicoUseCase>();
+            services.AddScoped<IIniciarServicoOrdemServicoUseCase, IniciarServicoOrdemServicoUseCase>();
+            services.AddScoped<IConcluirServicoOrdemServicoUseCase, ConcluirServicoOrdemServicoUseCase>();
+            services.AddScoped<IEntregarOrdemServicoUseCase, EntregarOrdemServicoUseCase>();
 
             return services;
         }

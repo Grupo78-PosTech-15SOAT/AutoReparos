@@ -1,3 +1,4 @@
+using AutoReparos.API.Controllers;
 using AutoReparos.API.Handlers;
 using AutoReparos.Infra.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,6 +50,14 @@ namespace AutoReparos.API
             });
 
             services.AddAuthorization();
+
+            services.AddScoped<AuthController>();
+            services.AddScoped<UsuarioController>();
+            services.AddScoped<ClienteController>();
+            services.AddScoped<VeiculoController>();
+            services.AddScoped<ServicoController>();
+            services.AddScoped<InsumoController>();
+            services.AddScoped<OrdemServicoController>();
 
             return services;
         }
