@@ -1,5 +1,5 @@
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
-using AutoReparos.Application.OrdensServicos.UseCases.Interfaces;
+using AutoReparos.Application.OrdensServicos.UseCases.Core.Interfaces;
 using AutoReparos.Application.Shared;
 
 namespace AutoReparos.API.Controllers

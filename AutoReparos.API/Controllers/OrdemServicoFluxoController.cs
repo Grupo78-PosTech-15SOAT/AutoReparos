@@ -1,5 +1,5 @@
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
-using AutoReparos.Application.OrdensServicos.UseCases.Interfaces;
+using AutoReparos.Application.OrdensServicos.UseCases.Fluxo.Interfaces;
 
 namespace AutoReparos.API.Controllers
 {

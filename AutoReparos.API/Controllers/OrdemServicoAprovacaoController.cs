@@ -1,4 +1,4 @@
-using AutoReparos.Application.OrdensServicos.UseCases.Interfaces;
+using AutoReparos.Application.OrdensServicos.UseCases.Aprovacao.Interfaces;
 
 namespace AutoReparos.API.Controllers
 {
