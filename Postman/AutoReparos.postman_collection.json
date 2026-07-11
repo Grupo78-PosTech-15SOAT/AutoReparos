@@ -1473,27 +1473,53 @@
           "name": "AprovarOrdemServico",
           "request": {
             "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
+              "type": "noauth"
             },
-            "method": "PATCH",
+            "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/aprovar",
+              "raw": "{{baseUrl}}/api/ordem-servico/aprovar?token={{tokenAprovacao}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "ordem-servico",
-                "{{ordemServicoId}}",
                 "aprovar"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAprovacao}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RecusarOrdemServico",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordem-servico/recusar?token={{tokenAprovacao}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordem-servico",
+                "recusar"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{tokenAprovacao}}"
+                }
               ]
             }
           },
@@ -1515,7 +1541,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/iniciar",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1525,7 +1551,7 @@
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
-                "Iniciar"
+                "iniciar"
               ]
             }
           },
@@ -1802,6 +1828,23 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [
