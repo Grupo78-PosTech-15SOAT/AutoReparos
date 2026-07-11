@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Kubernetes / Helm local secrets
+k8s/values-secrets.yaml

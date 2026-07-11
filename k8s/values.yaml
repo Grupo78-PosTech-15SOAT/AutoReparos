@@ -1,0 +1,53 @@
+replicaCount: 2
+
+image:
+  repository: autoreparos-api
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: autoreparos.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+postgres:
+  image: postgres:16
+  database: autoreparos
+  user: admin
+  password: "CHANGE_ME"
+  storageSize: 2Gi
+
+config:
+  jwtExpiryHours: "2"
+  seedUserEmail: "admin@autoreparos.com"
+  sendGridFromEmail: "noreply@autoreparos.com"
+  sendGridFromName: "AutoReparos"
+  appBaseUrl: "http://autoreparos.local"
+
+secrets:
+  jwtSecret: "DUMMY_JWT_SECRET_KEY_MINIMUM_32_CHARACTERS"
+  seedUserPassword: "DUMMY_SEED_USER_PASSWORD_123"
+  aprovacaoTokenSecret: "DUMMY_APPROVAL_TOKEN_SECRET_KEY"
+  sendGridApiKey: "SG.dummy_key_placeholder"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 40
+  targetMemoryUtilizationPercentage: 40

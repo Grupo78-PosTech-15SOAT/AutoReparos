@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "k8s.fullname" . }}-postgres-pvc
+  labels:
+    {{- include "k8s.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeName: {{ include "k8s.fullname" . }}-postgres-pv
+  storageClassName: ""
+  resources:
+    requests:
+      storage: {{ .Values.postgres.storageSize }}

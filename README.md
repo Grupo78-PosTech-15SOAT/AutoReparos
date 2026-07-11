@@ -160,6 +160,50 @@ ngrok http https://localhost:7258
 4. A API estará disponível em: `http://localhost:8080`
 5. Acesse a documentação Swagger em: `http://localhost:8080/swagger`
 
+### Execução no Kubernetes (Helm)
+
+A aplicação está preparada para ser implantada em um cluster Kubernetes local ou em produção utilizando o Helm.
+
+#### Pré-requisitos
+* Cluster Kubernetes ativo (ex: [Minikube](https://minikube.sigs.k8s.io/) ou [Kind](https://kind.sigs.k8s.io/)).
+* CLI do [Helm](https://helm.sh/) instalada.
+* [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/) habilitado no seu cluster (no Minikube: `minikube addons enable ingress`).
+
+#### Passo a Passo para Deploy Local
+
+1. **Configurar Segredos Locais:**
+   Crie um arquivo chamado `k8s/values-secrets.yaml` na raiz do projeto (este arquivo já está configurado no `.gitignore` para não ser commitado no GitHub). Insira as credenciais de teste reais:
+   ```yaml
+   postgres:
+     password: "admin123"
+
+   secrets:
+     jwtSecret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+     seedUserPassword: "Admin@123"
+     aprovacaoTokenSecret: "another_super_secret_key_for_approval_tokens_with_enough_length"
+     sendGridApiKey: "SG.dummy_key"
+   ```
+
+2. **Instalar o Helm Chart:**
+   Execute o comando de instalação/atualização a partir da raiz do projeto:
+   ```bash
+   helm upgrade --install autoreparos ./k8s -f k8s/values.yaml -f k8s/values-secrets.yaml
+   ```
+
+3. **Mapeamento do DNS Local (Ingress):**
+   Obtenha o IP do seu cluster Kubernetes (no Minikube: `minikube ip`). Adicione o mapeamento do DNS local no seu arquivo `/etc/hosts` (ou `hosts` do Windows):
+   ```text
+   <IP_DO_CLUSTER> autoreparos.local
+   ```
+   A API estará acessível publicamente via: `http://autoreparos.local` e o Swagger em `http://autoreparos.local/swagger`.
+
+4. **Verificar os Recursos e o HPA:**
+   Para acompanhar a subida dos pods da API, do banco Postgres e as regras de auto-escalonamento (HPA) rodando a 40% de CPU/Memória:
+   ```bash
+   kubectl get pods -w
+   kubectl get hpa
+   ```
+
 ### Scripts de Desenvolvimento
 
 Existem scripts auxiliares para facilitar tarefas comuns:
