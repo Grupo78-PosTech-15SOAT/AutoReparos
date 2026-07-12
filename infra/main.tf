@@ -31,3 +31,11 @@ module "addons" {
 
   depends_on = [module.eks]
 }
+
+module "ecr" {
+  source = "./modules/ecr"
+
+  repository_name = "autoreparos-api"
+  environment     = var.environment
+}
+

@@ -32,3 +32,9 @@ output "ebs_csi_addon_arn" {
   value       = module.addons.ebs_csi_addon_arn
   description = "ARN of the EBS CSI driver addon"
 }
+
+output "ecr_repository_url" {
+  value       = module.ecr.repository_url
+  description = "The URL of the ECR repository"
+}
+
