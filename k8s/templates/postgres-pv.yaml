@@ -1,3 +1,4 @@
+{{- if and .Values.postgres.persistence.enabled (or (empty .Values.postgres.persistence.storageClass) (eq .Values.postgres.persistence.storageClass "hostpath")) -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -12,3 +13,5 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: "/mnt/data/postgres"
+{{- end }}
+

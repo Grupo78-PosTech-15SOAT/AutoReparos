@@ -24,6 +24,10 @@ postgres:
   user: admin
   password: "CHANGE_ME"
   storageSize: 2Gi
+  persistence:
+    enabled: true
+    storageClass: "hostpath" # Definir como "gp3" no AWS EKS (CSI dynamic driver) ou "hostpath" / "" para local
+
 
 config:
   jwtExpiryHours: "2"
@@ -48,6 +52,6 @@ resources:
 
 hpa:
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 40
   targetMemoryUtilizationPercentage: 40

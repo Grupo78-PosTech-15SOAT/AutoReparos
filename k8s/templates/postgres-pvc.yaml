@@ -1,3 +1,4 @@
+{{- if .Values.postgres.persistence.enabled -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -7,8 +8,14 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  {{- if and (not (empty .Values.postgres.persistence.storageClass)) (ne .Values.postgres.persistence.storageClass "hostpath") }}
+  storageClassName: {{ .Values.postgres.persistence.storageClass | quote }}
+  {{- else }}
   volumeName: {{ include "k8s.fullname" . }}-postgres-pv
   storageClassName: ""
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.postgres.storageSize }}
+{{- end }}
+
