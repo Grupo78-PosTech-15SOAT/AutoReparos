@@ -151,6 +151,7 @@ ngrok http https://localhost:7258
    - `JWT_EXPIRY_HOURS`: Tempo (em horas) para expiração do Token
    - `SEED_USER_EMAIL` e `SEED_USER_PASSWORD`: Credenciais do usuário administrativo inicial.
    - `PGADMIN_EMAIL` e `PGADMIN_PASSWORD`: Credenciais de acesso do usuário ao pgAdmin.
+   - `ASPNETCORE_ENVIRONMENT`: Define o ambiente de execução do ASP.NET Core (ex: `Development` ou `Production`).
 3. No terminal, execute:
 
    ```bash

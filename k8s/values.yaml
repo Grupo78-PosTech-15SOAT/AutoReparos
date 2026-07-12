@@ -13,7 +13,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: autoreparos.local
+    - host: ""
       paths:
         - path: /
           pathType: Prefix
@@ -22,7 +22,7 @@ postgres:
   image: postgres:16
   database: autoreparos
   user: admin
-  password: "CHANGE_ME"
+  password: "admin123"
   storageSize: 2Gi
   persistence:
     enabled: true
@@ -30,6 +30,7 @@ postgres:
 
 
 config:
+  aspnetcoreEnvironment: "Development"
   jwtExpiryHours: "2"
   seedUserEmail: "admin@autoreparos.com"
   sendGridFromEmail: "noreply@autoreparos.com"
@@ -37,10 +38,10 @@ config:
   appBaseUrl: "http://autoreparos.local"
 
 secrets:
-  jwtSecret: "DUMMY_JWT_SECRET_KEY_MINIMUM_32_CHARACTERS"
-  seedUserPassword: "DUMMY_SEED_USER_PASSWORD_123"
-  aprovacaoTokenSecret: "DUMMY_APPROVAL_TOKEN_SECRET_KEY"
-  sendGridApiKey: "SG.dummy_key_placeholder"
+  jwtSecret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+  seedUserPassword: "Admin@123"
+  aprovacaoTokenSecret: "another_super_secret_key_for_approval_tokens_with_enough_length"
+  sendGridApiKey: "SG.dummy_key"
 
 resources:
   requests:
