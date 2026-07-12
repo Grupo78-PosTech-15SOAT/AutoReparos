@@ -123,7 +123,7 @@ resource "helm_release" "prometheus_stack" {
   namespace        = "monitoring"
   create_namespace = true
 
-  # Optimizing resource requests for academic sandbox / t3.medium
+  # Optimizing resource requests for academic sandbox / t3.small
   values = [
     <<-EOT
     prometheus:

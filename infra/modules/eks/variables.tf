@@ -16,8 +16,9 @@ variable "private_subnet_ids" {
 variable "instance_types" {
   type        = list(string)
   description = "EC2 instance types for EKS nodes"
-  default     = ["t3.medium"]
+  default     = ["t3.small"]
 }
+
 
 variable "desired_size" {
   type        = number

@@ -43,8 +43,9 @@ variable "availability_zones" {
 variable "instance_types" {
   type        = list(string)
   description = "Worker nodes EC2 instance types"
-  default     = ["t3.medium"]
+  default     = ["t3.small"]
 }
+
 
 variable "desired_size" {
   type        = number
