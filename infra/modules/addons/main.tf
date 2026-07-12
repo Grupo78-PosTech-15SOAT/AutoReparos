@@ -55,6 +55,24 @@ resource "aws_eks_addon" "ebs_csi" {
 }
 
 # -------------------------------------------------------------
+# Kubernetes Storage Class: GP3 (using EBS CSI Driver)
+# -------------------------------------------------------------
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+  }
+  storage_provisioner = "ebs.csi.aws.com"
+  volume_binding_mode = "WaitForFirstConsumer"
+  parameters = {
+    type = "gp3"
+  }
+
+  depends_on = [
+    aws_eks_addon.ebs_csi
+  ]
+}
+
+# -------------------------------------------------------------
 # Helm Release: Metrics Server (for horizontal pod autoscaler)
 # -------------------------------------------------------------
 resource "helm_release" "metrics_server" {
@@ -138,6 +156,7 @@ resource "helm_release" "prometheus_stack" {
   ]
 
   depends_on = [
-    aws_eks_addon.ebs_csi
+    aws_eks_addon.ebs_csi,
+    kubernetes_storage_class_v1.gp3
   ]
 }
