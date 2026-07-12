@@ -18,6 +18,11 @@ terraform {
       version = "~> 4.0"
     }
   }
+
+  backend "s3" {
+    key    = "state/terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 
 provider "aws" {

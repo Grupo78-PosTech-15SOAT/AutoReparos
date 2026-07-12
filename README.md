@@ -165,14 +165,17 @@ ngrok http https://localhost:7258
 A aplicação está preparada para ser implantada em um cluster Kubernetes local ou em produção utilizando o Helm.
 
 #### Pré-requisitos
-* Cluster Kubernetes ativo (ex: [Minikube](https://minikube.sigs.k8s.io/) ou [Kind](https://kind.sigs.k8s.io/)).
-* CLI do [Helm](https://helm.sh/) instalada.
-* [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/) habilitado no seu cluster (no Minikube: `minikube addons enable ingress`).
+
+- Cluster Kubernetes ativo (ex: [Minikube](https://minikube.sigs.k8s.io/) ou [Kind](https://kind.sigs.k8s.io/)).
+
+- CLI do [Helm](https://helm.sh/) instalada.
+- [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/) habilitado no seu cluster (no Minikube: `minikube addons enable ingress`).
 
 #### Passo a Passo para Deploy Local
 
 1. **Configurar Segredos Locais:**
    Crie um arquivo chamado `k8s/values-secrets.yaml` na raiz do projeto (este arquivo já está configurado no `.gitignore` para não ser commitado no GitHub). Insira as credenciais de teste reais:
+
    ```yaml
    postgres:
      password: "admin123"
@@ -186,19 +189,23 @@ A aplicação está preparada para ser implantada em um cluster Kubernetes local
 
 2. **Instalar o Helm Chart:**
    Execute o comando de instalação/atualização a partir da raiz do projeto:
+
    ```bash
    helm upgrade --install autoreparos ./k8s -f k8s/values.yaml -f k8s/values-secrets.yaml
    ```
 
 3. **Mapeamento do DNS Local (Ingress):**
    Obtenha o IP do seu cluster Kubernetes (no Minikube: `minikube ip`). Adicione o mapeamento do DNS local no seu arquivo `/etc/hosts` (ou `hosts` do Windows):
+
    ```text
    <IP_DO_CLUSTER> autoreparos.local
    ```
+
    A API estará acessível publicamente via: `http://autoreparos.local` e o Swagger em `http://autoreparos.local/swagger`.
 
 4. **Verificar os Recursos e o HPA:**
    Para acompanhar a subida dos pods da API, do banco Postgres e as regras de auto-escalonamento (HPA) rodando a 40% de CPU/Memória:
+
    ```bash
    kubectl get pods -w
    kubectl get hpa
@@ -210,6 +217,38 @@ Existem scripts auxiliares para facilitar tarefas comuns:
 
 - **Linux/macOS:** `./dev.sh {run|watch|db-update|mig-add|restore}`
 - **Windows (PowerShell):** `./dev.ps1 -Action {run|watch|db-update|mig-add|restore}`
+
+## ☁️ Infraestrutura como Código (Terraform)
+
+A infraestrutura na AWS (VPC, EKS, Addons) é provisionada como código utilizando o Terraform (arquivos sob a pasta [infra](./infra)).
+
+Por questões de segurança e colaboração, o estado do Terraform está configurado para salvar em um **backend remoto no AWS S3** de forma parcial (sem fixar o nome do bucket diretamente no código).
+
+### 1. Criar o Bucket S3 Prévio
+
+Antes de rodar o Terraform, você precisa ter um bucket S3 criado na sua conta AWS na região `us-east-1`. Crie-o pela console web da AWS ou via AWS CLI:
+
+```bash
+aws s3api create-bucket --bucket O-NOME-DO-SEU-BUCKET-AQUI --region us-east-1
+```
+
+### 2. Inicializar o Terraform (Configuração Parcial)
+
+Acesse a pasta `/infra` e inicialize informando o nome do seu bucket dinamicamente (ou via variável de ambiente):
+
+```bash
+cd infra
+terraform init -backend-config="bucket=O-NOME-DO-SEU-BUCKET-AQUI"
+```
+
+*(Caso queira migrar um estado existente ou reconfigurar para um novo bucket, adicione a flag `--reconfigure` ao final)*
+
+### 3. Validar e Executar o Plan
+
+```bash
+terraform validate
+terraform plan
+```
 
 ## 🧪 Testes
 
