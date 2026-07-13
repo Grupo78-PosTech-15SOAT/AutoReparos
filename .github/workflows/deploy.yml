@@ -1,0 +1,144 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.dockerignore'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - '.dockerignore'
+
+env:
+  # Região padrão da AWS
+  AWS_REGION: "us-east-1"
+  
+  # Configurações do Aplicativo (não-sensíveis)
+  SEED_USER_EMAIL: "admin@autoreparos.com"
+  SENDGRID_FROM_EMAIL: "noreply@autoreparos.com"
+  SENDGRID_FROM_NAME: "AutoReparos"
+  APP_BASE_URL: "http://autoreparos.production"
+
+  # Variáveis de ambiente para execução dos testes dotnet test
+  ConnectionStrings__DbConnection: "Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
+  Jwt__Secret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+  Jwt__ExpiryHours: "2"
+  SeedUser__Email: "admin@autoreparos.com"
+  SeedUser__Password: "Admin@123"
+  AprovacaoToken__Secret: "another_super_secret_key_for_approval_tokens_with_enough_length"
+  SendGrid__ApiKey: "SG.dummy_key"
+  SendGrid__FromEmail: "noreply@autoreparos.com"
+  SendGrid__FromName: "AutoReparos"
+  App__BaseUrl: "http://localhost:8080"
+
+jobs:
+  # 🧪 Job 1: Build & Test (Executa para Pull Requests)
+  build-and-test:
+    if: github.event_name == 'pull_request'
+    name: Build & Test (PR Validation)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore AutoReparos.slnx
+
+    - name: Build Application
+      run: dotnet build AutoReparos.slnx --no-restore -c Release
+
+    - name: Run Tests
+      run: dotnet test AutoReparos.slnx --no-build --verbosity normal
+
+  # 🚀 Job 2: Build, Test & Deploy (Executa na branch main após merge/push)
+  build-test-deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Build, Test, Provision & Deploy (Main Branch)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore AutoReparos.slnx
+
+    - name: Build Application
+      run: dotnet build AutoReparos.slnx --no-restore -c Release
+
+    - name: Run Tests
+      run: dotnet test AutoReparos.slnx --no-build --verbosity normal
+
+    # ☁️ Provisionamento de Infraestrutura via Terraform
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Init & Apply
+      working-directory: infra
+      run: |
+        terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+        terraform apply -auto-approve
+        # Exporta variáveis geradas pelo Terraform para uso nos passos de Docker e Helm
+        echo "ECR_REPOSITORY_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
+        echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+
+    # 🐳 Build e Push de Imagens Docker para ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build, Tag and Push Image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG -t $ECR_REGISTRY/autoreparos-api:latest .
+        docker push $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG
+        docker push $ECR_REGISTRY/autoreparos-api:latest
+
+    # ☸️ Deploy no Kubernetes (EKS) via Helm
+    - name: Update Kubeconfig
+      run: |
+        aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+    - name: Helm Upgrade Deploy
+      run: |
+        helm upgrade --install autoreparos ./k8s \
+          -f k8s/values.yaml \
+          -f k8s/values-production.yaml \
+          --set image.repository=${{ env.ECR_REPOSITORY_URL }} \
+          --set image.tag=${{ github.sha }} \
+          --set config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
+          --set config.sendGridFromEmail="${{ env.SENDGRID_FROM_EMAIL }}" \
+          --set config.sendGridFromName="${{ env.SENDGRID_FROM_NAME }}" \
+          --set config.appBaseUrl="${{ env.APP_BASE_URL }}" \
+          --set secrets.jwtSecret="${{ secrets.JWT_SECRET }}" \
+          --set secrets.seedUserPassword="${{ secrets.SEED_USER_PASSWORD }}" \
+          --set secrets.aprovacaoTokenSecret="${{ secrets.APROVACAO_TOKEN_SECRET }}" \
+          --set secrets.sendGridApiKey="${{ secrets.SENDGRID_API_KEY }}" \
+          --set postgres.password="${{ secrets.POSTGRES_PASSWORD }}"
