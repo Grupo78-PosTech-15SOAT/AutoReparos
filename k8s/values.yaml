@@ -22,7 +22,7 @@ postgres:
   image: postgres:16
   database: autoreparos
   user: admin
-  password: "admin123"
+  password: ""
   storageSize: 2Gi
   persistence:
     enabled: true
@@ -38,10 +38,10 @@ config:
   appBaseUrl: "http://autoreparos.local"
 
 secrets:
-  jwtSecret: "development-only-jwt-secret-key-32-chars"
-  seedUserPassword: "DevelopmentPassword123!"
-  aprovacaoTokenSecret: "development-only-approval-token-secret-key"
-  sendGridApiKey: "development-only-sendgrid-api-key-placeholder"
+  jwtSecret: ""
+  seedUserPassword: ""
+  aprovacaoTokenSecret: ""
+  sendGridApiKey: ""
 
 resources:
   requests:
