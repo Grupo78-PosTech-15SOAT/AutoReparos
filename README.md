@@ -251,6 +251,20 @@ terraform validate
 terraform plan
 ```
 
+## 🔄 Integração Contínua e Entrega Contínua (CI/CD)
+
+A pipeline de CI/CD é gerenciada pelo GitHub Actions (veja o arquivo [.github/workflows/deploy.yml](.github/workflows/deploy.yml)) e está dividida em dois fluxos principais:
+
+1. **Validação de Pull Requests (CI):** Disparado em qualquer PR direcionado à branch `main`. Realiza o restore, build e executa a suíte de testes unitários e de integração utilizando **Testcontainers** para instanciar um banco PostgreSQL efêmero em Docker.
+2. **Deploy Contínuo (CD):** Disparado em pushes/merges na branch `main`. Executa novamente a etapa de testes, inicializa/aplica o provisionamento da infraestrutura via **Terraform** na AWS (EKS, ECR, VPC), constrói e envia as imagens Docker para o AWS ECR com tags de SHA/latest, e atualiza os pods do cluster Kubernetes via **Helm Upgrade**.
+
+### ⚙️ Decisões de Projeto de CI/CD e Infraestrutura
+
+Para simplificar a topologia da Fase 2 e garantir a estabilidade do fluxo de deploy, as seguintes decisões técnicas foram adotadas e registradas no projeto:
+
+- **Namespace Único (default):** A aplicação inteira (API, banco de dados Postgres StatefulSet e HPA) executa diretamente no namespace `default`, que é de uso exclusivo da solução. Não há divisão de namespaces no Kubernetes para esta fase.
+- **Prevenção de Concorrência (Concurrency Control):** O workflow do GitHub Actions possui uma política de concorrência definida que cancela pipelines anteriores em andamento se novos commits forem enviados para a mesma branch. Isso previne concorrências indesejadas no Terraform, evitando travar o estado remoto (state lock) no S3.
+
 ## 🧪 Testes
 
 Para executar o conjunto de testes (Unitários e Integração):
@@ -267,6 +281,7 @@ Para rodar a análise estática e verificar a qualidade do código com o SonarQu
 
 - **DDD:** A documentação estratégica (Event Storming, Linguagem Ubíqua e Diagramas) pode ser consultada pelo [Miro](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405).
 - **Análise de Vulnerabilidades:** Relatórios de segurança incluídos na documentação de entrega.
+- **Collection Postman:** A collection completa para teste das APIs está disponível em [AutoReparos.postman_collection.json](Postman/AutoReparos.postman_collection.json).
 
 ## 👥 Grupo
 

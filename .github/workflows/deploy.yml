@@ -1,14 +1,18 @@
 name: CI/CD Pipeline
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
-    branches: [ main ]
+    branches: [ feat/cicd ]
     paths-ignore:
       - '**.md'
       - '.gitignore'
       - '.dockerignore'
   pull_request:
-    branches: [ main ]
+    branches: [ feat/cicd ]
     paths-ignore:
       - '**.md'
       - '.gitignore'
@@ -61,10 +65,10 @@ jobs:
     - name: Run Tests
       run: dotnet test AutoReparos.slnx --no-build --verbosity normal
 
-  # 🚀 Job 2: Build, Test & Deploy (Executa na branch main após merge/push)
+  # 🚀 Job 2: Build, Test & Deploy (Executa na branch feat/cicd após merge/push)
   build-test-deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    name: Build, Test, Provision & Deploy (Main Branch)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
+    name: Build, Test, Provision & Deploy (feat/cicd Branch)
     runs-on: ubuntu-latest
 
     steps:
