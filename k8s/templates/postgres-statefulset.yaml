@@ -15,8 +15,22 @@ spec:
       labels:
         app: {{ include "k8s.fullname" . }}-postgres
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: postgres
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            runAsNonRoot: true
+            runAsUser: 999
+            runAsGroup: 999
+            capabilities:
+              drop:
+                - ALL
           image: {{ .Values.postgres.image }}
           imagePullPolicy: IfNotPresent
           ports:

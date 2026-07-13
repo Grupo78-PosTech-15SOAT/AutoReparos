@@ -259,6 +259,10 @@ Para executar o conjunto de testes (Unitários e Integração):
 dotnet test
 ```
 
+## 📊 SonarQube Local
+
+Para rodar a análise estática e verificar a qualidade do código com o SonarQube localmente, consulte o guia passo a passo em [SONAR_LOCAL.md](file:///mnt/c/Users/joseh/Documents/Github/Fiap/AutoReparos/SONAR_LOCAL.md).
+
 ## 📄 Documentação de Entrega
 
 - **DDD:** A documentação estratégica (Event Storming, Linguagem Ubíqua e Diagramas) pode ser consultada pelo [Miro](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405).
