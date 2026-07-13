@@ -41,20 +41,22 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         return (await response.Content.ReadFromJsonAsync<ServicoDto>())!;
     }
-    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId)> ObterIdsDependenciasAsync()
+    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId, string DocumentoCliente, string PlacaVeiculo)> ObterIdsDependenciasAsync()
     {
         var faker = new Faker("pt_BR");
 
         var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDto>>("/api/clientes?pageNumber=1&pageSize=1");
         var clienteId = resCliente!.Items.First().Id;
+        var documentoCliente = resCliente!.Items.First().Documento;
 
+        var placaVeiculo = "ABC-1234";
         var requestDto = new VeiculoCreateDto(
             clienteId,
             "Toyota",
             "Corolla",
             2020,
             2022,
-            "ABC-1234",
+            placaVeiculo,
             "8Wz32v68wN7vf6617",
             "38579863163"
         );
@@ -73,7 +75,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
         var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDto>>("/api/servicos?pageNumber=1&pageSize=1");
         var servicoId = resServico!.Items.First().Id;
 
-        return (clienteId, veiculoId, servicoId);
+        return (clienteId, veiculoId, servicoId, documentoCliente, placaVeiculo);
     }
 
 
@@ -169,7 +171,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         var deps = await ObterIdsDependenciasAsync();
 
-        var criarOsDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, "Teste para forçar tempo médio");
+        var criarOsDto = new CriarOrdemServicoDto(deps.DocumentoCliente, deps.PlacaVeiculo, "Teste para forçar tempo médio");
         var resOs = await Client.PostAsJsonAsync("/api/ordem-servico", criarOsDto);
         var osCriada = await resOs.Content.ReadFromJsonAsync<OrdemServicoDto>();
 

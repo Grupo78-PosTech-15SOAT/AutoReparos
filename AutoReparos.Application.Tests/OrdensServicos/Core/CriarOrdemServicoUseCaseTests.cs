@@ -35,6 +35,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         private readonly CriarOrdemServicoUseCase _useCase;
 
         private readonly Cliente _cliente;
+        private readonly Cliente _cliente2;
         private readonly Veiculo _veiculo;
 
         public CriarOrdemServicoUseCaseTests()
@@ -51,16 +52,23 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
                 _clienteRepository, _notificacaoService, _logger);
 
             _cliente = new Cliente("João Silva", "52998224725", "11999999999", "joao@teste.com");
+            _cliente2 = new Cliente("Maria Santos", "23869292059", "11888888888", "maria@teste.com");
+
             _veiculo = new Veiculo(_cliente.Id, "Chevrolet", "Onix", 2020, 2021, new Placa("ABC1D23"), new Chassi("9BD111060T5002156"), new Renavam("00123456789"));
 
             _veiculoRepository.GetById(_veiculo.Id).Returns(_veiculo);
             _clienteRepository.GetById(_cliente.Id).Returns(_cliente);
+
+            _clienteRepository.GetByDocumentoOrEmail(_cliente.Documento.Valor, string.Empty).Returns(_cliente);
+            _clienteRepository.GetByDocumentoOrEmail(_cliente2.Documento.Valor, string.Empty).Returns(_cliente2);
+
+            _veiculoRepository.GetByPlaca(_veiculo.Placa.Valor).Returns(_veiculo);
         }
 
         [Fact(DisplayName = "Create With Valid Data Should Return Dto")]
         public async Task Create_WithValidData_ShouldReturnDto()
         {
-            var dto = new CriarOrdemServicoDto(_cliente.Id, _veiculo.Id, "Barulho no motor");
+            var dto = new CriarOrdemServicoDto(_cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor");
 
             var result = await _useCase.ExecuteAsync(dto);
 
@@ -73,7 +81,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         [Fact(DisplayName = "Create With Veiculo Not Found Should Throw NotFoundException")]
         public async Task Create_WithVeiculoNotFound_ShouldThrowNotFoundException()
         {
-            var dto = new CriarOrdemServicoDto(_cliente.Id, Guid.NewGuid(), "Barulho no motor");
+            var dto = new CriarOrdemServicoDto(_cliente.Documento.Valor, Guid.NewGuid().ToString(), "Barulho no motor");
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
 
@@ -83,8 +91,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         [Fact(DisplayName = "Create With Veiculo Not Belonging To Cliente Should Throw InvalidVeiculoException")]
         public async Task Create_WithVeiculoNotBelongingToCliente_ShouldThrowInvalidVeiculoException()
         {
-            var outroClienteId = Guid.NewGuid();
-            var dto = new CriarOrdemServicoDto(outroClienteId, _veiculo.Id, "Barulho no motor");
+            var dto = new CriarOrdemServicoDto(_cliente2.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor");
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
 
@@ -97,7 +104,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             var veiculoSemCliente = new Veiculo(Guid.NewGuid(), "Fiat", "Uno", 2015, 2015, new Placa("XYZ9Z88"), new Chassi("9BD111060T5002199"), new Renavam("00987654321"));
             _veiculoRepository.GetById(veiculoSemCliente.Id).Returns(veiculoSemCliente);
 
-            var dto = new CriarOrdemServicoDto(veiculoSemCliente.ClienteId, veiculoSemCliente.Id, "Barulho no motor");
+            var dto = new CriarOrdemServicoDto(veiculoSemCliente.ClienteId.ToString(), veiculoSemCliente.Placa.Valor, "Barulho no motor");
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
 
@@ -111,7 +118,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             _servicoRepository.GetById(servico.Id).Returns(servico);
 
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Servicos: [new AdicionarServicoDto(servico.Id, 150m)]);
 
             var result = await _useCase.ExecuteAsync(dto);
@@ -126,7 +133,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             _servicoRepository.GetById(servicoId).Returns((Servico?)null);
 
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Servicos: [new AdicionarServicoDto(servicoId, 150m)]);
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
@@ -141,7 +148,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             _insumoRepository.GetById(insumo.Id).Returns(insumo);
 
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Insumos: [new AdicionarInsumoDto(insumo.Id, "Óleo 5W30", null, 2, EOrigemInsumo.Estoque)]);
 
             var result = await _useCase.ExecuteAsync(dto);
@@ -158,7 +165,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             _insumoRepository.GetById(insumoId).Returns((Insumo?)null);
 
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Insumos: [new AdicionarInsumoDto(insumoId, "Óleo 5W30", null, 2, EOrigemInsumo.Estoque)]);
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
@@ -170,7 +177,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         public async Task Create_WithInsumoCompraEspecificaSemValorUnitario_ShouldThrowValidationException()
         {
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Insumos: [new AdicionarInsumoDto(null, "Peça externa", null, 1, EOrigemInsumo.CompraEspecifica)]);
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
@@ -182,7 +189,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         public async Task Create_WithInsumoCompraEspecificaComValorUnitario_ShouldAddItem()
         {
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Insumos: [new AdicionarInsumoDto(null, "Peça externa", 80m, 1, EOrigemInsumo.CompraEspecifica)]);
 
             var result = await _useCase.ExecuteAsync(dto);
@@ -194,7 +201,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         public async Task Create_WithInsumoEstoqueSemInsumoId_ShouldThrowValidationException()
         {
             var dto = new CriarOrdemServicoDto(
-                _cliente.Id, _veiculo.Id, "Barulho no motor",
+                _cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor",
                 Insumos: [new AdicionarInsumoDto(null, "Óleo 5W30", null, 2, EOrigemInsumo.Estoque)]);
 
             Func<Task> action = async () => await _useCase.ExecuteAsync(dto);
@@ -205,7 +212,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
         [Fact(DisplayName = "Create When NotificacaoService Throws Should Not Propagate Exception")]
         public async Task Create_WhenNotificacaoServiceThrows_ShouldNotPropagateException()
         {
-            var dto = new CriarOrdemServicoDto(_cliente.Id, _veiculo.Id, "Barulho no motor");
+            var dto = new CriarOrdemServicoDto(_cliente.Documento.Valor, _veiculo.Placa.Valor, "Barulho no motor");
 
             _notificacaoService
                 .EnviarAtualizacaoStatus(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string>())

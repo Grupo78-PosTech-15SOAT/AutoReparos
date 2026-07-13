@@ -6,4 +6,7 @@
   <Project Path="AutoReparos.Domain/AutoReparos.Domain.csproj" />
   <Project Path="AutoReparos.Infra/AutoReparos.Infra.csproj" />
   <Project Path="AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj" Id="8d51165e-e3d3-483c-9bd8-3869ededcf9d" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>
