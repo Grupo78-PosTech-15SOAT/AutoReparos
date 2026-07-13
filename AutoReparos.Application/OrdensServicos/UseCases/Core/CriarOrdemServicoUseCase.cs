@@ -5,6 +5,7 @@ using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.UseCases.Core.Interfaces;
 using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Repositories;
+using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
@@ -33,12 +34,16 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Core
         {
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await ValidarVeiculoDoCliente(dto);
-
-            var cliente = await clienteRepository.GetById(dto.ClienteId)
+            var cliente = await clienteRepository.GetByDocumentoOrEmail(Documento.Normalizar(dto.DocumentoCliente), string.Empty)
                 ?? throw new NotFoundException(ErrorMessages.ClienteNotFound);
 
-            var ordemServico = new OrdemServico(dto.ClienteId, dto.VeiculoId, dto.Observacao);
+            var veiculo = await veiculoRepository.GetByPlaca(dto.PlacaVeiculo)
+                ?? throw new NotFoundException(ErrorMessages.VeiculoNotFound);
+
+            if (veiculo.ClienteId != cliente.Id)
+                throw new InvalidVeiculoException("Veículo não pertence ao cliente informado.");
+
+            var ordemServico = new OrdemServico(cliente.Id, veiculo.Id, dto.Observacao);
 
             await AdicionarServicos(ordemServico, dto.Servicos);
             await AdicionarInsumos(ordemServico, dto.Insumos);
@@ -50,15 +55,6 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Core
             await NotificarCriacao(cliente, ordemServico);
 
             return OrdemServicoMapper.ToDto(ordemServico);
-        }
-
-        private async Task ValidarVeiculoDoCliente(CriarOrdemServicoDto dto)
-        {
-            var veiculo = await veiculoRepository.GetById(dto.VeiculoId)
-                ?? throw new NotFoundException(ErrorMessages.VeiculoNotFound);
-
-            if (veiculo.ClienteId != dto.ClienteId)
-                throw new InvalidVeiculoException("Veículo não pertence ao cliente informado.");
         }
 
         private async Task AdicionarServicos(OrdemServico ordemServico, IEnumerable<AdicionarServicoDto>? servicos)

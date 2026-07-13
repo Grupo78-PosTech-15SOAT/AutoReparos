@@ -22,20 +22,22 @@ namespace AutoReparos.IntegrationTests.Features.OrdensServico;
 public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> factory)
     : IntegrationTestBase(factory)
 {
-    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId)> ObterIdsDependenciasAsync()
+    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId, string DocumentoCliente, string PlacaVeiculo)> ObterIdsDependenciasAsync()
     {
         var faker = new Faker("pt_BR");
 
         var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDto>>("/api/clientes?pageNumber=1&pageSize=1");
         var clienteId = resCliente!.Items.First().Id;
+        var documentoCliente = resCliente!.Items.First().Documento;
 
+        var placaVeiculo = "ABC-1234";
         var requestDto = new VeiculoCreateDto(
             clienteId,
             "Toyota",
             "Corolla",
             2020,
             2022,
-            "ABC-1234",
+            placaVeiculo,
             "8Wz32v68wN7vf6617",
             "38579863163"
         );
@@ -54,7 +56,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDto>>("/api/servicos?pageNumber=1&pageSize=1");
         var servicoId = resServico!.Items.First().Id;
 
-        return (clienteId, veiculoId, servicoId);
+        return (clienteId, veiculoId, servicoId, documentoCliente, placaVeiculo);
     }
 
     private async Task<OrdemServicoDto> CriarOrdemServicoAuxiliarAsync()
@@ -62,7 +64,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var deps = await ObterIdsDependenciasAsync();
         var faker = new Faker();
 
-        var createDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, faker.Lorem.Sentence());
+        var createDto = new CriarOrdemServicoDto(deps.DocumentoCliente, deps.PlacaVeiculo, faker.Lorem.Sentence());
         var response = await Client.PostAsJsonAsync("/api/ordem-servico", createDto);
 
         if (!response.IsSuccessStatusCode)
@@ -104,7 +106,7 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         await AuthenticateAsync();
         var deps = await ObterIdsDependenciasAsync();
 
-        var requestDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, "Barulho na suspensão");
+        var requestDto = new CriarOrdemServicoDto(deps.DocumentoCliente, deps.PlacaVeiculo, "Barulho na suspensão");
 
         var response = await Client.PostAsJsonAsync("/api/ordem-servico", requestDto);
         var erro = await response.Content.ReadAsStringAsync();
@@ -245,8 +247,8 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var insumoDto = new AdicionarInsumoDto(insumoEstoque.Id, insumoEstoque.Nome, null, 2, EOrigemInsumo.Estoque);
 
         var requestDto = new CriarOrdemServicoDto(
-            deps.ClienteId,
-            deps.VeiculoId,
+            deps.DocumentoCliente,
+            deps.PlacaVeiculo,
             "Revisão completa inicial com peças e serviços no payload",
             new[] { servicoDto },
             new[] { insumoDto }

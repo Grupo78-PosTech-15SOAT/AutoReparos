@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "3a76b0ad-627c-4694-b81f-dd34731b985a",
+    "_postman_id": "0ce922ec-ea65-4459-b676-68ce431e1e77",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "27526426",
-    "_collection_link": "https://go.postman.co/collection/27526426-3a76b0ad-627c-4694-b81f-dd34731b985a?source=collection_link"
+    "_exporter_id": "28677730",
+    "_collection_link": "https://go.postman.co/collection/28677730-0ce922ec-ea65-4459-b676-68ce431e1e77?source=collection_link"
   },
   "item": [
     {
@@ -308,12 +308,8 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [],
+                "type": "text/javascript"
               }
             }
           ],
@@ -368,7 +364,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/veiculos?pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/veiculos?clienteId=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -379,8 +375,7 @@
               "query": [
                 {
                   "key": "clienteId",
-                  "value": "1",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "pageNumber",
@@ -1072,7 +1067,7 @@
       ]
     },
     {
-      "name": "Ordens de Serviço",
+      "name": "OrdensServico",
       "item": [
         {
           "name": "CreateOrdemServico",
@@ -1123,7 +1118,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"clienteId\": \"{{clienteId}}\",\r\n  \"veiculoId\": \"{{veiculoId}}\",\r\n  \"observacao\": \"Observação do serviço\"\r\n}",
+              "raw": "{\r\n  \"documentoCliente\": {{documentoCliente}},\r\n  \"placaVeiculo\": {{placaVeiculo}},\r\n  \"observacao\": \"Observação do serviço\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1131,13 +1126,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico",
+              "raw": "{{baseUrl}}/api/ordens-servico",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico"
+                "ordens-servico"
               ]
             }
           },
@@ -1168,13 +1163,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "servicos"
               ]
@@ -1207,13 +1202,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/insumos",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/insumos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "insumos"
               ]
@@ -1237,69 +1232,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico?pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/ordens-servico?clienteId=&veiculoId=&status=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico"
+                "ordens-servico"
               ],
               "query": [
                 {
                   "key": "clienteId",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "veiculoId",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "status",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
-                {
-                  "key": "pageNumber",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "GetFilaOrdensServico",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/fila?pageNumber=1&pageSize=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "ordem-servico",
-                "fila"
-              ],
-              "query": [
                 {
                   "key": "pageNumber",
                   "value": "1"
@@ -1329,13 +1282,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/consulta?documento=11999987532&placa=&pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/ordens-servico/consulta?documento=11999987532&placa=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "consulta"
               ],
               "query": [
@@ -1376,13 +1329,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}"
               ]
             }
@@ -1395,13 +1348,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/consulta/{{ordemServicoId}}",
+              "raw": "{{baseUrl}}/api/ordens-servico/consulta/{{ordemServicoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "consulta",
                 "{{ordemServicoId}}"
               ]
@@ -1425,13 +1378,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/iniciar-diagnostico",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/iniciar-diagnostico",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "iniciar-diagnostico"
               ]
@@ -1440,7 +1393,7 @@
           "response": []
         },
         {
-          "name": "EnviarParaAprovacao",
+          "name": "AguardarAprovacao",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1455,13 +1408,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/enviar-para-aprovacao",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/enviar-para-aprovacao",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "enviar-para-aprovacao"
               ]
@@ -1473,53 +1426,27 @@
           "name": "AprovarOrdemServico",
           "request": {
             "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/aprovar?token={{tokenAprovacao}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "ordem-servico",
-                "aprovar"
-              ],
-              "query": [
+              "type": "bearer",
+              "bearer": [
                 {
                   "key": "token",
-                  "value": "{{tokenAprovacao}}"
+                  "value": "{{token}}",
+                  "type": "string"
                 }
               ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "RecusarOrdemServico",
-          "request": {
-            "auth": {
-              "type": "noauth"
             },
-            "method": "GET",
+            "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/recusar?token={{tokenAprovacao}}",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/aprovar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
-                "recusar"
-              ],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "{{tokenAprovacao}}"
-                }
+                "ordens-servico",
+                "{{ordemServicoId}}",
+                "aprovar"
               ]
             }
           },
@@ -1541,17 +1468,17 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/iniciar",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
-                "iniciar"
+                "Iniciar"
               ]
             }
           },
@@ -1573,13 +1500,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/concluir",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/concluir",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
@@ -1605,13 +1532,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/entregar",
+              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/entregar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordem-servico",
+                "ordens-servico",
                 "{{ordemServicoId}}",
                 "entregar"
               ]
@@ -1828,23 +1755,6 @@
           "response": []
         }
       ]
-    },
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "health"
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "event": [
@@ -1910,6 +1820,10 @@
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "documentoCliente",
       "value": ""
     }
   ]

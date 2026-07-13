@@ -19,7 +19,7 @@ services:
     image: autoreparos-api
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: AutoReparos.API/Dockerfile
     container_name: autoreparos-api
     restart: always
     environment:
