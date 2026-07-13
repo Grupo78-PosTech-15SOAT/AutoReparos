@@ -1,0 +1,13 @@
+services:
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: autoreparos-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
