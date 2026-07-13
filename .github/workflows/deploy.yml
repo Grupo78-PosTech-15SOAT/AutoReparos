@@ -41,10 +41,9 @@ env:
   App__BaseUrl: "http://localhost:8080"
 
 jobs:
-  # 🧪 Job 1: Build & Test (Executa para Pull Requests)
-  build-and-test:
-    if: github.event_name == 'pull_request'
-    name: Build & Test (PR Validation)
+  # 🛠️ Bloco 1: Compilação (Restore & Build)
+  compilation:
+    name: Compilação (Restore & Build)
     runs-on: ubuntu-latest
 
     steps:
@@ -62,34 +61,58 @@ jobs:
     - name: Build Application
       run: dotnet build AutoReparos.slnx --no-restore -c Release
 
-    - name: Run Tests
-      run: dotnet test AutoReparos.slnx -c Release --no-build --verbosity normal
+    # Salva os binários para que os testes rodem sem precisar recompilar
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          **/bin/
+          **/obj/
+        retention-days: 1
 
-  # 🚀 Job 2: Build, Test & Deploy (Executa na branch feat/cicd após merge/push)
-  build-test-deploy:
+  # 🧪 Bloco 2: Testes (Unitários & Integração em steps separados)
+  tests:
+    name: Testes (Unitários & Integração)
+    needs: compilation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Run Unit Tests
+      run: |
+        dotnet test AutoReparos.Domain.Tests/AutoReparos.Domain.Tests.csproj -c Release --no-build --verbosity normal
+        dotnet test AutoReparos.Application.Tests/AutoReparos.Application.Tests.csproj -c Release --no-build --verbosity normal
+
+    - name: Run Integration Tests
+      run: dotnet test AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj -c Release --no-build --verbosity normal
+
+  # ☁️ Bloco 3: Infraestrutura (Terraform Setup, Apply, Validação, Login, Push Image)
+  infra:
+    name: Infraestrutura (Terraform & ECR Push)
+    needs: tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
-    name: Build, Test, Provision & Deploy (feat/cicd Branch)
     runs-on: ubuntu-latest
+    outputs:
+      ecr_repository_url: ${{ steps.tf-outputs.outputs.ecr_repository_url }}
+      cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
-
-    - name: Restore Dependencies
-      run: dotnet restore AutoReparos.slnx
-
-    - name: Build Application
-      run: dotnet build AutoReparos.slnx --no-restore -c Release
-
-    - name: Run Tests
-      run: dotnet test AutoReparos.slnx -c Release --no-build --verbosity normal
-
-    # ☁️ Provisionamento de Infraestrutura via Terraform
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -102,16 +125,23 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Terraform Init & Apply
+    - name: Terraform Validate
       working-directory: infra
       run: |
         terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
-        terraform apply -auto-approve
-        # Exporta variáveis geradas pelo Terraform para uso nos passos de Docker e Helm
-        echo "ECR_REPOSITORY_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
-        echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+        terraform validate
 
-    # 🐳 Build e Push de Imagens Docker para ECR
+    - name: Terraform Apply
+      working-directory: infra
+      run: terraform apply -auto-approve
+
+    - name: Get Terraform Outputs
+      id: tf-outputs
+      working-directory: infra
+      run: |
+        echo "ecr_repository_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
+        echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
@@ -125,17 +155,34 @@ jobs:
         docker push $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG
         docker push $ECR_REGISTRY/autoreparos-api:latest
 
-    # ☸️ Deploy no Kubernetes (EKS) via Helm
+  # ☸️ Bloco 4: Deploy (Kubeconfig, Upgrade, Configure URL)
+  deploy:
+    name: Deploy (Kubernetes & Helm)
+    needs: infra
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
     - name: Update Kubeconfig
       run: |
-        aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+        aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
 
     - name: Helm Upgrade Deploy
       run: |
         helm upgrade --install autoreparos ./k8s \
           -f k8s/values.yaml \
           -f k8s/values-production.yaml \
-          --set image.repository=${{ env.ECR_REPOSITORY_URL }} \
+          --set image.repository=${{ needs.infra.outputs.ecr_repository_url }} \
           --set image.tag=${{ github.sha }} \
           --set config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
           --set config.sendGridFromEmail="${{ env.SENDGRID_FROM_EMAIL }}" \
@@ -146,3 +193,21 @@ jobs:
           --set secrets.aprovacaoTokenSecret="${{ secrets.APROVACAO_TOKEN_SECRET }}" \
           --set secrets.sendGridApiKey="${{ secrets.SENDGRID_API_KEY }}" \
           --set postgres.password="${{ secrets.POSTGRES_PASSWORD }}"
+
+    - name: Configure URL Display
+      run: |
+        echo "Application base URL is configured at: ${{ env.APP_BASE_URL }}"
+
+  # 🎉 Bloco 5: Finalização
+  finalization:
+    name: Finalização
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Execution Summary
+      run: |
+        echo "=================================================="
+        echo "🎉 CI/CD Pipeline Executed and Deployed Successfully!"
+        echo "=================================================="
