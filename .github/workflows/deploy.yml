@@ -63,7 +63,7 @@ jobs:
       run: dotnet build AutoReparos.slnx --no-restore -c Release
 
     - name: Run Tests
-      run: dotnet test AutoReparos.slnx --no-build --verbosity normal
+      run: dotnet test AutoReparos.slnx -c Release --no-build --verbosity normal
 
   # 🚀 Job 2: Build, Test & Deploy (Executa na branch feat/cicd após merge/push)
   build-test-deploy:
@@ -87,7 +87,7 @@ jobs:
       run: dotnet build AutoReparos.slnx --no-restore -c Release
 
     - name: Run Tests
-      run: dotnet test AutoReparos.slnx --no-build --verbosity normal
+      run: dotnet test AutoReparos.slnx -c Release --no-build --verbosity normal
 
     # ☁️ Provisionamento de Infraestrutura via Terraform
     - name: Configure AWS Credentials
