@@ -13,6 +13,7 @@ builder.Services.AddInfraestructureSwagger();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -38,5 +39,7 @@ app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
 app.MapInsumosEndpoints();
 app.MapOrdemServicoEndpoints();
+
+app.MapHealthChecks("/health");
 
 app.Run();

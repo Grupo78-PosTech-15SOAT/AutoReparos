@@ -23,7 +23,7 @@ services:
     container_name: autoreparos-api
     restart: always
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__DbConnection=Host=postgres;Database=autoreparos;Username=admin;Password=${DB_PASSWORD}
       - Jwt__Secret=${JWT_SECRET}
       - Jwt__ExpiryHours=${JWT_EXPIRY_HOURS}

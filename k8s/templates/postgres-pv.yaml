@@ -1,0 +1,17 @@
+{{- if and .Values.postgres.persistence.enabled (or (empty .Values.postgres.persistence.storageClass) (eq .Values.postgres.persistence.storageClass "hostpath")) -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ include "k8s.fullname" . }}-postgres-pv
+  labels:
+    {{- include "k8s.labels" . | nindent 4 }}
+spec:
+  capacity:
+    storage: {{ .Values.postgres.storageSize }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/mnt/data/postgres"
+{{- end }}
+
