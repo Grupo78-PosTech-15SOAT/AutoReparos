@@ -35,7 +35,6 @@ config:
   seedUserEmail: "admin@autoreparos.com"
   sendGridFromEmail: "noreply@autoreparos.com"
   sendGridFromName: "AutoReparos"
-  appBaseUrl: "http://autoreparos.local"
 
 secrets:
   jwtSecret: ""

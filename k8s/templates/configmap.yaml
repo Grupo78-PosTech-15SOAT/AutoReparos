@@ -9,4 +9,3 @@ data:
   SeedUser__Email: {{ .Values.config.seedUserEmail | quote }}
   SendGrid__FromEmail: {{ .Values.config.sendGridFromEmail | quote }}
   SendGrid__FromName: {{ .Values.config.sendGridFromName | quote }}
-  App__BaseUrl: {{ .Values.config.appBaseUrl | quote }}

@@ -24,21 +24,6 @@ env:
   
   # Configurações do Aplicativo (não-sensíveis)
   SEED_USER_EMAIL: "admin@autoreparos.com"
-  SENDGRID_FROM_EMAIL: "noreply@autoreparos.com"
-  SENDGRID_FROM_NAME: "AutoReparos"
-  APP_BASE_URL: "http://autoreparos.production"
-
-  # Variáveis de ambiente para execução dos testes dotnet test
-  ConnectionStrings__DbConnection: "Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
-  Jwt__Secret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
-  Jwt__ExpiryHours: "2"
-  SeedUser__Email: "admin@autoreparos.com"
-  SeedUser__Password: "Admin@123"
-  AprovacaoToken__Secret: "another_super_secret_key_for_approval_tokens_with_enough_length"
-  SendGrid__ApiKey: "SG.dummy_key"
-  SendGrid__FromEmail: "noreply@autoreparos.com"
-  SendGrid__FromName: "AutoReparos"
-  App__BaseUrl: "http://localhost:8080"
 
 jobs:
   # 🛠️ Bloco 1: Compilação (Restore & Build)
@@ -76,6 +61,16 @@ jobs:
     name: Testes (Unitários & Integração)
     needs: compilation
     runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DbConnection: "Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
+      Jwt__Secret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+      Jwt__ExpiryHours: "2"
+      SeedUser__Email: "admin@autoreparos.com"
+      SeedUser__Password: "Admin@123"
+      AprovacaoToken__Secret: "another_super_secret_key_for_approval_tokens_with_enough_length"
+      SendGrid__ApiKey: "SG.dummy_key"
+      SendGrid__FromEmail: "noreply@autoreparos.com"
+      SendGrid__FromName: "AutoReparos"
 
     steps:
     - name: Checkout Code
@@ -185,9 +180,8 @@ jobs:
           --set image.repository=${{ needs.infra.outputs.ecr_repository_url }} \
           --set image.tag=${{ github.sha }} \
           --set config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
-          --set config.sendGridFromEmail="${{ env.SENDGRID_FROM_EMAIL }}" \
-          --set config.sendGridFromName="${{ env.SENDGRID_FROM_NAME }}" \
-          --set config.appBaseUrl="${{ env.APP_BASE_URL }}" \
+          --set config.sendGridFromEmail="${{ secrets.SENDGRID_FROM_EMAIL }}" \
+          --set config.sendGridFromName="${{ secrets.SENDGRID_FROM_NAME }}" \
           --set secrets.jwtSecret="${{ secrets.JWT_SECRET }}" \
           --set secrets.seedUserPassword="${{ secrets.SEED_USER_PASSWORD }}" \
           --set secrets.aprovacaoTokenSecret="${{ secrets.APROVACAO_TOKEN_SECRET }}" \
@@ -196,18 +190,5 @@ jobs:
 
     - name: Configure URL Display
       run: |
-        echo "Application base URL is configured at: ${{ env.APP_BASE_URL }}"
-
-  # 🎉 Bloco 5: Finalização
-  finalization:
-    name: Finalização
-    needs: deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Execution Summary
-      run: |
-        echo "=================================================="
-        echo "🎉 CI/CD Pipeline Executed and Deployed Successfully!"
-        echo "=================================================="
+        echo "Application is deployed. You can retrieve the load balancer URL using:"
+        echo "kubectl get ingress"
