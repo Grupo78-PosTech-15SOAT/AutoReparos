@@ -98,8 +98,7 @@ jobs:
   infra:
     name: Infraestrutura (Terraform & ECR Push)
     needs: tests
-    if: github.event_name == 'push' 
-    # && github.ref == 'refs/heads/main'
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       ecr_repository_url: ${{ steps.tf-outputs.outputs.ecr_repository_url }}
@@ -157,8 +156,7 @@ jobs:
   deploy:
     name: Deploy (Kubernetes & Helm)
     needs: infra
-    if: github.event_name == 'push' 
-    # && github.ref == 'refs/heads/main'
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
