@@ -96,6 +96,7 @@ A aplicação está dividida em camadas seguindo os princípios de **Clean Archi
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
   'themeVariables': {
     'background': '#ffffff',
     'primaryColor': '#ED145B',
@@ -154,6 +155,7 @@ O ambiente em nuvem provisiona uma infraestrutura elástica e resiliente na AWS,
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
   'themeVariables': {
     'background': '#ffffff',
     'primaryColor': '#ED145B',
@@ -177,7 +179,7 @@ graph TB
     subgraph AWS VPC / Kubernetes Cluster
         APIPods
         PostgresPod
-        HPA[Horizontal Pod Autoscaler - CPU/Memória @ 40%]
+        HPA[Horizontal Pod Autoscaler - CPU/Memória @ 80%]
         HPA -.-> APIPods
     end
 ```
@@ -193,6 +195,7 @@ O deploy é totalmente automatizado através do GitHub Actions a cada merge na b
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'themeCSS': 'svg { background-color: #ffffff !important; } .note rect, .note, .loopBox rect, .loopBox { fill: #FDE7EE !important; }',
   'themeVariables': {
     'background': '#ffffff',
     'primaryColor': '#ED145B',

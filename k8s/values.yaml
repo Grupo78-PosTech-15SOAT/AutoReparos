@@ -61,5 +61,5 @@ resources:
 hpa:
   minReplicas: 1
   maxReplicas: 4
-  targetCPUUtilizationPercentage: 40
+  targetCPUUtilizationPercentage: 80
   targetMemoryUtilizationPercentage: 80
