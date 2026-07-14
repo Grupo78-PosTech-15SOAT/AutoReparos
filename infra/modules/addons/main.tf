@@ -124,7 +124,7 @@ resource "helm_release" "prometheus_stack" {
   namespace        = "monitoring"
   create_namespace = true
 
-  # Optimizing resource requests for academic sandbox / t3.small
+  # Optimizing resource requests for t3.small
   values = [
     <<-EOT
     prometheus:
@@ -147,6 +147,8 @@ resource "helm_release" "prometheus_stack" {
                   storage: 5Gi
     grafana:
       adminPassword: "admin"
+      service:
+        type: LoadBalancer
       persistence:
         enabled: true
         storageClassName: gp3
