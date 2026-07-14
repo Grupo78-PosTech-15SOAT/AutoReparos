@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # URL do endpoint de consulta da API
-URL="http://af25409a2f61b4a43bcbca78623473fa-be8009ff32a736a2.elb.us-east-1.amazonaws.com/api/ordem-servico/consulta?placa=AAA1A11"
+URL="https://af25409a2f61b4a43bcbca78623473fa-be8009ff32a736a2.elb.us-east-1.amazonaws.com/api/ordem-servico/consulta?placa=AAA1A11"
 
 # Número de processos paralelos (concorrência)
 CONCURRENCY=20
@@ -26,6 +26,7 @@ cleanup() {
     done
     echo "✅ Concluído. O HPA deve começar a reduzir as réplicas em alguns minutos."
     exit 0
+    return 0
 }
 
 # Captura o sinal de interrupção (SIGINT / CTRL+C)
@@ -37,6 +38,7 @@ run_worker() {
         # Executa o curl silenciando a saída e descartando o corpo da resposta
         curl -s -o /dev/null -w "%{http_code} " "$URL"
     done
+    return 0
 }
 
 # Inicializa os workers em background

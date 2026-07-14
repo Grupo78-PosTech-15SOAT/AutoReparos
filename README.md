@@ -1,186 +1,320 @@
 # AutoReparos - Sistema Integrado de Oficina Mecânica
 
 <p align="center">
-<img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
-<img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled"></div>
-<img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
-<img src="https://img.shields.io/badge/Architecture-DDD%20%2F%20Clean-blue" alt="Architecture DDD/Clean">
+  <img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
+  <img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled">
+  <img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
+  <img src="https://img.shields.io/badge/Architecture-DDD%20%2F%20Clean-blue" alt="Architecture DDD/Clean">
+  <img src="https://img.shields.io/badge/Kubernetes-HPA%20Enabled-326ce5" alt="Kubernetes HPA">
+  <img src="https://img.shields.io/badge/IaC-Terraform-7b42bc" alt="Terraform IaC">
 </p>
 
-## 📌 Sobre o Projeto
+Este repositório contém a solução do **AutoReparos**, um Sistema Integrado de Atendimento e Execução de Serviços projetado para modernizar as operações de oficinas mecânicas de médio porte.
 
-O **AutoReparos** é um Sistema Integrado de Atendimento e Execução de Serviços desenvolvido para oficinas mecânicas de médio porte. O objetivo é modernizar o processo de atendimento, diagnóstico, execução de serviços e entrega de veículos, eliminando anotações manuais e planilhas ineficientes.
+Este projeto foi desenvolvido como parte do **Tech Challenge (Fases 1 e 2)** da Pós-Graduação em **Software Architecture** pela **FIAP (SOAT)**.
 
-Este projeto faz parte do **Tech Challenge - Fase 2** do curso de Pós-Graduação em Software Architecture da FIAP (SOAT).
+---
 
-## 🚀 Funcionalidades Principais
+## Sumário
 
-- **Gestão de Ordens de Serviço:**
-  - Abertura de Ordens de Serviço completa (associando Cliente, Veículo, Serviços e Peças/Insumos em uma única operação transacional).
-  - Cadastro e vínculo de veículos.
-  - Inclusão avulsa de serviços e insumos/peças na OS.
-  - Geração automática de orçamento.
-  - Acompanhamento de status em tempo real.
-  - Envio de email com orçamento para aprovação;
-- **Gestão Administrativa (CRUDs):**
-  - Clientes, Veículos, Serviços e Insumos (Peças).
-  - Controle de estoque de insumos.
-- **Segurança:**
-  - Autenticação JWT para acesso administrativo.
-  - Validação de dados sensíveis.
-- **Qualidade:**
-  - Testes unitários e de integração.
+- [🎯 Objetivos e Problema](#objetivos-e-problema)
+- [🏗️ Desenho da Arquitetura](#desenho-da-arquitetura)
+  - [1. Componentes da Aplicação (Clean Architecture)](#1-componentes-da-aplicação-clean-architecture)
+  - [2. Infraestrutura Provisionada (AWS e Kubernetes)](#2-infraestrutura-provisionada-aws-e-kubernetes)
+  - [3. Fluxo de Deploy (Pipeline CI/CD)](#3-fluxo-de-deploy-pipeline-cicd)
+- [🚀 Funcionalidades da Aplicação](#funcionalidades-da-aplicação)
+  - [Fluxo de Ordens de Serviço](#fluxo-de-ordens-de-serviço)
+  - [Gestão Administrativa](#gestão-administrativa)
+- [▶️ Guia de Execução Local](#guia-de-execução-local)
+  - [Pré-requisitos](#pré-requisitos)
+  - [Configuração de Credenciais (.env e Secrets)](#configuração-de-credenciais-env-e-secrets)
+  - [Execução com Docker Compose](#execução-com-docker-compose)
+  - [Execução de Testes Automatizados](#execução-de-testes-automatizados)
+- [☸️ Guia de Kubernetes (Deploy Local com Helm)](#guia-de-kubernetes-deploy-local-com-helm)
+- [☁️ Guia de Infraestrutura como Código (Terraform na AWS)](#guia-de-infraestrutura-como-código-terraform-na-aws)
+- [🔄 Pipeline de CI/CD (GitHub Actions)](#pipeline-de-cicd-github-actions)
+- [📊 Qualidade de Código (SonarQube) e Vulnerabilidades](#qualidade-de-código-sonarqube-e-vulnerabilidades)
+- [📄 Entregáveis e Links Úteis](#entregáveis-e-links-úteis)
+- [👥 Integrantes do Grupo](#integrantes-do-grupo)
 
-## 🛠️ Tecnologias Utilizadas
+---
 
-- **Linguagem:** C# (.NET 10)
-- **Framework Web:** ASP.NET Core
-- **Banco de Dados:** PostgreSQL 16
-- **ORM:** Entity Framework Core
-- **Segurança:** ASP.NET Core Identity & JWT
-- **Documentação:** Swagger (OpenAPI)
-- **Integração:** Sendgrid
+## Objetivos e Problema
 
-### Justificativa da escolha do Banco de Dados
+### O Problema (Fase 1)
 
-O **PostgreSQL** foi escolhido por ser um banco de dados relacional de código aberto, robusto e altamente confiável. Sua escolha para o projeto AutoReparos justifica-se por:
+Originalmente, a oficina mecânica realizava todo o controle de forma manual ou por planilhas rudimentares, resultando em:
 
-1. **Consistência ACID:** Essencial para garantir a integridade dos dados de estoque, orçamentos e peças.
-2. **Suporte Avançado:** Excelente integração com o Entity Framework Core via o provedor Npgsql.
-3. **Escalabilidade:** Capacidade de lidar com o crescimento da oficina e volume de dados a longo prazo.
-4. **Ecossistema:** Ferramentas como o pgAdmin facilitam a gestão e monitoramento, conforme solicitado nos requisitos de gestão administrativa.
+- Erros na priorização dos atendimentos.
+- Perda de histórico de veículos e clientes.
+- Ineficiência no fluxo de aprovação de orçamentos.
+- Falhas graves no controle de estoque de peças.
 
-## 🏗️ Arquitetura
+### A Evolução (Fase 2)
 
-O projeto segue os princípios de **Clean Architecture** e **Domain-Driven Design (DDD)**:
+Após a implantação do MVP na Fase 1, o foco da Fase 2 passou a ser a **alta disponibilidade, resiliência, automação de infraestrutura e escalabilidade dinâmica**, preparando a aplicação para suportar picos de demanda através de práticas modernas de nuvem e DevOps.
 
-- **AutoReparos.Domain:** Núcleo da aplicação contendo Entidades, Value Objects, Enums, Exceções de Domínio e Interfaces de Repositório.
-- **AutoReparos.Application:** Camada de lógica de aplicação, DTOs e serviços.
-- **AutoReparos.Infra:** Implementação de persistência (EF Core), Repositórios, Identidade e configurações de infraestrutura.
-- **AutoReparos.API:** Ponto de entrada da aplicação, contendo os Endpoints e Handlers de exceção global.
+---
 
-## ▶️ Como Executar
+## Desenho da Arquitetura
+
+### 1. Componentes da Aplicação (Clean Architecture)
+
+A aplicação está dividida em camadas seguindo os princípios de **Clean Architecture** e **DDD**, garantindo isolamento da lógica de domínio e facilidade de testes.
+
+<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'background': '#ffffff',
+    'primaryColor': '#ED145B',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#000000',
+    'lineColor': '#000000',
+    'secondaryColor': '#1A1A1A',
+    'tertiaryColor': '#FDE7EE',
+    'edgeLabelBackground': '#ffffff'
+  }
+}}%%
+graph TD
+    API[AutoReparos.API] --> Application[AutoReparos.Application]
+    Infra[AutoReparos.Infra] --> Application
+    Application --> Domain[AutoReparos.Domain]
+    
+    subgraph AutoReparos.API
+        Endpoints[Endpoints / Handlers]
+        DI[DependencyInjectionAPI.cs]
+    end
+    
+    subgraph AutoReparos.Application
+        Services[Services - OrdemServicoService, NotificacaoService]
+        DTOs[DTOs - Requests & Responses]
+    end
+    
+    subgraph AutoReparos.Infra
+        Context[AppDbContext / EF Core]
+        Repos[Repositories - PostgreSQL]
+        Security[Identity / JWT / TokenServices]
+    end
+    
+    subgraph AutoReparos.Domain
+        Entities[Entities - OrdemServico, Cliente, Veiculo, Insumo, Servico]
+        ValueObjects[Value Objects - CPF, CNPJ, Placa, Email]
+        Enums[Enums - EStatusOrdemServico, EOrigemInsumo]
+    end
+```
+
+</div>
+
+### 2. Infraestrutura Provisionada (AWS e Kubernetes)
+
+O ambiente em nuvem provisiona uma infraestrutura elástica e resiliente na AWS, contendo os recursos orquestrados descritos abaixo:
+
+<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'background': '#ffffff',
+    'primaryColor': '#ED145B',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#000000',
+    'lineColor': '#000000',
+    'secondaryColor': '#1A1A1A',
+    'tertiaryColor': '#FDE7EE',
+    'edgeLabelBackground': '#ffffff'
+  }
+}}%%
+graph TB
+    Client[Cliente / Navegador] --> Ingress[Nginx Ingress Controller]
+    Ingress --> APIService[API Service]
+    APIService --> APIPods[API Pods - Replicas]
+    APIPods --> PostgresService[Postgres Service]
+    PostgresService --> PostgresPod[Postgres StatefulSet Pod]
+    PostgresPod --> PVC[Persistent Volume Claim]
+    PVC --> PV[Persistent Volume - gp3 / hostPath]
+    
+    subgraph AWS VPC / Kubernetes Cluster
+        APIPods
+        PostgresPod
+        HPA[Horizontal Pod Autoscaler - CPU/Memória @ 40%]
+        HPA -.-> APIPods
+    end
+```
+
+</div>
+
+### 3. Fluxo de Deploy (Pipeline CI/CD)
+
+O deploy é totalmente automatizado através do GitHub Actions a cada merge na branch `main`:
+
+<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'background': '#ffffff',
+    'primaryColor': '#ED145B',
+    'primaryTextColor': '#ffffff',
+    'primaryBorderColor': '#000000',
+    'lineColor': '#000000',
+    'secondaryColor': '#1A1A1A',
+    'tertiaryColor': '#FDE7EE',
+    'actorColor': '#ED145B',
+    'actorTextColor': '#ffffff',
+    'actorLineColor': '#000000',
+    'signalColor': '#000000',
+    'signalTextColor': '#000000',
+    'labelBoxBkgColor': '#1A1A1A',
+    'labelBoxBorderColor': '#000000',
+    'labelTextColor': '#ffffff',
+    'loopLimitBorderColor': '#ED145B',
+    'loopLimitBkgColor': '#FDE7EE',
+    'noteBorderColor': '#ED145B',
+    'noteBkgColor': '#FDE7EE'
+  }
+}}%%
+sequenceDiagram
+    participant Git as Repositório GitHub
+    participant CI as Pipeline GitHub Actions
+    participant ECR as AWS ECR (Registry)
+    participant TF as Terraform (IaC)
+    participant EKS as AWS EKS Cluster
+    
+    Git->>CI: Push / Merge na branch 'main'
+    Note over CI: 1. Compilação (Build .NET 10)
+    Note over CI: 2. Testes Unitários & Integração (Testcontainers)
+    CI->>TF: 3. Terraform Validate & Apply
+    Note over TF: Provisiona/Garante VPC, EKS, ECR e Addons
+    TF-->>CI: Retorna URLs e Cluster Info
+    CI->>ECR: 4. Build, Tag e Push da Imagem Docker (:SHA / :latest)
+    CI->>EKS: 5. Deploy via Helm Upgrade --install
+    Note over EKS: Atualiza Deployments, StatefulSet, HPA, Services e Ingress
+```
+
+</div>
+
+---
+
+## Funcionalidades da Aplicação
+
+### Fluxo de Ordens de Serviço
+
+1. **Criação da OS (`POST /api/ordem-servico`):** Vincula cliente (CPF/CNPJ), veículo, serviços e insumos na mesma operação transacional.
+2. **Acompanhamento de Status:**
+   - **Fluxo de Transições:** `Recebida` ➔ `Em Diagnóstico` ➔ `Aguardando Aprovação` ➔ `Em Execução` ➔ `Finalizada` ➔ `Entregue`.
+   - **Notificações:** O cliente recebe atualizações por e-mail a cada mudança de status.
+3. **Aprovação de Orçamento:** O cliente recebe a lista detalhada do orçamento por e-mail e aprova ou recusa através de links com tokens assinados temporários (sem precisar estar autenticado).
+4. **Fila de Trabalho (`GET /api/ordem-servico/fila`):**
+   - **Priorização:** Ordenado dinamicamente: `Em Execução` > `Aguardando Aprovação` > `Em Diagnóstico` > `Recebida`.
+   - **Antiguidade:** Exibe as ordens mais antigas primeiro dentro de cada prioridade.
+   - **Filtro Ativo:** Exclui logicamente ordens já `Finalizadas` ou `Entregues`.
+
+### Gestão Administrativa
+
+- CRUD de Clientes, Veículos, Serviços e Insumos (Peças).
+
+- Controle de estoque mínimo e baixa automática de peças consumidas em OS.
+- Monitoramento do tempo médio de execução de cada tipo de serviço para fins analíticos.
+
+---
+
+## Guia de Execução Local
 
 ### Pré-requisitos
 
-- [Docker](https://www.docker.com/) e [Docker Compose](https://docs.docker.com/compose/) instalados.
-- .NET 10 SDK (opcional, apenas para desenvolvimento local sem Docker).
+- [Docker e Docker Compose](https://www.docker.com/) instalados.
 
-### Antes de Executar a aplicação, configure os User Secrets
+- .NET 10 SDK (apenas se quiser compilar fora do Docker).
 
-```json
-{
-  "ConnectionStrings:DbConnection": "Host=localhost;Port=5433;Database=autoreparos;Username=admin;Password=12w3e4r@#$",
+### Configuração de Credenciais (.env e Secrets)
 
-  "SeedUser": {
-    "Email": "admin@autoreparos.com",
-    "Password": "Admin@123"
-  },
+Crie um arquivo `.env` na raiz do diretório `./AutoReparos` com o seguinte modelo:
 
-  "Jwt": {
-    "Secret": "super_secret_key_with_enough_length_for_hmac256",
-    "ExpiryHours": "2"
-  },
+```env
+# Configurações do Banco de Dados
+DB_PASSWORD=admin123
 
-  "SendGrid": {
-    "ApiKey": "SUA_API_KEY",
-    "FromEmail": "remetente@email.com",
-    "FromName": "AutoReparos"
-  },
+# Configurações de Segurança
+JWT_SECRET=FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9
+JWT_EXPIRY_HOURS=2
+SEED_USER_EMAIL=admin@autoreparos.com
+SEED_USER_PASSWORD=Admin@123
+APROVACAO_TOKEN_SECRET=another_super_secret_key_for_approval_tokens_with_enough_length
 
-  "AprovacaoToken": {
-    "Secret": "another_super_secret_key_for_approval_tokens_with_enough_length"
-  },
+# Provedor de Email (SendGrid)
+SENDGRID_API_KEY=SG.dummy_key
+SENDGRID_FROM_EMAIL=noreply@autoreparos.com
+SENDGRID_FROM_NAME=AutoReparos
 
-  "App": {
-    "BaseUrl": "https://seu-endereco-ngrok.ngrok-free.app"
-  }
-}
+# Exposição Externa (ngrok/local)
+APP_BASE_URL=http://localhost:8080
+
+# Acesso ao pgAdmin
+PGADMIN_EMAIL=admin@admin.com
+PGADMIN_PASSWORD=admin
+ASPNETCORE_ENVIRONMENT=Development
 ```
 
-### Configuração do SendGrid
+> [!TIP]
+> Para testar os links de aprovação de orçamento por e-mail em ambiente de desenvolvimento local, você pode utilizar o **ngrok** para expor a porta local da API e preencher a URL gerada na variável `APP_BASE_URL`.
 
-Para habilitar o envio de e-mails de orçamento:
+### Execução com Docker Compose
 
-1. Criar conta no SendGrid.
-2. Criar uma API Key.
-3. Configurar um remetente validado (Sender Identity).
-4. Preencher os campos da seção SendGrid nos User Secrets.
-
-Após a aprovação do orçamento, o cliente receberá um e-mail contendo:
-
-- Valor total do orçamento
-- Lista de serviços
-- Botão Aprovar
-- Botão Recusar
-
-### Configuração do Ngrok
-
-O Ngrok é utilizado para expor a API local para a internet, permitindo que os links enviados por e-mail funcionem fora do ambiente local.
-
-1. Criar uma conta gratuita:
-
-- <https://ngrok.com/>
-
-1. Instalar:
+Para subir a API, o banco de dados PostgreSQL e o utilitário pgAdmin localmente, execute na pasta `./AutoReparos`:
 
 ```bash
-winget install ngrok -s msstore
+docker-compose up -d --build
 ```
 
-1. Adicionar seu Auth Token:
+A API estará disponível em:
+
+- Documentação interativa (Swagger): [http://localhost:8080/swagger](http://localhost:8080/swagger)
+- pgAdmin: [http://localhost:5050](http://localhost:5050)
+
+### Execução de Testes Automatizados
+
+Para rodar a suíte completa de testes locais, exporte as variáveis no terminal e execute:
 
 ```bash
-ngrok config add-authtoken SEU_AUTH_TOKEN
+# Exportando variáveis exigidas pelos testes locais (Linux/macOS)
+export ConnectionStrings__DbConnection="Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
+export Jwt__Secret="FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+export Jwt__ExpiryHours="2"
+export SeedUser__Email="admin@autoreparos.com"
+export SeedUser__Password="Admin@123"
+export AprovacaoToken__Secret="another_super_secret_key_for_approval_tokens_with_enough_length"
+export SendGrid__ApiKey="SG.dummy_key"
+export SendGrid__FromEmail="noreply@autoreparos.com"
+export SendGrid__FromName="AutoReparos"
+export App__BaseUrl="http://localhost:8080"
+
+dotnet test
 ```
 
-1. Iniciar túnel
+---
 
-```bash
-ngrok http https://localhost:7258
-```
+## Guia de Kubernetes (Deploy Local com Helm)
 
-- Irá ser gerado uma URL pública, basta adicionar em BaseUrl no UserSecrets
+A pasta [/k8s](./k8s) contém o Helm Chart completo configurado para orquestração da aplicação.
 
-### Execução usando Docker
+1. **Habilitar Ingress Controller** (no Kind):
 
-1. Clone o repositório.
-2. Certifique-se de configurar as variáveis de ambiente necessárias (pode ser via arquivo `.env` na raiz ou variáveis de sistema):
-   - `DB_PASSWORD`: Senha do banco de dados PostgreSQL.
-   - `JWT_SECRET`: Chave secreta para geração dos tokens JWT.
-   - `JWT_EXPIRY_HOURS`: Tempo (em horas) para expiração do Token
-   - `SEED_USER_EMAIL` e `SEED_USER_PASSWORD`: Credenciais do usuário administrativo inicial.
-   - `PGADMIN_EMAIL` e `PGADMIN_PASSWORD`: Credenciais de acesso do usuário ao pgAdmin.
-   - `ASPNETCORE_ENVIRONMENT`: Define o ambiente de execução do ASP.NET Core (ex: `Development` ou `Production`).
-3. No terminal, execute:
+   Aplique o manifesto oficial do Ingress Nginx para clusters Kind:
 
    ```bash
-   docker-compose up -d --build
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
    ```
 
-4. A API estará disponível em: `http://localhost:8080`
-5. Acesse a documentação Swagger em: `http://localhost:8080/swagger`
-
-### Execução no Kubernetes (Helm)
-
-A aplicação está preparada para ser implantada em um cluster Kubernetes local ou em produção utilizando o Helm.
-
-#### Pré-requisitos
-
-- Cluster Kubernetes ativo (ex: [Minikube](https://minikube.sigs.k8s.io/) ou [Kind](https://kind.sigs.k8s.io/)).
-
-- CLI do [Helm](https://helm.sh/) instalada.
-- [Nginx Ingress Controller](https://kubernetes.github.io/ingress-nginx/) habilitado no seu cluster (no Minikube: `minikube addons enable ingress`).
-
-#### Passo a Passo para Deploy Local
-
-1. **Configurar Segredos Locais:**
-   Crie um arquivo chamado `k8s/values-secrets.yaml` na raiz do projeto (este arquivo já está configurado no `.gitignore` para não ser commitado no GitHub). Insira as credenciais de teste reais:
+2. **Configurar os Segredos Locais** criando o arquivo `k8s/values-secrets.yaml` (este arquivo está ignorado no Git por segurança):
 
    ```yaml
    postgres:
      password: "admin123"
-
    secrets:
      jwtSecret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
      seedUserPassword: "Admin@123"
@@ -188,111 +322,89 @@ A aplicação está preparada para ser implantada em um cluster Kubernetes local
      sendGridApiKey: "SG.dummy_key"
    ```
 
-2. **Instalar o Helm Chart:**
-   Execute o comando de instalação/atualização a partir da raiz do projeto:
+3. **Instalar o Helm Chart**:
 
    ```bash
    helm upgrade --install autoreparos ./k8s -f k8s/values.yaml -f k8s/values-secrets.yaml
    ```
 
-3. **Mapeamento do DNS Local (Ingress):**
-   Obtenha o IP do seu cluster Kubernetes (no Minikube: `minikube ip`). Adicione o mapeamento do DNS local no seu arquivo `/etc/hosts` (ou `hosts` do Windows):
+4. **Mapeamento do DNS local (Ingress)**:
+   Como o Kind expõe o Ingress diretamente na porta 80 e 443 do host Docker, mapeie o IP `127.0.0.1` no seu arquivo `/etc/hosts` (ou `hosts` do Windows) apontando para o DNS local:
 
    ```text
-   <IP_DO_CLUSTER> autoreparos.local
+   127.0.0.1 autoreparos.local
    ```
 
-   A API estará acessível publicamente via: `http://autoreparos.local` e o Swagger em `http://autoreparos.local/swagger`.
-
-4. **Verificar os Recursos e o HPA:**
-   Para acompanhar a subida dos pods da API, do banco Postgres e as regras de auto-escalonamento (HPA) rodando a 40% de CPU/Memória:
-
-   ```bash
-   kubectl get pods -w
-   kubectl get hpa
-   ```
-
-### Scripts de Desenvolvimento
-
-Existem scripts auxiliares para facilitar tarefas comuns:
-
-- **Linux/macOS:** `./dev.sh {run|watch|db-update|mig-add|restore}`
-- **Windows (PowerShell):** `./dev.ps1 -Action {run|watch|db-update|mig-add|restore}`
-
-## ☁️ Infraestrutura como Código (Terraform)
-
-A infraestrutura na AWS (VPC, EKS, Addons) é provisionada como código utilizando o Terraform (arquivos sob a pasta [infra](./infra)).
-
-Por questões de segurança e colaboração, o estado do Terraform está configurado para salvar em um **backend remoto no AWS S3** de forma parcial (sem fixar o nome do bucket diretamente no código).
-
-### 1. Criar o Bucket S3 Prévio
-
-Antes de rodar o Terraform, você precisa ter um bucket S3 criado na sua conta AWS na região `us-east-1`. Crie-o pela console web da AWS ou via AWS CLI:
-
-```bash
-aws s3api create-bucket --bucket O-NOME-DO-SEU-BUCKET-AQUI --region us-east-1
-```
-
-### 2. Inicializar o Terraform (Configuração Parcial)
-
-Acesse a pasta `/infra` e inicialize informando o nome do seu bucket dinamicamente (ou via variável de ambiente):
-
-```bash
-cd infra
-terraform init -backend-config="bucket=O-NOME-DO-SEU-BUCKET-AQUI"
-```
-
-*(Caso queira migrar um estado existente ou reconfigurar para um novo bucket, adicione a flag `--reconfigure` ao final)*
-
-### 3. Validar e Executar o Plan
-
-```bash
-terraform validate
-terraform plan
-```
-
-## 🔄 Integração Contínua e Entrega Contínua (CI/CD)
-
-A pipeline de CI/CD é gerenciada pelo GitHub Actions (veja o arquivo [.github/workflows/deploy.yml](.github/workflows/deploy.yml)) e está dividida em dois fluxos principais:
-
-1. **Validação de Pull Requests (CI):** Disparado em qualquer PR direcionado à branch `main`. Realiza o restore, build e executa a suíte de testes unitários e de integração utilizando **Testcontainers** para instanciar um banco PostgreSQL efêmero em Docker.
-2. **Deploy Contínuo (CD):** Disparado em pushes/merges na branch `main`. Executa novamente a etapa de testes, inicializa/aplica o provisionamento da infraestrutura via **Terraform** na AWS (EKS, ECR, VPC), constrói e envia as imagens Docker para o AWS ECR com tags de SHA/latest, e atualiza os pods do cluster Kubernetes via **Helm Upgrade**.
-
-### ⚙️ Decisões de Projeto de CI/CD e Infraestrutura
-
-Para simplificar a topologia da Fase 2 e garantir a estabilidade do fluxo de deploy, as seguintes decisões técnicas foram adotadas e registradas no projeto:
-
-- **Namespace Único (default):** A aplicação inteira (API, banco de dados Postgres StatefulSet e HPA) executa diretamente no namespace `default`, que é de uso exclusivo da solução. Não há divisão de namespaces no Kubernetes para esta fase.
-- **Prevenção de Concorrência (Concurrency Control):** O workflow do GitHub Actions possui uma política de concorrência definida que cancela pipelines anteriores em andamento se novos commits forem enviados para a mesma branch. Isso previne concorrências indesejadas no Terraform, evitando travar o estado remoto (state lock) no S3.
-
-## 🧪 Testes
-
-Para executar o conjunto de testes (Unitários e Integração):
-
-```bash
-dotnet test
-```
-
-## 📊 SonarQube Local
-
-Para rodar a análise estática e verificar a qualidade do código com o SonarQube localmente, consulte o guia passo a passo em [SONAR_LOCAL.md](file:///mnt/c/Users/joseh/Documents/Github/Fiap/AutoReparos/SONAR_LOCAL.md).
-
-## 📄 Documentação de Entrega
-
-- **DDD:** A documentação estratégica (Event Storming, Linguagem Ubíqua e Diagramas) pode ser consultada pelo [Miro](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405).
-- **Análise de Vulnerabilidades:** Relatórios de segurança incluídos na documentação de entrega.
-- **Collection Postman:** A collection completa para teste das APIs está disponível em [AutoReparos.postman_collection.json](Postman/AutoReparos.postman_collection.json).
-
-## 👥 Grupo
-
-<i>Grupo78-PosTech-15SOAT</i>
-
-- **Participantes:**
-  - Enrico Gollner - rm370737
-  - José Dotta - rm372959
-  - Júlia Santos - rm370364
-  - Lucas Bastos - rm370749
-  - Mateus Lecchi - rm371085
+   A aplicação estará acessível em [http://autoreparos.local/swagger](http://autoreparos.local/swagger).
 
 ---
-Desenvolvido para fins educacionais - FIAP SOAT.
+
+## Guia de Infraestrutura como Código (Terraform na AWS)
+
+O diretório [/infra](./infra) contém o provisionamento completo de rede e cluster gerenciado utilizando Terraform:
+
+1. **Criar o bucket S3 prévio** na AWS para armazenar o estado:
+
+   ```bash
+   aws s3api create-bucket --bucket meu-bucket-state-autoreparos --region us-east-1
+   ```
+
+2. **Inicializar o Terraform** apontando para o bucket dinamicamente:
+
+   ```bash
+   cd infra
+   terraform init -backend-config="bucket=meu-bucket-state-autoreparos"
+   ```
+
+3. **Validar e Aplicar**:
+
+   ```bash
+   terraform apply -auto-approve
+   ```
+
+*Recursos Criados:* VPC completa (Subnets públicas/privadas, IGW, NAT Gateways), AWS EKS (cluster com Node Groups de instâncias de Worker Nodes escaláveis), repositório privado AWS ECR para imagens Docker e OIDC Provider.
+
+---
+
+## Pipeline de CI/CD (GitHub Actions)
+
+A pipeline é definida no arquivo [.github/workflows/deploy.yml](./.github/workflows/deploy.yml) e executa o seguinte fluxo seguro:
+
+1. **Controle de Concorrência:** Cancela execuções antigas na mesma branch para evitar corrupção de estado remoto do Terraform (State Lock).
+2. **Restore & Build** da aplicação em ambiente temporário (.NET 10).
+3. **Testes Unitários & Integração:** Roda todos os testes em containers efêmeros via Testcontainers.
+4. **Provisionamento IaC (Terraform):** Executa o plan e aplica infraestrutura da AWS S3/EKS automaticamente.
+5. **Build & Push Docker:** Gera a imagem otimizada e publica com tags exclusivas baseadas no SHA no AWS ECR.
+6. **Helm Deploy:** Realiza o upgrade dos manifestos do Kubernetes apontando a nova imagem para o cluster AWS EKS.
+
+---
+
+## Qualidade de Código (SonarQube) e Vulnerabilidades
+
+### Análise Estática de Qualidade
+
+Para rodar a análise estática e verificar o índice de segurança, bugs, code smells e cobertura de testes localmente com o SonarQube, consulte o guia passo a passo em [SONAR_LOCAL.md](./SONAR_LOCAL.md).
+
+### Relatório de Análise de Vulnerabilidades
+
+O scan de vulnerabilidades de segurança de dependências (SCA) e a análise estática de segurança do código (SAST) fazem parte dos relatórios de qualidade gerados pelo SonarQube e pelos alertas de segurança do GitHub (Dependabot), estando anexados e descritos de forma transparente no documento de entrega da Fase 2.
+
+---
+
+## Entregáveis e Links Úteis
+
+- **Desenho Estratégico (DDD) no Miro:** [Link para o Miro Board](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405) (Event Storming, Linguagem Ubíqua, Diagrama de Domínio).
+- **Collection do Postman:** Arquivo localizado na pasta [/Postman/AutoReparos.postman_collection.json](./Postman/AutoReparos.postman_collection.json).
+- **Link para o Vídeo Demonstrativo:** *[Adicione aqui o link do vídeo publicado no YouTube/Vimeo de até 15 minutos]*
+
+---
+
+## Integrantes do Grupo
+
+**Grupo 78 - PosTech - 15SOAT (FIAP)**
+
+- 👨‍💻 **Enrico Gollner** - rm370737
+- 👨‍💻 **José Dotta** - rm372959
+- 👩‍💻 **Júlia Santos** - rm370364
+- 👨‍💻 **Lucas Bastos** - rm370749
+- 👨‍💻 **Mateus Lecchi** - rm371085
