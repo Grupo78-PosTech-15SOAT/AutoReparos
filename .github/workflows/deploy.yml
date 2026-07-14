@@ -232,10 +232,18 @@ jobs:
       run: |
         aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }} || true
 
-    - name: Uninstall Helm Release
+    - name: Uninstall Helm Releases
       run: |
         # Uninstall the Helm release and wait for all resources (including load balancers) to be removed
         helm uninstall autoreparos --wait || true
+        
+        # Uninstall public infrastructure Helm releases that create Load Balancers
+        helm uninstall ingress-nginx -n ingress-nginx || true
+        helm uninstall prometheus -n monitoring || true
+        
+        # Wait for AWS to completely delete the Load Balancers and detach their ENIs
+        echo "Waiting 3 minutes for AWS Load Balancers to be completely deleted..."
+        sleep 180
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
