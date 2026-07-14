@@ -116,8 +116,10 @@ jobs:
 
     - name: Terraform Validate
       working-directory: infra
+      env:
+        TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
       run: |
-        terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+        terraform init -backend-config="bucket=$TF_STATE_BUCKET"
         terraform validate
 
     - name: Terraform Apply
@@ -167,6 +169,14 @@ jobs:
         aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
 
     - name: Helm Upgrade Deploy
+      env:
+        SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
+        SENDGRID_FROM_NAME: ${{ secrets.SENDGRID_FROM_NAME }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
+        APROVACAO_TOKEN_SECRET: ${{ secrets.APROVACAO_TOKEN_SECRET }}
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       run: |
         helm upgrade --install autoreparos ./k8s \
           -f k8s/values.yaml \
@@ -174,13 +184,13 @@ jobs:
           --set image.repository=${{ needs.infra.outputs.ecr_repository_url }} \
           --set image.tag=${{ github.sha }} \
           --set config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
-          --set config.sendGridFromEmail="${{ secrets.SENDGRID_FROM_EMAIL }}" \
-          --set config.sendGridFromName="${{ secrets.SENDGRID_FROM_NAME }}" \
-          --set secrets.jwtSecret="${{ secrets.JWT_SECRET }}" \
-          --set secrets.seedUserPassword="${{ secrets.SEED_USER_PASSWORD }}" \
-          --set secrets.aprovacaoTokenSecret="${{ secrets.APROVACAO_TOKEN_SECRET }}" \
-          --set secrets.sendGridApiKey="${{ secrets.SENDGRID_API_KEY }}" \
-          --set postgres.password="${{ secrets.POSTGRES_PASSWORD }}"
+          --set config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
+          --set config.sendGridFromName="$SENDGRID_FROM_NAME" \
+          --set secrets.jwtSecret="$JWT_SECRET" \
+          --set secrets.seedUserPassword="$SEED_USER_PASSWORD" \
+          --set secrets.aprovacaoTokenSecret="$APROVACAO_TOKEN_SECRET" \
+          --set secrets.sendGridApiKey="$SENDGRID_API_KEY" \
+          --set postgres.password="$POSTGRES_PASSWORD"
 
     - name: Configure URL Display
       run: |
