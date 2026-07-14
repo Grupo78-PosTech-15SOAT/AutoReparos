@@ -1,5 +1,6 @@
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.Servicos.DTOs.Response;
+using AutoReparos.Application.Shared.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SendGrid;
@@ -12,16 +13,18 @@ namespace AutoReparos.Application.OrdensServicos.Services
     {
         private readonly ILogger<NotificacaoService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAppUrlProvider _appUrlProvider;
 
-        public NotificacaoService(ILogger<NotificacaoService> logger, IConfiguration configuration)
+        public NotificacaoService(ILogger<NotificacaoService> logger, IConfiguration configuration, IAppUrlProvider appUrlProvider)
         {
             _logger = logger;
             _configuration = configuration;
+            _appUrlProvider = appUrlProvider;
         }
 
         public async Task EnviarOrcamento(string emailDestinatario, string nomeDestinatario, string token, decimal valorTotal, IEnumerable<ServicoDto> servicos)
         {
-            var baseUrl = _configuration["App:BaseUrl"];
+            var baseUrl = _appUrlProvider.GetBaseUrl();
             var aprovarUrl = $"{baseUrl}/api/ordem-servico/aprovar?token={Uri.EscapeDataString(token)}";
             var recusarUrl = $"{baseUrl}/api/ordem-servico/recusar?token={Uri.EscapeDataString(token)}";
 

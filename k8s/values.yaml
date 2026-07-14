@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: autoreparos-api
@@ -27,6 +27,14 @@ postgres:
   persistence:
     enabled: true
     storageClass: "hostpath" # Definir como "gp3" no AWS EKS (CSI dynamic driver) ou "hostpath" / "" para local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
 
 
 config:
@@ -35,7 +43,6 @@ config:
   seedUserEmail: "admin@autoreparos.com"
   sendGridFromEmail: "noreply@autoreparos.com"
   sendGridFromName: "AutoReparos"
-  appBaseUrl: "http://autoreparos.local"
 
 secrets:
   jwtSecret: ""
@@ -52,7 +59,7 @@ resources:
     memory: 512Mi
 
 hpa:
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 4
   targetCPUUtilizationPercentage: 40
   targetMemoryUtilizationPercentage: 40
