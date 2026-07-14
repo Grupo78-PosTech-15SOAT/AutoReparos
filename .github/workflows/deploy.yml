@@ -219,7 +219,7 @@ jobs:
     - name: Wait 15 Minutes
       run: |
         echo "Waiting 15 minutes before destroying infrastructure..."
-        sleep 900
+        sleep 10
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
@@ -227,23 +227,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
-
-    - name: Setup Kubeconfig
-      run: |
-        aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }} || true
-
-    - name: Uninstall Helm Releases
-      run: |
-        # Uninstall the Helm release and wait for all resources (including load balancers) to be removed
-        helm uninstall autoreparos --wait || true
-        
-        # Uninstall public infrastructure Helm releases that create Load Balancers
-        helm uninstall ingress-nginx -n ingress-nginx || true
-        helm uninstall prometheus -n monitoring || true
-        
-        # Wait for AWS to completely delete the Load Balancers and detach their ENIs
-        echo "Waiting 3 minutes for AWS Load Balancers to be completely deleted..."
-        sleep 180
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
@@ -257,8 +240,89 @@ jobs:
       run: |
         terraform init -backend-config="bucket=$TF_STATE_BUCKET"
 
+    - name: Get Infrastructure Details
+      id: get-infra-details
+      working-directory: infra
+      run: |
+        CLUSTER_NAME=$(terraform output -raw cluster_name || echo "")
+        VPC_ID=$(terraform output -raw vpc_id || echo "")
+        echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+        echo "vpc_id=$VPC_ID" >> $GITHUB_OUTPUT
+
+    - name: Setup Kubeconfig
+      run: |
+        CLUSTER_NAME="${{ steps.get-infra-details.outputs.cluster_name }}"
+        if [ -z "$CLUSTER_NAME" ]; then
+          CLUSTER_NAME="${{ needs.infra.outputs.cluster_name }}"
+        fi
+        if [ -n "$CLUSTER_NAME" ]; then
+          aws eks update-kubeconfig --name "$CLUSTER_NAME" --region ${{ env.AWS_REGION }}
+        else
+          echo "No cluster name found, skipping kubeconfig update."
+        fi
+
+    - name: Uninstall Helm Releases
+      run: |
+        if kubectl cluster-info >/dev/null 2>&1; then
+          echo "Connected to EKS cluster. Starting Helm cleanup..."
+          
+          # Desinstala o autoreparos aguardando a exclusão dos pods/recursos
+          helm uninstall autoreparos --wait || true
+          
+          # Desinstala ingress-nginx e prometheus
+          helm uninstall ingress-nginx -n ingress-nginx --wait || true
+          helm uninstall prometheus -n monitoring --wait || true
+          
+          # Garante a remoção forçada de qualquer ingress ou serviço restante do tipo LoadBalancer
+          kubectl delete ingress --all --all-namespaces || true
+          kubectl delete service -n ingress-nginx ingress-nginx-controller || true
+          kubectl delete service -n monitoring prometheus-grafana || true
+        else
+          echo "Cannot connect to EKS cluster. Skipping Helm/Kubernetes cleanup steps."
+        fi
+
+    - name: Wait for AWS Resources to be Released (Polling)
+      run: |
+        VPC_ID="${{ steps.get-infra-details.outputs.vpc_id }}"
+        if [ -z "$VPC_ID" ]; then
+          echo "VPC ID not found, skipping AWS resource polling."
+          exit 0
+        fi
+
+        echo "VPC ID: $VPC_ID"
+
+        # 1. Aguarda a deleção de todos os Load Balancers no VPC
+        echo "Waiting for all Load Balancers in VPC $VPC_ID to be deleted..."
+        while true; do
+          LBS=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?VpcId=='$VPC_ID'].LoadBalancerArn" --output text 2>/dev/null || echo "")
+          if [ -z "$LBS" ]; then
+            echo "All Load Balancers in VPC deleted."
+            break
+          fi
+          echo "Still waiting for Load Balancers to be deleted: $LBS"
+          sleep 10
+        done
+
+        # 2. Aguarda a deleção de todas as interfaces de rede (ENIs) de ELB no VPC
+        echo "Waiting for all ELB network interfaces (ENIs) in VPC $VPC_ID to be deleted..."
+        while true; do
+          ENIS=$(aws ec2 describe-network-interfaces \
+            --filters "Name=vpc-id,Values=$VPC_ID" "Name=description,Values='ELB net/*','ELB app/*','ELB *'" \
+            --query "NetworkInterfaces[*].NetworkInterfaceId" \
+            --output text 2>/dev/null || echo "")
+          if [ -z "$ENIS" ]; then
+            echo "All ELB ENIs in VPC deleted."
+            break
+          fi
+          echo "Still waiting for ELB ENIs to be deleted: $ENIS"
+          sleep 10
+        done
+        
+        echo "All dynamically created AWS resources have been successfully deleted!"
+
     - name: Terraform Destroy
       working-directory: infra
       run: terraform destroy -auto-approve
+
 
 
