@@ -1118,7 +1118,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"documentoCliente\": {{documentoCliente}},\r\n  \"placaVeiculo\": {{placaVeiculo}},\r\n  \"observacao\": \"Observação do serviço\"\r\n}",
+              "raw": "{\r\n  \"documentoCliente\": \"{{documentoCliente}}\",\r\n  \"placaVeiculo\": \"{{placaVeiculo}}\",\r\n  \"observacao\": \"Observação do serviço\",\r\n  \"servicos\": [\r\n    {\r\n      \"servicoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"valorCobrado\": 200\r\n    }\r\n  ],\r\n  \"insumos\": [\r\n    {\r\n      \"insumoId\": \"8fc840c6-fd20-41a1-8c53-6f956a9c8a01\",\r\n      \"descricao\": \"Óleo motor 15W-40\",\r\n      \"valorUnitario\": 50,\r\n      \"quantidade\": 1,\r\n      \"origem\": 2\r\n    },\r\n    {\r\n      \"insumoId\": \"2768e51b-8243-41b8-bcc3-cbcb1627b198\",\r\n      \"descricao\": \"Pastilha de freio honda civic 2007\",\r\n      \"valorUnitario\": 104.99,\r\n      \"quantidade\": 2,\r\n      \"origem\": 1\r\n    },\r\n    {\r\n      \"insumoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"descricao\": \"Retrovisor esquerdo peugeot 206\",\r\n      \"valorUnitario\": 155.90,\r\n      \"quantidade\": 3,\r\n      \"origem\": 2\r\n    }\r\n  ]\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1126,13 +1126,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico",
+              "raw": "{{baseUrl}}/api/ordem-servico",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico"
+                "ordem-servico"
               ]
             }
           },
@@ -1163,13 +1163,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "servicos"
               ]
@@ -1202,13 +1202,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/insumos",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/insumos",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "insumos"
               ]
@@ -1232,13 +1232,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico?clienteId=&veiculoId=&status=&pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/ordem-servico?clienteId=&veiculoId=&status=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico"
+                "ordem-servico"
               ],
               "query": [
                 {
@@ -1282,13 +1282,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/consulta?documento=11999987532&placa=&pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/ordem-servico/consulta?documento=11999987532&placa=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "consulta"
               ],
               "query": [
@@ -1329,13 +1329,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}"
               ]
             }
@@ -1348,13 +1348,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/consulta/{{ordemServicoId}}",
+              "raw": "{{baseUrl}}/api/ordem-servico/consulta/{{ordemServicoId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "consulta",
                 "{{ordemServicoId}}"
               ]
@@ -1378,13 +1378,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/iniciar-diagnostico",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/iniciar-diagnostico",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "iniciar-diagnostico"
               ]
@@ -1408,13 +1408,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/enviar-para-aprovacao",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/enviar-para-aprovacao",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "enviar-para-aprovacao"
               ]
@@ -1438,13 +1438,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/aprovar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/aprovar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "aprovar"
               ]
@@ -1468,13 +1468,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
@@ -1500,13 +1500,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/concluir",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/concluir",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
@@ -1532,13 +1532,13 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordens-servico/{{ordemServicoId}}/entregar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/entregar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "ordens-servico",
+                "ordem-servico",
                 "{{ordemServicoId}}",
                 "entregar"
               ]

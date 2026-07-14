@@ -9,6 +9,7 @@ using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Insumos.Repositories;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
+using AutoReparos.Domain.OrdensServicos.Exceptions;
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Servicos.Repositories;
 using AutoReparos.Domain.Shared;
@@ -81,7 +82,14 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Core
             {
                 var valorUnitario = await ObterValorUnitario(insumoDto);
 
-                var item = new OrdemServicoInsumo(ordemServico.Id, insumoDto.InsumoId, insumoDto.Descricao, valorUnitario, insumoDto.Quantidade, insumoDto.Origem);
+                Guid? insumoId = insumoDto.Origem switch
+                {
+                    EOrigemInsumo.Estoque => insumoDto.InsumoId,
+                    EOrigemInsumo.CompraEspecifica => null,
+                    _ => throw new InvalidOrdemServicoException("Origem do insumo inválida(1 - Estoque ou 2 - Compra Específica).")
+                };
+
+                var item = new OrdemServicoInsumo(ordemServico.Id, insumoId, insumoDto.Descricao, valorUnitario, insumoDto.Quantidade, insumoDto.Origem);
                 ordemServico.AdicionarInsumo(item);
             }
         }

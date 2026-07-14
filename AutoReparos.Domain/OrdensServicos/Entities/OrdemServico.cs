@@ -56,7 +56,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             if (Status != EStatusOrdemServico.Recebida && Status != EStatusOrdemServico.EmDiagnostico)
                 throw new InvalidOrdemServicoException("Insumos só podem ser adicionados quando a Ordem de Serviço estiver recebida ou em diagnóstico.");
 
-            if (insumo.Origem == EOrigemInsumo.Estoque && insumo.InsumoId.HasValue)
+            if (insumo.Origem == EOrigemInsumo.Estoque)
             {
                 var existente = _insumos.FirstOrDefault(p => p.InsumoId == insumo.InsumoId);
                 if (existente is not null)
