@@ -1,7 +1,7 @@
+using AutoReparos.API.Controllers;
 using AutoReparos.Application.Shared;
 using AutoReparos.Application.Usuarios.DTOs.Request;
 using AutoReparos.Application.Usuarios.DTOs.Response;
-using AutoReparos.Application.Usuarios.Services.Interfaces;
 
 namespace AutoReparos.API.Endpoints
 {
@@ -13,52 +13,32 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Usuários")
                 .RequireAuthorization();
 
-            group.MapPost("/", async (UsuarioCreateDto dto, IUsuarioService service) =>
-            {
-                var usuario = await service.Create(dto);
-                return Results.Created($"/api/usuarios/{usuario.Id}", usuario);
-            })
+            group.MapPost("/", (UsuarioCreateDto dto, UsuarioController controller) => controller.Create(dto))
             .WithName("CreateUsuario")
             .WithSummary("Cadastra um novo usuário")
             .WithDescription("Cria um novo usuário no sistema (Administrador, Atendente ou Mecânico)")
             .Produces<UsuarioDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/", async (IUsuarioService service, [AsParameters] UsuarioPagedRequest request) =>
-            {
-                var result = await service.GetAll(request);
-                return Results.Ok(result);
-            })
+            group.MapGet("/", (UsuarioController controller, [AsParameters] UsuarioPagedRequest request) => controller.GetAll(request))
             .WithName("GetAllUsuarios")
             .WithSummary("Lista todos os usuários")
             .Produces<PagedResult<UsuarioDto>>(StatusCodes.Status200OK);
 
-            group.MapGet("/{id:guid}", async (Guid id, IUsuarioService service) =>
-            {
-                var usuario = await service.GetById(id);
-                return usuario is null ? Results.NotFound() : Results.Ok(usuario);
-            })
+            group.MapGet("/{id:guid}", (Guid id, UsuarioController controller) => controller.GetById(id))
             .WithName("GetUsuarioById")
             .WithSummary("Busca um usuário por Id")
             .Produces<UsuarioDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPut("/{id:guid}", async (Guid id, UsuarioUpdateDto dto, IUsuarioService service) =>
-            {
-                await service.Update(id, dto);
-                return Results.NoContent();
-            })
+            group.MapPut("/{id:guid}", (Guid id, UsuarioUpdateDto dto, UsuarioController controller) => controller.Update(id, dto))
             .WithName("UpdateUsuario")
             .WithSummary("Atualiza um usuário")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapDelete("/{id:guid}", async (Guid id, IUsuarioService service) =>
-            {
-                await service.Delete(id);
-                return Results.NoContent();
-            })
+            group.MapDelete("/{id:guid}", (Guid id, UsuarioController controller) => controller.Delete(id))
             .WithName("DeleteUsuario")
             .WithSummary("Exclui um usuário")
             .Produces(StatusCodes.Status204NoContent)

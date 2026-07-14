@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "3a76b0ad-627c-4694-b81f-dd34731b985a",
+    "_postman_id": "0ce922ec-ea65-4459-b676-68ce431e1e77",
     "name": "AutoReparos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "27526426",
-    "_collection_link": "https://go.postman.co/collection/27526426-3a76b0ad-627c-4694-b81f-dd34731b985a?source=collection_link"
+    "_exporter_id": "28677730",
+    "_collection_link": "https://go.postman.co/collection/28677730-0ce922ec-ea65-4459-b676-68ce431e1e77?source=collection_link"
   },
   "item": [
     {
@@ -308,12 +308,8 @@
             {
               "listen": "prerequest",
               "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [],
+                "type": "text/javascript"
               }
             }
           ],
@@ -368,7 +364,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/veiculos?pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/veiculos?clienteId=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -379,8 +375,7 @@
               "query": [
                 {
                   "key": "clienteId",
-                  "value": "1",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "pageNumber",
@@ -1072,7 +1067,7 @@
       ]
     },
     {
-      "name": "Ordens de Serviço",
+      "name": "OrdensServico",
       "item": [
         {
           "name": "CreateOrdemServico",
@@ -1123,7 +1118,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"clienteId\": \"{{clienteId}}\",\r\n  \"veiculoId\": \"{{veiculoId}}\",\r\n  \"observacao\": \"Observação do serviço\"\r\n}",
+              "raw": "{\r\n  \"documentoCliente\": \"{{documentoCliente}}\",\r\n  \"placaVeiculo\": \"{{placaVeiculo}}\",\r\n  \"observacao\": \"Observação do serviço\",\r\n  \"servicos\": [\r\n    {\r\n      \"servicoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"valorCobrado\": 200\r\n    }\r\n  ],\r\n  \"insumos\": [\r\n    {\r\n      \"insumoId\": \"8fc840c6-fd20-41a1-8c53-6f956a9c8a01\",\r\n      \"descricao\": \"Óleo motor 15W-40\",\r\n      \"valorUnitario\": 50,\r\n      \"quantidade\": 1,\r\n      \"origem\": 2\r\n    },\r\n    {\r\n      \"insumoId\": \"2768e51b-8243-41b8-bcc3-cbcb1627b198\",\r\n      \"descricao\": \"Pastilha de freio honda civic 2007\",\r\n      \"valorUnitario\": 104.99,\r\n      \"quantidade\": 2,\r\n      \"origem\": 1\r\n    },\r\n    {\r\n      \"insumoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"descricao\": \"Retrovisor esquerdo peugeot 206\",\r\n      \"valorUnitario\": 155.90,\r\n      \"quantidade\": 3,\r\n      \"origem\": 2\r\n    }\r\n  ]\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1237,7 +1232,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico?pageNumber=1&pageSize=10",
+              "raw": "{{baseUrl}}/api/ordem-servico?clienteId=&veiculoId=&status=&pageNumber=1&pageSize=10",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1248,58 +1243,16 @@
               "query": [
                 {
                   "key": "clienteId",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "veiculoId",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
                 {
                   "key": "status",
-                  "value": "",
-                  "disabled": true
+                  "value": ""
                 },
-                {
-                  "key": "pageNumber",
-                  "value": "1"
-                },
-                {
-                  "key": "pageSize",
-                  "value": "10"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "GetFilaOrdensServico",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/fila?pageNumber=1&pageSize=10",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "ordem-servico",
-                "fila"
-              ],
-              "query": [
                 {
                   "key": "pageNumber",
                   "value": "1"
@@ -1440,7 +1393,7 @@
           "response": []
         },
         {
-          "name": "EnviarParaAprovacao",
+          "name": "AguardarAprovacao",
           "request": {
             "auth": {
               "type": "bearer",
@@ -1473,53 +1426,27 @@
           "name": "AprovarOrdemServico",
           "request": {
             "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/aprovar?token={{tokenAprovacao}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "ordem-servico",
-                "aprovar"
-              ],
-              "query": [
+              "type": "bearer",
+              "bearer": [
                 {
                   "key": "token",
-                  "value": "{{tokenAprovacao}}"
+                  "value": "{{token}}",
+                  "type": "string"
                 }
               ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "RecusarOrdemServico",
-          "request": {
-            "auth": {
-              "type": "noauth"
             },
-            "method": "GET",
+            "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/recusar?token={{tokenAprovacao}}",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/aprovar",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "ordem-servico",
-                "recusar"
-              ],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "{{tokenAprovacao}}"
-                }
+                "{{ordemServicoId}}",
+                "aprovar"
               ]
             }
           },
@@ -1541,7 +1468,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/iniciar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1551,7 +1478,7 @@
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
-                "iniciar"
+                "Iniciar"
               ]
             }
           },
@@ -1828,23 +1755,6 @@
           "response": []
         }
       ]
-    },
-    {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "health"
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "event": [
@@ -1910,6 +1820,10 @@
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "documentoCliente",
       "value": ""
     }
   ]

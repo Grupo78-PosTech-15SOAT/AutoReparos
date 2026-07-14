@@ -19,7 +19,7 @@ services:
     image: autoreparos-api
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: AutoReparos.API/Dockerfile
     container_name: autoreparos-api
     restart: always
     environment:
@@ -29,10 +29,11 @@ services:
       - Jwt__ExpiryHours=${JWT_EXPIRY_HOURS}
       - SeedUser__Email=${SEED_USER_EMAIL}
       - SeedUser__Password=${SEED_USER_PASSWORD}
+      - AprovacaoToken__Secret=${APROVACAO_TOKEN_SECRET}
       - SendGrid__ApiKey=${SENDGRID_API_KEY}
       - SendGrid__FromEmail=${SENDGRID_FROM_EMAIL}
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
-      - AprovacaoToken__Secret=${APROVACAO_TOKEN_SECRET}
+      - App__BaseUrl=${APP_BASE_URL}
     ports:
       - "8080:8080"
     depends_on:

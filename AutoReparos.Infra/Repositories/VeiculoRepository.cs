@@ -1,4 +1,5 @@
-﻿using AutoReparos.Domain.Veiculos.Entities;
+﻿using AutoReparos.Domain.Shared.Exceptions;
+using AutoReparos.Domain.Veiculos.Entities;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
 using AutoReparos.Domain.Veiculos.ValueObjects;
@@ -82,8 +83,15 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task Delete(Veiculo veiculo)
         {
-            _context.Veiculos.Remove(veiculo);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Veiculos.Remove(veiculo);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new RelatedEntityException("veículos", "ordens de serviços");
+            }
         }
     }
 }

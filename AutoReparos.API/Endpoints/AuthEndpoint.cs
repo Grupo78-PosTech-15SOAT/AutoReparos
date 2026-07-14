@@ -1,6 +1,6 @@
+using AutoReparos.API.Controllers;
 using AutoReparos.Application.Auth.DTOs.Request;
 using AutoReparos.Application.Auth.DTOs.Response;
-using AutoReparos.Application.Auth.Services.Interfaces;
 
 namespace AutoReparos.API.Endpoints
 {
@@ -11,17 +11,7 @@ namespace AutoReparos.API.Endpoints
             var group = app.MapGroup("/api/auth")
                 .WithTags("Autenticação");
 
-            group.MapPost("/login", async (LoginRequestDto loginRequest, IAuthService authService) =>
-            {
-                var result = await authService.Login(loginRequest);
-
-                if (result == null)
-                {
-                    return Results.Unauthorized();
-                }
-
-                return Results.Ok(result);
-            })
+            group.MapPost("/login", (LoginRequestDto loginRequest, AuthController controller) => controller.Login(loginRequest))
             .WithName("Login")
             .WithSummary("Realiza o login do usuário")
             .WithDescription("Valida as credenciais e retorna o token JWT")

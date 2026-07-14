@@ -14,6 +14,7 @@ namespace AutoReparos.API.Handlers
             {
                 NotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
                 DomainException ex => (StatusCodes.Status400BadRequest, ex.Message),
+                BadHttpRequestException ex => (ex.StatusCode, ex.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Erro interno no servidor.")
             };
 
