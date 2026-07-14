@@ -1,35 +1,34 @@
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.OrdensServicos.DTOs.Request;
 using AutoReparos.Application.OrdensServicos.DTOs.Response;
 using AutoReparos.Application.Servicos.DTOs.Request;
 using AutoReparos.Application.Servicos.DTOs.Response;
 using AutoReparos.Application.Shared;
+using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Application.Veiculos.DTOs.Request;
 using AutoReparos.Application.Veiculos.DTOs.Response;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.Servicos;
 
 public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factory)
-    : IntegrationTestBase(factory){
+    : IntegrationTestBase(factory)
+{
     private async Task<ServicoDto> CriarServicoAuxiliarAsync()
     {
         var faker = new Faker("pt_BR");
 
         var createDto = new CriarServicoDto
         (
-            faker.Commerce.ProductName(),             
-            faker.Commerce.ProductDescription(),      
-            Math.Round(faker.Random.Decimal(50, 1000), 2) 
+            faker.Commerce.ProductName(),
+            faker.Commerce.ProductDescription(),
+            Math.Round(faker.Random.Decimal(50, 1000), 2)
         );
 
         var response = await Client.PostAsJsonAsync("/api/servicos", createDto);
@@ -42,20 +41,22 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         return (await response.Content.ReadFromJsonAsync<ServicoDto>())!;
     }
-    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId)> ObterIdsDependenciasAsync()
+    private async Task<(Guid ClienteId, Guid VeiculoId, Guid ServicoId, string DocumentoCliente, string PlacaVeiculo)> ObterIdsDependenciasAsync()
     {
         var faker = new Faker("pt_BR");
 
         var resCliente = await Client.GetFromJsonAsync<PagedResult<ClienteDto>>("/api/clientes?pageNumber=1&pageSize=1");
         var clienteId = resCliente!.Items.First().Id;
+        var documentoCliente = resCliente!.Items.First().Documento;
 
+        var placaVeiculo = "ABC-1234";
         var requestDto = new VeiculoCreateDto(
             clienteId,
             "Toyota",
             "Corolla",
             2020,
             2022,
-            "ABC-1234",
+            placaVeiculo,
             "8Wz32v68wN7vf6617",
             "38579863163"
         );
@@ -74,7 +75,7 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
         var resServico = await Client.GetFromJsonAsync<PagedResult<ServicoDto>>("/api/servicos?pageNumber=1&pageSize=1");
         var servicoId = resServico!.Items.First().Id;
 
-        return (clienteId, veiculoId, servicoId);
+        return (clienteId, veiculoId, servicoId, documentoCliente, placaVeiculo);
     }
 
 
@@ -170,29 +171,36 @@ public class ServicoIntegrationTests(CustomWebApplicationFactory<Program> factor
 
         var deps = await ObterIdsDependenciasAsync();
 
-        var criarOsDto = new CriarOrdemServicoDto(deps.ClienteId, deps.VeiculoId, "Teste para forçar tempo médio");
-        var resOs = await Client.PostAsJsonAsync("/api/ordens-servico", criarOsDto);
+        var criarOsDto = new CriarOrdemServicoDto(deps.DocumentoCliente, deps.PlacaVeiculo, "Teste para forçar tempo médio");
+        var resOs = await Client.PostAsJsonAsync("/api/ordem-servico", criarOsDto);
         var osCriada = await resOs.Content.ReadFromJsonAsync<OrdemServicoDto>();
 
-        await Client.PatchAsync($"/api/ordens-servico/{osCriada!.Id}/iniciar-diagnostico", null);
+        await Client.PatchAsync($"/api/ordem-servico/{osCriada!.Id}/iniciar-diagnostico", null);
 
-        await Client.PostAsJsonAsync($"/api/ordens-servico/{osCriada.Id}/servicos", new
+        await Client.PostAsJsonAsync($"/api/ordem-servico/{osCriada.Id}/servicos", new
         {
             ServicoId = deps.ServicoId,
             ValorCobrado = 150.00m
         });
 
-        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/enviar-para-aprovacao", null);
-        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/aprovar", null);
+        await Client.PatchAsync($"/api/ordem-servico/{osCriada.Id}/enviar-para-aprovacao", null);
 
-        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDto>($"/api/ordens-servico/{osCriada.Id}");
+        // Resolve IAprovacaoTokenService in scope and call GET /aprovar
+        using (var scope = Services.CreateScope())
+        {
+            var tokenService = scope.ServiceProvider.GetRequiredService<IAprovacaoTokenService>();
+            var token = tokenService.GerarToken(osCriada.Id);
+            await Client.GetAsync($"/api/ordem-servico/aprovar?token={Uri.EscapeDataString(token)}");
+        }
+
+        var osDetalhe = await Client.GetFromJsonAsync<OrdemServicoDetalheDto>($"/api/ordem-servico/{osCriada.Id}");
         var osServicoId = osDetalhe!.Servicos.First().Id;
 
-        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/iniciar", null);
+        await Client.PatchAsync($"/api/ordem-servico/{osCriada.Id}/servicos/{osServicoId}/iniciar", null);
 
         await Task.Delay(100);
 
-        await Client.PatchAsync($"/api/ordens-servico/{osCriada.Id}/servicos/{osServicoId}/concluir", null);
+        await Client.PatchAsync($"/api/ordem-servico/{osCriada.Id}/servicos/{osServicoId}/concluir", null);
 
         var response = await Client.GetAsync($"/api/servicos/{deps.ServicoId}/tempo-medio");
         var erro = await response.Content.ReadAsStringAsync();

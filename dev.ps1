@@ -1,10 +1,16 @@
 param (
     [Parameter(Mandatory=$true)]
-    [ValidateSet("update-tool", "run", "watch", "db-update", "mig-add", "restore")]
+    [ValidateSet("update-tool", "run", "watch", "db-update", "mig-add", "restore", "kube-config")]
     $Action,
 
     [Parameter(Mandatory=$false)]
-    $Name = "InitialMigration"
+    $Name = "InitialMigration",
+
+    [Parameter(Mandatory=$false)]
+    $Region = "",
+
+    [Parameter(Mandatory=$false)]
+    $ClusterName = ""
 )
 
 switch ($Action) {
@@ -31,5 +37,8 @@ switch ($Action) {
     "restore" {
         Write-Host "--- Restaurando Pacotes ---" -ForegroundColor Cyan
         dotnet restore
+    }
+    "kube-config" {
+        & "$PSScriptRoot\infra\update-kubeconfig.ps1" -Region $Region -ClusterName $ClusterName
     }
 }

@@ -480,3 +480,28 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Kubernetes / Helm local secrets
+k8s/values-secrets.yaml
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# SonarQube
+.sonarqube/
+.sonar/
+k8s-renderizado.yaml
+
+# Claude Code
+CLAUDE.md

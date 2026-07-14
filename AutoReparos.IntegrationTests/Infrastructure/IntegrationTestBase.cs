@@ -1,10 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using AutoReparos.Application.Auth.DTOs.Request;
+using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Infra.Data;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
+using Xunit;
 
 namespace AutoReparos.IntegrationTests.Infrastructure
 {

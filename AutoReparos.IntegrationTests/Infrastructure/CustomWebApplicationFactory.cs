@@ -1,5 +1,3 @@
-using System.Data.Common;
-using AutoReparos.Infra.Data;
 using AutoReparos.IntegrationTests.Infrastructure.Config;
 using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Respawn;
+using System.Data.Common;
 using Testcontainers.PostgreSql;
 using Xunit;
 

@@ -1,5 +1,4 @@
 ﻿using AutoReparos.Domain.Veiculos.Exceptions;
-using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace AutoReparos.Domain.Veiculos.ValueObjects
@@ -31,7 +30,7 @@ namespace AutoReparos.Domain.Veiculos.ValueObjects
 
         [GeneratedRegex(PatternPlacaAntiga)]
         private static partial Regex PlacaAntigaRegex();
-        
+
         [GeneratedRegex(PatternPlacaNova)]
         private static partial Regex PlacaNovaRegex();
     }

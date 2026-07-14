@@ -16,6 +16,8 @@ case $action in
     dotnet ef migrations add $name --project ./AutoReparos.Infra/ --startup-project ./AutoReparos.API/ ;;
   "restore")
     dotnet restore ;;
+  "kube-config")
+    ./infra/update-kubeconfig.sh "$2" "$3" ;;
   *)
-    echo "Uso: ./dev.sh {run|watch|db-update|mig-add|update-tool|restore}" ;;
+    echo "Uso: ./dev.sh {run|watch|db-update|mig-add|update-tool|restore|kube-config}" ;;
 esac

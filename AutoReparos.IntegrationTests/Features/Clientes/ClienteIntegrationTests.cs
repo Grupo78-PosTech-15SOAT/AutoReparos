@@ -1,17 +1,13 @@
-using AutoReparos.Application.Auth.DTOs.Request;
-using AutoReparos.Application.Auth.DTOs.Response;
 using AutoReparos.Application.Clientes.DTOs.Request;
 using AutoReparos.Application.Clientes.DTOs.Response;
 using AutoReparos.Application.Shared;
+using AutoReparos.IntegrationTests.Infrastructure;
 using Bogus;
 using Bogus.Extensions.Brazil;
 using FluentAssertions;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
-
-using AutoReparos.IntegrationTests.Infrastructure;
 
 namespace AutoReparos.IntegrationTests.Features.Clientes;
 
