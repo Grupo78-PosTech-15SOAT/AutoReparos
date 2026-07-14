@@ -63,6 +63,7 @@ resource "kubernetes_storage_class_v1" "gp3" {
   }
   storage_provisioner = "ebs.csi.aws.com"
   volume_binding_mode = "WaitForFirstConsumer"
+  reclaim_policy      = "Retain"
   parameters = {
     type = "gp3"
   }
