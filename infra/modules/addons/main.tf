@@ -63,6 +63,7 @@ resource "kubernetes_storage_class_v1" "gp3" {
   }
   storage_provisioner = "ebs.csi.aws.com"
   volume_binding_mode = "WaitForFirstConsumer"
+  reclaim_policy      = "Retain"
   parameters = {
     type = "gp3"
   }
@@ -123,7 +124,7 @@ resource "helm_release" "prometheus_stack" {
   namespace        = "monitoring"
   create_namespace = true
 
-  # Optimizing resource requests for academic sandbox / t3.small
+  # Optimizing resource requests for t3.small
   values = [
     <<-EOT
     prometheus:
@@ -146,6 +147,10 @@ resource "helm_release" "prometheus_stack" {
                   storage: 5Gi
     grafana:
       adminPassword: "admin"
+      service:
+        type: LoadBalancer
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       persistence:
         enabled: true
         storageClassName: gp3
