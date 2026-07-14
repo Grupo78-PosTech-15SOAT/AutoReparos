@@ -51,7 +51,10 @@ spec:
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
             claimName: {{ include "k8s.fullname" . }}-postgres-pvc
+

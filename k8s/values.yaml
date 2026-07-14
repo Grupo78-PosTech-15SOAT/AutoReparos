@@ -27,6 +27,14 @@ postgres:
   persistence:
     enabled: true
     storageClass: "hostpath" # Definir como "gp3" no AWS EKS (CSI dynamic driver) ou "hostpath" / "" para local
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
 
 
 config:

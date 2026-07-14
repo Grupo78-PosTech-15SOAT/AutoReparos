@@ -6,13 +6,12 @@ concurrency:
 
 on:
   push:
-    branches: [ feat/cicd ]
     paths-ignore:
       - '**.md'
       - '.gitignore'
       - '.dockerignore'
   pull_request:
-    branches: [ feat/cicd ]
+    types: [ opened, reopened, synchronize ]
     paths-ignore:
       - '**.md'
       - '.gitignore'
@@ -56,19 +55,18 @@ jobs:
           **/obj/
         retention-days: 1
 
-  # 🧪 Bloco 2: Testes (Unitários & Integração em steps separados)
   tests:
     name: Testes (Unitários & Integração)
     needs: compilation
     runs-on: ubuntu-latest
     env:
-      ConnectionStrings__DbConnection: "Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
-      Jwt__Secret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
+      ConnectionStrings__DbConnection: "Host=localhost;Database=autoreparos_test;Username=admin;Password=${{ secrets.POSTGRES_PASSWORD }}"
+      Jwt__Secret: ${{ secrets.JWT_SECRET }}
       Jwt__ExpiryHours: "2"
       SeedUser__Email: "admin@autoreparos.com"
-      SeedUser__Password: "Admin@123"
-      AprovacaoToken__Secret: "another_super_secret_key_for_approval_tokens_with_enough_length"
-      SendGrid__ApiKey: "SG.dummy_key"
+      SeedUser__Password: ${{ secrets.SEED_USER_PASSWORD }}
+      AprovacaoToken__Secret: ${{ secrets.APROVACAO_TOKEN_SECRET }}
+      SendGrid__ApiKey: ${{ secrets.SENDGRID_API_KEY }}
       SendGrid__FromEmail: "noreply@autoreparos.com"
       SendGrid__FromName: "AutoReparos"
 
@@ -94,11 +92,12 @@ jobs:
     - name: Run Integration Tests
       run: dotnet test AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj -c Release --no-build --verbosity normal
 
+
   # ☁️ Bloco 3: Infraestrutura (Terraform Setup, Apply, Validação, Login, Push Image)
   infra:
     name: Infraestrutura (Terraform & ECR Push)
     needs: tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       ecr_repository_url: ${{ steps.tf-outputs.outputs.ecr_repository_url }}
@@ -154,7 +153,7 @@ jobs:
   deploy:
     name: Deploy (Kubernetes & Helm)
     needs: infra
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/cicd'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
