@@ -149,6 +149,8 @@ resource "helm_release" "prometheus_stack" {
       adminPassword: "admin"
       service:
         type: LoadBalancer
+        annotations:
+          service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
       persistence:
         enabled: true
         storageClassName: gp3
