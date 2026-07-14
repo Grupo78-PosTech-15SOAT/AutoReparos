@@ -98,7 +98,7 @@ jobs:
   infra:
     name: Infraestrutura (Terraform & ECR Push)
     needs: tests
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       ecr_repository_url: ${{ steps.tf-outputs.outputs.ecr_repository_url }}
@@ -156,7 +156,7 @@ jobs:
   deploy:
     name: Deploy (Kubernetes & Helm)
     needs: infra
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -202,3 +202,55 @@ jobs:
       run: |
         echo "Application is deployed. You can retrieve the load balancer URL using:"
         echo "kubectl get ingress"
+
+  destroy:
+    name: Auto-Destroy (Terraform & Helm Cleanup)
+    needs: [infra, deploy]
+    if: |
+      always() &&
+      (needs.infra.result == 'success' || needs.infra.result == 'failure') &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+    - name: Wait 15 Minutes
+      run: |
+        echo "Waiting 15 minutes before destroying infrastructure..."
+        sleep 900
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Kubeconfig
+      run: |
+        aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }} || true
+
+    - name: Uninstall Helm Release
+      run: |
+        # Uninstall the Helm release and wait for all resources (including load balancers) to be removed
+        helm uninstall autoreparos --wait || true
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Init
+      working-directory: infra
+      env:
+        TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
+      run: |
+        terraform init -backend-config="bucket=$TF_STATE_BUCKET"
+
+    - name: Terraform Destroy
+      working-directory: infra
+      run: terraform destroy -auto-approve
+
+

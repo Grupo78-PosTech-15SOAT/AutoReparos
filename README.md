@@ -17,25 +17,35 @@ Este projeto foi desenvolvido como parte do **Tech Challenge (Fases 1 e 2)** da 
 
 ## Sumário
 
-- [🎯 Objetivos e Problema](#objetivos-e-problema)
-- [🏗️ Desenho da Arquitetura](#desenho-da-arquitetura)
-  - [1. Componentes da Aplicação (Clean Architecture)](#1-componentes-da-aplicação-clean-architecture)
-  - [2. Infraestrutura Provisionada (AWS e Kubernetes)](#2-infraestrutura-provisionada-aws-e-kubernetes)
-  - [3. Fluxo de Deploy (Pipeline CI/CD)](#3-fluxo-de-deploy-pipeline-cicd)
-- [🚀 Funcionalidades da Aplicação](#funcionalidades-da-aplicação)
-  - [Fluxo de Ordens de Serviço](#fluxo-de-ordens-de-serviço)
-  - [Gestão Administrativa](#gestão-administrativa)
-- [▶️ Guia de Execução Local](#guia-de-execução-local)
-  - [Pré-requisitos](#pré-requisitos)
-  - [Configuração de Credenciais (.env e Secrets)](#configuração-de-credenciais-env-e-secrets)
-  - [Execução com Docker Compose](#execução-com-docker-compose)
-  - [Execução de Testes Automatizados](#execução-de-testes-automatizados)
-- [☸️ Guia de Kubernetes (Deploy Local com Helm)](#guia-de-kubernetes-deploy-local-com-helm)
-- [☁️ Guia de Infraestrutura como Código (Terraform na AWS)](#guia-de-infraestrutura-como-código-terraform-na-aws)
-- [🔄 Pipeline de CI/CD (GitHub Actions)](#pipeline-de-cicd-github-actions)
-- [📊 Qualidade de Código (SonarQube) e Vulnerabilidades](#qualidade-de-código-sonarqube-e-vulnerabilidades)
-- [📄 Entregáveis e Links Úteis](#entregáveis-e-links-úteis)
-- [👥 Integrantes do Grupo](#integrantes-do-grupo)
+- [AutoReparos - Sistema Integrado de Oficina Mecânica](#autoreparos---sistema-integrado-de-oficina-mecânica)
+  - [Sumário](#sumário)
+  - [Objetivos e Problema](#objetivos-e-problema)
+    - [O Problema (Fase 1)](#o-problema-fase-1)
+    - [A Evolução (Fase 2)](#a-evolução-fase-2)
+  - [Tecnologias Utilizadas e Banco de Dados](#tecnologias-utilizadas-e-banco-de-dados)
+    - [Justificativa da Escolha do Banco de Dados](#justificativa-da-escolha-do-banco-de-dados)
+  - [Desenho da Arquitetura](#desenho-da-arquitetura)
+    - [1. Componentes da Aplicação (Clean Architecture)](#1-componentes-da-aplicação-clean-architecture)
+    - [Detalhamento das Camadas (DDD / Clean Architecture)](#detalhamento-das-camadas-ddd--clean-architecture)
+    - [2. Infraestrutura Provisionada (AWS e Kubernetes)](#2-infraestrutura-provisionada-aws-e-kubernetes)
+    - [3. Fluxo de Deploy (Pipeline CI/CD)](#3-fluxo-de-deploy-pipeline-cicd)
+  - [Funcionalidades da Aplicação](#funcionalidades-da-aplicação)
+    - [Regras de Negócio Principais](#regras-de-negócio-principais)
+    - [Fluxo de Ordens de Serviço](#fluxo-de-ordens-de-serviço)
+    - [Gestão Administrativa](#gestão-administrativa)
+  - [Guia de Execução Local](#guia-de-execução-local)
+    - [Pré-requisitos](#pré-requisitos)
+    - [Configuração de Credenciais (.env e Secrets)](#configuração-de-credenciais-env-e-secrets)
+    - [Execução com Docker Compose](#execução-com-docker-compose)
+    - [Execução de Testes Automatizados](#execução-de-testes-automatizados)
+  - [Guia de Kubernetes (Deploy Local com Helm)](#guia-de-kubernetes-deploy-local-com-helm)
+  - [Guia de Infraestrutura como Código (Terraform na AWS)](#guia-de-infraestrutura-como-código-terraform-na-aws)
+  - [Pipeline de CI/CD (GitHub Actions)](#pipeline-de-cicd-github-actions)
+  - [Qualidade de Código (SonarQube) e Vulnerabilidades](#qualidade-de-código-sonarqube-e-vulnerabilidades)
+    - [Análise Estática de Qualidade](#análise-estática-de-qualidade)
+    - [Relatório de Análise de Vulnerabilidades](#relatório-de-análise-de-vulnerabilidades)
+  - [Entregáveis e Links Úteis](#entregáveis-e-links-úteis)
+  - [Integrantes do Grupo](#integrantes-do-grupo)
 
 ---
 
@@ -53,6 +63,25 @@ Originalmente, a oficina mecânica realizava todo o controle de forma manual ou 
 ### A Evolução (Fase 2)
 
 Após a implantação do MVP na Fase 1, o foco da Fase 2 passou a ser a **alta disponibilidade, resiliência, automação de infraestrutura e escalabilidade dinâmica**, preparando a aplicação para suportar picos de demanda através de práticas modernas de nuvem e DevOps.
+
+---
+
+## Tecnologias Utilizadas e Banco de Dados
+
+- **Linguagem & Framework:** C# (.NET 10) & ASP.NET Core (API REST / Minimal APIs)
+- **Banco de Dados:** PostgreSQL 16 (Banco de dados relacional primário)
+- **ORM:** Entity Framework Core & Npgsql
+- **Segurança & Autenticação:** ASP.NET Core Identity & JWT (JSON Web Tokens)
+- **Documentação:** Swagger / OpenAPI
+- **Provedor de E-mail:** SendGrid API
+
+### Justificativa da Escolha do Banco de Dados
+
+O **PostgreSQL** foi adotado por sua alta robustez e confiabilidade como banco relacional. Suas vantagens principais para o projeto são:
+
+1. **Consistência ACID:** Essencial para transações críticas de baixa de estoque e fechamento financeiro de orçamentos.
+2. **Integração de Ecossistema:** Excelente compatibilidade e performance com o Entity Framework Core via o driver Npgsql.
+3. **Escalabilidade & Flexibilidade:** Capacidade de persistir de forma consistente o histórico de ordens de serviço a longo prazo.
 
 ---
 
@@ -107,6 +136,14 @@ graph TD
 ```
 
 </div>
+
+### Detalhamento das Camadas (DDD / Clean Architecture)
+
+- **AutoReparos.Domain:** Núcleo puro (sem dependências externas) contendo as entidades de domínio, objetos de valor (CPF, CNPJ, Placa), enums e os contratos (interfaces) de repositório.
+
+- **AutoReparos.Application:** Camada de lógica de aplicação, serviços de orquestração de negócios, DTOs e mapeamentos.
+- **AutoReparos.Infra:** Implementa a persistência no PostgreSQL (EF Core Context e Repositórios), configurações de segurança (Identity/JWT) e integrações de e-mail (SendGrid).
+- **AutoReparos.API:** Ponto de entrada da aplicação, contendo os controladores/endpoints (Minimal APIs), injeção de dependência e tratamento global de erros.
 
 ### 2. Infraestrutura Provisionada (AWS e Kubernetes)
 
@@ -201,6 +238,13 @@ sequenceDiagram
 ---
 
 ## Funcionalidades da Aplicação
+
+### Regras de Negócio Principais
+
+- **Identificação Unificada:** Cadastro flexível de clientes por CPF (Pessoa Física) ou CNPJ (Pessoa Jurídica).
+- **Consistência de Estoque:** Validação automática e baixa de insumos/peças no estoque após a aprovação de uma Ordem de Serviço.
+- **Aprovação Sem Autenticação:** Links gerados com tokens temporários assinados e enviados por e-mail para aprovar ou recusar orçamentos sem exigir login do cliente final.
+- **Fila Dinâmica e Ordenada:** Priorização de Ordens de Serviço em andamento (`Em Execução` primeiro), seguidas pela antiguidade (mais antigas primeiro). Ordens finalizadas ou entregues são excluídas da visualização da fila.
 
 ### Fluxo de Ordens de Serviço
 
