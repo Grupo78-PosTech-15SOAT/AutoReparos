@@ -216,10 +216,10 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-    - name: Wait 15 Minutes
+    - name: Wait 20 Minutes
       run: |
-        echo "Waiting 15 minutes before destroying infrastructure..."
-        sleep 10
+        echo "Waiting 20 minutes before destroying infrastructure..."
+        sleep 1200
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
