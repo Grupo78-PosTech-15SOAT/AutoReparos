@@ -8,65 +8,64 @@ import {
   AdicionarServicoOSRequest,
   AdicionarInsumoOSRequest
 } from '../models/ordem-servico.model';
+import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrdemServicoService {
-  private apiUrl = 'http://localhost:8080/api/v1/ordensservico';
-
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<OrdemServico[]> {
-    return this.http.get<OrdemServico[]>(this.apiUrl);
+    return this.http.get<OrdemServico[]>(API_ENDPOINTS.ORDENS_SERVICO.BASE);
   }
 
   getById(id: string): Observable<OrdemServico> {
-    return this.http.get<OrdemServico>(`${this.apiUrl}/${id}`);
+    return this.http.get<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.BY_ID(id));
   }
 
   getFilaKanban(): Observable<OrdemServico[]> {
-    return this.http.get<OrdemServico[]>(`${this.apiUrl}/fila-kanban`);
+    return this.http.get<OrdemServico[]>(API_ENDPOINTS.ORDENS_SERVICO.FILA_KANBAN);
   }
 
   buscarPorPlacaOuCpf(termo: string): Observable<OrdemServico[]> {
     const params = new HttpParams().set('termo', termo);
-    return this.http.get<OrdemServico[]>(`${this.apiUrl}/consulta-publica`, { params });
+    return this.http.get<OrdemServico[]>(API_ENDPOINTS.ORDENS_SERVICO.CONSULTA_PUBLICA, { params });
   }
 
   criar(req: CriarOSRequest): Observable<OrdemServico> {
-    return this.http.post<OrdemServico>(this.apiUrl, req);
+    return this.http.post<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.BASE, req);
   }
 
   atualizarStatus(id: string, novoStatus: StatusOS): Observable<OrdemServico> {
-    return this.http.patch<OrdemServico>(`${this.apiUrl}/${id}/status`, { novoStatus });
+    return this.http.patch<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.STATUS(id), { novoStatus });
   }
 
   registrarDiagnostico(id: string, observacoes: string): Observable<OrdemServico> {
-    return this.http.put<OrdemServico>(`${this.apiUrl}/${id}/diagnostico`, { observacoes });
+    return this.http.put<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.DIAGNOSTICO(id), { observacoes });
   }
 
   adicionarServico(osId: string, req: AdicionarServicoOSRequest): Observable<OrdemServico> {
-    return this.http.post<OrdemServico>(`${this.apiUrl}/${osId}/servicos`, req);
+    return this.http.post<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.SERVICOS(osId), req);
   }
 
   adicionarInsumo(osId: string, req: AdicionarInsumoOSRequest): Observable<OrdemServico> {
-    return this.http.post<OrdemServico>(`${this.apiUrl}/${osId}/insumos`, req);
+    return this.http.post<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.INSUMOS(osId), req);
   }
 
   alternarStatusItemServico(osId: string, itemId: string, concluido: boolean): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${osId}/servicos/${itemId}/status`, { concluido });
+    return this.http.put<void>(API_ENDPOINTS.ORDENS_SERVICO.SERVICO_STATUS(osId, itemId), { concluido });
   }
 
   enviarParaAprovacao(osId: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${osId}/enviar-aprovacao`, {});
+    return this.http.post<void>(API_ENDPOINTS.ORDENS_SERVICO.ENVIAR_APROVACAO(osId), {});
   }
 
   responderOrcamentoToken(token: string, aprovado: boolean): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/aprovar-orcamento`, { token, aprovado });
+    return this.http.post<void>(API_ENDPOINTS.ORDENS_SERVICO.RESPONDER_ORCAMENTO, { token, aprovado });
   }
 
   entregarVeiculo(osId: string): Observable<OrdemServico> {
-    return this.http.post<OrdemServico>(`${this.apiUrl}/${osId}/entregar`, {});
+    return this.http.post<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.ENTREGAR(osId), {});
   }
 }

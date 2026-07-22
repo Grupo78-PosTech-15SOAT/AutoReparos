@@ -3,18 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, UserTokenInfo } from '../models/auth.model';
+import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/v1/auth';
   currentUser = signal<UserTokenInfo | null>(this.loadStoredUser());
 
   constructor(private http: HttpClient, private router: Router) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+    return this.http.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
       tap(response => {
         if (response && response.token) {
           localStorage.setItem('autoreparos_token', response.token);

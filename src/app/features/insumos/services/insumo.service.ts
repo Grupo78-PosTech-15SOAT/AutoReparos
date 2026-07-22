@@ -2,32 +2,31 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Insumo } from '../models/insumo.model';
+import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InsumoService {
-  private apiUrl = 'http://localhost:8080/api/v1/insumos';
-
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Insumo[]> {
-    return this.http.get<Insumo[]>(this.apiUrl);
+    return this.http.get<Insumo[]>(API_ENDPOINTS.INSUMOS.BASE);
   }
 
   getById(id: string): Observable<Insumo> {
-    return this.http.get<Insumo>(`${this.apiUrl}/${id}`);
+    return this.http.get<Insumo>(API_ENDPOINTS.INSUMOS.BY_ID(id));
   }
 
   criar(insumo: Insumo): Observable<Insumo> {
-    return this.http.post<Insumo>(this.apiUrl, insumo);
+    return this.http.post<Insumo>(API_ENDPOINTS.INSUMOS.BASE, insumo);
   }
 
   atualizar(id: string, insumo: Insumo): Observable<Insumo> {
-    return this.http.put<Insumo>(`${this.apiUrl}/${id}`, insumo);
+    return this.http.put<Insumo>(API_ENDPOINTS.INSUMOS.BY_ID(id), insumo);
   }
 
   excluir(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(API_ENDPOINTS.INSUMOS.BY_ID(id));
   }
 }

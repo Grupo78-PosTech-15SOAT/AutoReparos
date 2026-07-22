@@ -2,36 +2,35 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Veiculo } from '../models/veiculo.model';
+import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VeiculoService {
-  private apiUrl = 'http://localhost:8080/api/v1/veiculos';
-
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Veiculo[]> {
-    return this.http.get<Veiculo[]>(this.apiUrl);
+    return this.http.get<Veiculo[]>(API_ENDPOINTS.VEICULOS.BASE);
   }
 
   getById(id: string): Observable<Veiculo> {
-    return this.http.get<Veiculo>(`${this.apiUrl}/${id}`);
+    return this.http.get<Veiculo>(API_ENDPOINTS.VEICULOS.BY_ID(id));
   }
 
   buscarPorPlaca(placa: string): Observable<Veiculo> {
-    return this.http.get<Veiculo>(`${this.apiUrl}/placa/${placa}`);
+    return this.http.get<Veiculo>(API_ENDPOINTS.VEICULOS.BY_PLACA(placa));
   }
 
   criar(veiculo: Veiculo): Observable<Veiculo> {
-    return this.http.post<Veiculo>(this.apiUrl, veiculo);
+    return this.http.post<Veiculo>(API_ENDPOINTS.VEICULOS.BASE, veiculo);
   }
 
   atualizar(id: string, veiculo: Veiculo): Observable<Veiculo> {
-    return this.http.put<Veiculo>(`${this.apiUrl}/${id}`, veiculo);
+    return this.http.put<Veiculo>(API_ENDPOINTS.VEICULOS.BY_ID(id), veiculo);
   }
 
   excluir(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(API_ENDPOINTS.VEICULOS.BY_ID(id));
   }
 }
