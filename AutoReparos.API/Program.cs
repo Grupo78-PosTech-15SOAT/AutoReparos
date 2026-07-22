@@ -27,6 +27,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+
+app.UseCors("AllowFrontend");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

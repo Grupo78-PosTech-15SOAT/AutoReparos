@@ -12,11 +12,11 @@ namespace AutoReparos.API.Endpoints
                 .WithTags("Autenticação");
 
             group.MapPost("/login", (LoginRequestDto loginRequest, AuthController controller) => controller.Login(loginRequest))
-            .WithName("Login")
-            .WithSummary("Realiza o login do usuário")
-            .WithDescription("Valida as credenciais e retorna o token JWT")
-            .Produces<LoginResponseDto>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status401Unauthorized);
+                .WithName("Login")
+                .WithSummary("Realiza o login do usuário")
+                .WithDescription("Valida as credenciais e retorna o token JWT")
+                .Produces<LoginResponseDto>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status401Unauthorized);
         }
     }
 }
