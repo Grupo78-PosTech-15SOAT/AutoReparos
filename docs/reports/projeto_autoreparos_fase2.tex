@@ -1,0 +1,162 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds, calc}
+
+\definecolor{primary}{HTML}{1E3A8A}
+\definecolor{secondary}{HTML}{0D9488}
+\definecolor{accent}{HTML}{EF4444}
+\definecolor{bglight}{HTML}{F8FAFC}
+\definecolor{borderlight}{HTML}{E2E8F0}
+\definecolor{k8sblue}{HTML}{326CE5}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primary,
+    filecolor=primary,
+    urlcolor=secondary,
+    citecolor=primary
+}
+
+\tcbset{
+    elegantbox/.style={
+        colback=bglight,
+        colframe=primary,
+        boxrule=1pt,
+        arc=4pt,
+        left=8pt,
+        right=8pt,
+        top=8pt,
+        bottom=8pt
+    }
+}
+
+\tikzset{
+    box/.style={draw, rectangle, rounded corners=4pt, minimum width=2.4cm, minimum height=1.1cm, align=center, font=\sffamily\scriptsize, line width=1pt},
+    client/.style={box, draw=blue!70!black, fill=blue!8},
+    ingress/.style={box, draw=orange!80!black, fill=orange!8},
+    k8ssvc/.style={box, draw=teal!80!black, fill=teal!8},
+    k8spod/.style={box, draw=k8sblue!90!black, fill=k8sblue!8},
+    hpa/.style={box, draw=accent!80!black, fill=accent!8},
+    dbpod/.style={draw=brown!80!black, cylinder, shape border rotate=90, fill=brown!8, minimum width=1.6cm, minimum height=1.4cm, align=center, font=\sffamily\scriptsize, line width=1pt},
+    storage/.style={box, draw=gray!70!black, fill=gray!12},
+    arrow/.style={->, >=stealth, thick, draw=black!70},
+    dasharrow/.style={->, >=stealth, thick, dashed, draw=accent!90!black}
+}
+
+\begin{document}
+
+\pagestyle{empty}
+
+% --- CABEÇALHO DO DOCUMENTO ---
+\begin{center}
+    {\LARGE \textbf{\color{primary} AUTO REPAROS}} \\
+    \vspace{0.1cm}
+    {\large \textbf{Sistema de Gestão para Oficina Mecânica}} \\
+    \vspace{0.15cm}
+    {\color{gray}\textbf{Fase 2: Arquitetura em Nuvem, CI/CD, Containerização e Kubernetes}} \\
+    \vspace{0.1cm}
+    \textbf{FIAP -- Pós-Tech Software Architecture (Grupo 78)}
+\end{center}
+
+\vspace{0.2cm}
+
+% --- PAINEL DE LINKS E INTEGRANTES ---
+\begin{tcolorbox}[elegantbox]
+    \begin{minipage}[t]{0.52\textwidth}
+        \textbf{\color{primary}🔗 Links do Projeto}
+        \vspace{0.2cm}
+        \begin{itemize}
+            \item \textbf{Repositório GitHub:} \\
+            \href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos}{AutoReparos}
+            
+            \item \textbf{Vídeo Demonstrativo (Apresentação):} \\
+            \href{https://drive.google.com/file/d/1wpeMYPY7q6-YYxHCgSaO52PLPLOrK1k3/view?usp=sharing}{\texttt{Video no Drive}}
+        \end{itemize}
+        \vspace{0.1cm}
+        \textit{\small * O vídeo contém a demonstração da pipeline CI/CD, deploy Helm, testes locais/AWS EKS, fluxo de negócio e o teste de carga escalando a API com HPA.}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.42\textwidth}
+        \textbf{\color{primary}👥 Integrantes do Grupo 78}
+        \vspace{0.2cm}
+        \begin{itemize}
+            \item Enrico Gollner (RM 370737)
+            \item José Dotta (RM 372959)
+            \item Júlia Santos (RM 370364)
+            \item Lucas Bastos (RM 370749)
+            \item Mateus Lecchi (RM 371085)
+        \end{itemize}
+    \end{minipage}
+\end{tcolorbox}
+
+\vspace{0.3cm}
+
+% --- ARQUITETURA CLOUD ---
+\begin{center}
+    \textbf{\large \color{primary} ☁️ Desenho da Arquitetura Cloud (AWS \& Kubernetes)}
+\end{center}
+\vspace{0.1cm}
+\begin{center}
+    \begin{tikzpicture}[node distance=1.6cm and 1.2cm, scale=0.9, every node/.style={transform shape}]
+        
+        \node[client] (client) {Cliente / Navegador};
+        \node[ingress, right=of client] (ingress) {Nginx Ingress\\Controller\\(AWS ALB/NLB)};
+        \node[k8ssvc, right=of ingress] (apisvc) {API Service\\(ClusterIP)};
+        \node[k8spod, right=1.2cm of apisvc, yshift=0.7cm] (apipod1) {API Pod (Réplica 1)\\AutoReparos.API};
+        \node[k8spod, right=1.2cm of apisvc, yshift=-0.7cm] (apipod2) {API Pod (Réplica 2)\\AutoReparos.API};
+        \node[hpa, above=0.6cm of apipod1] (hpa) {Horizontal Pod\\Autoscaler (HPA)};
+        \node[k8ssvc, right=1.2cm of apipod1, yshift=-0.7cm] (dbsvc) {Postgres Service\\(ClusterIP)};
+        \node[dbpod, right=of dbsvc] (dbpod) {PostgreSQL\\StatefulSet Pod};
+        \node[storage, below=1.0cm of dbpod] (pvc) {Persistent Volume\\Claim (PVC / PV)};
+
+        \draw[arrow] (client) -- node[above, font=\sffamily\tiny] {HTTPS} (ingress);
+        \draw[arrow] (ingress) -- node[above, font=\sffamily\tiny] {Roteia} (apisvc);
+        \draw[arrow] (apisvc.east) -- +(0.4,0) |- (apipod1.west);
+        \draw[arrow] (apisvc.east) -- +(0.4,0) |- (apipod2.west);
+        
+        \draw[dasharrow] (hpa.south) -- (apipod1.north);
+        \draw[dasharrow] (hpa.west) -| node[left, pos=0.3, font=\sffamily\tiny\color{accent}] {Métrica CPU/Mem > 80\%} (apisvc.north);
+        
+        \draw[arrow] (apipod1.east) -- +(0.4,0) |- (dbsvc.west);
+        \draw[arrow] (apipod2.east) -- +(0.4,0) |- (dbsvc.west);
+        \draw[arrow] (dbsvc) -- (dbpod);
+        \draw[arrow] (dbpod.south) -- node[right, font=\sffamily\tiny] {Monta} (pvc);
+
+        \begin{pgfonlayer}{background}
+            \node[draw=k8sblue!70, dashed, fill=k8sblue!3, fill opacity=0.05, line width=1.2pt, rounded corners=6pt,
+                  fit=(apisvc) (apipod1) (apipod2) (hpa) (dbsvc) (dbpod) (pvc),
+                  label={[anchor=south, yshift=0.1cm, font=\sffamily\scriptsize\bfseries\color{k8sblue}]below:Cluster Kubernetes (AWS EKS / Kind)}] (cluster) {};
+            
+            \node[draw=gray!50, line width=1.5pt, rounded corners=8pt, inner sep=15pt,
+                  fit=(ingress) (cluster),
+                  label={[anchor=north, yshift=-0.1cm, font=\sffamily\scriptsize\bfseries\color{gray}]above:AWS Cloud VPC / Infraestrutura Provisionada}] (vpc) {};
+        \end{pgfonlayer}
+
+    \end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+
+% --- DESCRIÇÃO TÉCNICA E RESUMO ---
+\begin{tcolorbox}[colback=white, colframe=borderlight, boxrule=0.5pt, arc=4pt, left=8pt, right=8pt, top=6pt, bottom=6pt]
+    \small
+    \textbf{\color{primary}🛠️ Visão Geral e Principais Componentes Implementados na Fase 2:}
+    \vspace{0.15cm}
+    \begin{itemize}
+        \item \textbf{Automação da Infraestrutura (IaC):} Provisionamento 100\% via \textbf{Terraform} na AWS (VPC, EKS Cluster, ECR, e Addons de rede/ingress), garantindo replicação e infraestrutura idêntica de forma rápida e segura.
+        \item \textbf{Containerização \& Orquestração:} Containerização das APIs .NET 10 e deploy gerenciado localmente via \textbf{Kind} e em produção no \textbf{AWS EKS}, utilizando empacotamento com \textbf{Helm Charts} para controle de variáveis.
+        \item \textbf{Escalabilidade e Resiliência:} Configuração de \textbf{HPA} que escala horizontalmente o número de réplicas da API baseando-se no limite de 80\% de CPU/Memória, testado via stress test simulado no cluster.
+        \item \textbf{Persistência de Dados:} PostgreSQL implantado como \textbf{StatefulSet} no Kubernetes com volume persistente (\textbf{PVC/PV}) atrelado a armazenamento EBS (AWS) ou hostPath (Local) para consistência transacional do estoque e orçamentos.
+        \item \textbf{Integração e Entrega Contínua (CI/CD):} Pipeline completa no \textbf{GitHub Actions} que compila, executa testes de integração (usando \textit{Testcontainers}), realiza push da imagem Docker e aplica alterações de infraestrutura.
+    \end{itemize}
+\end{tcolorbox}
+
+\end{document}

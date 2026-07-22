@@ -505,3 +505,13 @@ k8s-renderizado.yaml
 
 # Claude Code
 CLAUDE.md
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
