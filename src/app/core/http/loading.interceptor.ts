@@ -8,15 +8,7 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   
   const isLoginRequest = req.url.toLowerCase().includes('/auth/login');
 
-  if (!isLoginRequest) {
-    loadingService.show();
-  }
-
-  return next(req).pipe(
-    finalize(() => {
-      if (!isLoginRequest) {
-        loadingService.hide();
-      }
-    })
-  );
+  // Global loading service is disabled to prevent full screen blocking.
+  // We use localized spinners in each table instead.
+  return next(req);
 };
