@@ -19,7 +19,7 @@ namespace AutoReparos.Infra.Services
 
             var valoresFaturados = await ordens
                 .Where(os => os.Status == EStatusOrdemServico.Finalizada || os.Status == EStatusOrdemServico.Entregue)
-                .Select(os => os.Servicos.Sum(s => s.ValorCobrado) + os.Insumos.Sum(i => i.ValorTotal))
+                .Select(os => os.Servicos.Sum(s => s.ValorCobrado) + os.Insumos.Sum(i => i.ValorUnitario * i.Quantidade))
                 .ToListAsync();
 
             var ultimasOrdens = await (
@@ -29,7 +29,7 @@ namespace AutoReparos.Infra.Services
                 select new DashboardOrdemServicoDto(
                     os.Id,
                     os.Status,
-                    os.Servicos.Sum(s => s.ValorCobrado) + os.Insumos.Sum(i => i.ValorTotal),
+                    os.Servicos.Sum(s => s.ValorCobrado) + os.Insumos.Sum(i => i.ValorUnitario * i.Quantidade),
                     os.CriadoEm,
                     veiculo.Modelo,
                     veiculo.Placa.Valor))

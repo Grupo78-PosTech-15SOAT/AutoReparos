@@ -15,6 +15,8 @@ public class JwtService(IOptions<JwtSettings> jwtOptions) : IJwtService
 
     public string GenerateToken(Usuario usuario)
     {
+        if (usuario == null) throw new ArgumentNullException(nameof(usuario));
+
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
         var tokenDescriptor = new SecurityTokenDescriptor

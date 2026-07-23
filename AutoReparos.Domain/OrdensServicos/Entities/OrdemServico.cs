@@ -1,7 +1,10 @@
-﻿using AutoReparos.Domain.OrdensServicos.Enums;
+using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Exceptions;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
+
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("AutoReparos.Application.Tests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("AutoReparos.IntegrationTests")]
 
 namespace AutoReparos.Domain.OrdensServicos.Entities
 {
@@ -27,6 +30,12 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             _insumos.Sum(p => p.ValorTotal);
 
         protected OrdemServico() { }
+
+        internal OrdemServico(Guid clienteId, Guid veiculoId, string? observacao, DateTime criadoEm, EStatusOrdemServico status) : this(clienteId, veiculoId, observacao)
+        {
+            CriadoEm = criadoEm;
+            Status = status;
+        }
 
         public OrdemServico(Guid clienteId, Guid veiculoId, string? observacao) : base()
         {
