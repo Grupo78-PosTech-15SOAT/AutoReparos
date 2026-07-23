@@ -75,6 +75,7 @@ namespace AutoReparos.Application
             // Ordens de Serviço
             services.AddScoped<ICriarOrdemServicoUseCase, CriarOrdemServicoUseCase>();
             services.AddScoped<IListarOrdensServicoUseCase, ListarOrdensServicoUseCase>();
+            services.AddScoped<IListarKanbanOrdensServicoUseCase, ListarKanbanOrdensServicoUseCase>();
             services.AddScoped<IListarFilaOrdensServicoUseCase, ListarFilaOrdensServicoUseCase>();
             services.AddScoped<IObterOrdemServicoPorIdUseCase, ObterOrdemServicoPorIdUseCase>();
             services.AddScoped<IObterOrdemServicoPublicaPorIdUseCase, ObterOrdemServicoPublicaPorIdUseCase>();

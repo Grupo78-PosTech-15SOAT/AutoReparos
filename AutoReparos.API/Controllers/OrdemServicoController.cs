@@ -10,11 +10,18 @@ namespace AutoReparos.API.Controllers
         IListarFilaOrdensServicoUseCase listarFilaOrdensServicoUseCase,
         IObterOrdemServicoPorIdUseCase obterOrdemServicoPorIdUseCase,
         IObterOrdemServicoPublicaPorIdUseCase obterOrdemServicoPublicaPorIdUseCase,
-        IConsultarOrdensServicoPorDocumentoOuPlacaUseCase consultarOrdensServicoPorDocumentoOuPlacaUseCase)
+        IConsultarOrdensServicoPorDocumentoOuPlacaUseCase consultarOrdensServicoPorDocumentoOuPlacaUseCase,
+        IListarKanbanOrdensServicoUseCase listarKanbanOrdensServicoUseCase)
     {
         public async Task<IResult> GetAll(OrdemServicoPagedRequest request)
         {
             var result = await listarOrdensServicoUseCase.ExecuteAsync(request);
+            return Results.Ok(result);
+        }
+
+        public async Task<IResult> GetKanban(PagedRequest request)
+        {
+            var result = await listarKanbanOrdensServicoUseCase.ExecuteAsync(request);
             return Results.Ok(result);
         }
 

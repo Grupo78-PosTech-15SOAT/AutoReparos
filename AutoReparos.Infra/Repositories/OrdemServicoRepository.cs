@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.ValueObjects;
+using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Repositories;
@@ -111,6 +111,25 @@ namespace AutoReparos.Infra.Repositories
             var total = await query.CountAsync();
             var items = await query
                 .OrderByDescending(os => os.CriadoEm)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
+        public async Task<(IEnumerable<OrdemServico> Items, int Total)> GetKanban(int skip, int take)
+        {
+            var query = _context.OrdensServico
+                .AsNoTracking()
+                .Include(os => os.Servicos)
+                .Include(os => os.Insumos)
+                .AsQueryable();
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderBy(os => os.Status)
+                .ThenByDescending(os => os.CriadoEm)
                 .Skip(skip)
                 .Take(take)
                 .ToListAsync();
