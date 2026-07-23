@@ -6,39 +6,39 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
 import { OrdemServico, StatusOS } from '../../models/ordem-servico.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-os-lista-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, StatusBadgeComponent],
+  imports: [CommonModule, RouterLink, FormsModule, StatusBadgeComponent, PaginationComponent, CustomSelectComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
         <div>
           <h1 class="page-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Gerenciamento de Ordens de Serviço
+            Ordens de Serviço
           </h1>
-          <p class="page-subtitle">Listagem completa e ações operacionais da oficina.</p>
         </div>
         <a routerLink="/ordens-servico/nova" class="btn btn-primary">
-          + Abrir Nova OS
+          + Nova OS
         </a>
       </div>
 
       <!-- Filtros de Busca -->
       <div class="card-panel" style="margin-bottom: 1.5rem;">
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <input type="text" [(ngModel)]="filtroTermo" (input)="filtrar()" placeholder="Buscar por cliente, placa ou número da OS..." class="form-control" style="flex: 1; min-width: 260px;" />
-          <select [(ngModel)]="filtroStatus" (change)="filtrar()" class="form-control" style="width: 200px;">
-            <option [value]="0">Todos os Status</option>
-            <option [value]="1">1. Recebida</option>
-            <option [value]="2">2. Em Diagnóstico</option>
-            <option [value]="3">3. Aguardando Aprovação</option>
-            <option [value]="4">4. Em Execução</option>
-            <option [value]="5">5. Finalizada</option>
-            <option [value]="6">6. Entregue</option>
-          </select>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+          <input type="text" [(ngModel)]="filtroTermo" (input)="filtrar()" placeholder="Buscar cliente, placa ou OS..." class="form-control" style="flex: 1; min-width: 260px;" />
+          <div style="width: 210px;">
+            <app-custom-select
+              [options]="statusOptions"
+              [value]="filtroStatusStr"
+              placeholder="Todos os Status"
+              (valueChange)="onFiltroStatusChange($event)"
+            ></app-custom-select>
+          </div>
         </div>
       </div>
 
@@ -49,10 +49,10 @@ import { NotificationService } from '../../../../core/ui/notification.service';
             <tr>
               <th>OS #</th>
               <th>Cliente</th>
-              <th>Veículo & Placa</th>
+              <th>Veículo</th>
               <th>Status</th>
-              <th>Data Abertura</th>
-              <th>Valor Total</th>
+              <th>Abertura</th>
+              <th>Valor</th>
               <th style="text-align: right;">Ações</th>
             </tr>
           </thead>
@@ -72,7 +72,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 <td>
                   <app-status-badge [status]="os.status"></app-status-badge>
                 </td>
-                <td>{{ os.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ os.dataAbertura | date:'dd/MM/yy HH:mm' }}</td>
                 <td>
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #10B981;">
                     R$ {{ os.valorTotal | number:'1.2-2' }}
@@ -80,9 +80,9 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 </td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 0.5rem;">
-                    <a [routerLink]="['/ordens-servico', os.id]" class="btn btn-secondary btn-sm">Workbench</a>
+                    <a [routerLink]="['/ordens-servico', os.id]" class="btn btn-secondary btn-sm" title="Abrir OS">🔍 OS</a>
                     @if (os.status === StatusOS.Finalizada) {
-                      <button (click)="entregar(os.id)" class="btn btn-success btn-sm">Entregar Veículo</button>
+                      <button (click)="entregar(os.id)" class="btn btn-success btn-sm" title="Entregar Veículo">✅ Entregar</button>
                     }
                   </div>
                 </td>
@@ -90,13 +90,24 @@ import { NotificationService } from '../../../../core/ui/notification.service';
             } @empty {
               <tr>
                 <td colspan="7" style="text-align: center; padding: 2.5rem; color: #71717A;">
-                  Nenhuma Ordem de Serviço encontrada com os filtros aplicados.
+                  Nenhuma OS encontrada.
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
     </div>
   `,
   styles: [`.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }`]
@@ -108,6 +119,22 @@ export class OsListaPageComponent implements OnInit {
 
   filtroTermo = '';
   filtroStatus = 0;
+  filtroStatusStr = '0';
+
+  statusOptions: SelectOption[] = [
+    { value: '0', label: 'Todos os Status' },
+    { value: '1', label: '1. Recebida' },
+    { value: '2', label: '2. Diagnóstico' },
+    { value: '3', label: '3. Aprovação' },
+    { value: '4', label: '4. Execução' },
+    { value: '5', label: '5. Finalizada' },
+    { value: '6', label: '6. Entregue' },
+  ];
+
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
 
   private osService = inject(OrdemServicoService);
   private notification = inject(NotificationService);
@@ -117,12 +144,31 @@ export class OsListaPageComponent implements OnInit {
   }
 
   carregarOrdens() {
-    this.osService.getAll().subscribe({
-      next: (lista) => {
-        this.todasOrdens = lista;
+    this.osService.getAll(this.pageNumber, this.pageSize).subscribe({
+      next: (res) => {
+        this.todasOrdens = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
         this.filtrar();
       }
     });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregarOrdens();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregarOrdens();
+  }
+
+  onFiltroStatusChange(val: string) {
+    this.filtroStatusStr = val;
+    this.filtroStatus = Number(val);
+    this.filtrar();
   }
 
   filtrar() {

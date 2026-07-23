@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
 import { InsumoService } from '../../../insumos/services/insumo.service';
@@ -11,11 +11,12 @@ import { Servico } from '../../../servicos/models/servico.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-os-detalhe-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, StatusBadgeComponent],
+  imports: [CommonModule, FormsModule, StatusBadgeComponent, CustomSelectComponent],
   template: `
     @if (os) {
       <div class="container fade-in">
@@ -40,19 +41,19 @@ import { AuthService } from '../../../auth/services/auth.service';
 
             @if (os.status === StatusOS.EmDiagnostico) {
               <button (click)="enviarParaAprovacao()" class="btn btn-accent">
-                ✉️ Disparar Orçamento para Cliente
+                ✉️ Enviar Orçamento
               </button>
             }
 
             @if (os.status === StatusOS.AguardandoAprovacao) {
               <button (click)="alterarStatus(StatusOS.EmExecucao)" class="btn btn-primary">
-                ▶️ Forçar Início de Execução
+                ▶️ Iniciar Execução
               </button>
             }
 
             @if (os.status === StatusOS.EmExecucao) {
               <button (click)="alterarStatus(StatusOS.Finalizada)" class="btn btn-success">
-                ✅ Finalizar Serviço na Oficina
+                ✅ Finalizar OS
               </button>
             }
           </div>
@@ -70,7 +71,7 @@ import { AuthService } from '../../../auth/services/auth.service';
                 <textarea [(ngModel)]="os.observacoesDiagnostico" rows="3" placeholder="Insira o laudo técnico do veículo..." class="form-control"></textarea>
               </div>
               <button (click)="salvarDiagnostico()" class="btn btn-secondary btn-sm" style="margin-top: 0.5rem;">
-                Salvar Laudo de Diagnóstico
+                Salvar Diagnóstico
               </button>
             </div>
 
@@ -78,14 +79,17 @@ import { AuthService } from '../../../auth/services/auth.service';
             <div class="card-panel" style="margin-top: 1.5rem;">
               <div class="card-header-flex">
                 <h3 class="card-title">🛠️ Serviços de Mão de Obra</h3>
-                <div style="display: flex; gap: 0.5rem;">
-                  <select [(ngModel)]="servicoIdSelecionado" class="form-control form-control-sm" style="width: 240px;">
-                    <option value="">-- Selecionar Serviço --</option>
-                    @for (s of servicosDisponiveis; track s.id) {
-                      <option [value]="s.id">{{ s.nome }} (R$ {{ s.precoBase | number:'1.2-2' }})</option>
-                    }
-                  </select>
-                  <button (click)="adicionarServico()" [disabled]="!servicoIdSelecionado" class="btn btn-primary btn-sm">+ Adicionar</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <div style="width: 260px;">
+                    <app-custom-select
+                      [options]="servicoOptions"
+                      [value]="servicoIdSelecionado"
+                      [loading]="loadingCatalogos"
+                      placeholder="-- Selecionar Serviço --"
+                      (valueChange)="servicoIdSelecionado = $event"
+                    ></app-custom-select>
+                  </div>
+                  <button (click)="adicionarServico()" [disabled]="!servicoIdSelecionado || loadingCatalogos" class="btn btn-primary btn-sm">+ Adicionar</button>
                 </div>
               </div>
 
@@ -122,15 +126,18 @@ import { AuthService } from '../../../auth/services/auth.service';
             <div class="card-panel" style="margin-top: 1.5rem;">
               <div class="card-header-flex">
                 <h3 class="card-title">📦 Peças e Insumos Consumidos</h3>
-                <div style="display: flex; gap: 0.5rem;">
-                  <select [(ngModel)]="insumoIdSelecionado" class="form-control form-control-sm" style="width: 200px;">
-                    <option value="">-- Selecionar Peça --</option>
-                    @for (i of insumosDisponiveis; track i.id) {
-                      <option [value]="i.id">{{ i.nome }} (Estoque: {{ i.quantidadeEstoque }})</option>
-                    }
-                  </select>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                  <div style="width: 230px;">
+                    <app-custom-select
+                      [options]="insumoOptions"
+                      [value]="insumoIdSelecionado"
+                      [loading]="loadingCatalogos"
+                      placeholder="-- Selecionar Peça --"
+                      (valueChange)="insumoIdSelecionado = $event"
+                    ></app-custom-select>
+                  </div>
                   <input type="number" [(ngModel)]="quantidadeInsumo" min="1" class="form-control form-control-sm" style="width: 70px;" />
-                  <button (click)="adicionarInsumo()" [disabled]="!insumoIdSelecionado" class="btn btn-primary btn-sm">+ Adicionar</button>
+                  <button (click)="adicionarInsumo()" [disabled]="!insumoIdSelecionado || loadingCatalogos" class="btn btn-primary btn-sm">+ Adicionar</button>
                 </div>
               </div>
 
@@ -183,7 +190,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 
               @if (os.approvalToken) {
                 <div class="token-box">
-                  <div style="font-size: 0.75rem; color: #A1A1AA; margin-bottom: 0.3rem;">Token de Aprovação do Cliente:</div>
+                  <div style="font-size: 0.75rem; color: #A1A1AA; margin-bottom: 0.3rem;">Token de Aprovação:</div>
                   <code class="token-code">{{ os.approvalToken }}</code>
                 </div>
               }
@@ -235,9 +242,13 @@ export class OsDetalhePageComponent implements OnInit {
   servicosDisponiveis: Servico[] = [];
   insumosDisponiveis: Insumo[] = [];
 
+  servicoOptions: SelectOption[] = [];
+  insumoOptions: SelectOption[] = [];
+
   servicoIdSelecionado = '';
   insumoIdSelecionado = '';
   quantidadeInsumo = 1;
+  loadingCatalogos = true;
 
   private route = inject(ActivatedRoute);
   private osService = inject(OrdemServicoService);
@@ -258,8 +269,26 @@ export class OsDetalhePageComponent implements OnInit {
   }
 
   carregarCatalogos() {
-    this.servicoService.getAll().subscribe(data => this.servicosDisponiveis = data);
-    this.insumoService.getAll().subscribe(data => this.insumosDisponiveis = data);
+    this.loadingCatalogos = true;
+    let s = false, i = false;
+    const check = () => { if (s && i) this.loadingCatalogos = false; };
+
+    this.servicoService.getAll(1, 100).subscribe(res => {
+      this.servicosDisponiveis = res.items || [];
+      this.servicoOptions = this.servicosDisponiveis.map(sv => ({
+        value: sv.id!,
+        label: `${sv.nome} (R$ ${sv.precoBase.toFixed(2)})`
+      }));
+      s = true; check();
+    });
+    this.insumoService.getAll(1, 100).subscribe(res => {
+      this.insumosDisponiveis = res.items || [];
+      this.insumoOptions = this.insumosDisponiveis.map(ins => ({
+        value: ins.id!,
+        label: `${ins.nome} (Estoque: ${ins.quantidadeEstoque})`
+      }));
+      i = true; check();
+    });
   }
 
   alterarStatus(novoStatus: StatusOS) {

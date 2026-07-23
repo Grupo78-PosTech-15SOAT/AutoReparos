@@ -29,17 +29,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
       <!-- Resumo de Itens se houver -->
       @if (os.itensServico && os.itensServico.length > 0) {
         <div class="os-details-list">
-          @for (item of os.itensServico.slice(0, 2); track item.id) {
-            <div class="os-item">
-              <span class="os-item-name">{{ item.nomeServico }}</span>
-              <span [style.color]="item.concluido ? '#10B981' : '#F59E0B'">
-                {{ item.concluido ? '✓ OK' : 'Em andamento' }}
-              </span>
-            </div>
-          }
-          @if (os.itensServico.length > 2) {
-            <div class="more-items">+{{ os.itensServico.length - 2 }} outro(s) serviço(s)</div>
-          }
+          🔧 {{ getConcluidosCount() }} de {{ os.itensServico.length }} serviços concluídos
         </div>
       }
 
@@ -100,18 +90,10 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
     .os-details-list {
       background: rgba(10, 10, 12, 0.6);
       border-radius: 8px;
-      padding: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
+      padding: 0.5rem 0.75rem;
       font-size: 0.8rem;
+      color: #A1A1AA;
     }
-    .os-item {
-      display: flex;
-      justify-content: space-between;
-    }
-    .os-item-name { color: #E2E8F0; }
-    .more-items { font-size: 0.75rem; color: #71717A; font-style: italic; }
     .os-footer {
       display: flex;
       justify-content: space-between;
@@ -127,4 +109,8 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 })
 export class OsCardComponent {
   @Input() os!: OrdemServico;
+
+  getConcluidosCount(): number {
+    return this.os.itensServico ? this.os.itensServico.filter(i => i.concluido).length : 0;
+  }
 }
