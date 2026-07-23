@@ -22,7 +22,19 @@ export class UsuarioService {
   }
 
   criar(usuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(API_ENDPOINTS.USUARIOS.BASE, usuario);
+    const roleMapping: Record<string, number> = {
+      'Administrador': 1,
+      'Atendente': 2,
+      'Mecanico': 3
+    };
+
+    const payload = {
+      ...usuario,
+      password: usuario.senha,
+      tipo: roleMapping[usuario.tipo as unknown as string] || usuario.tipo
+    };
+
+    return this.http.post<Usuario>(API_ENDPOINTS.USUARIOS.BASE, payload);
   }
 
   atualizarRole(id: string, role: string): Observable<Usuario> {

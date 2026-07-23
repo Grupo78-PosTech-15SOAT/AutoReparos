@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
 import { InsumoService } from '../../../insumos/services/insumo.service';
 import { ServicoService } from '../../../servicos/services/servico.service';
+import { ClienteService } from '../../../clientes/services/cliente.service';
+import { VeiculoService } from '../../../veiculos/services/veiculo.service';
 import { OrdemServico, StatusOS } from '../../models/ordem-servico.model';
 import { Insumo } from '../../../insumos/models/insumo.model';
 import { Servico } from '../../../servicos/models/servico.model';
@@ -24,11 +26,11 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
         <div class="page-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.3rem;">
-              <span class="mono-badge" style="color: #ED145B; font-size: 1.1rem; padding: 0.3rem 0.8rem;">#{{ os.numeroOS }}</span>
+              <span class="mono-badge" style="color: #ED145B; font-size: 1.1rem; padding: 0.3rem 0.8rem;">#{{ os.id?.substring(0, 8) }}</span>
               <app-status-badge [status]="os.status"></app-status-badge>
             </div>
-            <h1 class="page-title">{{ os.modeloVeiculo }} (Placa: {{ os.placaVeiculo }})</h1>
-            <p class="page-subtitle">Proprietário: {{ os.clienteNome }} | Data de Entrada: {{ os.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</p>
+            <h1 class="page-title">{{ getVeiculoDesc(os.veiculoId) }} (Placa: {{ getVeiculoPlaca(os.veiculoId) }})</h1>
+            <p class="page-subtitle">Proprietário: {{ getClienteNome(os.clienteId) }} | Data de Entrada: {{ os.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</p>
           </div>
 
           <!-- Ações Rápidas de Transição de Status -->
@@ -97,7 +99,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                 <thead>
                   <tr>
                     <th>Serviço</th>
-                    <th>Valor</th>
+                    <th style="text-align: center;">Valor</th>
                     <th>Status Execução</th>
                   </tr>
                 </thead>
@@ -105,7 +107,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                   @for (item of os.itensServico; track item.id) {
                     <tr>
                       <td style="font-weight: 600;">{{ item.nomeServico }}</td>
-                      <td>R$ {{ item.valor | number:'1.2-2' }}</td>
+                      <td style="text-align: center;">R$ {{ item.valor | number:'1.2-2' }}</td>
                       <td>
                         <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                           <input type="checkbox" [checked]="item.concluido" (change)="alternarServico(item)" />
@@ -145,18 +147,18 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                 <thead>
                   <tr>
                     <th>Peça/Insumo</th>
-                    <th>Qtd</th>
-                    <th>Unitário</th>
-                    <th>Subtotal</th>
+                    <th style="text-align: center;">Qtd</th>
+                    <th style="text-align: center;">Unitário</th>
+                    <th style="text-align: center;">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (item of os.itensInsumo; track item.id) {
                     <tr>
                       <td style="font-weight: 600;">{{ item.nomeInsumo }}</td>
-                      <td>{{ item.quantidade }}x</td>
-                      <td>R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
-                      <td style="font-weight: 700; color: #E2E8F0;">R$ {{ item.valorTotal | number:'1.2-2' }}</td>
+                      <td style="text-align: center;">{{ item.quantidade }}x</td>
+                      <td style="text-align: center;">R$ {{ item.valorUnitario | number:'1.2-2' }}</td>
+                      <td style="font-weight: 700; color: #E2E8F0; text-align: center;">R$ {{ item.valorTotal | number:'1.2-2' }}</td>
                     </tr>
                   } @empty {
                     <tr><td colspan="4" class="empty-text">Nenhuma peça adicionada.</td></tr>
@@ -249,11 +251,15 @@ export class OsDetalhePageComponent implements OnInit {
   insumoIdSelecionado = '';
   quantidadeInsumo = 1;
   loadingCatalogos = true;
+  clientes: any[] = [];
+  veiculos: any[] = [];
 
   private route = inject(ActivatedRoute);
   private osService = inject(OrdemServicoService);
   private servicoService = inject(ServicoService);
   private insumoService = inject(InsumoService);
+  private clienteService = inject(ClienteService);
+  private veiculoService = inject(VeiculoService);
   private notification = inject(NotificationService);
 
   ngOnInit() {
@@ -266,6 +272,22 @@ export class OsDetalhePageComponent implements OnInit {
 
   carregarOS() {
     this.osService.getById(this.osId).subscribe(data => this.os = data);
+    this.clienteService.getAll(1, 500).subscribe(c => this.clientes = c.items || []);
+    this.veiculoService.getAll(1, 500).subscribe(v => this.veiculos = v.items || []);
+  }
+
+  getClienteNome(id: string): string {
+    return this.clientes.find(c => c.id === id)?.nome || 'Carregando...';
+  }
+
+  getVeiculoDesc(id: string): string {
+    const v = this.veiculos.find(v => v.id === id);
+    return v ? `${v.marca} ${v.modelo}` : 'Carregando...';
+  }
+
+  getVeiculoPlaca(id: string): string {
+    const v = this.veiculos.find(v => v.id === id);
+    return v ? v.placa : '---';
   }
 
   carregarCatalogos() {
@@ -277,7 +299,7 @@ export class OsDetalhePageComponent implements OnInit {
       this.servicosDisponiveis = res.items || [];
       this.servicoOptions = this.servicosDisponiveis.map(sv => ({
         value: sv.id!,
-        label: `${sv.nome} (R$ ${sv.precoBase.toFixed(2)})`
+        label: `${sv.nome} (R$ ${sv.valorTabelado.toFixed(2)})`
       }));
       s = true; check();
     });

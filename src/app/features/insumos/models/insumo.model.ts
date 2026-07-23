@@ -3,7 +3,6 @@ export interface Insumo {
   nome: string;
   descricao?: string;
   quantidadeEstoque: number;
-  quantidadeMinima: number;
-  precoUnitario: number;
-  abaixoEstoqueMinimo?: boolean;
+  quantidadeMinima?: number;
+  valor: number;
 }

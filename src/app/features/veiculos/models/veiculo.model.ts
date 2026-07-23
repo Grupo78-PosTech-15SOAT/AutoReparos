@@ -3,8 +3,8 @@ export interface Veiculo {
   placa: string;
   marca: string;
   modelo: string;
-  ano: number;
-  cor?: string;
+  anoFabricacao: number;
+  anoModelo: number;
   clienteId: string;
   clienteNome?: string;
   dataCadastro?: string;
