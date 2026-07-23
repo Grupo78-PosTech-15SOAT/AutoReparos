@@ -23,7 +23,8 @@ public class JwtService(IOptions<JwtSettings> jwtOptions) : IJwtService
             [
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Email.Endereco),
-                new Claim(ClaimTypes.Name, usuario.NomeCompleto)
+                new Claim(ClaimTypes.Name, usuario.NomeCompleto),
+                new Claim(ClaimTypes.Role, usuario.Tipo.ToString())
             ]),
             Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpiryHours),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

@@ -19,7 +19,7 @@ namespace AutoReparos.Application.Auth.UseCases
 
             var token = jwtService.GenerateToken(user);
 
-            return new LoginResponseDto(token, user.Email.Endereco, user.NomeCompleto);
+            return new LoginResponseDto(token, user.Email.Endereco, user.NomeCompleto, user.Tipo.ToString());
         }
     }
 }

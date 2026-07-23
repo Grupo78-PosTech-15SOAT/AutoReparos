@@ -43,6 +43,7 @@ app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
 app.MapInsumosEndpoints();
 app.MapOrdemServicoEndpoints();
+app.MapDashboardEndpoints();
 
 app.MapHealthChecks("/health");
 
