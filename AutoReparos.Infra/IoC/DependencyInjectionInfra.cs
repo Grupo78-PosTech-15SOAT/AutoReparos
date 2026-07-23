@@ -1,4 +1,5 @@
 using AutoReparos.Application.Auth.Services.Interfaces;
+using AutoReparos.Application.Dashboard.Services;
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Domain.Clientes.Repositories;
@@ -52,6 +53,7 @@ namespace AutoReparos.Infra.IoC
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IAprovacaoTokenService, AprovacaoTokenService>();
             services.AddScoped<INotificacaoService, NotificacaoService>();
+            services.AddScoped<IDashboardQueryService, DashboardQueryService>();
 
             return services;
         }
