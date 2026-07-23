@@ -14,6 +14,7 @@ builder.Services.AddInfraestructureSwagger();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHealthChecks();
+builder.Services.AddOpenTelemetryObservability(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
 
@@ -27,6 +28,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+
+app.UseCors("AllowFrontend");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
