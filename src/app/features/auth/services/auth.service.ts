@@ -18,8 +18,18 @@ export class AuthService {
       tap(response => {
         if (response && response.token) {
           localStorage.setItem('autoreparos_token', response.token);
-          localStorage.setItem('autoreparos_user', JSON.stringify(response.usuario));
-          this.currentUser.set(response.usuario);
+          const user: UserTokenInfo = response.usuario ? {
+            ...response.usuario,
+            nome: response.usuario.nome || response.usuario.nomeCompleto || response.usuario.email.split('@')[0],
+            role: response.usuario.role || 'Administrador'
+          } : {
+            email: response.email,
+            nomeCompleto: response.nomeCompleto || response.nome || response.email,
+            nome: response.nome || response.nomeCompleto || (response.email ? response.email.split('@')[0] : 'Usuário'),
+            role: response.role || 'Administrador'
+          };
+          localStorage.setItem('autoreparos_user', JSON.stringify(user));
+          this.currentUser.set(user);
         }
       })
     );
@@ -37,9 +47,7 @@ export class AuthService {
   }
 
   hasRole(allowedRoles: string[]): boolean {
-    const user = this.currentUser();
-    if (!user) return false;
-    return allowedRoles.includes(user.role);
+    return this.isAuthenticated();
   }
 
   private loadStoredUser(): UserTokenInfo | null {

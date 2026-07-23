@@ -1,14 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="login-container fade-in">
       <div class="login-card">
@@ -20,14 +21,14 @@ import { NotificationService } from '../../../../core/ui/notification.service';
             </svg>
           </div>
           <h1 class="brand-title">AutoReparos</h1>
-          <p class="brand-subtitle">Acesso Restrito ao Sistema da Oficina</p>
+          <p class="brand-subtitle">Painel Interno da Oficina</p>
         </div>
 
         <!-- Formulário -->
         <form (ngSubmit)="onSubmit()" class="login-form">
           <div class="form-group">
             <label class="form-label">E-mail</label>
-            <input type="email" [(ngModel)]="email" name="email" required placeholder="admin@autoreparos.com" class="form-control" />
+            <input type="email" [(ngModel)]="email" name="email" required placeholder="seu@email.com" class="form-control" />
           </div>
 
           <div class="form-group">
@@ -35,22 +36,25 @@ import { NotificationService } from '../../../../core/ui/notification.service';
             <input type="password" [(ngModel)]="senha" name="senha" required placeholder="••••••••" class="form-control" />
           </div>
 
-          <button type="submit" [disabled]="loading" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+          <button type="submit" [disabled]="loading" class="btn btn-primary btn-block" style="margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
             @if (loading) {
-              Autenticando...
+              <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/>
+              </svg>
+              <span>Autenticando...</span>
             } @else {
-              Entrar no Sistema
+              <span>Entrar no Sistema</span>
             }
           </button>
         </form>
 
         <!-- Perfis Rápidos para Demo -->
         <div class="quick-roles">
-          <span class="quick-title">Acesso Rápido de Teste:</span>
+          <span class="quick-title">Acesso rápido:</span>
           <div class="quick-buttons">
-            <button (click)="fillCredentials('admin@autoreparos.com', 'Admin@123')" class="btn-role">Admin</button>
-            <button (click)="fillCredentials('atendente@autoreparos.com', 'Atendente@123')" class="btn-role">Atendente</button>
-            <button (click)="fillCredentials('mecanico@autoreparos.com', 'Mecanico@123')" class="btn-role">Mecânico</button>
+            <button type="button" (click)="fillEmail('admin@autoreparos.com')" class="btn-role">Admin</button>
+            <button type="button" (click)="fillEmail('atendente@autoreparos.com')" class="btn-role">Atendente</button>
+            <button type="button" (click)="fillEmail('mecanico@autoreparos.com')" class="btn-role">Mecânico</button>
           </div>
         </div>
 
@@ -62,7 +66,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `,
   styles: [`
     .login-container {
-      min-height: calc(100vh - 80px);
+      min-height: 80vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -151,20 +155,27 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       transition: color 0.2s;
     }
     .public-link:hover { color: #ED145B; }
+    .spinner {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   `]
 })
 export class LoginPageComponent {
-  email = 'admin@autoreparos.com';
-  senha = 'Admin@123';
+  email = '';
+  senha = '';
   loading = false;
 
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
   private router = inject(Router);
 
-  fillCredentials(e: string, s: string) {
+  fillEmail(e: string) {
     this.email = e;
-    this.senha = s;
+    this.senha = '';
   }
 
   onSubmit() {
@@ -174,15 +185,22 @@ export class LoginPageComponent {
     }
 
     this.loading = true;
-    this.authService.login({ email: this.email, senha: this.senha }).subscribe({
-      next: () => {
-        this.loading = false;
-        this.notification.success('Autenticado com Sucesso', 'Bem-vindo ao AutoReparos!');
-        this.router.navigate(['/ordens-servico/fila']);
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    this.authService.login({ email: this.email, password: this.senha })
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.notification.success('Autenticado com Sucesso', 'Bem-vindo ao AutoReparos!');
+          this.router.navigate(['/ordens-servico/fila']);
+        },
+        error: () => {
+          // Desfoca do botão de login e limpa os campos de senha e email para resetar o estado
+          (document.activeElement as HTMLElement)?.blur();
+          this.senha = '';
+        }
+      });
   }
 }
