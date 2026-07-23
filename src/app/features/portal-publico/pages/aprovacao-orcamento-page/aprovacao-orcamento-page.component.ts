@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
 import { NotificationService } from '../../../../core/ui/notification.service';
@@ -7,7 +8,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
 @Component({
   selector: 'app-aprovacao-orcamento-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="container fade-in" style="max-width: 650px; padding-top: 3rem;">
       <div class="approval-card">
@@ -17,26 +18,31 @@ import { NotificationService } from '../../../../core/ui/notification.service';
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/>
             </svg>
           </div>
-          <h1 class="card-title">Aprovação de Orçamento com 1-Clique</h1>
-          <p class="card-subtitle">Confirmação de execução de serviços pela oficina AutoReparos.</p>
+          <h1 class="card-title">Aprovação de Orçamento</h1>
+          <p class="card-subtitle">Confirme ou recuse o orçamento abaixo.</p>
         </div>
 
         @if (!respondido) {
           <div class="token-info-box">
-            <div class="info-row">
-              <span class="label">Token Assinado:</span>
-              <code class="token-code">{{ token }}</code>
+            <label class="form-label" for="input-token">Token Assinado de Aprovação:</label>
+            <div class="token-input-wrapper">
+              <textarea
+                id="input-token"
+                [(ngModel)]="token"
+                rows="3"
+                placeholder="Cole ou digite aqui o Token de aprovação..."
+                class="form-control token-textarea"
+              ></textarea>
             </div>
-            <p class="token-desc">Ao aprovar o orçamento abaixo, o mecânico será notificado imediatamente para dar início aos serviços no veículo.</p>
           </div>
 
           <!-- Botões de Decisão -->
           <div class="decision-buttons">
-            <button (click)="responder(false)" [disabled]="loading" class="btn btn-danger btn-lg" style="flex: 1;">
+            <button (click)="responder(false)" [disabled]="loading || !token.trim()" class="btn btn-danger btn-lg" style="flex: 1;">
               ✕ Recusar Orçamento
             </button>
-            <button (click)="responder(true)" [disabled]="loading" class="btn btn-success btn-lg" style="flex: 1.5;">
-              ✓ Aprovar Orçamento & Iniciar Serviço
+            <button (click)="responder(true)" [disabled]="loading || !token.trim()" class="btn btn-success btn-lg" style="flex: 1.5;">
+              ✓ Aprovar Orçamento
             </button>
           </div>
         } @else {
@@ -47,11 +53,14 @@ import { NotificationService } from '../../../../core/ui/notification.service';
               </span>
             </div>
             <h2 style="font-family: 'Outfit', sans-serif; color: #fff; margin-top: 1rem;">
-              {{ aprovado ? 'Orçamento Aprovado com Sucesso!' : 'Orçamento Recusado' }}
+              {{ aprovado ? 'Orçamento Aprovado!' : 'Orçamento Recusado' }}
             </h2>
             <p style="color: #A1A1AA; font-size: 0.95rem; margin-top: 0.5rem;">
-              {{ aprovado ? 'Sua aprovação foi registrada no sistema. A equipe da oficina já foi notificada!' : 'Sua resposta foi registrada. Entraremos em contato para mais informações.' }}
+              {{ aprovado ? 'Sua aprovação foi registrada.' : 'Sua recusa foi registrada.' }}
             </p>
+            <button (click)="resetar()" class="btn btn-secondary btn-sm" style="margin-top: 1.5rem;">
+              🔄 Testar outro Token
+            </button>
           </div>
         }
       </div>
@@ -68,34 +77,50 @@ import { NotificationService } from '../../../../core/ui/notification.service';
     }
     .brand-header { text-align: center; margin-bottom: 2rem; }
     .brand-icon {
-      width: 58px; height: 58px;
+      width: 52px; height: 52px;
       background: linear-gradient(135deg, #ED145B, #800A30);
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       color: #ffffff; margin: 0 auto 1rem;
       box-shadow: 0 0 25px rgba(237, 20, 91, 0.4);
     }
-    .brand-icon svg { width: 32px; height: 32px; }
-    .card-title { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: #ffffff; }
+    .brand-icon svg { width: 28px; height: 28px; }
+    .card-title { font-family: 'Outfit', sans-serif; font-size: 1.75rem; font-weight: 800; color: #ffffff; }
     .card-subtitle { font-size: 0.875rem; color: #A1A1AA; margin-top: 0.25rem; }
 
     .token-info-box {
       background: rgba(10, 10, 12, 0.7);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 1.25rem;
       margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    .info-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; }
-    .label { font-size: 0.75rem; color: #71717A; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-    .token-code { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #ED145B; word-break: break-all; }
-    .token-desc { font-size: 0.85rem; color: #A1A1AA; line-height: 1.5; }
+    .token-textarea {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #ED145B;
+      background: rgba(15, 15, 18, 0.9);
+      border: 1px solid rgba(237, 20, 91, 0.3);
+      border-radius: 8px;
+      resize: vertical;
+      word-break: break-all;
+      white-space: pre-wrap;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    .token-textarea:focus {
+      border-color: #ED145B;
+      box-shadow: 0 0 12px rgba(237, 20, 91, 0.3);
+    }
+    .token-hint { font-size: 0.8rem; color: #71717A; line-height: 1.4; }
 
     .decision-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .btn-lg { padding: 1rem 1.5rem; font-size: 1rem; }
+    .btn-lg { padding: 0.85rem 1.25rem; font-size: 0.95rem; }
 
     .success-box { text-align: center; padding: 2rem 1rem; }
-    .check-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+    .check-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
   `]
 })
 export class AprovacaoOrcamentoPageComponent implements OnInit {
@@ -113,13 +138,13 @@ export class AprovacaoOrcamentoPageComponent implements OnInit {
   }
 
   responder(aprovado: boolean) {
-    if (!this.token) {
-      this.notification.error('Token Inválido', 'Token de aprovação não fornecido na URL.');
+    if (!this.token.trim()) {
+      this.notification.error('Token Obrigatório', 'Por favor, informe ou cole o token de aprovação.');
       return;
     }
 
     this.loading = true;
-    this.osService.responderOrcamentoToken(this.token, aprovado).subscribe({
+    this.osService.responderOrcamentoToken(this.token.trim(), aprovado).subscribe({
       next: () => {
         this.loading = false;
         this.respondido = true;
@@ -130,5 +155,11 @@ export class AprovacaoOrcamentoPageComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  resetar() {
+    this.respondido = false;
+    this.aprovado = false;
+    this.token = '';
   }
 }

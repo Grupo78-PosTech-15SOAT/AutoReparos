@@ -4,27 +4,33 @@ import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
 import { OrdemServico } from '../../../ordens-servico/models/ordem-servico.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { MaskDirective } from '../../../../shared/directives/mask.directive';
 import { NotificationService } from '../../../../core/ui/notification.service';
 
 @Component({
   selector: 'app-consulta-publica-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatusBadgeComponent, MaskDirective],
+  imports: [CommonModule, FormsModule, StatusBadgeComponent],
   template: `
     <div class="container fade-in" style="max-width: 850px; padding-top: 3rem;">
       <!-- Banner Público -->
       <div class="public-banner">
-        <div class="brand-badge">Portal do Cliente AutoReparos</div>
-        <h1 class="public-title">Acompanhe o Status do seu Veículo</h1>
-        <p class="public-desc">Digite a placa do seu veículo ou o CPF/CNPJ do proprietário para consultar o andamento em tempo real.</p>
+        <div class="brand-badge">Portal do Cliente</div>
+        <h1 class="public-title">Consulta de Veículo</h1>
 
         <!-- Campo de Pesquisa -->
-        <form (ngSubmit)="consultar()" class="search-form">
-          <input type="text" [(ngModel)]="termoBusca" name="termoBusca" placeholder="Digite a Placa (ex: BRA2E19) ou CPF..." class="form-control search-input" />
-          <button type="submit" [disabled]="loading" class="btn btn-primary search-btn">
-            🔍 Consultar Status
-          </button>
+        <form (ngSubmit)="consultar()" class="search-form-group">
+          <div class="search-input-wrapper">
+            <input
+              type="text"
+              [(ngModel)]="termoBusca"
+              name="termoBusca"
+              placeholder="Placa, CPF ou CNPJ..."
+              class="form-control search-input"
+            />
+            <button type="submit" [disabled]="loading || !termoBusca.trim()" class="btn btn-primary search-btn">
+              🔍 Consultar
+            </button>
+          </div>
         </form>
       </div>
 
@@ -78,8 +84,8 @@ import { NotificationService } from '../../../../core/ui/notification.service';
           } @empty {
             <div class="card-panel empty-card">
               <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
-              <h3 style="font-family: 'Outfit', sans-serif; color: #fff;">Nenhuma Ordem de Serviço Encontrada</h3>
-              <p style="color: #A1A1AA; font-size: 0.9rem;">Verifique a placa ou o CPF digitado e tente novamente.</p>
+              <h3 style="font-family: 'Outfit', sans-serif; color: #fff;">Nenhuma OS Encontrada</h3>
+              <p style="color: #A1A1AA; font-size: 0.9rem;">Verifique os dados informados e tente novamente.</p>
             </div>
           }
         </div>
@@ -92,7 +98,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       backdrop-filter: blur(16px);
       border: 1px solid rgba(237, 20, 91, 0.3);
       border-radius: 16px;
-      padding: 3rem 2.5rem;
+      padding: 2.75rem 2.25rem;
       text-align: center;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
       margin-bottom: 2rem;
@@ -102,7 +108,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       background: rgba(237, 20, 91, 0.15);
       color: #ED145B;
       border: 1px solid rgba(237, 20, 91, 0.4);
-      padding: 0.35rem 0.85rem;
+      padding: 0.3rem 0.85rem;
       border-radius: 999px;
       font-size: 0.75rem;
       font-weight: 700;
@@ -112,7 +118,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
     }
     .public-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       font-weight: 800;
       color: #ffffff;
     }
@@ -120,19 +126,46 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       color: #A1A1AA;
       font-size: 0.95rem;
       max-width: 580px;
-      margin: 0.5rem auto 2rem;
+      margin: 0.5rem auto 1.75rem;
+      line-height: 1.55;
     }
-    .search-form {
+    .search-form-group {
+      max-width: 620px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .search-input-wrapper {
       display: flex;
       gap: 0.75rem;
-      max-width: 600px;
-      margin: 0 auto;
+      flex-wrap: wrap;
     }
     .search-input {
-      font-size: 1.05rem;
-      padding: 0.85rem 1.25rem;
+      font-size: 0.98rem;
+      padding: 0.8rem 1.1rem;
+      flex: 1;
+      min-width: 260px;
     }
-    .search-btn { padding: 0.85rem 1.5rem; font-size: 1rem; }
+    .search-btn { padding: 0.8rem 1.4rem; font-size: 0.92rem; border-radius: 8px; }
+
+    .search-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      color: #71717A;
+      font-size: 0.82rem;
+      margin-top: 0.25rem;
+    }
+    .hint-code {
+      font-family: 'JetBrains Mono', monospace;
+      color: #E2E8F0;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
     .results-container { display: flex; flex-direction: column; gap: 1.5rem; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; }
@@ -177,10 +210,10 @@ export class ConsultaPublicaPageComponent {
 
     this.loading = true;
     this.osService.buscarPorPlacaOuCpf(this.termoBusca.trim()).subscribe({
-      next: (lista) => {
+      next: (res) => {
         this.loading = false;
         this.buscou = true;
-        this.ordensEncontradas = lista;
+        this.ordensEncontradas = res.items || [];
       },
       error: () => {
         this.loading = false;
