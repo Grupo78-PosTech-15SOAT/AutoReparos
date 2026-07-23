@@ -10,11 +10,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      const isLoginRequest = req.url.toLowerCase().includes('/auth/login');
+
       if (error.status === 401) {
-        notificationService.warning('Sessão Expirada', 'Por favor, faça login novamente.');
-        localStorage.removeItem('autoreparos_token');
-        localStorage.removeItem('autoreparos_user');
-        router.navigate(['/login']);
+        if (isLoginRequest) {
+          const message = error.error?.message || 'E-mail ou senha incorretos. Verifique suas credenciais.';
+          notificationService.error('Falha no Login', message);
+        } else {
+          notificationService.warning('Sessão Expirada', 'Por favor, faça login novamente.');
+          localStorage.removeItem('autoreparos_token');
+          localStorage.removeItem('autoreparos_user');
+          router.navigate(['/login']);
+        }
       } else if (error.status === 403) {
         notificationService.error('Acesso Negado', 'Seu perfil de usuário não possui permissão para esta ação.');
       } else if (error.status === 400) {
@@ -23,7 +30,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       } else if (error.status === 404) {
         notificationService.warning('Não Encontrado (404)', error.error?.message || 'O recurso solicitado não foi encontrado.');
       } else if (error.status === 0 || error.status >= 500) {
-        notificationService.error('Erro de Servidor / Conexão', 'Não foi possível se comunicar com o backend .NET 10 em http://localhost:8080.');
+        notificationService.error('Erro de Servidor / Conexão', 'Não foi possível se comunicar com o backend.');
       }
 
       return throwError(() => error);
