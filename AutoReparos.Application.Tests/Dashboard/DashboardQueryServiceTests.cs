@@ -218,7 +218,7 @@ namespace AutoReparos.Application.Tests.Dashboard
 
             // Assert
             // Expected: 200.00 + 180.00 = 380.00
-            result.FaturamentoTotal.Should().Be(380.00m);
+            result.FaturamentoMesAtual.Should().Be(380.00m);
         }
 
         [Fact]
@@ -245,7 +245,7 @@ namespace AutoReparos.Application.Tests.Dashboard
             var result = await service.GetMetricsAsync();
 
             // Assert
-            result.TotalOrdensServico.Should().Be(6);
+            result.TotalOrdensMesAtual.Should().Be(6);
             result.OrdensEmExecucao.Should().Be(1);
         }
 
@@ -370,11 +370,13 @@ namespace AutoReparos.Application.Tests.Dashboard
 
             // Assert
             result.Should().NotBeNull();
-            result.FaturamentoTotal.Should().Be(0m);
+            result.FaturamentoMesAtual.Should().Be(0m);
+            result.FaturamentoMesAnterior.Should().Be(0m);
             result.OrdensEmExecucao.Should().Be(0);
-            result.TotalOrdensServico.Should().Be(0);
+            result.TotalOrdensMesAtual.Should().Be(0);
             result.UltimasOrdens.Should().BeEmpty();
             result.InsumosCriticos.Should().BeEmpty();
+            result.HistoricoMensal.Should().NotBeEmpty();
         }
     }
 }

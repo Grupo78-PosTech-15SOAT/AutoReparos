@@ -64,9 +64,11 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
         // totalOrdensServico = 3
         // ordensEmExecucao = 1 (OS1 is EmExecucao, OS2 is AguardandoAprovacao, OS3 is Recebida)
         // faturamentoTotal = 0 (since no OS has status Finalizada or Entregue)
-        metrics!.TotalOrdensServico.Should().Be(3);
+        metrics!.TotalOrdensMesAtual.Should().Be(3);
         metrics.OrdensEmExecucao.Should().Be(1);
-        metrics.FaturamentoTotal.Should().Be(0);
+        metrics.FaturamentoMesAtual.Should().Be(0);
+        metrics.FaturamentoMesAnterior.Should().Be(0);
+        metrics.HistoricoMensal.Should().NotBeEmpty();
 
         // UltimasOrdens should list the seeded ordens (up to 5, we have 3)
         metrics.UltimasOrdens.Should().HaveCount(3);
@@ -147,12 +149,12 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
         var metrics = await response.Content.ReadFromJsonAsync<DashboardMetricsDto>();
         metrics.Should().NotBeNull();
 
-        // FaturamentoTotal:
+        // FaturamentoMesAtual:
         // Prior to this test, the seeded database has 3 OSs in progress (Faturamento = 0).
         // Our new OS has 150.00 (service) + 2 * 50.00 (insumo) = 250.00.
-        // It's Entregue, so FaturamentoTotal should be 250.00m.
-        metrics!.FaturamentoTotal.Should().Be(250.00m);
-        metrics.TotalOrdensServico.Should().Be(4); // 3 seeded + 1 new
+        // It's Entregue, so FaturamentoMesAtual should be 250.00m.
+        metrics!.FaturamentoMesAtual.Should().Be(250.00m);
+        metrics.TotalOrdensMesAtual.Should().Be(4); // 3 seeded + 1 new
 
         // Assert on lists (UltimasOrdens)
         metrics.UltimasOrdens.Should().NotBeEmpty();
@@ -187,9 +189,11 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
         var metrics = await response.Content.ReadFromJsonAsync<DashboardMetricsDto>();
         metrics.Should().NotBeNull();
 
-        metrics!.TotalOrdensServico.Should().Be(0);
+        metrics!.TotalOrdensMesAtual.Should().Be(0);
         metrics.OrdensEmExecucao.Should().Be(0);
-        metrics.FaturamentoTotal.Should().Be(0);
+        metrics.FaturamentoMesAtual.Should().Be(0);
+        metrics.FaturamentoMesAnterior.Should().Be(0);
+        metrics.HistoricoMensal.Should().NotBeEmpty();
         metrics.UltimasOrdens.Should().BeEmpty();
         metrics.InsumosCriticos.Should().BeEmpty();
     }
