@@ -62,37 +62,6 @@ import { AuthService } from '../../../auth/services/auth.service';
          </div>
        </section>
  
-       <!-- Dev Mode Card Elegant Redesign -->
-       @if (!auth.currentUser()) {
-         <section class="dev-mode-card">
-           <div class="dev-header">
-             <div class="dev-status-badge">
-               <span class="pulse-dot"></span> Ambientação Local e Testes
-             </div>
-             <span class="dev-tag">Ambiente de Desenvolvimento</span>
-           </div>
- 
-           <div class="dev-body">
-             <div class="dev-cred-item">
-               <span class="cred-label">E-mail de Administrador</span>
-               <div class="cred-values">
-                 <div class="cred-chip">
-                   <span class="chip-key">Email:</span>
-                   <code class="chip-val">admin&#64;autoreparos.com</code>
-                 </div>
-               </div>
-             </div>
- 
-             <div class="dev-action-area">
-               <a routerLink="/login" class="btn btn-accent btn-sm">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                 Ir para Login
-               </a>
-             </div>
-           </div>
-         </section>
-       }
- 
        <!-- Grid de Módulos e Acessos Diretos (Mantido o Pin favorito do usuário) -->
        <section class="modules-section">
          <div class="section-header">
@@ -334,81 +303,7 @@ import { AuthService } from '../../../auth/services/auth.service';
       flex-wrap: wrap;
     }
 
-    /* Dev Mode Card Sleek Style */
-    .dev-mode-card {
-      background: rgba(18, 18, 22, 0.85);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 14px;
-      padding: 1.25rem 1.5rem;
-      margin-top: 1.75rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    }
-    .dev-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .dev-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #F59E0B;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-    }
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background: #F59E0B;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #F59E0B;
-    }
-    .dev-tag {
-      font-size: 0.72rem;
-      color: #71717A;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .dev-body {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      background: rgba(10, 10, 12, 0.6);
-      padding: 0.85rem 1.15rem;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    .cred-label {
-      font-size: 0.78rem;
-      color: #A1A1AA;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.4rem;
-    }
-    .cred-values {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .cred-chip {
-      font-size: 0.82rem;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 0.3rem 0.65rem;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .chip-key { color: #71717A; }
-    .chip-val { font-family: 'JetBrains Mono', monospace; color: #F8FAFC; font-weight: 600; }
+
 
     /* Modules Section */
     .modules-section {
