@@ -4,23 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { ServicoService } from '../../services/servico.service';
 import { Servico } from '../../models/servico.model';
 import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-servicos-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
         <div>
           <h1 class="page-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Catálogo de Serviços de Mão de Obra
+            Catálogo de Serviços
           </h1>
-          <p class="page-subtitle">Padrões de serviço, preços base e tempos estimados de execução.</p>
         </div>
         <button (click)="abrirModalNovo()" class="btn btn-primary">
-          + Cadastrar Serviço
+          + Serviço
         </button>
       </div>
 
@@ -29,9 +29,9 @@ import { NotificationService } from '../../../../core/ui/notification.service';
         <table class="data-table">
           <thead>
             <tr>
-              <th>Serviço / Procedimento</th>
-              <th>Preço Base Mão de Obra</th>
-              <th>Tempo Estimado</th>
+              <th>Serviço</th>
+              <th>Preço Base</th>
+              <th>Estimativa</th>
               <th style="text-align: right;">Ações</th>
             </tr>
           </thead>
@@ -52,21 +52,32 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 <td>⏱️ {{ s.tempoEstimadoMinutos }} min</td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 0.5rem;">
-                    <button (click)="editar(s)" class="btn btn-secondary btn-sm">Editar</button>
-                    <button (click)="excluir(s.id!)" class="btn btn-danger btn-sm">Excluir</button>
+                    <button (click)="editar(s)" class="btn btn-secondary btn-sm" title="Editar Serviço">✏️ Editar</button>
+                    <button (click)="excluir(s.id!)" class="btn btn-danger btn-sm" title="Excluir Serviço">🗑️ Excluir</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
                 <td colspan="4" style="text-align: center; padding: 2.5rem; color: #71717A;">
-                  Nenhum serviço disponível no catálogo.
+                  Nenhum serviço cadastrado.
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
 
       <!-- Modal de Cadastro / Edição -->
       @if (exibirModal) {
@@ -125,6 +136,11 @@ export class ServicosPageComponent implements OnInit {
   exibirModal = false;
   editandoId: string | null = null;
 
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+
   formServico: Servico = {
     nome: '',
     descricao: '',
@@ -140,7 +156,22 @@ export class ServicosPageComponent implements OnInit {
   }
 
   carregar() {
-    this.servicoService.getAll().subscribe(data => this.servicos = data);
+    this.servicoService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
+      this.servicos = res.items || [];
+      this.totalItems = res.total;
+      this.totalPages = res.totalPages;
+    });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregar();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregar();
   }
 
   abrirModalNovo() {

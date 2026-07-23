@@ -4,23 +4,23 @@ import { FormsModule } from '@angular/forms';
 import { InsumoService } from '../../services/insumo.service';
 import { Insumo } from '../../models/insumo.model';
 import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-insumos-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
         <div>
           <h1 class="page-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            Gestão de Insumos e Estoque Mínimo
+            Estoque de Insumos
           </h1>
-          <p class="page-subtitle">Controle de peças de reposição e alertas de nível crítico de estoque.</p>
         </div>
         <button (click)="abrirModalNovo()" class="btn btn-primary">
-          + Cadastrar Insumo / Peça
+          + Insumo
         </button>
       </div>
 
@@ -29,11 +29,11 @@ import { NotificationService } from '../../../../core/ui/notification.service';
         <table class="data-table">
           <thead>
             <tr>
-              <th>Nome da Peça / Insumo</th>
-              <th>Preço Unitário</th>
-              <th>Estoque Atual</th>
-              <th>Estoque Mínimo</th>
-              <th>Status do Estoque</th>
+              <th>Insumo</th>
+              <th>Preço</th>
+              <th>Estoque</th>
+              <th>Mínimo</th>
+              <th>Status</th>
               <th style="text-align: right;">Ações</th>
             </tr>
           </thead>
@@ -51,32 +51,32 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 </td>
                 <td>
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem;" [style.color]="item.quantidadeEstoque <= item.quantidadeMinima ? '#EF4444' : '#F8FAFC'">
-                    {{ item.quantidadeEstoque }} un.
+                    {{ item.quantidadeEstoque }}
                   </span>
                 </td>
-                <td>{{ item.quantidadeMinima }} un.</td>
+                <td>{{ item.quantidadeMinima }}</td>
                 <td>
                   @if (item.quantidadeEstoque <= item.quantidadeMinima) {
                     <span class="stock-badge danger">
-                      ⚠️ Abaixo do Mínimo!
+                      ⚠️ Crítico
                     </span>
                   } @else {
                     <span class="stock-badge success">
-                      ✓ Normal
+                      ✓ OK
                     </span>
                   }
                 </td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 0.5rem;">
-                    <button (click)="editar(item)" class="btn btn-secondary btn-sm">Editar</button>
-                    <button (click)="excluir(item.id!)" class="btn btn-danger btn-sm">Excluir</button>
+                    <button (click)="editar(item)" class="btn btn-secondary btn-sm" title="Editar Insumo">✏️ Editar</button>
+                    <button (click)="excluir(item.id!)" class="btn btn-danger btn-sm" title="Excluir Insumo">🗑️ Excluir</button>
                   </div>
                 </td>
               </tr>
             } @empty {
               <tr>
                 <td colspan="6" style="text-align: center; padding: 2.5rem; color: #71717A;">
-                  Nenhum insumo cadastrado no estoque.
+                  Nenhum insumo cadastrado.
                 </td>
               </tr>
             }
@@ -84,24 +84,35 @@ import { NotificationService } from '../../../../core/ui/notification.service';
         </table>
       </div>
 
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+
       <!-- Modal de Cadastro / Edição -->
       @if (exibirModal) {
         <div class="modal-backdrop fade-in">
           <div class="modal-card">
             <div class="modal-header">
-              <h3>{{ editandoId ? 'Editar Insumo' : 'Novo Insumo / Peça' }}</h3>
+              <h3>{{ editandoId ? 'Editar Insumo' : 'Novo Insumo' }}</h3>
               <button (click)="exibirModal = false" class="btn-close">&times;</button>
             </div>
 
             <form (ngSubmit)="salvar()">
               <div class="form-group">
-                <label class="form-label">Nome do Insumo / Peça</label>
-                <input type="text" [(ngModel)]="formInsumo.nome" name="nome" required placeholder="Ex: Amortecedor Dianteiro Honda Civic" class="form-control" />
+                <label class="form-label">Nome</label>
+                <input type="text" [(ngModel)]="formInsumo.nome" name="nome" required placeholder="Ex: Amortecedor Dianteiro" class="form-control" />
               </div>
 
               <div class="form-group">
-                <label class="form-label">Descrição Técnica / Especificações</label>
-                <input type="text" [(ngModel)]="formInsumo.descricao" name="descricao" placeholder="Ex: Par de amortecedores de liga reforçada" class="form-control" />
+                <label class="form-label">Descrição</label>
+                <input type="text" [(ngModel)]="formInsumo.descricao" name="descricao" placeholder="Especificações técnicas..." class="form-control" />
               </div>
 
               <div class="grid-3">
@@ -150,6 +161,11 @@ export class InsumosPageComponent implements OnInit {
   exibirModal = false;
   editandoId: string | null = null;
 
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+
   formInsumo: Insumo = {
     nome: '',
     descricao: '',
@@ -166,7 +182,22 @@ export class InsumosPageComponent implements OnInit {
   }
 
   carregar() {
-    this.insumoService.getAll().subscribe(data => this.insumos = data);
+    this.insumoService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
+      this.insumos = res.items || [];
+      this.totalItems = res.total;
+      this.totalPages = res.totalPages;
+    });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregar();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregar();
   }
 
   abrirModalNovo() {

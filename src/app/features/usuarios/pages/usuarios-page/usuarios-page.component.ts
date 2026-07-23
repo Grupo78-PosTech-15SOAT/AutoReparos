@@ -4,23 +4,24 @@ import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../models/usuario.model';
 import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-usuarios-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginationComponent, CustomSelectComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
         <div>
           <h1 class="page-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-            Gestão de Contas e Perfis de Acesso
+            Usuários
           </h1>
-          <p class="page-subtitle">Controle de credenciais de Administradores, Atendentes e Mecânicos.</p>
         </div>
         <button (click)="abrirModalNovo()" class="btn btn-primary">
-          + Criar Usuário
+          + Usuário
         </button>
       </div>
 
@@ -31,7 +32,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
             <tr>
               <th>Nome</th>
               <th>E-mail</th>
-              <th>Perfil / Role</th>
+              <th>Perfil</th>
               <th style="text-align: right;">Ações</th>
             </tr>
           </thead>
@@ -41,12 +42,12 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 <td style="font-weight: 600;">{{ u.nome }}</td>
                 <td>{{ u.email }}</td>
                 <td>
-                  <span class="role-badge" [ngClass]="u.role.toLowerCase()">
-                    {{ u.role }}
+                  <span class="role-badge" [ngClass]="getRoleClass(u.role)">
+                    {{ u.role || 'Sem Cargo' }}
                   </span>
                 </td>
                 <td style="text-align: right;">
-                  <button (click)="excluir(u.id!)" class="btn btn-danger btn-sm">Excluir</button>
+                  <button (click)="excluir(u.id!)" class="btn btn-danger btn-sm" title="Excluir Usuário">🗑️ Excluir</button>
                 </td>
               </tr>
             } @empty {
@@ -59,6 +60,17 @@ import { NotificationService } from '../../../../core/ui/notification.service';
           </tbody>
         </table>
       </div>
+
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
 
       <!-- Modal de Criar Usuário -->
       @if (exibirModal) {
@@ -83,11 +95,12 @@ import { NotificationService } from '../../../../core/ui/notification.service';
               <div class="grid-2">
                 <div class="form-group">
                   <label class="form-label">Perfil de Acesso (Role)</label>
-                  <select [(ngModel)]="formUsuario.role" name="role" class="form-control">
-                    <option value="Administrador">Administrador</option>
-                    <option value="Atendente">Atendente</option>
-                    <option value="Mecanico">Mecânico</option>
-                  </select>
+                  <app-custom-select
+                    [options]="roleOptions"
+                    [value]="formUsuario.role || 'Mecanico'"
+                    placeholder="Selecione o Perfil"
+                    (valueChange)="formUsuario.role = $any($event)"
+                  ></app-custom-select>
                 </div>
 
                 <div class="form-group">
@@ -113,6 +126,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
     .role-badge.administrador { background: rgba(237, 20, 91, 0.15); color: #ED145B; border: 1px solid rgba(237, 20, 91, 0.3); }
     .role-badge.atendente { background: rgba(59, 130, 246, 0.15); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); }
     .role-badge.mecanico { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .role-badge.sem-cargo { background: rgba(113, 113, 122, 0.15); color: #A1A1AA; border: 1px solid rgba(113, 113, 122, 0.3); }
 
     .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
     .modal-card { background: #18181C; border: 1px solid rgba(237, 20, 91, 0.3); border-radius: 12px; padding: 2rem; max-width: 580px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); }
@@ -125,6 +139,17 @@ export class UsuariosPageComponent implements OnInit {
   usuarios: Usuario[] = [];
   exibirModal = false;
 
+  roleOptions: SelectOption[] = [
+    { value: 'Administrador', label: 'Administrador' },
+    { value: 'Atendente', label: 'Atendente' },
+    { value: 'Mecanico', label: 'Mecânico' }
+  ];
+
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+
   formUsuario: Usuario = {
     nome: '',
     email: '',
@@ -135,12 +160,32 @@ export class UsuariosPageComponent implements OnInit {
   private usuarioService = inject(UsuarioService);
   private notification = inject(NotificationService);
 
+  getRoleClass(role?: string): string {
+    if (!role) return 'sem-cargo';
+    return role.toLowerCase().replace(/\s+/g, '-');
+  }
+
   ngOnInit() {
     this.carregar();
   }
 
   carregar() {
-    this.usuarioService.getAll().subscribe(data => this.usuarios = data);
+    this.usuarioService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
+      this.usuarios = res.items || [];
+      this.totalItems = res.total;
+      this.totalPages = res.totalPages;
+    });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregar();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregar();
   }
 
   abrirModalNovo() {

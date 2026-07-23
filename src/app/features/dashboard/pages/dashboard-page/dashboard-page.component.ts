@@ -18,9 +18,8 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
         <div>
           <h1 class="page-title">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Dashboard Gerencial da Oficina
+            Dashboard
           </h1>
-          <p class="page-subtitle">Indicadores operacionais, faturamento estimado e alertas de estoque.</p>
         </div>
       </div>
 
@@ -28,46 +27,42 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-title">Faturamento Estimado</span>
+            <span class="kpi-title">Faturamento</span>
             <div class="kpi-icon green">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
           </div>
           <div class="kpi-value green-val">R$ {{ faturamentoTotal | number:'1.2-2' }}</div>
-          <div class="kpi-desc">Total acumulado de OSs em aberto e concluídas</div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-title">OSs em Execução</span>
+            <span class="kpi-title">Em Execução</span>
             <div class="kpi-icon orange">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
           </div>
           <div class="kpi-value orange-val">{{ ordensExecucao.length }} OS(s)</div>
-          <div class="kpi-desc">Veículos no elevador em reparo ativo</div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-title">Total de Ordens Registradas</span>
+            <span class="kpi-title">Total OSs</span>
             <div class="kpi-icon blue">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
           </div>
           <div class="kpi-value">{{ ultimasOrdens.length }} OS(s)</div>
-          <div class="kpi-desc">Histórico completo de atendimentos</div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-header">
-            <span class="kpi-title">Alertas de Estoque Mínimo</span>
+            <span class="kpi-title">Estoque Crítico</span>
             <div class="kpi-icon red">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             </div>
           </div>
-          <div class="kpi-value red-val">{{ insumosCriticos.length }} Peça(s)</div>
-          <div class="kpi-desc">Insumos precisando de reposição imediata</div>
+          <div class="kpi-value red-val">{{ insumosCriticos.length }} Insumo(s)</div>
         </div>
       </div>
 
@@ -196,13 +191,15 @@ export class DashboardPageComponent implements OnInit {
   }
 
   carregar() {
-    this.osService.getAll().subscribe(lista => {
+    this.osService.getAll(1, 100).subscribe(res => {
+      const lista = res.items || [];
       this.ultimasOrdens = lista;
       this.ordensExecucao = lista.filter(x => x.status === 4);
       this.faturamentoTotal = lista.reduce((acc, item) => acc + item.valorTotal, 0);
     });
 
-    this.insumoService.getAll().subscribe(insumos => {
+    this.insumoService.getAll(1, 100).subscribe(res => {
+      const insumos = res.items || [];
       this.insumosCriticos = insumos.filter(i => i.quantidadeEstoque <= i.quantidadeMinima);
     });
   }

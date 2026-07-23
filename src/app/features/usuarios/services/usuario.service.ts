@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
 import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
+import { PagedResult } from '../../../shared/models/pagination.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,14 @@ import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 export class UsuarioService {
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(API_ENDPOINTS.USUARIOS.BASE);
+  getAll(pageNumber = 1, pageSize = 10): Observable<PagedResult<Usuario>> {
+    const params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<any>(API_ENDPOINTS.USUARIOS.BASE, { params }).pipe(
+      map(res => this.normalizePagedResult(res, pageNumber, pageSize))
+    );
   }
 
   criar(usuario: Usuario): Observable<Usuario> {
@@ -24,5 +31,19 @@ export class UsuarioService {
 
   excluir(id: string): Observable<void> {
     return this.http.delete<void>(API_ENDPOINTS.USUARIOS.BY_ID(id));
+  }
+
+  private normalizePagedResult(res: any, pageNumber: number, pageSize: number): PagedResult<Usuario> {
+    if (res) {
+      const items = res.items ?? res.Items ?? res.data ?? res.Data ?? (Array.isArray(res) ? res : null);
+      if (Array.isArray(items)) {
+        const total = res.totalItems ?? res.TotalItems ?? res.total ?? res.Total ?? items.length;
+        const pNum = res.pageNumber ?? res.PageNumber ?? pageNumber ?? 1;
+        const pSize = res.pageSize ?? res.PageSize ?? pageSize ?? 10;
+        const totalPages = res.totalPages ?? res.TotalPages ?? Math.max(1, Math.ceil(total / (pSize || 1)));
+        return { items, total, pageNumber: pNum, pageSize: pSize, totalPages };
+      }
+    }
+    return { items: [], total: 0, pageNumber: pageNumber || 1, pageSize: pageSize || 10, totalPages: 1 };
   }
 }
