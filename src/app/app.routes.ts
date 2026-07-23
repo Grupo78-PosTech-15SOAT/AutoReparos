@@ -3,7 +3,11 @@ import { authGuard } from './core/auth/auth.guard';
 import { roleGuard } from './core/auth/role.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'ordens-servico/fila', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./features/home/pages/home-page/home-page.component').then(m => m.HomePageComponent)
+  },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login-page/login-page.component').then(m => m.LoginPageComponent)
@@ -71,5 +75,5 @@ export const routes: Routes = [
     path: 'aprovar-orcamento',
     loadComponent: () => import('./features/portal-publico/pages/aprovacao-orcamento-page/aprovacao-orcamento-page.component').then(m => m.AprovacaoOrcamentoPageComponent)
   },
-  { path: '**', redirectTo: 'ordens-servico/fila' }
+  { path: '**', redirectTo: '' }
 ];
