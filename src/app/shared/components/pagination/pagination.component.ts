@@ -1,20 +1,25 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CustomSelectComponent, SelectOption } from '../custom-select/custom-select.component';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomSelectComponent],
   template: `
     <div class="pagination-wrapper">
       <div class="pagination-size">
         <label class="pagination-label">Exibir</label>
-        <select [ngModel]="pageSize" (ngModelChange)="onPageSizeSelect($event)" class="pagination-select">
-          @for (opt of pageSizeOptions; track opt) {
-            <option [value]="opt">{{ opt }} por página</option>
-          }
-        </select>
+        <app-custom-select
+          [options]="pageSizeSelectOptions"
+          [value]="pageSize.toString()"
+          [searchable]="false"
+          [dropUp]="true"
+          placeholder="Itens"
+          style="width: 140px; display: inline-block;"
+          (valueChange)="onPageSizeSelect($event)"
+        ></app-custom-select>
       </div>
 
       <div class="pagination-info">
@@ -70,40 +75,6 @@ import { FormsModule } from '@angular/forms';
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
-    .pagination-select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-color: #0E0E12;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ED145B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 14px;
-      border: 1px solid rgba(237, 20, 91, 0.35);
-      color: #F8FAFC;
-      border-radius: 8px;
-      padding: 0.45rem 2.4rem 0.45rem 0.85rem;
-      font-size: 0.825rem;
-      font-weight: 600;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      outline: none;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    .pagination-select:hover {
-      border-color: #ED145B;
-      background-color: #14141A;
-    }
-    .pagination-select:focus {
-      border-color: #ED145B;
-      box-shadow: 0 0 0 3px rgba(237, 20, 91, 0.25);
-    }
-    .pagination-select option {
-      background: #141418;
-      color: #F8FAFC;
-      padding: 0.5rem;
-    }
     .pagination-info {
       font-size: 0.85rem;
       color: #E2E8F0;
@@ -158,12 +129,28 @@ import { FormsModule } from '@angular/forms';
     }
   `]
 })
-export class PaginationComponent {
+export class PaginationComponent implements OnChanges {
   @Input() pageNumber = 1;
   @Input() pageSize = 10;
   @Input() totalItems = 0;
   @Input() totalPages = 1;
-  @Input() pageSizeOptions = [5, 10, 20, 50];
+  @Input() pageSizeOptions: number[] = [5, 10, 20, 50];
+
+  pageSizeSelectOptions: SelectOption[] = [
+    { value: '5', label: '5' },
+    { value: '10', label: '10' },
+    { value: '20', label: '20' },
+    { value: '50', label: '50' }
+  ];
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['pageSizeOptions'] && this.pageSizeOptions) {
+      this.pageSizeSelectOptions = this.pageSizeOptions.map(opt => ({
+        value: opt.toString(),
+        label: `${opt}`
+      }));
+    }
+  }
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();
@@ -174,8 +161,7 @@ export class PaginationComponent {
     }
   }
 
-  onPageSizeSelect(size: any) {
-    const newSize = Number(size);
-    this.pageSizeChange.emit(newSize);
+  onPageSizeSelect(size: string | number) {
+    this.pageSizeChange.emit(Number(size));
   }
 }

@@ -25,7 +25,7 @@ export interface SelectOption {
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="cs-wrapper" [class.cs-open]="isOpen" [class.cs-loading]="loading" [class.cs-disabled]="disabled">
+    <div class="cs-wrapper" [class.cs-open]="isOpen" [class.cs-loading]="loading" [class.cs-disabled]="disabled" [class.cs-drop-up]="dropUp">
       <!-- Trigger -->
       <button
         type="button"
@@ -204,8 +204,23 @@ export interface SelectOption {
       to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .fade-in-down {
       animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .cs-drop-up .cs-dropdown {
+      top: auto;
+      bottom: calc(100% + 6px);
+      box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6), 0 -4px 16px rgba(237, 20, 91, 0.15);
+    }
+    
+    .cs-drop-up .fade-in-down {
+      animation: fadeInUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* Search */
@@ -293,6 +308,7 @@ export class CustomSelectComponent implements OnChanges {
   @Input() loading: boolean = false;
   @Input() disabled: boolean = false;
   @Input() searchable: boolean = true;
+  @Input() dropUp: boolean = false;
 
   @Output() valueChange = new EventEmitter<string>();
 
