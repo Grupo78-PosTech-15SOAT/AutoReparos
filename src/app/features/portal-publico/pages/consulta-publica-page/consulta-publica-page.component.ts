@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
@@ -35,10 +35,17 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       </div>
 
       <!-- Lista de Resultados -->
-      @if (buscou) {
-        <div class="results-container">
-          @for (os of ordensEncontradas; track os.id) {
-            <div class="card-panel os-public-card">
+      @if (buscou || loading) {
+        <div class="results-container table-loading-container" style="position: relative; min-height: 150px;">
+          @if (loading) {
+            <div class="table-loading-overlay">
+              <div class="table-loading-spinner"></div>
+              <span class="table-loading-text">Buscando informações...</span>
+            </div>
+          }
+          @if (buscou && !loading) {
+            @for (os of ordensEncontradas; track os.id) {
+              <div class="card-panel os-public-card">
               <div class="os-header flex-between">
                 <div>
                   <span class="mono-badge" style="color: #ED145B;">OS #{{ os.numeroOS }}</span>
@@ -88,9 +95,10 @@ import { NotificationService } from '../../../../core/ui/notification.service';
               <p style="color: #A1A1AA; font-size: 0.9rem;">Verifique os dados informados e tente novamente.</p>
             </div>
           }
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
+  </div>
   `,
   styles: [`
     .public-banner {
@@ -201,6 +209,7 @@ export class ConsultaPublicaPageComponent {
 
   private osService = inject(OrdemServicoService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   consultar() {
     if (!this.termoBusca.trim()) {
@@ -209,16 +218,19 @@ export class ConsultaPublicaPageComponent {
     }
 
     this.loading = true;
+    this.cdr.detectChanges();
     this.osService.buscarPorPlacaOuCpf(this.termoBusca.trim()).subscribe({
       next: (res) => {
         this.loading = false;
         this.buscou = true;
         this.ordensEncontradas = res.items || [];
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
         this.buscou = true;
         this.ordensEncontradas = [];
+        this.cdr.detectChanges();
       }
     });
   }

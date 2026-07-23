@@ -1,9 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
 import { OrdemServico, StatusOS } from '../../models/ordem-servico.model';
+import { ClienteService } from '../../../clientes/services/cliente.service';
+import { VeiculoService } from '../../../veiculos/services/veiculo.service';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
@@ -43,7 +45,13 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
       </div>
 
       <!-- Tabela de OSs -->
-      <div class="data-table-container">
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
         <table class="data-table">
           <thead>
             <tr>
@@ -52,33 +60,33 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
               <th>Veículo</th>
               <th>Status</th>
               <th>Abertura</th>
-              <th>Valor</th>
-              <th style="text-align: right;">Ações</th>
+              <th style="text-align: center;">Valor</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
             @for (os of ordensFiltradas; track os.id) {
               <tr>
                 <td>
-                  <span class="mono-badge" style="color: #ED145B;">#{{ os.numeroOS }}</span>
+                  <span class="mono-badge" style="color: #ED145B;">#{{ os.id.substring(0, 8) }}</span>
                 </td>
                 <td>
-                  <div style="font-weight: 600;">{{ os.clienteNome }}</div>
+                  <div style="font-weight: 600;">{{ getClienteNome(os.clienteId) }}</div>
                 </td>
                 <td>
-                  <div>{{ os.modeloVeiculo }}</div>
-                  <span class="mono-badge" style="font-size: 0.75rem;">{{ os.placaVeiculo }}</span>
+                  <div>{{ getVeiculoDesc(os.veiculoId) }}</div>
+                  <span class="mono-badge" style="font-size: 0.75rem;">{{ getVeiculoPlaca(os.veiculoId) }}</span>
                 </td>
                 <td>
                   <app-status-badge [status]="os.status"></app-status-badge>
                 </td>
                 <td>{{ os.dataAbertura | date:'dd/MM/yy HH:mm' }}</td>
-                <td>
+                <td style="text-align: center;">
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #10B981;">
                     R$ {{ os.valorTotal | number:'1.2-2' }}
                   </span>
                 </td>
-                <td style="text-align: right;">
+                <td>
                   <div style="display: inline-flex; gap: 0.5rem;">
                     <a [routerLink]="['/ordens-servico', os.id]" class="btn btn-secondary btn-sm" title="Abrir OS">🔍 OS</a>
                     @if (os.status === StatusOS.Finalizada) {
@@ -136,20 +144,43 @@ export class OsListaPageComponent implements OnInit {
   totalItems = 0;
   totalPages = 1;
 
+  loading = false;
+  clientes: any[] = [];
+  veiculos: any[] = [];
   private osService = inject(OrdemServicoService);
+  private clienteService = inject(ClienteService);
+  private veiculoService = inject(VeiculoService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregarOrdens();
   }
 
   carregarOrdens() {
+    this.loading = true;
+    
+    this.clienteService.getAll(1, 500).subscribe(c => {
+      this.clientes = c.items || [];
+      this.cdr.detectChanges();
+    });
+    this.veiculoService.getAll(1, 500).subscribe(v => {
+      this.veiculos = v.items || [];
+      this.cdr.detectChanges();
+    });
+
     this.osService.getAll(this.pageNumber, this.pageSize).subscribe({
       next: (res) => {
         this.todasOrdens = res.items || [];
         this.totalItems = res.total;
         this.totalPages = res.totalPages;
         this.filtrar();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -176,16 +207,34 @@ export class OsListaPageComponent implements OnInit {
     const st = Number(this.filtroStatus);
 
     this.ordensFiltradas = this.todasOrdens.filter(os => {
+      const cNome = this.getClienteNome(os.clienteId).toLowerCase();
+      const vPlaca = this.getVeiculoPlaca(os.veiculoId).toLowerCase();
+      const vDesc = this.getVeiculoDesc(os.veiculoId).toLowerCase();
+      
       const matchTermo = !termo ||
-        os.numeroOS.toLowerCase().includes(termo) ||
-        os.clienteNome.toLowerCase().includes(termo) ||
-        os.placaVeiculo.toLowerCase().includes(termo) ||
-        os.modeloVeiculo.toLowerCase().includes(termo);
+        os.id.toLowerCase().includes(termo) ||
+        cNome.includes(termo) ||
+        vPlaca.includes(termo) ||
+        vDesc.includes(termo);
 
       const matchStatus = st === 0 || os.status === st;
 
       return matchTermo && matchStatus;
     });
+  }
+
+  getClienteNome(id: string): string {
+    return this.clientes.find(c => c.id === id)?.nome || 'Carregando...';
+  }
+
+  getVeiculoDesc(id: string): string {
+    const v = this.veiculos.find(v => v.id === id);
+    return v ? `${v.marca} ${v.modelo}` : 'Carregando...';
+  }
+  
+  getVeiculoPlaca(id: string): string {
+    const v = this.veiculos.find(v => v.id === id);
+    return v ? v.placa : '---';
   }
 
   entregar(osId: string) {

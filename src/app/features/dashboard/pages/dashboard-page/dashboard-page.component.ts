@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DashboardService, DashboardMetrics } from '../../services/dashboard.service';
@@ -42,7 +42,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
           </div>
-          <div class="kpi-value orange-val">{{ ordensExecucao.length }} OS(s)</div>
+          <div class="kpi-value orange-val">{{ ordensExecucao.length }} Ordens</div>
         </div>
 
         <div class="kpi-card">
@@ -52,7 +52,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
           </div>
-          <div class="kpi-value">{{ ultimasOrdens.length }} OS(s)</div>
+          <div class="kpi-value">{{ ultimasOrdens.length }} Ordens</div>
         </div>
 
         <div class="kpi-card">
@@ -73,14 +73,20 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
           <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 1rem;">
             📋 Ordens de Serviço Recentes
           </h3>
-          <div class="data-table-container">
+          <div class="data-table-container table-loading-container">
+            @if (loading) {
+              <div class="table-loading-overlay">
+                <div class="table-loading-spinner"></div>
+                <span class="table-loading-text">Carregando...</span>
+              </div>
+            }
             <table class="data-table">
               <thead>
                 <tr>
                   <th>OS #</th>
                   <th>Veículo</th>
                   <th>Status</th>
-                  <th>Valor</th>
+                  <th style="text-align: center;">Valor</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,7 +95,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
                     <td><span class="mono-badge" style="color: #ED145B;">#{{ os.numeroOS }}</span></td>
                     <td>{{ os.modeloVeiculo }} ({{ os.placaVeiculo }})</td>
                     <td><app-status-badge [status]="os.status"></app-status-badge></td>
-                    <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">R$ {{ os.valorTotal | number:'1.2-2' }}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; text-align: center;">R$ {{ os.valorTotal | number:'1.2-2' }}</td>
                   </tr>
                 } @empty {
                   <tr><td colspan="4" style="text-align: center; color: #71717A;">Nenhuma OS registrada.</td></tr>
@@ -100,7 +106,13 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
         </div>
 
         <!-- Alertas Críticos de Estoque -->
-        <div class="card-panel">
+        <div class="card-panel table-loading-container">
+          @if (loading) {
+            <div class="table-loading-overlay">
+              <div class="table-loading-spinner"></div>
+              <span class="table-loading-text">Carregando...</span>
+            </div>
+          }
           <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #EF4444; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
             ⚠️ Alertas de Estoque Crítico
           </h3>
@@ -109,7 +121,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
               <div class="stock-alert-item">
                 <div>
                   <div style="font-weight: 600; color: #F8FAFC;">{{ item.nome }}</div>
-                  <div style="font-size: 0.8rem; color: #A1A1AA;">Qtd Atual: <strong style="color: #EF4444;">{{ item.quantidadeEstoque }} un.</strong> | Mínimo: {{ item.quantidadeMinima }} un.</div>
+                  <div style="font-size: 0.8rem; color: #A1A1AA;">Qtd Atual: <strong style="color: #EF4444;">{{ item.quantidadeEstoque }} un.</strong> | Mínimo: 5 un.</div>
                 </div>
                 <a routerLink="/insumos" class="btn btn-secondary btn-sm">Repor</a>
               </div>
@@ -182,25 +194,48 @@ export class DashboardPageComponent implements OnInit {
   ordensExecucao: OrdemServico[] = [];
   insumosCriticos: Insumo[] = [];
   faturamentoTotal = 0;
-
+  loading = false;
   private osService = inject(OrdemServicoService);
   private insumoService = inject(InsumoService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();
   }
 
   carregar() {
-    this.osService.getAll(1, 100).subscribe(res => {
-      const lista = res.items || [];
-      this.ultimasOrdens = lista;
-      this.ordensExecucao = lista.filter(x => x.status === 4);
-      this.faturamentoTotal = lista.reduce((acc, item) => acc + item.valorTotal, 0);
+    this.loading = true;
+    let completedCount = 0;
+    const checkComplete = () => {
+      completedCount++;
+      if (completedCount === 2) {
+        this.loading = false;
+      }
+      this.cdr.detectChanges();
+    };
+
+    this.osService.getAll(1, 100).subscribe({
+      next: res => {
+        const lista = res.items || [];
+        this.ultimasOrdens = lista;
+        this.ordensExecucao = lista.filter(x => x.status === 4);
+        this.faturamentoTotal = lista.reduce((acc, item) => acc + item.valorTotal, 0);
+        checkComplete();
+      },
+      error: () => {
+        checkComplete();
+      }
     });
 
-    this.insumoService.getAll(1, 100).subscribe(res => {
-      const insumos = res.items || [];
-      this.insumosCriticos = insumos.filter(i => i.quantidadeEstoque <= i.quantidadeMinima);
+    this.insumoService.getAll(1, 100).subscribe({
+      next: res => {
+        const insumos = res.items || [];
+        this.insumosCriticos = insumos.filter(i => i.quantidadeEstoque <= 5);
+        checkComplete();
+      },
+      error: () => {
+        checkComplete();
+      }
     });
   }
 }

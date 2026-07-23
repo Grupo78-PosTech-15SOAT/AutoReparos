@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subject, timer } from 'rxjs';
@@ -54,7 +54,13 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
       </div>
 
       <!-- Grid de Colunas Kanban Responsivo -->
-      <div class="kanban-grid">
+      <div class="kanban-grid table-loading-container" style="position: relative;">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
         <!-- Coluna 1: Recebidas -->
         <div class="kanban-column">
           <div class="column-header status-recebida-border">
@@ -85,10 +91,10 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
           </div>
         </div>
 
-        <!-- Coluna 3: Aguardando Aprovação -->
+        <!-- Coluna 3: Aprovação -->
         <div class="kanban-column">
           <div class="column-header status-aguardando-border">
-            <span class="column-title">3. Aguardando Aprovação</span>
+            <span class="column-title">3. Aprovação</span>
             <span class="column-count">{{ aguardando.length }}</span>
           </div>
           <div class="column-cards">
@@ -302,6 +308,7 @@ export class OsKanbanPageComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private osService = inject(OrdemServicoService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.iniciarPolling();
@@ -321,6 +328,7 @@ export class OsKanbanPageComponent implements OnInit, OnDestroy {
 
   carregarFilaManualmente() {
     this.loading = true;
+    this.cdr.detectChanges();
     this.carregarFila(() => {
       this.loading = false;
       this.notification.info('Fila Atualizada', 'Quadro Kanban atualizado.');
@@ -344,6 +352,10 @@ export class OsKanbanPageComponent implements OnInit, OnDestroy {
   }
 
   private carregarFila(callback?: () => void) {
+    const isManual = !!callback;
+    if (!isManual) {
+      this.loading = true;
+    }
     this.osService.getFilaKanban(this.pageNumber, this.pageSize).subscribe({
       next: (res) => {
         this.semComunicacao.set(false);
@@ -358,13 +370,17 @@ export class OsKanbanPageComponent implements OnInit, OnDestroy {
 
         const agora = new Date();
         this.ultimaAtualizacao.set(agora.toLocaleTimeString('pt-BR'));
+        this.loading = false;
         if (callback) callback();
+        this.cdr.detectChanges();
       },
       error: () => {
         // Para o polling ao detectar falha de comunicação
         this.destroy$.next();
         this.semComunicacao.set(true);
+        this.loading = false;
         if (callback) callback();
+        this.cdr.detectChanges();
       }
     });
   }

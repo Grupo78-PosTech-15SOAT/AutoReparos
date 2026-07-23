@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
@@ -26,14 +26,20 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
       </div>
 
       <!-- Tabela de Usuários -->
-      <div class="data-table-container">
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
         <table class="data-table">
           <thead>
             <tr>
               <th>Nome</th>
               <th>E-mail</th>
               <th>Perfil</th>
-              <th style="text-align: right;">Ações</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -46,7 +52,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                     {{ u.role || 'Sem Cargo' }}
                   </span>
                 </td>
-                <td style="text-align: right;">
+                <td>
                   <button (click)="excluir(u.id!)" class="btn btn-danger btn-sm" title="Excluir Usuário">🗑️ Excluir</button>
                 </td>
               </tr>
@@ -157,8 +163,10 @@ export class UsuariosPageComponent implements OnInit {
     senha: ''
   };
 
+  loading = false;
   private usuarioService = inject(UsuarioService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   getRoleClass(role?: string): string {
     if (!role) return 'sem-cargo';
@@ -170,10 +178,19 @@ export class UsuariosPageComponent implements OnInit {
   }
 
   carregar() {
-    this.usuarioService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
-      this.usuarios = res.items || [];
-      this.totalItems = res.total;
-      this.totalPages = res.totalPages;
+    this.loading = true;
+    this.usuarioService.getAll(this.pageNumber, this.pageSize).subscribe({
+      next: res => {
+        this.usuarios = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

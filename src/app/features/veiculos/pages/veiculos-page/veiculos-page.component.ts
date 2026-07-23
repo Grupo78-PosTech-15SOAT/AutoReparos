@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VeiculoService } from '../../services/veiculo.service';
@@ -30,16 +30,21 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
       </div>
 
       <!-- Tabela de Veículos -->
-      <div class="data-table-container">
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
         <table class="data-table">
           <thead>
             <tr>
               <th>Placa</th>
               <th>Modelo / Marca</th>
-              <th>Ano</th>
-              <th>Cor</th>
+              <th>Fabricação/Modelo</th>
               <th>Proprietário</th>
-              <th style="text-align: right;">Ações</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -49,10 +54,9 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                   <span class="mono-badge" style="color: #ED145B; font-weight: 700;">{{ v.placa | placa }}</span>
                 </td>
                 <td style="font-weight: 600;">{{ v.marca }} {{ v.modelo }}</td>
-                <td>{{ v.ano }}</td>
-                <td>{{ v.cor || '-' }}</td>
-                <td>{{ v.clienteNome || '-' }}</td>
-                <td style="text-align: right;">
+                <td>{{ v.anoFabricacao }}/{{ v.anoModelo }}</td>
+                <td>{{ getClienteNome(v.clienteId) }}</td>
+                <td>
                   <div style="display: inline-flex; gap: 0.5rem;">
                     <button (click)="editar(v)" class="btn btn-secondary btn-sm" title="Editar Veículo">✏️ Editar</button>
                     <button (click)="excluir(v.id!)" class="btn btn-danger btn-sm" title="Excluir Veículo">🗑️ Excluir</button>
@@ -121,14 +125,16 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Ano Fabricação/Modelo</label>
-                  <input type="number" [(ngModel)]="formVeiculo.ano" name="ano" required placeholder="2022" class="form-control" />
+                  <label class="form-label">Ano Fabricação</label>
+                  <input type="number" [(ngModel)]="formVeiculo.anoFabricacao" name="anoFabricacao" required placeholder="Ex: 2022" class="form-control" />
                 </div>
               </div>
 
-              <div class="form-group">
-                <label class="form-label">Cor Predominante</label>
-                <input type="text" [(ngModel)]="formVeiculo.cor" name="cor" placeholder="Ex: Previsão Preto Carbon / Prata" class="form-control" />
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Ano Modelo</label>
+                  <input type="number" [(ngModel)]="formVeiculo.anoModelo" name="anoModelo" required placeholder="Ex: 2023" class="form-control" />
+                </div>
               </div>
 
               <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
@@ -168,33 +174,51 @@ export class VeiculosPageComponent implements OnInit {
     placa: '',
     marca: '',
     modelo: '',
-    ano: new Date().getFullYear(),
-    cor: '',
+    anoFabricacao: new Date().getFullYear(),
+    anoModelo: new Date().getFullYear(),
     clienteId: ''
   };
 
+  loading = false;
   private veiculoService = inject(VeiculoService);
   private clienteService = inject(ClienteService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();
   }
 
   carregar() {
-    this.veiculoService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
-      this.veiculos = res.items || [];
-      this.totalItems = res.total;
-      this.totalPages = res.totalPages;
+    this.loading = true;
+    this.veiculoService.getAll(this.pageNumber, this.pageSize).subscribe({
+      next: res => {
+        this.veiculos = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
     this.loadingClientes = true;
-    this.clienteService.getAll(1, 100).subscribe(res => {
-      this.clientes = res.items || [];
-      this.clienteOptions = this.clientes.map(c => ({
-        value: c.id!,
-        label: `${c.nome} (${c.documento})`
-      }));
-      this.loadingClientes = false;
+    this.clienteService.getAll(1, 100).subscribe({
+      next: res => {
+        this.clientes = res.items || [];
+        this.clienteOptions = this.clientes.map(c => ({
+          value: c.id!,
+          label: `${c.nome} (${c.documento})`
+        }));
+        this.loadingClientes = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingClientes = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -209,9 +233,13 @@ export class VeiculosPageComponent implements OnInit {
     this.carregar();
   }
 
+  getClienteNome(id: string): string {
+    return this.clientes.find(c => c.id === id)?.nome || 'Desconhecido';
+  }
+
   abrirModalNovo() {
     this.editandoId = null;
-    this.formVeiculo = { placa: '', marca: '', modelo: '', ano: new Date().getFullYear(), cor: '', clienteId: '' };
+    this.formVeiculo = { placa: '', marca: '', modelo: '', anoFabricacao: new Date().getFullYear(), anoModelo: new Date().getFullYear(), clienteId: '' };
     this.exibirModal = true;
   }
 

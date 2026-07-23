@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicoService } from '../../services/servico.service';
@@ -25,14 +25,19 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
       </div>
 
       <!-- Tabela de Serviços -->
-      <div class="data-table-container">
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
         <table class="data-table">
           <thead>
             <tr>
               <th>Serviço</th>
-              <th>Preço Base</th>
-              <th>Estimativa</th>
-              <th style="text-align: right;">Ações</th>
+              <th style="text-align: center;">Preço Base</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -44,13 +49,12 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
                     <div style="font-size: 0.75rem; color: #A1A1AA;">{{ s.descricao }}</div>
                   }
                 </td>
-                <td>
+                <td style="text-align: center;">
                   <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #10B981;">
-                    R$ {{ s.precoBase | number:'1.2-2' }}
+                    R$ {{ s.valorTabelado | number:'1.2-2' }}
                   </span>
                 </td>
-                <td>⏱️ {{ s.tempoEstimadoMinutos }} min</td>
-                <td style="text-align: right;">
+                <td>
                   <div style="display: inline-flex; gap: 0.5rem;">
                     <button (click)="editar(s)" class="btn btn-secondary btn-sm" title="Editar Serviço">✏️ Editar</button>
                     <button (click)="excluir(s.id!)" class="btn btn-danger btn-sm" title="Excluir Serviço">🗑️ Excluir</button>
@@ -102,12 +106,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
               <div class="grid-2">
                 <div class="form-group">
                   <label class="form-label">Preço Base (R$)</label>
-                  <input type="number" step="0.01" [(ngModel)]="formServico.precoBase" name="precoBase" required class="form-control" />
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Tempo Estimado (Minutos)</label>
-                  <input type="number" [(ngModel)]="formServico.tempoEstimadoMinutos" name="tempoEstimadoMinutos" required placeholder="60" class="form-control" />
+                  <input type="number" step="0.01" [(ngModel)]="formServico.valorTabelado" name="valorTabelado" required class="form-control" />
                 </div>
               </div>
 
@@ -144,22 +143,32 @@ export class ServicosPageComponent implements OnInit {
   formServico: Servico = {
     nome: '',
     descricao: '',
-    precoBase: 0,
-    tempoEstimadoMinutos: 60
+    valorTabelado: 0
   };
 
+  loading = false;
   private servicoService = inject(ServicoService);
   private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();
   }
 
   carregar() {
-    this.servicoService.getAll(this.pageNumber, this.pageSize).subscribe(res => {
-      this.servicos = res.items || [];
-      this.totalItems = res.total;
-      this.totalPages = res.totalPages;
+    this.loading = true;
+    this.servicoService.getAll(this.pageNumber, this.pageSize).subscribe({
+      next: res => {
+        this.servicos = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -176,7 +185,7 @@ export class ServicosPageComponent implements OnInit {
 
   abrirModalNovo() {
     this.editandoId = null;
-    this.formServico = { nome: '', descricao: '', precoBase: 0, tempoEstimadoMinutos: 60 };
+    this.formServico = { nome: '', descricao: '', valorTabelado: 0 };
     this.exibirModal = true;
   }
 
