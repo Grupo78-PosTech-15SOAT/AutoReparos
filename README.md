@@ -25,6 +25,10 @@ A aplicação foi desenvolvida seguindo os princípios de **Vertical Slice Archi
 5. **Pipelines Globais de Tratamento de Erros:**
    - **`HttpErrorInterceptor`:** Trata falhas de rede, 400 Bad Request (toasts de validação), 401 Unauthorized (redirecionamento automático), 403 Forbidden (acesso negado) e 500 Server Error.
    - **`GlobalErrorHandler`:** Captura exceções JS/TS não tratadas na aplicação.
+6. **Paginação Estruturada e Reutilizável:**
+   - **`PaginationComponent` Standalone:** Componente 100% reutilizável em `src/app/shared/components/pagination/` com dropdown interativo para escolha da quantidade de itens por página (`5, 10, 20, 50, 100`), contador dinâmico de páginas e botões de navegação.
+   - **Contrato `PagedResult<T>`:** Interface TypeScript em `src/app/shared/models/pagination.model.ts` para padronização de respostas paginadas do backend (`items`, `total`, `pageNumber`, `pageSize`, `totalPages`).
+   - **Integração HTTP com `HttpParams`:** Todos os serviços de listagem (`OrdemServicoService`, `ClienteService`, `VeiculoService`, `InsumoService`, `ServicoService`, `UsuarioService`) repassam `pageNumber` e `pageSize` via `HttpParams` na API REST.
 
 ---
 
@@ -76,7 +80,7 @@ AutoReparos-Frontend/
         │   └── ui/                               # NotificationService (Toasts) & LoadingService (Spinner)
         │
         ├── shared/                               # 🧩 Design System & Elementos Reutilizáveis
-        │   ├── components/                       # NavbarComponent, ToastComponent, LoadingSpinnerComponent, StatusBadgeComponent
+        │   ├── components/                       # NavbarComponent, PaginationComponent, ToastComponent, LoadingSpinnerComponent, StatusBadgeComponent
         │   ├── directives/                       # MaskDirective (CPF/CNPJ, Placa, Telefone)
         │   └── pipes/                            # StatusOSPipe, CpfCnpjPipe, PlacaPipe
         │
