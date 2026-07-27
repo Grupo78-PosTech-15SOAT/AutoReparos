@@ -239,16 +239,16 @@ namespace AutoReparos.Infra.Data
             var os1 = new OrdemServico(clientes[0].Id, veiculos[0].Id, "Troca de óleo e revisão de freios");
             os1.AdicionarServico(new OrdemServicoServico(os1.Id, servicos[0].Id, servicos[0].ValorTabelado!.Value));
             os1.AdicionarInsumo(new OrdemServicoInsumo(os1.Id, insumos[0].Id, insumos[0].Nome, insumos[0].Valor, 1, EOrigemInsumo.Estoque));
-            os1.IniciarDiagnostico();
-            os1.AguardarAprovacao();
+            os1.IniciarDiagnostico("seed-admin");
+            os1.AguardarAprovacao("seed-admin");
             os1.Aprovar();
             await osRepository.Create(os1);
 
             var os2 = new OrdemServico(clientes[1].Id, veiculos[1].Id, "Revisão completa de freios");
             os2.AdicionarServico(new OrdemServicoServico(os2.Id, servicos[1].Id, servicos[1].ValorTabelado!.Value));
             os2.AdicionarInsumo(new OrdemServicoInsumo(os2.Id, insumos[2].Id, insumos[2].Nome, insumos[2].Valor, 2, EOrigemInsumo.Estoque));
-            os2.IniciarDiagnostico();
-            os2.AguardarAprovacao();
+            os2.IniciarDiagnostico("seed-admin");
+            os2.AguardarAprovacao("seed-admin");
             await osRepository.Create(os2);
 
             var os3 = new OrdemServico(clientes[2].Id, veiculos[2].Id, "Verificar alinhamento e balanceamento");

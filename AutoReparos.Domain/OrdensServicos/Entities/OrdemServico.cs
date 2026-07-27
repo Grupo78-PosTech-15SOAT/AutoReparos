@@ -21,6 +21,12 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public DateTime? IniciadoEm { get; private set; }
         public DateTime? FinalizadoEm { get; private set; }
         public DateTime? EntregueEm { get; private set; }
+        public DateTime? EnvioAprovacaoEm { get; private set; }
+        /// <summary>
+        /// ID do mecânico responsável pelo diagnóstico.
+        /// Definido ao iniciar o diagnóstico; sobrescrito ao finalizar caso outro mecânico assuma.
+        /// </summary>
+        public string? ResponsavelId { get; private set; }
 
         public IReadOnlyCollection<OrdemServicoServico> Servicos => _servicos.AsReadOnly();
         public IReadOnlyCollection<OrdemServicoInsumo> Insumos => _insumos.AsReadOnly();
@@ -78,15 +84,16 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             _insumos.Add(insumo);
         }
 
-        public void IniciarDiagnostico()
+        public void IniciarDiagnostico(string mecanicoId)
         {
             if (Status != EStatusOrdemServico.Recebida)
                 throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ir para diagnóstico quando estiver recebida.");
 
             Status = EStatusOrdemServico.EmDiagnostico;
+            ResponsavelId = mecanicoId;
         }
 
-        public void AguardarAprovacao()
+        public void AguardarAprovacao(string mecanicoId)
         {
             if (Status != EStatusOrdemServico.EmDiagnostico)
                 throw new InvalidOrdemServicoException("A Ordem de Serviço só pode aguardar aprovação após o diagnóstico.");
@@ -95,6 +102,8 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
                 throw new InvalidOrdemServicoException("A Ordem de Serviço deve ter pelo menos um serviço para aguardar aprovação.");
 
             Status = EStatusOrdemServico.AguardandoAprovacao;
+            ResponsavelId = mecanicoId;
+            EnvioAprovacaoEm = DateTime.UtcNow;
         }
 
         public void Aprovar()
