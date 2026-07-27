@@ -154,9 +154,9 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         var response = await Client.GetAsync("/api/ordem-servico/kanban?pageNumber=1&pageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var responseData = await response.Content.ReadFromJsonAsync<PagedResult<OrdemServicoKanbanDto>>();
+        var responseData = await response.Content.ReadFromJsonAsync<IEnumerable<KanbanColumnDto>>();
         responseData.Should().NotBeNull();
-        responseData!.Items.Should().NotBeEmpty();
+        responseData.Should().NotBeEmpty();
     }
 
     [Fact(DisplayName = "POST /api/ordem-servico/{id}/servicos - Deve adicionar serviço se OS Recebida/Diagnóstico")]

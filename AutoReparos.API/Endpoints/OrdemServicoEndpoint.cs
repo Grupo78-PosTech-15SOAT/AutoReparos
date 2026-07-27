@@ -21,11 +21,10 @@ namespace AutoReparos.API.Endpoints
             .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/kanban", (
-                OrdemServicoController controller,
-                [AsParameters] PagedRequest request) => controller.GetKanban(request))
+                OrdemServicoController controller) => controller.GetKanban())
             .WithName("GetKanbanOrdensServico")
             .WithSummary("Lista as ordens de serviço para o Kanban")
-            .Produces<PagedResult<OrdemServicoKanbanDto>>(StatusCodes.Status200OK);
+            .Produces<IEnumerable<KanbanColumnDto>>(StatusCodes.Status200OK);
 
             group.MapGet("/fila", (
                 OrdemServicoController controller,

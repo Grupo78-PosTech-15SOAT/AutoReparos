@@ -19,9 +19,9 @@ namespace AutoReparos.API.Controllers
             return Results.Ok(result);
         }
 
-        public async Task<IResult> GetKanban(PagedRequest request)
+        public async Task<IResult> GetKanban()
         {
-            var result = await listarKanbanOrdensServicoUseCase.ExecuteAsync(request);
+            var result = await listarKanbanOrdensServicoUseCase.ExecuteAsync();
             return Results.Ok(result);
         }
 
