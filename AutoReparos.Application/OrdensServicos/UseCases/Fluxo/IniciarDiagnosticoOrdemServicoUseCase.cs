@@ -1,5 +1,6 @@
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.UseCases.Fluxo.Interfaces;
+using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Shared;
@@ -11,6 +12,7 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Fluxo
     public class IniciarDiagnosticoOrdemServicoUseCase(
         IOrdemServicoRepository repository,
         IClienteRepository clienteRepository,
+        ICurrentUserService currentUserService,
         INotificacaoService notificacaoService,
         ILogger<IniciarDiagnosticoOrdemServicoUseCase> logger) : IIniciarDiagnosticoOrdemServicoUseCase
     {
@@ -19,8 +21,10 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Fluxo
             var os = await repository.GetById(id)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
+            var mecanicoId = currentUserService.GetUserId();
             var statusAnterior = os.Status.ToString();
-            os.IniciarDiagnostico();
+
+            os.IniciarDiagnostico(mecanicoId);
             await repository.Update(os);
 
             try

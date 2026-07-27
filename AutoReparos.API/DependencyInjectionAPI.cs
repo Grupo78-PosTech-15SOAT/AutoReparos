@@ -76,6 +76,7 @@ namespace AutoReparos.API
 
             services.AddHttpContextAccessor();
             services.AddScoped<IAppUrlProvider, HttpAppUrlProvider>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }
