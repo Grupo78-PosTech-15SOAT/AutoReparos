@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Infra.Data;
@@ -48,6 +48,11 @@ namespace AutoReparos.Infra.Repositories
         public async Task<Cliente?> GetById(Guid id)
         {
             return await _context.Clientes.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Cliente>> GetByIds(IEnumerable<Guid> ids)
+        {
+            return await _context.Clientes.Where(c => ids.Contains(c.Id)).ToListAsync();
         }
 
         public async Task Update(Cliente cliente)

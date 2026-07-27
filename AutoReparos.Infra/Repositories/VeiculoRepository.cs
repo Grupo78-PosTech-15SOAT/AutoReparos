@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Shared.Exceptions;
+using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Veiculos.Entities;
 using AutoReparos.Domain.Veiculos.Exceptions;
 using AutoReparos.Domain.Veiculos.Repositories;
@@ -68,6 +68,11 @@ namespace AutoReparos.Infra.Repositories
         public async Task<Veiculo?> GetById(Guid id)
         {
             return await _context.Veiculos.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Veiculo>> GetByIds(IEnumerable<Guid> ids)
+        {
+            return await _context.Veiculos.Where(v => ids.Contains(v.Id)).ToListAsync();
         }
 
         public async Task<Veiculo?> GetByPlaca(string placa)
