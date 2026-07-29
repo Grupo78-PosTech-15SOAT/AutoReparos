@@ -81,7 +81,10 @@ namespace AutoReparos.Infra.Repositories
 
         public async Task<OrdemServico?> GetById(Guid id)
             => await _context.OrdensServico
+                .Include(os => os.Cliente)
+                .Include(os => os.Veiculo)
                 .Include(os => os.Servicos)
+                    .ThenInclude(s => s.Servico)
                 .Include(os => os.Insumos)
                 .FirstOrDefaultAsync(os => os.Id == id);
 
@@ -122,6 +125,8 @@ namespace AutoReparos.Infra.Repositories
         {
             var query = _context.OrdensServico
                 .AsNoTracking()
+                .Include(os => os.Cliente)
+                .Include(os => os.Veiculo)
                 .Include(os => os.Servicos)
                 .Include(os => os.Insumos)
                 .AsQueryable();
