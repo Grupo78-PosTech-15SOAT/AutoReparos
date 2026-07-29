@@ -10,12 +10,14 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
     public class ObterOrdemServicoPorIdUseCaseTests
     {
         private readonly IOrdemServicoRepository _repository;
+        private readonly AutoReparos.Domain.Usuarios.Repositories.IUsuarioRepository _usuarioRepository;
         private readonly ObterOrdemServicoPorIdUseCase _useCase;
 
         public ObterOrdemServicoPorIdUseCaseTests()
         {
             _repository = Substitute.For<IOrdemServicoRepository>();
-            _useCase = new ObterOrdemServicoPorIdUseCase(_repository);
+            _usuarioRepository = Substitute.For<AutoReparos.Domain.Usuarios.Repositories.IUsuarioRepository>();
+            _useCase = new ObterOrdemServicoPorIdUseCase(_repository, _usuarioRepository);
         }
 
         [Fact(DisplayName = "GetById When OrdemServico Exists Should Return Dto")]

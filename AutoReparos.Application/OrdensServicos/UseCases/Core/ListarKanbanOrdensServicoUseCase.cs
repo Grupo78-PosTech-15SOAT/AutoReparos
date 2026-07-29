@@ -8,14 +8,28 @@ using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.OrdensServicos.Repositories;
 using AutoReparos.Domain.Veiculos.Repositories;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoReparos.Application.OrdensServicos.DTOs.Response;
+using AutoReparos.Application.OrdensServicos.UseCases.Core.Interfaces;
+using AutoReparos.Domain.Clientes.Repositories;
+using AutoReparos.Domain.OrdensServicos.Repositories;
+using AutoReparos.Domain.Usuarios.Repositories;
+using AutoReparos.Domain.Veiculos.Repositories;
+
 namespace AutoReparos.Application.OrdensServicos.UseCases.Core
 {
     public class ListarKanbanOrdensServicoUseCase(
-        IOrdemServicoRepository ordemServicoRepository) : IListarKanbanOrdensServicoUseCase
+        IOrdemServicoRepository ordemServicoRepository,
+        IUsuarioRepository usuarioRepository) : IListarKanbanOrdensServicoUseCase
     {
         public async Task<IEnumerable<KanbanColumnDto>> ExecuteAsync()
         {
             var (items, _) = await ordemServicoRepository.GetKanban(0, 1000);
+            var (usuarios, _) = await usuarioRepository.GetAllAsync(null, 0, 1000);
+            var usuarioDict = usuarios.ToDictionary(u => u.Id.ToString(), u => u.NomeCompleto);
 
             var columns = new Dictionary<string, List<KanbanCardDto>>
             {
@@ -38,7 +52,9 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Core
                 var clienteNome = os.Cliente?.Nome ?? "Cliente não encontrado";
                 var placaVeiculo = os.Veiculo?.Placa?.Valor ?? "Placa não encontrada";
                 var modeloVeiculo = os.Veiculo?.Modelo ?? "Modelo não encontrado";
-                var mecanicoNome = os.ResponsavelId ?? "Mecânico Responsável";
+                var mecanicoNome = !string.IsNullOrEmpty(os.ResponsavelId) && usuarioDict.TryGetValue(os.ResponsavelId, out var nome)
+                    ? nome
+                    : (os.ResponsavelId ?? "Mecânico Responsável");
                 
                 KanbanCardDto card = os.Status switch
                 {
