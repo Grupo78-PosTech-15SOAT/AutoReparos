@@ -17,11 +17,14 @@ namespace AutoReparos.Application.OrdensServicos.Mappers
         );
 
         public static OrdemServicoDetalheDto ToDetalheDto(OrdemServico os) => new(
-            os.Id, os.ClienteId, os.VeiculoId, os.Status.ToString(),
-            os.Observacao, os.ValorTotal, os.CriadoEm,
-            os.IniciadoEm, os.FinalizadoEm, os.EntregueEm,
+            os.Id, os.ClienteId, os.Cliente?.Nome,
+            os.VeiculoId, os.Veiculo?.Placa?.Valor, os.Veiculo?.Modelo,
+            os.Status.ToString(), os.Observacao, os.ValorTotal, os.CriadoEm,
+            os.IniciadoEm, os.FinalizadoEm, os.EntregueEm, os.EnvioAprovacaoEm,
+            os.ResponsavelId, null,
             os.Servicos.Select(s => new OrdemServicoServicoDto(
-                s.Id, s.ServicoId, s.ValorCobrado, s.Status.ToString(),
+                s.Id, s.ServicoId, s.Servico?.Nome,
+                s.ValorCobrado, s.Status.ToString(),
                 s.IniciadoEm, s.ConcluidoEm, s.TempoExecucao)),
             os.Insumos.Select(p => new OrdemServicoInsumoDto(
                 p.Id, p.InsumoId, p.Descricao, p.ValorUnitario,
