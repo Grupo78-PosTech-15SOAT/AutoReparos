@@ -20,16 +20,23 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Core
             _useCase = new ObterOrdemServicoPorIdUseCase(_repository, _usuarioRepository);
         }
 
-        [Fact(DisplayName = "GetById When OrdemServico Exists Should Return Dto")]
+        [Fact(DisplayName = "GetById When OrdemServico Exists Should Return Dto With ResponsavelNome")]
         public async Task GetById_WhenOrdemServicoExists_ShouldReturnDto()
         {
+            var mecanicoId = Guid.NewGuid().ToString();
+            var mecanico = new AutoReparos.Domain.Usuarios.Entities.Usuario("Mecânico Pedro", "mecanico@autoreparos.com", AutoReparos.Domain.Usuarios.Enums.ETipoUsuario.Mecanico);
             var os = new OrdemServico(Guid.NewGuid(), Guid.NewGuid(), "obs");
+            os.IniciarDiagnostico(mecanicoId);
+
             _repository.GetById(os.Id).Returns(os);
+            _usuarioRepository.GetByIdAsync(Guid.Parse(mecanicoId)).Returns(mecanico);
 
             var result = await _useCase.ExecuteAsync(os.Id);
 
             result.Should().NotBeNull();
             result!.Id.Should().Be(os.Id);
+            result.ResponsavelId.Should().Be(mecanicoId);
+            result.ResponsavelNome.Should().Be("Mecânico Pedro");
         }
 
         [Fact(DisplayName = "GetById When OrdemServico Has Servicos And Insumos Should Return Dto With Items")]

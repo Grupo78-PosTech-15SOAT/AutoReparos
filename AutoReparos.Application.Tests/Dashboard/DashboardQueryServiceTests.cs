@@ -105,23 +105,23 @@ namespace AutoReparos.Application.Tests.Dashboard
             // Perform transitions using public domain methods to achieve the desired target status
             if (status == EStatusOrdemServico.EmDiagnostico)
             {
-                os.IniciarDiagnostico();
+                os.IniciarDiagnostico("mecanico-123");
             }
             else if (status == EStatusOrdemServico.AguardandoAprovacao)
             {
-                os.IniciarDiagnostico();
-                os.AguardarAprovacao();
+                os.IniciarDiagnostico("mecanico-123");
+                os.AguardarAprovacao("mecanico-123");
             }
             else if (status == EStatusOrdemServico.EmExecucao)
             {
-                os.IniciarDiagnostico();
-                os.AguardarAprovacao();
+                os.IniciarDiagnostico("mecanico-123");
+                os.AguardarAprovacao("mecanico-123");
                 os.Aprovar();
             }
             else if (status == EStatusOrdemServico.Finalizada)
             {
-                os.IniciarDiagnostico();
-                os.AguardarAprovacao();
+                os.IniciarDiagnostico("mecanico-123");
+                os.AguardarAprovacao("mecanico-123");
                 os.Aprovar();
                 foreach (var servico in os.Servicos)
                 {
@@ -131,8 +131,8 @@ namespace AutoReparos.Application.Tests.Dashboard
             }
             else if (status == EStatusOrdemServico.Entregue)
             {
-                os.IniciarDiagnostico();
-                os.AguardarAprovacao();
+                os.IniciarDiagnostico("mecanico-123");
+                os.AguardarAprovacao("mecanico-123");
                 os.Aprovar();
                 foreach (var servico in os.Servicos)
                 {
