@@ -130,8 +130,8 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
             var osInsumo = new OrdemServicoInsumo(os.Id, insumo.Id, insumo.Nome, insumo.Valor, 2, EOrigemInsumo.Estoque);
             os.AdicionarInsumo(osInsumo);
 
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-123");
+            os.AguardarAprovacao("mecanico-123");
             os.Aprovar();
             os.IniciarServico(osServico.Id);
             os.ConcluirServico(osServico.Id); // Transitions to Finalizada

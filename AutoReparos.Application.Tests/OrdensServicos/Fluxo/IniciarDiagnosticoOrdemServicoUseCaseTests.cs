@@ -1,5 +1,6 @@
 using AutoReparos.Application.OrdensServicos.Services.Interfaces;
 using AutoReparos.Application.OrdensServicos.UseCases.Fluxo;
+using AutoReparos.Application.Shared.Interfaces;
 using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Repositories;
 using AutoReparos.Domain.OrdensServicos.Entities;
@@ -27,7 +28,9 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             _clienteRepository = Substitute.For<IClienteRepository>();
             _notificacaoService = Substitute.For<INotificacaoService>();
             _logger = Substitute.For<ILogger<IniciarDiagnosticoOrdemServicoUseCase>>();
-            _useCase = new IniciarDiagnosticoOrdemServicoUseCase(_repository, _clienteRepository, _notificacaoService, _logger);
+            var currentUserService = Substitute.For<ICurrentUserService>();
+            currentUserService.GetUserId().Returns("mecanico-guid-123");
+            _useCase = new IniciarDiagnosticoOrdemServicoUseCase(_repository, _clienteRepository, currentUserService, _notificacaoService, _logger);
         }
 
         [Fact(DisplayName = "IniciarDiagnostico When OrdemServico Is Recebida Should Change Status And Notify")]
@@ -42,6 +45,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             await _useCase.ExecuteAsync(os.Id);
 
             os.Status.Should().Be(EStatusOrdemServico.EmDiagnostico);
+            os.ResponsavelId.Should().Be("mecanico-guid-123");
             await _repository.Received(1).Update(os);
             await _notificacaoService.Received(1).EnviarAtualizacaoStatus(
                 cliente.Email.Endereco, cliente.Nome, os.Id, "Recebida", "EmDiagnostico");

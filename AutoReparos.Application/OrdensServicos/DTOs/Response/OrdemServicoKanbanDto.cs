@@ -15,7 +15,6 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 
     public record ReceivedKanbanCardDto(
         Guid Id, 
-        string NumeroOS, 
         string ClienteNome, 
         string PlacaVeiculo, 
         string ModeloVeiculo, 
@@ -24,7 +23,6 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 
     public record DiagnosisKanbanCardDto(
         Guid Id, 
-        string NumeroOS, 
         string ClienteNome, 
         string PlacaVeiculo, 
         string ModeloVeiculo, 
@@ -33,7 +31,6 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 
     public record ApprovalKanbanCardDto(
         Guid Id, 
-        string NumeroOS, 
         string ClienteNome, 
         string PlacaVeiculo, 
         string ModeloVeiculo, 
@@ -44,7 +41,6 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 
     public record ExecutionKanbanCardDto(
         Guid Id, 
-        string NumeroOS, 
         string ClienteNome, 
         string PlacaVeiculo, 
         string ModeloVeiculo, 
@@ -57,7 +53,6 @@ namespace AutoReparos.Application.OrdensServicos.DTOs.Response
 
     public record FinishedKanbanCardDto(
         Guid Id, 
-        string NumeroOS, 
         string ClienteNome, 
         string PlacaVeiculo, 
         string ModeloVeiculo, 

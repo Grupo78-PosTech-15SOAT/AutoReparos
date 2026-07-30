@@ -1,5 +1,6 @@
-﻿using AutoReparos.Domain.OrdensServicos.Enums;
+using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Exceptions;
+using AutoReparos.Domain.Servicos.Entities;
 using AutoReparos.Domain.Shared;
 
 namespace AutoReparos.Domain.OrdensServicos.Entities
@@ -8,6 +9,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
     {
         public Guid OrdemServicoId { get; private set; }
         public Guid ServicoId { get; private set; }
+        public Servico? Servico { get; private set; }
         public decimal ValorCobrado { get; private set; }
         public EStatusServicoOS Status { get; private set; }
         public DateTime? IniciadoEm { get; private set; }

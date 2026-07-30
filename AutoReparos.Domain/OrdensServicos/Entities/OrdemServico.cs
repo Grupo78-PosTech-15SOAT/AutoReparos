@@ -1,7 +1,9 @@
+using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Exceptions;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.Exceptions;
+using AutoReparos.Domain.Veiculos.Entities;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("AutoReparos.Application.Tests")]
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("AutoReparos.IntegrationTests")]
@@ -14,7 +16,9 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         private readonly List<OrdemServicoInsumo> _insumos = [];
 
         public Guid ClienteId { get; private set; }
+        public Cliente? Cliente { get; private set; }
         public Guid VeiculoId { get; private set; }
+        public Veiculo? Veiculo { get; private set; }
         public EStatusOrdemServico Status { get; private set; }
         public string? Observacao { get; private set; }
         public DateTime CriadoEm { get; }
