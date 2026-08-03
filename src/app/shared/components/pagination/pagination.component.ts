@@ -1,19 +1,18 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { CustomSelectComponent, SelectOption } from '../custom-select/custom-select.component';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CustomSelectComponent],
   template: `
     <div class="pagination-wrapper">
       <div class="pagination-size">
         <label class="pagination-label">Exibir</label>
         <app-custom-select
-          [options]="pageSizeSelectOptions"
-          [value]="pageSize.toString()"
+          [options]="pageSizeSelectOptions()"
+          [value]="pageSize().toString()"
           [searchable]="false"
           [dropUp]="true"
           placeholder="Itens"
@@ -23,14 +22,14 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
       </div>
 
       <div class="pagination-info">
-        <span>Página <strong>{{ pageNumber }}</strong> / <strong>{{ totalPages || 1 }}</strong></span>
-        <span class="total-badge">{{ totalItems }} registro(s)</span>
+        <span>Página <strong>{{ pageNumber() }}</strong> / <strong>{{ totalPages() || 1 }}</strong></span>
+        <span class="total-badge">{{ totalItems() }} registro(s)</span>
       </div>
 
       <div class="pagination-controls">
         <button 
-          (click)="goToPage(pageNumber - 1)" 
-          [disabled]="pageNumber <= 1" 
+          (click)="goToPage(pageNumber() - 1)" 
+          [disabled]="pageNumber() <= 1" 
           class="btn-page"
           title="Página Anterior"
           aria-label="Página Anterior">
@@ -38,8 +37,8 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
         </button>
 
         <button 
-          (click)="goToPage(pageNumber + 1)" 
-          [disabled]="pageNumber >= (totalPages || 1)" 
+          (click)="goToPage(pageNumber() + 1)" 
+          [disabled]="pageNumber() >= (totalPages() || 1)" 
           class="btn-page"
           title="Próxima Página"
           aria-label="Próxima Página">
@@ -129,39 +128,27 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
     }
   `]
 })
-export class PaginationComponent implements OnChanges {
-  @Input() pageNumber = 1;
-  @Input() pageSize = 10;
-  @Input() totalItems = 0;
-  @Input() totalPages = 1;
-  @Input() pageSizeOptions: number[] = [5, 10, 20, 50];
+export class PaginationComponent {
+  pageNumber = input(1);
+  pageSize = input(10);
+  totalItems = input(0);
+  totalPages = input(1);
+  pageSizeOptions = input<number[]>([5, 10, 20, 50]);
 
-  pageSizeSelectOptions: SelectOption[] = [
-    { value: '5', label: '5' },
-    { value: '10', label: '10' },
-    { value: '20', label: '20' },
-    { value: '50', label: '50' }
-  ];
+  pageSizeSelectOptions = computed<SelectOption[]>(() =>
+    this.pageSizeOptions().map(opt => ({ value: String(opt), label: String(opt) }))
+  );
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['pageSizeOptions'] && this.pageSizeOptions) {
-      this.pageSizeSelectOptions = this.pageSizeOptions.map(opt => ({
-        value: opt.toString(),
-        label: `${opt}`
-      }));
-    }
-  }
+  pageChange = output<number>();
+  pageSizeChange = output<number>();
 
-  @Output() pageChange = new EventEmitter<number>();
-  @Output() pageSizeChange = new EventEmitter<number>();
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= (this.totalPages || 1)) {
+  goToPage(page: number): void {
+    if (page >= 1 && page <= (this.totalPages() || 1)) {
       this.pageChange.emit(page);
     }
   }
 
-  onPageSizeSelect(size: string | number) {
+  onPageSizeSelect(size: string | number): void {
     this.pageSizeChange.emit(Number(size));
   }
 }

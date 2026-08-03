@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -9,7 +9,8 @@ import { NotificationService } from '../../../../core/ui/notification.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ FormsModule, RouterLink],
   template: `
     <div class="login-container fade-in">
       <div class="login-card">
@@ -66,63 +67,64 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `,
   styles: [`
     .login-container {
-      min-height: 80vh;
+      min-height: calc(100vh - 8rem);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 1rem;
+      box-sizing: border-box;
     }
     .login-card {
       background: rgba(24, 24, 28, 0.9);
       backdrop-filter: blur(16px);
       border: 1px solid rgba(237, 20, 91, 0.3);
       border-radius: 16px;
-      padding: 2.5rem;
-      max-width: 440px;
+      padding: 1.75rem;
+      max-width: 420px;
       width: 100%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
     }
     .brand-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.25rem;
     }
     .brand-logo {
-      width: 58px;
-      height: 58px;
+      width: 50px;
+      height: 50px;
       background: linear-gradient(135deg, #ED145B, #800A30);
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      margin: 0 auto 1rem;
-      box-shadow: 0 0 25px rgba(237, 20, 91, 0.4);
+      margin: 0 auto 0.75rem;
+      box-shadow: 0 0 20px rgba(237, 20, 91, 0.4);
     }
-    .brand-logo svg { width: 32px; height: 32px; }
+    .brand-logo svg { width: 28px; height: 28px; }
     .brand-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 800;
       color: #ffffff;
     }
     .brand-subtitle {
-      font-size: 0.875rem;
+      font-size: 0.825rem;
       color: #A1A1AA;
     }
     .btn-block { width: 100%; }
     .quick-roles {
-      margin-top: 2rem;
-      padding-top: 1.5rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       text-align: center;
     }
     .quick-title {
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       color: #71717A;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       display: block;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
     .quick-buttons {
       display: flex;
@@ -133,9 +135,9 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.12);
       color: #E2E8F0;
-      padding: 0.35rem 0.75rem;
+      padding: 0.3rem 0.65rem;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -146,7 +148,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
       color: #ED145B;
     }
     .login-footer {
-      margin-top: 1.5rem;
+      margin-top: 1.25rem;
       text-align: center;
     }
     .public-link {
@@ -165,6 +167,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `]
 })
 export class LoginPageComponent {
+  private destroyRef = inject(DestroyRef);
   email = '';
   senha = '';
   loading = false;
@@ -191,7 +194,7 @@ export class LoginPageComponent {
           this.loading = false;
         })
       )
-      .subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Autenticado com Sucesso', 'Bem-vindo ao AutoReparos!');
           this.router.navigate(['/ordens-servico/fila']);

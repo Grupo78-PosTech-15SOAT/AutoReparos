@@ -47,13 +47,13 @@ export const routes: Routes = [
     path: 'insumos',
     loadComponent: () => import('./features/insumos/pages/insumos-page/insumos-page.component').then(m => m.InsumosPageComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Administrador'] }
+    data: { roles: ['Administrador', 'Mecanico'] }
   },
   {
     path: 'servicos',
     loadComponent: () => import('./features/servicos/pages/servicos-page/servicos-page.component').then(m => m.ServicosPageComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['Administrador'] }
+    data: { roles: ['Administrador', 'Atendente', 'Mecanico'] }
   },
   {
     path: 'usuarios',

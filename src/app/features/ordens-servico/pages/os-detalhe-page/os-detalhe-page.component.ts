@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
@@ -14,22 +15,34 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { IdBadgeComponent } from '../../../../shared/components/id-badge/id-badge.component';
+import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/placa-badge.component';
 
 @Component({
   selector: 'app-os-detalhe-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatusBadgeComponent, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DatePipe, DecimalPipe, 
+    FormsModule, 
+    StatusBadgeComponent, 
+    CustomSelectComponent,
+    PageContainerComponent,
+    IdBadgeComponent,
+    PlacaBadgeComponent
+  ],
   template: `
     @if (os) {
-      <div class="container fade-in">
+      <app-page-container>
         <!-- Top Bar Header -->
         <div class="page-header">
           <div>
             <div style="display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.3rem;">
-              <span class="mono-badge" style="color: #ED145B; font-size: 1.1rem; padding: 0.3rem 0.8rem;">#{{ os.id?.substring(0, 8) }}</span>
+              <app-id-badge [text]="'#' + os.id.substring(0, 8)" size="lg"></app-id-badge>
               <app-status-badge [status]="os.status"></app-status-badge>
             </div>
-            <h1 class="page-title">{{ getVeiculoDesc(os.veiculoId) }} (Placa: {{ getVeiculoPlaca(os.veiculoId) }})</h1>
+            <h1 class="page-title">{{ getVeiculoDesc(os.veiculoId) }} <app-placa-badge [placa]="getVeiculoPlaca(os.veiculoId)" size="lg" style="vertical-align: middle;"></app-placa-badge></h1>
             <p class="page-subtitle">Proprietário: {{ getClienteNome(os.clienteId) }} | Data de Entrada: {{ os.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</p>
           </div>
 
@@ -124,12 +137,12 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
               </table>
             </div>
 
-            <!-- Tabela de Insumos e Peças Consumidas -->
+            <!-- Tabela de Peças & Insumos Utilizados -->
             <div class="card-panel" style="margin-top: 1.5rem;">
               <div class="card-header-flex">
-                <h3 class="card-title">📦 Peças e Insumos Consumidos</h3>
+                <h3 class="card-title">📦 Peças e Insumos</h3>
                 <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                  <div style="width: 230px;">
+                  <div style="width: 260px;">
                     <app-custom-select
                       [options]="insumoOptions"
                       [value]="insumoIdSelecionado"
@@ -138,7 +151,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                       (valueChange)="insumoIdSelecionado = $event"
                     ></app-custom-select>
                   </div>
-                  <input type="number" [(ngModel)]="quantidadeInsumo" min="1" class="form-control form-control-sm" style="width: 70px;" />
+                  <input type="number" [(ngModel)]="quantidadeInsumo" min="1" class="form-control" style="width: 70px; padding: 0.4rem 0.5rem; height: 38px;" />
                   <button (click)="adicionarInsumo()" [disabled]="!insumoIdSelecionado || loadingCatalogos" class="btn btn-primary btn-sm">+ Adicionar</button>
                 </div>
               </div>
@@ -180,7 +193,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                   <span>R$ {{ calcularSubtotalServicos() | number:'1.2-2' }}</span>
                 </div>
                 <div class="summary-item">
-                  <span>Subtotal Peças:</span>
+                  <span>Subtotal Insumos:</span>
                   <span>R$ {{ calcularSubtotalInsumos() | number:'1.2-2' }}</span>
                 </div>
                 <div class="summary-divider"></div>
@@ -199,7 +212,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
             </div>
           </div>
         </div>
-      </div>
+      </app-page-container>
     }
   `,
   styles: [`
@@ -237,6 +250,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
   `]
 })
 export class OsDetalhePageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   StatusOS = StatusOS;
   osId!: string;
   os!: OrdemServico;
@@ -271,9 +285,9 @@ export class OsDetalhePageComponent implements OnInit {
   }
 
   carregarOS() {
-    this.osService.getById(this.osId).subscribe(data => this.os = data);
-    this.clienteService.getAll(1, 500).subscribe(c => this.clientes = c.items || []);
-    this.veiculoService.getAll(1, 500).subscribe(v => this.veiculos = v.items || []);
+    this.osService.getById(this.osId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.os = data);
+    this.clienteService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(c => this.clientes = c.items || []);
+    this.veiculoService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => this.veiculos = v.items || []);
   }
 
   getClienteNome(id: string): string {
@@ -295,7 +309,7 @@ export class OsDetalhePageComponent implements OnInit {
     let s = false, i = false;
     const check = () => { if (s && i) this.loadingCatalogos = false; };
 
-    this.servicoService.getAll(1, 100).subscribe(res => {
+    this.servicoService.getAll(1, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.servicosDisponiveis = res.items || [];
       this.servicoOptions = this.servicosDisponiveis.map(sv => ({
         value: sv.id!,
@@ -303,7 +317,7 @@ export class OsDetalhePageComponent implements OnInit {
       }));
       s = true; check();
     });
-    this.insumoService.getAll(1, 100).subscribe(res => {
+    this.insumoService.getAll(1, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.insumosDisponiveis = res.items || [];
       this.insumoOptions = this.insumosDisponiveis.map(ins => ({
         value: ins.id!,
@@ -314,7 +328,7 @@ export class OsDetalhePageComponent implements OnInit {
   }
 
   alterarStatus(novoStatus: StatusOS) {
-    this.osService.atualizarStatus(this.osId, novoStatus).subscribe({
+    this.osService.atualizarStatus(this.osId, novoStatus).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (atualizada) => {
         this.os = atualizada;
         this.notification.success('Status Atualizado', 'Status da OS alterado com sucesso.');
@@ -324,7 +338,7 @@ export class OsDetalhePageComponent implements OnInit {
 
   salvarDiagnostico() {
     if (!this.os.observacoesDiagnostico) return;
-    this.osService.registrarDiagnostico(this.osId, this.os.observacoesDiagnostico).subscribe({
+    this.osService.registrarDiagnostico(this.osId, this.os.observacoesDiagnostico).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success('Diagnóstico Salvo', 'Laudo de diagnóstico registrado.');
       }
@@ -333,7 +347,7 @@ export class OsDetalhePageComponent implements OnInit {
 
   adicionarServico() {
     if (!this.servicoIdSelecionado) return;
-    this.osService.adicionarServico(this.osId, { servicoId: this.servicoIdSelecionado }).subscribe({
+    this.osService.adicionarServico(this.osId, { servicoId: this.servicoIdSelecionado }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (atualizada) => {
         this.os = atualizada;
         this.servicoIdSelecionado = '';
@@ -344,7 +358,7 @@ export class OsDetalhePageComponent implements OnInit {
 
   adicionarInsumo() {
     if (!this.insumoIdSelecionado || this.quantidadeInsumo < 1) return;
-    this.osService.adicionarInsumo(this.osId, { insumoId: this.insumoIdSelecionado, quantidade: this.quantidadeInsumo }).subscribe({
+    this.osService.adicionarInsumo(this.osId, { insumoId: this.insumoIdSelecionado, quantidade: this.quantidadeInsumo }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (atualizada) => {
         this.os = atualizada;
         this.insumoIdSelecionado = '';
@@ -356,7 +370,7 @@ export class OsDetalhePageComponent implements OnInit {
 
   alternarServico(item: any) {
     const novoStatus = !item.concluido;
-    this.osService.alternarStatusItemServico(this.osId, item.id, novoStatus).subscribe({
+    this.osService.alternarStatusItemServico(this.osId, item.id, novoStatus).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         item.concluido = novoStatus;
         this.notification.info('Item Atualizado', `Serviço marcado como ${novoStatus ? 'Concluído' : 'Pendente'}.`);
@@ -365,7 +379,7 @@ export class OsDetalhePageComponent implements OnInit {
   }
 
   enviarParaAprovacao() {
-    this.osService.enviarParaAprovacao(this.osId).subscribe({
+    this.osService.enviarParaAprovacao(this.osId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success('Orçamento Enviado', 'E-mail enviado ao cliente com link de aprovação.');
         this.carregarOS();

@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InsumoService } from '../../services/insumo.service';
 import { Insumo } from '../../models/insumo.model';
@@ -9,7 +10,8 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
 @Component({
   selector: 'app-insumos-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, FormsModule, PaginationComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
@@ -156,6 +158,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
   `]
 })
 export class InsumosPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   insumos: Insumo[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -183,7 +186,7 @@ export class InsumosPageComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.insumoService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.insumoService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.insumos = res.items || [];
         this.totalItems = res.total;
@@ -223,7 +226,7 @@ export class InsumosPageComponent implements OnInit {
 
   salvar() {
     if (this.editandoId) {
-      this.insumoService.atualizar(this.editandoId, this.formInsumo).subscribe({
+      this.insumoService.atualizar(this.editandoId, this.formInsumo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Insumo Atualizado', 'Item salvo no estoque.');
           this.exibirModal = false;
@@ -231,7 +234,7 @@ export class InsumosPageComponent implements OnInit {
         }
       });
     } else {
-      this.insumoService.criar(this.formInsumo).subscribe({
+      this.insumoService.criar(this.formInsumo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Insumo Cadastrado', 'Novo insumo incluído.');
           this.exibirModal = false;
@@ -243,7 +246,7 @@ export class InsumosPageComponent implements OnInit {
 
   excluir(id: string) {
     if (confirm('Deseja remover este insumo do catálogo?')) {
-      this.insumoService.excluir(id).subscribe({
+      this.insumoService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.info('Insumo Removido', 'Item excluído.');
           this.carregar();

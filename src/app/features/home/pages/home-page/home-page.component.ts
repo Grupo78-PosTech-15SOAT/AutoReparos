@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ RouterLink],
   template: `
     <div class="home-container fade-in">
  
@@ -19,7 +19,7 @@ import { AuthService } from '../../../auth/services/auth.service';
            </div>
  
            <h1 class="hero-title">
-             Plataforma Integrada de <span class="highlight-pink">Gestão Automotiva</span>
+             Plataforma de <span class="highlight-pink">Gestão Automotiva</span>
            </h1>
            <p class="hero-description">
              Gestão de ordens de serviço, estoque e orçamentos.
@@ -133,34 +133,38 @@ import { AuthService } from '../../../auth/services/auth.service';
            </div>
  
            <!-- Card 5: Estoque e Insumos -->
-           <div class="module-card">
-             <div class="card-top-line emerald-line"></div>
-             <div class="card-header">
-               <div class="card-icon icon-emerald">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+           @if (auth.hasRole(['Administrador', 'Mecanico'])) {
+             <div class="module-card">
+               <div class="card-top-line emerald-line"></div>
+               <div class="card-header">
+                 <div class="card-icon icon-emerald">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                 </div>
+                 <h3 class="module-title">Controle de Estoque e Peças</h3>
                </div>
-               <h3 class="module-title">Controle de Estoque e Peças</h3>
+               <a routerLink="/insumos" class="module-link">
+                 <span>Ver Tabela de Insumos</span>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+               </a>
              </div>
-             <a routerLink="/insumos" class="module-link">
-               <span>Ver Tabela de Insumos</span>
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-             </a>
-           </div>
+           }
  
            <!-- Card 6: Dashboard -->
-           <div class="module-card">
-             <div class="card-top-line cyan-line"></div>
-             <div class="card-header">
-               <div class="card-icon icon-cyan">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+           @if (auth.hasRole(['Administrador'])) {
+             <div class="module-card">
+               <div class="card-top-line cyan-line"></div>
+               <div class="card-header">
+                 <div class="card-icon icon-cyan">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                 </div>
+                 <h3 class="module-title">Dashboard e Métricas</h3>
                </div>
-               <h3 class="module-title">Dashboard e Métricas</h3>
+               <a routerLink="/dashboard" class="module-link">
+                 <span>Visualizar Métricas</span>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+               </a>
              </div>
-             <a routerLink="/dashboard" class="module-link">
-               <span>Visualizar Métricas</span>
-               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-             </a>
-           </div>
+           }
  
          </div>
        </section>

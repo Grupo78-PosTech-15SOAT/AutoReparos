@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicoService } from '../../services/servico.service';
 import { Servico } from '../../models/servico.model';
@@ -9,7 +10,8 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
 @Component({
   selector: 'app-servicos-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, FormsModule, PaginationComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
@@ -131,6 +133,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
   `]
 })
 export class ServicosPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   servicos: Servico[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -157,7 +160,7 @@ export class ServicosPageComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.servicoService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.servicoService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.servicos = res.items || [];
         this.totalItems = res.total;
@@ -197,7 +200,7 @@ export class ServicosPageComponent implements OnInit {
 
   salvar() {
     if (this.editandoId) {
-      this.servicoService.atualizar(this.editandoId, this.formServico).subscribe({
+      this.servicoService.atualizar(this.editandoId, this.formServico).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Serviço Atualizado', 'Item alterado no catálogo.');
           this.exibirModal = false;
@@ -205,7 +208,7 @@ export class ServicosPageComponent implements OnInit {
         }
       });
     } else {
-      this.servicoService.criar(this.formServico).subscribe({
+      this.servicoService.criar(this.formServico).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Serviço Cadastrado', 'Novo serviço incluído.');
           this.exibirModal = false;
@@ -217,7 +220,7 @@ export class ServicosPageComponent implements OnInit {
 
   excluir(id: string) {
     if (confirm('Deseja excluir este serviço do catálogo?')) {
-      this.servicoService.excluir(id).subscribe({
+      this.servicoService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.info('Serviço Removido', 'Item excluído.');
           this.carregar();

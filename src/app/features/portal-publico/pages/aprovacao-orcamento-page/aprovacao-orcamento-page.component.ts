@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
@@ -8,7 +8,8 @@ import { NotificationService } from '../../../../core/ui/notification.service';
 @Component({
   selector: 'app-aprovacao-orcamento-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ FormsModule],
   template: `
     <div class="container fade-in" style="max-width: 650px; padding-top: 3rem;">
       <div class="approval-card">
@@ -124,6 +125,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `]
 })
 export class AprovacaoOrcamentoPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   token = '';
   loading = false;
   respondido = false;
@@ -144,7 +146,7 @@ export class AprovacaoOrcamentoPageComponent implements OnInit {
     }
 
     this.loading = true;
-    this.osService.responderOrcamentoToken(this.token.trim(), aprovado).subscribe({
+    this.osService.responderOrcamentoToken(this.token.trim(), aprovado).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.loading = false;
         this.respondido = true;

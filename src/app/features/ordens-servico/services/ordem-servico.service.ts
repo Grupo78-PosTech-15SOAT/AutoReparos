@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
@@ -6,7 +6,8 @@ import {
   CriarOSRequest,
   StatusOS,
   AdicionarServicoOSRequest,
-  AdicionarInsumoOSRequest
+  AdicionarInsumoOSRequest,
+  KanbanColumn
 } from '../models/ordem-servico.model';
 import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { PagedResult } from '../../../shared/models/pagination.model';
@@ -15,30 +16,33 @@ import { PagedResult } from '../../../shared/models/pagination.model';
   providedIn: 'root'
 })
 export class OrdemServicoService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getAll(pageNumber = 1, pageSize = 10): Observable<PagedResult<OrdemServico>> {
     const params = new HttpParams()
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<any>(API_ENDPOINTS.ORDENS_SERVICO.BASE, { params }).pipe(
-      map(res => this.normalizePagedResult(res, pageNumber, pageSize))
+    return this.http.get<unknown>(API_ENDPOINTS.ORDENS_SERVICO.BASE, { params }).pipe(
+      map((res: any) => this.normalizePagedResult(res, pageNumber, pageSize))
     );
   }
 
   getById(id: string): Observable<OrdemServico> {
-    return this.http.get<OrdemServico>(API_ENDPOINTS.ORDENS_SERVICO.BY_ID(id));
+    return this.http.get<unknown>(API_ENDPOINTS.ORDENS_SERVICO.BY_ID(id)).pipe(
+      map((res: any) => ({
+        ...res,
+        status: this.normalizeStatus(res?.status ?? res?.Status)
+      }))
+    );
   }
 
-  getFilaKanban(pageNumber = 1, pageSize = 50): Observable<PagedResult<OrdemServico>> {
+  getFilaKanban(pageNumber = 1, pageSize = 50): Observable<KanbanColumn[]> {
     const params = new HttpParams()
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<any>(API_ENDPOINTS.ORDENS_SERVICO.FILA_KANBAN, { params }).pipe(
-      map(res => this.normalizePagedResult(res, pageNumber, pageSize))
-    );
+    return this.http.get<KanbanColumn[]>(API_ENDPOINTS.ORDENS_SERVICO.FILA_KANBAN, { params });
   }
 
   buscarPorPlacaOuCpf(termo: string, pageNumber = 1, pageSize = 10): Observable<PagedResult<OrdemServico>> {
@@ -47,8 +51,8 @@ export class OrdemServicoService {
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<any>(API_ENDPOINTS.ORDENS_SERVICO.CONSULTA_PUBLICA, { params }).pipe(
-      map(res => this.normalizePagedResult(res, pageNumber, pageSize))
+    return this.http.get<unknown>(API_ENDPOINTS.ORDENS_SERVICO.CONSULTA_PUBLICA, { params }).pipe(
+      map((res: any) => this.normalizePagedResult(res, pageNumber, pageSize))
     );
   }
 
@@ -96,9 +100,42 @@ export class OrdemServicoService {
         const pNum = res.pageNumber ?? res.PageNumber ?? pageNumber ?? 1;
         const pSize = res.pageSize ?? res.PageSize ?? pageSize ?? 10;
         const totalPages = res.totalPages ?? res.TotalPages ?? Math.max(1, Math.ceil(total / (pSize || 1)));
-        return { items, total, pageNumber: pNum, pageSize: pSize, totalPages };
+        return {
+          items: items.map(item => ({
+            ...item,
+            status: this.normalizeStatus(item.status ?? item.Status)
+          })),
+          total,
+          pageNumber: pNum,
+          pageSize: pSize,
+          totalPages
+        };
       }
     }
     return { items: [], total: 0, pageNumber: pageNumber || 1, pageSize: pageSize || 10, totalPages: 1 };
+  }
+
+  /** A API expõe o enum como texto; a tela usa os valores numéricos de StatusOS. */
+  private normalizeStatus(status: unknown): StatusOS {
+    if (typeof status === 'number' && status in StatusOS) {
+      return status;
+    }
+
+    const normalized = String(status)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[\s_-]/g, '')
+      .toLowerCase();
+
+    const statuses: Record<string, StatusOS> = {
+      recebida: StatusOS.Recebida,
+      emdiagnostico: StatusOS.EmDiagnostico,
+      aguardandoaprovacao: StatusOS.AguardandoAprovacao,
+      emexecucao: StatusOS.EmExecucao,
+      finalizada: StatusOS.Finalizada,
+      entregue: StatusOS.Entregue
+    };
+
+    return statuses[normalized] ?? (status as StatusOS);
   }
 }

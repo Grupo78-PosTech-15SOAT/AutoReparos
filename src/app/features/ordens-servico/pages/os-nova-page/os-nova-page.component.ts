@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
@@ -13,15 +13,18 @@ import {
   CustomSelectComponent,
   SelectOption,
 } from '../../../../shared/components/custom-select/custom-select.component';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { STORAGE_TOKEN } from '../../../../core/tokens/storage.token';
 
 const DRAFT_STORAGE_KEY = 'autoreparos_draft_nova_os';
 
 @Component({
   selector: 'app-os-nova-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, MaskDirective, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, MaskDirective, CustomSelectComponent, PageContainerComponent],
   template: `
-    <div class="container fade-in" style="max-width: 800px;">
+    <app-page-container maxWidth="800px">
       <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
         <div>
           <h1 class="page-title">
@@ -132,7 +135,7 @@ const DRAFT_STORAGE_KEY = 'autoreparos_draft_nova_os';
           </form>
         </div>
       }
-    </div>
+    </app-page-container>
   `,
   styles: [`
     .form-section {
@@ -202,6 +205,7 @@ const DRAFT_STORAGE_KEY = 'autoreparos_draft_nova_os';
   `]
 })
 export class OsNovaPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   clienteId = '';
   veiculoId = '';
   observacoesIniciais = '';
@@ -225,6 +229,8 @@ export class OsNovaPageComponent implements OnInit {
   private veiculoService = inject(VeiculoService);
   private notification = inject(NotificationService);
   private router = inject(Router);
+  private storage = inject(STORAGE_TOKEN);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregarDados();
@@ -242,7 +248,7 @@ export class OsNovaPageComponent implements OnInit {
       }
     };
 
-    this.clienteService.getAll(1, 100).subscribe(res => {
+    this.clienteService.getAll(1, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       this.clientes = res.items || [];
       this.clienteOptions = this.clientes.map(c => ({
         value: c.id!,
@@ -252,13 +258,14 @@ export class OsNovaPageComponent implements OnInit {
       checarConcluido();
     });
 
-    this.veiculoService.getAll(1, 100).subscribe(res => {
+    this.veiculoService.getAll(1, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       const data = res.items || [];
       this.todosVeiculos = data;
       this.veiculosFiltrados = data;
       this.atualizarVeiculoOptions();
       veiculosCarregados = true;
       checarConcluido();
+      this.cdr.markForCheck();
     });
   }
 
@@ -276,13 +283,13 @@ export class OsNovaPageComponent implements OnInit {
         veiculoId: this.veiculoId,
         observacoesIniciais: this.observacoesIniciais
       };
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      this.storage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
       this.rascunhoSalvo = true;
     }
   }
 
   carregarRascunho() {
-    const json = localStorage.getItem(DRAFT_STORAGE_KEY);
+    const json = this.storage.getItem(DRAFT_STORAGE_KEY);
     if (json) {
       try {
         const draft = JSON.parse(json);
@@ -291,13 +298,13 @@ export class OsNovaPageComponent implements OnInit {
         this.observacoesIniciais = draft.observacoesIniciais || '';
         this.rascunhoSalvo = true;
       } catch (e) {
-        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        this.storage.removeItem(DRAFT_STORAGE_KEY);
       }
     }
   }
 
   limparRascunho() {
-    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    this.storage.removeItem(DRAFT_STORAGE_KEY);
     this.rascunhoSalvo = false;
   }
 
@@ -363,15 +370,17 @@ export class OsNovaPageComponent implements OnInit {
       clienteId: this.clienteId,
       veiculoId: this.veiculoId,
       observacoesIniciais: this.observacoesIniciais
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (osCriada) => {
         this.loading = false;
         this.limparRascunho();
-        this.notification.success('OS Aberta!', `Ordem de Serviço #${osCriada.numeroOS} registrada.`);
+        this.notification.success('OS Aberta!', `Ordem de Serviço #${osCriada.id.slice(0, 8)} registrada.`);
+        this.cdr.markForCheck();
         this.router.navigate(['/ordens-servico', osCriada.id]);
       },
       error: () => {
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

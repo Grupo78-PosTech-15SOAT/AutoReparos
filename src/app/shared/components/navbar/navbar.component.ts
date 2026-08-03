@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <!-- Mobile Top Header Bar (Visible on mobile view) -->
     <div class="mobile-topbar">
@@ -20,7 +20,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
       </a>
 
       <button (click)="toggleMobileMenu()" class="mobile-toggle-btn" aria-label="Abrir Menu">
-        @if (isMobileMenuOpen) {
+        @if (isMobileMenuOpen()) {
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         } @else {
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -29,7 +29,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     </div>
 
     <!-- Main Sidebar Container -->
-    <aside class="sidebar" [class.mobile-open]="isMobileMenuOpen">
+    <aside class="sidebar" [class.mobile-open]="isMobileMenuOpen()">
       <!-- Desktop Sidebar Brand Header -->
       <div class="sidebar-brand">
         <a routerLink="/" (click)="closeMobileMenu()" class="brand-link">
@@ -74,26 +74,34 @@ import { AuthService } from '../../../features/auth/services/auth.service';
             </nav>
           </div>
 
-          @if (auth.hasRole(['Administrador'])) {
+          @if (auth.hasRole(['Administrador', 'Mecanico', 'Atendente'])) {
             <div class="nav-section">
               <span class="nav-section-title">Gestão e Administração</span>
               <nav class="nav-menu">
-                <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                  <span>Dashboard</span>
-                </a>
-                <a routerLink="/insumos" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                  <span>Estoque e Insumos</span>
-                </a>
-                <a routerLink="/servicos" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  <span>Catálogo de Serviços</span>
-                </a>
-                <a routerLink="/usuarios" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                  <span>Usuários</span>
-                </a>
+                @if (auth.hasRole(['Administrador'])) {
+                  <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard</span>
+                  </a>
+                }
+                @if (auth.hasRole(['Administrador', 'Mecanico'])) {
+                  <a routerLink="/insumos" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span>Estoque e Insumos</span>
+                  </a>
+                }
+                @if (auth.hasRole(['Administrador', 'Atendente', 'Mecanico'])) {
+                  <a routerLink="/servicos" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span>Catálogo de Serviços</span>
+                  </a>
+                }
+                @if (auth.hasRole(['Administrador'])) {
+                  <a routerLink="/usuarios" routerLinkActive="active" (click)="closeMobileMenu()" class="nav-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <span>Usuários</span>
+                  </a>
+                }
               </nav>
             </div>
           }
@@ -143,7 +151,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     </aside>
 
     <!-- Backdrop for Mobile Navigation -->
-    @if (isMobileMenuOpen) {
+    @if (isMobileMenuOpen()) {
       <div (click)="closeMobileMenu()" class="sidebar-backdrop"></div>
     }
   `,
@@ -397,13 +405,13 @@ import { AuthService } from '../../../features/auth/services/auth.service';
 })
 export class NavbarComponent {
   auth = inject(AuthService);
-  isMobileMenuOpen = false;
+  isMobileMenuOpen = signal(false);
 
-  toggleMobileMenu() {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(v => !v);
   }
 
-  closeMobileMenu() {
-    this.isMobileMenuOpen = false;
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
   }
 }

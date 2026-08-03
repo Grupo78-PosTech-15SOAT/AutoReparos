@@ -1,15 +1,13 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  SimpleChanges,
   HostListener,
   ElementRef,
   inject,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
+  input,
+  output,
+  signal,
+  computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,17 +23,17 @@ export interface SelectOption {
   imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="cs-wrapper" [class.cs-open]="isOpen" [class.cs-loading]="loading" [class.cs-disabled]="disabled" [class.cs-drop-up]="dropUp">
+    <div class="cs-wrapper" [class.cs-open]="isOpen()" [class.cs-loading]="loading()" [class.cs-disabled]="disabled()" [class.cs-drop-up]="dropUp()">
       <!-- Trigger -->
       <button
         type="button"
         class="cs-trigger"
         (click)="toggle()"
-        [disabled]="disabled || loading"
-        [attr.aria-expanded]="isOpen"
-        [attr.aria-label]="placeholder"
+        [disabled]="disabled() || loading()"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-label]="placeholder()"
       >
-        @if (loading) {
+        @if (loading()) {
           <span class="cs-spinner">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
               <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/>
@@ -43,8 +41,8 @@ export interface SelectOption {
           </span>
           <span class="cs-loading-text">Carregando...</span>
         } @else {
-          <span class="cs-value" [class.cs-placeholder]="!selectedLabel">
-            {{ selectedLabel || placeholder }}
+          <span class="cs-value" [class.cs-placeholder]="!selectedLabel()">
+            {{ selectedLabel() || placeholder() }}
           </span>
           <span class="cs-arrow">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -55,10 +53,10 @@ export interface SelectOption {
       </button>
 
       <!-- Dropdown Panel -->
-      @if (isOpen && !loading) {
+      @if (isOpen() && !loading()) {
         <div class="cs-dropdown fade-in-down">
           <!-- Search (when many options) -->
-          @if (searchable && options.length > 6) {
+          @if (searchable() && options().length > 6) {
             <div class="cs-search-wrapper">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -68,8 +66,8 @@ export interface SelectOption {
                 type="text"
                 class="cs-search"
                 placeholder="Filtrar..."
-                [(ngModel)]="searchTerm"
-                (ngModelChange)="onSearch()"
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event)"
                 (click)="$event.stopPropagation()"
               />
             </div>
@@ -79,19 +77,19 @@ export interface SelectOption {
             <!-- Placeholder option -->
             <div
               class="cs-option cs-option-placeholder"
-              [class.cs-selected]="!value"
+              [class.cs-selected]="!value()"
               (click)="select('', '')"
             >
-              {{ placeholder }}
+              {{ placeholder() }}
             </div>
 
-            @for (opt of filteredOptions; track opt.value) {
+            @for (opt of filteredOptions(); track opt.value) {
               <div
                 class="cs-option"
-                [class.cs-selected]="opt.value === value"
+                [class.cs-selected]="opt.value === value()"
                 (click)="select(opt.value, opt.label)"
               >
-                @if (opt.value === value) {
+                @if (opt.value === value()) {
                   <svg class="cs-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
@@ -301,74 +299,54 @@ export interface SelectOption {
     }
   `]
 })
-export class CustomSelectComponent implements OnChanges {
-  @Input() options: SelectOption[] = [];
-  @Input() value: string = '';
-  @Input() placeholder: string = '-- Selecione --';
-  @Input() loading: boolean = false;
-  @Input() disabled: boolean = false;
-  @Input() searchable: boolean = true;
-  @Input() dropUp: boolean = false;
+export class CustomSelectComponent {
+  options = input<SelectOption[]>([]);
+  value = input<string>('');
+  placeholder = input<string>('-- Selecione --');
+  loading = input<boolean>(false);
+  disabled = input<boolean>(false);
+  searchable = input<boolean>(true);
+  dropUp = input<boolean>(false);
 
-  @Output() valueChange = new EventEmitter<string>();
+  valueChange = output<string>();
 
-  isOpen = false;
-  searchTerm = '';
-  filteredOptions: SelectOption[] = [];
-  selectedLabel = '';
+  isOpen = signal(false);
+  searchTerm = signal('');
+
+  selectedLabel = computed(() => {
+    const found = this.options().find(o => o.value === this.value());
+    return found ? found.label : '';
+  });
+
+  filteredOptions = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    return this.options().filter(o => o.label.toLowerCase().includes(term));
+  });
 
   private el = inject(ElementRef);
-  private cdr = inject(ChangeDetectorRef);
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['options']) {
-      this.filteredOptions = [...this.options];
-    }
-    if (changes['value'] || changes['options']) {
-      this.updateSelectedLabel();
-    }
-  }
-
-  updateSelectedLabel() {
-    const found = this.options.find(o => o.value === this.value);
-    this.selectedLabel = found ? found.label : '';
-  }
 
   toggle() {
-    if (this.disabled || this.loading) return;
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) {
-      this.searchTerm = '';
-      this.filteredOptions = [...this.options];
+    if (this.disabled() || this.loading()) return;
+    this.isOpen.update(v => !v);
+    if (this.isOpen()) {
+      this.searchTerm.set('');
     }
   }
 
   select(val: string, label: string) {
-    this.value = val;
-    this.selectedLabel = label;
-    this.isOpen = false;
+    this.isOpen.set(false);
     this.valueChange.emit(val);
-    this.cdr.markForCheck();
-  }
-
-  onSearch() {
-    const term = this.searchTerm.toLowerCase();
-    this.filteredOptions = this.options.filter(o =>
-      o.label.toLowerCase().includes(term)
-    );
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.el.nativeElement.contains(event.target)) {
-      this.isOpen = false;
-      this.cdr.markForCheck();
+      this.isOpen.set(false);
     }
   }
 
   @HostListener('document:keydown.escape')
   onEscape() {
-    this.isOpen = false;
-    this.cdr.markForCheck();
+    this.isOpen.set(false);
   }
 }

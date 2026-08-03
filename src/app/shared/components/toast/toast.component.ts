@@ -1,15 +1,14 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { NotificationService } from '../../../core/ui/notification.service';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toast-container">
       @for (toast of notificationService.toasts(); track toast.id) {
-        <div class="toast-item" [ngClass]="toast.type">
+        <div class="toast-item" [class]="toast.type">
           <div class="toast-content">
             <div class="toast-title">{{ toast.title }}</div>
             <div class="toast-message">{{ toast.message }}</div>

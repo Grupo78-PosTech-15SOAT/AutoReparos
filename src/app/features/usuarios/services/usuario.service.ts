@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
@@ -9,7 +9,7 @@ import { PagedResult } from '../../../shared/models/pagination.model';
   providedIn: 'root'
 })
 export class UsuarioService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getAll(pageNumber = 1, pageSize = 10): Observable<PagedResult<Usuario>> {
     const params = new HttpParams()
@@ -29,9 +29,10 @@ export class UsuarioService {
     };
 
     const payload = {
-      ...usuario,
+      nomeCompleto: usuario.nome,
+      email: usuario.email,
       password: usuario.senha,
-      tipo: roleMapping[usuario.tipo as unknown as string] || usuario.tipo
+      tipo: roleMapping[usuario.role] || 3
     };
 
     return this.http.post<Usuario>(API_ENDPOINTS.USUARIOS.BASE, payload);
@@ -47,8 +48,18 @@ export class UsuarioService {
 
   private normalizePagedResult(res: any, pageNumber: number, pageSize: number): PagedResult<Usuario> {
     if (res) {
-      const items = res.items ?? res.Items ?? res.data ?? res.Data ?? (Array.isArray(res) ? res : null);
+      let items = res.items ?? res.Items ?? res.data ?? res.Data ?? (Array.isArray(res) ? res : null);
       if (Array.isArray(items)) {
+        const roleReverseMapping: Record<number, string> = {
+          1: 'Administrador',
+          2: 'Atendente',
+          3: 'Mecanico'
+        };
+        items = items.map((u: any) => ({
+          ...u,
+          nome: u.nome ?? u.nomeCompleto ?? u.NomeCompleto ?? '',
+          role: u.role ?? roleReverseMapping[u.tipo] ?? roleReverseMapping[u.Tipo] ?? 'Mecanico'
+        }));
         const total = res.totalItems ?? res.TotalItems ?? res.total ?? res.Total ?? items.length;
         const pNum = res.pageNumber ?? res.PageNumber ?? pageNumber ?? 1;
         const pSize = res.pageSize ?? res.PageSize ?? pageSize ?? 10;

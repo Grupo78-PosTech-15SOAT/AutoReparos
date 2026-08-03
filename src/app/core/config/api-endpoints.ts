@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
   // 2. Ordens de Serviço & Sub-endpoints
   ORDENS_SERVICO: {
     BASE: `${API_BASE_URL}/api/ordem-servico`,
-    FILA_KANBAN: `${API_BASE_URL}/api/ordem-servico/fila`,
+    FILA_KANBAN: `${API_BASE_URL}/api/ordem-servico/kanban`,
     CONSULTA_PUBLICA: `${API_BASE_URL}/api/ordem-servico/consulta`,
     ENVIAR_APROVACAO: (id: string) => `${API_BASE_URL}/api/ordem-servico/${id}/enviar-para-aprovacao`,
     RESPONDER_ORCAMENTO: `${API_BASE_URL}/api/ordem-servico/aprovar`,

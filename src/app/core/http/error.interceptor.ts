@@ -3,10 +3,12 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { NotificationService } from '../ui/notification.service';
+import { STORAGE_TOKEN } from '../tokens/storage.token';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notificationService = inject(NotificationService);
   const router = inject(Router);
+  const storage = inject(STORAGE_TOKEN);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -18,8 +20,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           notificationService.error('Falha no Login', message);
         } else {
           notificationService.warning('Sessão Expirada', 'Por favor, faça login novamente.');
-          localStorage.removeItem('autoreparos_token');
-          localStorage.removeItem('autoreparos_user');
+          storage.removeItem('autoreparos_token');
+          storage.removeItem('autoreparos_user');
           router.navigate(['/login']);
         }
       } else if (error.status === 403) {

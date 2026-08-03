@@ -24,9 +24,49 @@ export interface ItemInsumoOS {
   valorTotal: number;
 }
 
+export interface ServicoDetalhe {
+  id: string;
+  servicoId: string;
+  nomeServico?: string;
+  valorCobrado: number;
+  status: string;         // "Pendente" | "EmExecucao" | "Concluido"
+  iniciadoEm?: string;
+  concluidoEm?: string;
+}
+
+export interface InsumoDetalhe {
+  id: string;
+  insumoId?: string;
+  descricao: string;
+  valorUnitario: number;
+  quantidade: number;
+  valorTotal: number;
+  origem: string;         // "Estoque" | "CompraEspecifica"
+}
+
+export interface OsDetalhe {
+  id: string;
+  clienteId: string;
+  clienteNome?: string;
+  veiculoId: string;
+  placaVeiculo?: string;
+  modeloVeiculo?: string;
+  status: StatusOS | string | number;
+  observacao?: string;
+  valorTotal: number;
+  criadoEm: string;
+  iniciadoEm?: string;
+  finalizadoEm?: string;
+  entregueEm?: string;
+  envioAprovacaoEm?: string;
+  responsavelId?: string;
+  responsavelNome?: string;
+  servicos: ServicoDetalhe[];
+  insumos: InsumoDetalhe[];
+}
+
 export interface OrdemServico {
   id: string;
-  numeroOS: string;
   clienteId: string;
   clienteNome: string;
   clienteDocumento?: string;
@@ -57,4 +97,31 @@ export interface AdicionarServicoOSRequest {
 export interface AdicionarInsumoOSRequest {
   insumoId: string;
   quantidade: number;
+}
+
+export interface KanbanCard {
+  $type: string;
+  id: string;
+  clienteNome: string;
+  placaVeiculo: string;
+  modeloVeiculo: string;
+  status: string;
+  dataEntrada?: string;
+  mecanicoResponsavel?: string;
+  tempoDiagnostico?: string;
+  valorOrcamento?: number;
+  quantidadeServicos?: number;
+  tempoAguardandoAprovacao?: string;
+  valorAprovado?: number;
+  progressoServicos?: number;
+  valorFinal?: number;
+  dataConclusao?: string;
+  statusEntrega?: string;
+  servicosConcluidos?: number;
+  servicosTotal?: number;
+}
+
+export interface KanbanColumn {
+  status: string;
+  cards: KanbanCard[];
 }

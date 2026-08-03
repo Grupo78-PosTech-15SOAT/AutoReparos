@@ -1,17 +1,30 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
 import { OrdemServico } from '../../../ordens-servico/models/ordem-servico.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { NotificationService } from '../../../../core/ui/notification.service';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { IdBadgeComponent } from '../../../../shared/components/id-badge/id-badge.component';
+import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/placa-badge.component';
 
 @Component({
   selector: 'app-consulta-publica-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, StatusBadgeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    FormsModule, 
+    StatusBadgeComponent,
+    PageContainerComponent,
+    IdBadgeComponent,
+    PlacaBadgeComponent
+  ],
   template: `
-    <div class="container fade-in" style="max-width: 850px; padding-top: 3rem;">
+    <app-page-container maxWidth="850px" style="padding-top: 3rem; display: block;">
       <!-- Banner Público -->
       <div class="public-banner">
         <div class="brand-badge">Portal do Cliente</div>
@@ -48,7 +61,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
               <div class="card-panel os-public-card">
               <div class="os-header flex-between">
                 <div>
-                  <span class="mono-badge" style="color: #ED145B;">OS #{{ os.numeroOS }}</span>
+                  <app-id-badge [text]="'OS #' + os.id"></app-id-badge>
                   <h3 class="vehicle-title">{{ os.modeloVeiculo }}</h3>
                 </div>
                 <app-status-badge [status]="os.status"></app-status-badge>
@@ -61,7 +74,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
                 </div>
                 <div>
                   <span class="info-label">Placa:</span>
-                  <div class="info-val mono-badge">{{ os.placaVeiculo }}</div>
+                  <div class="info-val"><app-placa-badge [placa]="os.placaVeiculo"></app-placa-badge></div>
                 </div>
                 <div>
                   <span class="info-label">Data de Entrada:</span>
@@ -98,7 +111,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
         }
       </div>
     }
-  </div>
+  </app-page-container>
   `,
   styles: [`
     .public-banner {
@@ -202,6 +215,7 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `]
 })
 export class ConsultaPublicaPageComponent {
+  private destroyRef = inject(DestroyRef);
   termoBusca = '';
   loading = false;
   buscou = false;
@@ -219,7 +233,7 @@ export class ConsultaPublicaPageComponent {
 
     this.loading = true;
     this.cdr.detectChanges();
-    this.osService.buscarPorPlacaOuCpf(this.termoBusca.trim()).subscribe({
+    this.osService.buscarPorPlacaOuCpf(this.termoBusca.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.loading = false;
         this.buscou = true;

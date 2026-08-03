@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Servico } from '../models/servico.model';
@@ -9,7 +9,7 @@ import { PagedResult } from '../../../shared/models/pagination.model';
   providedIn: 'root'
 })
 export class ServicoService {
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getAll(pageNumber = 1, pageSize = 10): Observable<PagedResult<Servico>> {
     const params = new HttpParams()

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../models/usuario.model';
@@ -10,7 +10,8 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
 @Component({
   selector: 'app-usuarios-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ FormsModule, PaginationComponent, CustomSelectComponent],
   template: `
     <div class="container fade-in">
       <div class="page-header">
@@ -48,7 +49,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
                 <td style="font-weight: 600;">{{ u.nome }}</td>
                 <td>{{ u.email }}</td>
                 <td>
-                  <span class="role-badge" [ngClass]="getRoleClass(u.role)">
+                  <span class="role-badge" [class]="getRoleClass(u.role)">
                     {{ u.role || 'Sem Cargo' }}
                   </span>
                 </td>
@@ -142,6 +143,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
   `]
 })
 export class UsuariosPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   usuarios: Usuario[] = [];
   exibirModal = false;
 
@@ -179,7 +181,7 @@ export class UsuariosPageComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.usuarioService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.usuarioService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.usuarios = res.items || [];
         this.totalItems = res.total;
@@ -211,7 +213,7 @@ export class UsuariosPageComponent implements OnInit {
   }
 
   salvar() {
-    this.usuarioService.criar(this.formUsuario).subscribe({
+    this.usuarioService.criar(this.formUsuario).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notification.success('Usuário Criado', 'Conta cadastrada com sucesso.');
         this.exibirModal = false;
@@ -222,7 +224,7 @@ export class UsuariosPageComponent implements OnInit {
 
   excluir(id: string) {
     if (confirm('Deseja excluir esta conta de usuário?')) {
-      this.usuarioService.excluir(id).subscribe({
+      this.usuarioService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.info('Usuário Removido', 'Conta excluída.');
           this.carregar();

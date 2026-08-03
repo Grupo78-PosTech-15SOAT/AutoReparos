@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
 import { Cliente } from '../../models/cliente.model';
@@ -8,13 +8,25 @@ import { MaskDirective } from '../../../../shared/directives/mask.directive';
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { DocumentoBadgeComponent } from '../../../../shared/components/documento-badge/documento-badge.component';
 
 @Component({
   selector: 'app-clientes-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CpfCnpjPipe, MaskDirective, PaginationComponent, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+     
+    FormsModule, 
+    CpfCnpjPipe, 
+    MaskDirective, 
+    PaginationComponent, 
+    CustomSelectComponent,
+    PageContainerComponent,
+    DocumentoBadgeComponent
+  ],
   template: `
-    <div class="container fade-in">
+    <app-page-container>
       <div class="page-header">
         <div>
           <h1 class="page-title">
@@ -50,7 +62,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
               <tr>
                 <td style="font-weight: 600;">{{ c.nome }}</td>
                 <td>
-                  <span class="mono-badge">{{ c.documento | cpfCnpj }}</span>
+                  <app-documento-badge [documento]="c.documento | cpfCnpj"></app-documento-badge>
                 </td>
                 <td>{{ c.email }}</td>
                 <td>{{ c.telefone }}</td>
@@ -140,7 +152,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
           </div>
         </div>
       }
-    </div>
+    </app-page-container>
   `,
   styles: [`
     .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
@@ -153,6 +165,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
   `]
 })
 export class ClientesPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   clientes: Cliente[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -187,7 +200,7 @@ export class ClientesPageComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.clienteService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.clienteService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.clientes = res.items || [];
         this.totalItems = res.total;
@@ -227,7 +240,7 @@ export class ClientesPageComponent implements OnInit {
 
   salvar() {
     if (this.editandoId) {
-      this.clienteService.atualizar(this.editandoId, this.formCliente).subscribe({
+      this.clienteService.atualizar(this.editandoId, this.formCliente).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Cliente Atualizado', 'Dados do cliente salvos com sucesso.');
           this.exibirModal = false;
@@ -235,7 +248,7 @@ export class ClientesPageComponent implements OnInit {
         }
       });
     } else {
-      this.clienteService.criar(this.formCliente).subscribe({
+      this.clienteService.criar(this.formCliente).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Cliente Cadastrado', 'Novo cliente incluído na base.');
           this.exibirModal = false;
@@ -247,7 +260,7 @@ export class ClientesPageComponent implements OnInit {
 
   excluir(id: string) {
     if (confirm('Deseja realmente remover este cliente?')) {
-      this.clienteService.excluir(id).subscribe({
+      this.clienteService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.info('Cliente Removido', 'Cadastro removido.');
           this.carregar();

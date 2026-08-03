@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { VeiculoService } from '../../services/veiculo.service';
 import { ClienteService } from '../../../clientes/services/cliente.service';
@@ -10,13 +10,25 @@ import { MaskDirective } from '../../../../shared/directives/mask.directive';
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/placa-badge.component';
 
 @Component({
   selector: 'app-veiculos-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, PlacaPipe, MaskDirective, PaginationComponent, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+     
+    FormsModule, 
+    PlacaPipe, 
+    MaskDirective, 
+    PaginationComponent, 
+    CustomSelectComponent,
+    PageContainerComponent,
+    PlacaBadgeComponent
+  ],
   template: `
-    <div class="container fade-in">
+    <app-page-container>
       <div class="page-header">
         <div>
           <h1 class="page-title">
@@ -51,7 +63,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
             @for (v of veiculos; track v.id) {
               <tr>
                 <td>
-                  <span class="mono-badge" style="color: #ED145B; font-weight: 700;">{{ v.placa | placa }}</span>
+                  <app-placa-badge [placa]="v.placa | placa"></app-placa-badge>
                 </td>
                 <td style="font-weight: 600;">{{ v.marca }} {{ v.modelo }}</td>
                 <td>{{ v.anoFabricacao }}/{{ v.anoModelo }}</td>
@@ -74,16 +86,18 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
         </table>
       </div>
 
-      <!-- Paginação Estruturada -->
-      <app-pagination
-        [pageNumber]="pageNumber"
-        [pageSize]="pageSize"
-        [totalItems]="totalItems"
-        [totalPages]="totalPages"
-        [pageSizeOptions]="[5, 10, 20, 50]"
-        (pageChange)="onPageChange($event)"
-        (pageSizeChange)="onPageSizeChange($event)">
-      </app-pagination>
+      <!-- Paginação -->
+      <div style="margin-top: 1rem;">
+        <app-pagination
+          [pageNumber]="pageNumber"
+          [pageSize]="pageSize"
+          [totalItems]="totalItems"
+          [totalPages]="totalPages"
+          [pageSizeOptions]="[5, 10, 20, 50]"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)">
+        </app-pagination>
+      </div>
 
       <!-- Modal de Cadastro / Edição -->
       @if (exibirModal) {
@@ -96,32 +110,32 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
 
             <form (ngSubmit)="salvar()">
               <div class="form-group">
-                <label class="form-label">Proprietário (Cliente)</label>
+                <label class="form-label">Cliente Proprietário</label>
                 <app-custom-select
                   [options]="clienteOptions"
                   [value]="formVeiculo.clienteId || ''"
+                  placeholder="Selecione o proprietário"
                   [loading]="loadingClientes"
-                  placeholder="-- Selecione o Cliente --"
                   (valueChange)="formVeiculo.clienteId = $event"
                 ></app-custom-select>
               </div>
 
               <div class="grid-2">
                 <div class="form-group">
-                  <label class="form-label">Placa do Veículo</label>
-                  <input type="text" [(ngModel)]="formVeiculo.placa" name="placa" appMask="placa" required placeholder="Ex: BRA2E19" class="form-control" />
+                  <label class="form-label">Marca</label>
+                  <input type="text" [(ngModel)]="formVeiculo.marca" name="marca" required placeholder="Ex: Chevrolet" class="form-control" />
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Marca / Fabricante</label>
-                  <input type="text" [(ngModel)]="formVeiculo.marca" name="marca" required placeholder="Ex: Honda, Toyota, VW..." class="form-control" />
+                  <label class="form-label">Modelo</label>
+                  <input type="text" [(ngModel)]="formVeiculo.modelo" name="modelo" required placeholder="Ex: Onix" class="form-control" />
                 </div>
               </div>
 
               <div class="grid-2">
                 <div class="form-group">
-                  <label class="form-label">Modelo</label>
-                  <input type="text" [(ngModel)]="formVeiculo.modelo" name="modelo" required placeholder="Ex: Civic 2.0 EXL" class="form-control" />
+                  <label class="form-label">Placa</label>
+                  <input type="text" [(ngModel)]="formVeiculo.placa" name="placa" appMask="placa" required placeholder="ABC-1234 / ABC1D23" class="form-control" />
                 </div>
 
                 <div class="form-group">
@@ -145,7 +159,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
           </div>
         </div>
       }
-    </div>
+    </app-page-container>
   `,
   styles: [`
     .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
@@ -158,6 +172,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
   `]
 })
 export class VeiculosPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   veiculos: Veiculo[] = [];
   clientes: Cliente[] = [];
   clienteOptions: SelectOption[] = [];
@@ -191,7 +206,7 @@ export class VeiculosPageComponent implements OnInit {
 
   carregar() {
     this.loading = true;
-    this.veiculoService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.veiculoService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.veiculos = res.items || [];
         this.totalItems = res.total;
@@ -205,7 +220,7 @@ export class VeiculosPageComponent implements OnInit {
       }
     });
     this.loadingClientes = true;
-    this.clienteService.getAll(1, 100).subscribe({
+    this.clienteService.getAll(1, 100).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.clientes = res.items || [];
         this.clienteOptions = this.clientes.map(c => ({
@@ -251,7 +266,7 @@ export class VeiculosPageComponent implements OnInit {
 
   salvar() {
     if (this.editandoId) {
-      this.veiculoService.atualizar(this.editandoId, this.formVeiculo).subscribe({
+      this.veiculoService.atualizar(this.editandoId, this.formVeiculo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Veículo Atualizado', 'Dados do veículo salvos.');
           this.exibirModal = false;
@@ -259,7 +274,7 @@ export class VeiculosPageComponent implements OnInit {
         }
       });
     } else {
-      this.veiculoService.criar(this.formVeiculo).subscribe({
+      this.veiculoService.criar(this.formVeiculo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Veículo Cadastrado', 'Novo veículo incluído na frota.');
           this.exibirModal = false;
@@ -271,7 +286,7 @@ export class VeiculosPageComponent implements OnInit {
 
   excluir(id: string) {
     if (confirm('Deseja remover este veículo?')) {
-      this.veiculoService.excluir(id).subscribe({
+      this.veiculoService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.info('Veículo Removido', 'Cadastro excluído.');
           this.carregar();

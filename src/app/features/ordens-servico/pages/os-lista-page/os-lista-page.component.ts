@@ -1,5 +1,6 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
@@ -10,13 +11,27 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
+import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
+import { IdBadgeComponent } from '../../../../shared/components/id-badge/id-badge.component';
+import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/placa-badge.component';
 
 @Component({
   selector: 'app-os-lista-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, StatusBadgeComponent, PaginationComponent, CustomSelectComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    DatePipe, DecimalPipe, 
+    RouterLink, 
+    FormsModule, 
+    StatusBadgeComponent, 
+    PaginationComponent, 
+    CustomSelectComponent,
+    PageContainerComponent,
+    IdBadgeComponent,
+    PlacaBadgeComponent
+  ],
   template: `
-    <div class="container fade-in">
+    <app-page-container>
       <div class="page-header">
         <div>
           <h1 class="page-title">
@@ -30,7 +45,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
       </div>
 
       <!-- Filtros de Busca -->
-      <div class="card-panel" style="margin-bottom: 1.5rem;">
+      <div class="card-panel" style="margin-bottom: 1.5rem; position: relative; z-index: 10;">
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
           <input type="text" [(ngModel)]="filtroTermo" (input)="filtrar()" placeholder="Buscar cliente, placa ou OS..." class="form-control" style="flex: 1; min-width: 260px;" />
           <div style="width: 210px;">
@@ -68,14 +83,14 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
             @for (os of ordensFiltradas; track os.id) {
               <tr>
                 <td>
-                  <span class="mono-badge" style="color: #ED145B;">#{{ os.id.substring(0, 8) }}</span>
+                  <app-id-badge [text]="'#' + os.id.substring(0, 8)"></app-id-badge>
                 </td>
                 <td>
                   <div style="font-weight: 600;">{{ getClienteNome(os.clienteId) }}</div>
                 </td>
                 <td>
                   <div>{{ getVeiculoDesc(os.veiculoId) }}</div>
-                  <span class="mono-badge" style="font-size: 0.75rem;">{{ getVeiculoPlaca(os.veiculoId) }}</span>
+                  <app-placa-badge [placa]="getVeiculoPlaca(os.veiculoId)"></app-placa-badge>
                 </td>
                 <td>
                   <app-status-badge [status]="os.status"></app-status-badge>
@@ -116,11 +131,12 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
         (pageChange)="onPageChange($event)"
         (pageSizeChange)="onPageSizeChange($event)">
       </app-pagination>
-    </div>
+    </app-page-container>
   `,
   styles: [`.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }`]
 })
 export class OsListaPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   StatusOS = StatusOS;
   todasOrdens: OrdemServico[] = [];
   ordensFiltradas: OrdemServico[] = [];
@@ -160,16 +176,16 @@ export class OsListaPageComponent implements OnInit {
   carregarOrdens() {
     this.loading = true;
     
-    this.clienteService.getAll(1, 500).subscribe(c => {
+    this.clienteService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(c => {
       this.clientes = c.items || [];
       this.cdr.detectChanges();
     });
-    this.veiculoService.getAll(1, 500).subscribe(v => {
+    this.veiculoService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => {
       this.veiculos = v.items || [];
       this.cdr.detectChanges();
     });
 
-    this.osService.getAll(this.pageNumber, this.pageSize).subscribe({
+    this.osService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.todasOrdens = res.items || [];
         this.totalItems = res.total;
@@ -239,7 +255,7 @@ export class OsListaPageComponent implements OnInit {
 
   entregar(osId: string) {
     if (confirm('Confirmar entrega do veículo e encerramento da Ordem de Serviço?')) {
-      this.osService.entregarVeiculo(osId).subscribe({
+      this.osService.entregarVeiculo(osId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.notification.success('Veículo Entregue', 'Status da OS atualizado para Entregue.');
           this.carregarOrdens();
