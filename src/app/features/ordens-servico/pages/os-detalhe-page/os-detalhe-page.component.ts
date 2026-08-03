@@ -285,7 +285,7 @@ export class OsDetalhePageComponent implements OnInit {
   }
 
   carregarOS() {
-    this.osService.getById(this.osId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.os = data);
+    this.osService.getById(this.osId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.os = data as unknown as OrdemServico);
     this.clienteService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(c => this.clientes = c.items || []);
     this.veiculoService.getAll(1, 500).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => this.veiculos = v.items || []);
   }

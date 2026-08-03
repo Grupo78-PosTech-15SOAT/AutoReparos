@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
   OrdemServico,
+  OsDetalhe,
   CriarOSRequest,
   StatusOS,
   AdicionarServicoOSRequest,
@@ -28,12 +29,14 @@ export class OrdemServicoService {
     );
   }
 
-  getById(id: string): Observable<OrdemServico> {
+  getById(id: string): Observable<OsDetalhe> {
     return this.http.get<unknown>(API_ENDPOINTS.ORDENS_SERVICO.BY_ID(id)).pipe(
       map((res: any) => ({
         ...res,
-        status: this.normalizeStatus(res?.status ?? res?.Status)
-      }))
+        status: this.normalizeStatus(res?.status ?? res?.Status),
+        servicos: Array.isArray(res?.servicos) ? res.servicos : [],
+        insumos:  Array.isArray(res?.insumos)  ? res.insumos  : [],
+      } as OsDetalhe))
     );
   }
 
@@ -42,7 +45,9 @@ export class OrdemServicoService {
       .set('pageNumber', pageNumber.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<KanbanColumn[]>(API_ENDPOINTS.ORDENS_SERVICO.FILA_KANBAN, { params });
+    return this.http.get<unknown>(API_ENDPOINTS.ORDENS_SERVICO.FILA_KANBAN, { params }).pipe(
+      map((res: unknown) => (Array.isArray(res) ? res as KanbanColumn[] : []))
+    );
   }
 
   buscarPorPlacaOuCpf(termo: string, pageNumber = 1, pageSize = 10): Observable<PagedResult<OrdemServico>> {

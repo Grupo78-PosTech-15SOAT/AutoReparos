@@ -65,6 +65,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #ED145B rgba(10, 10, 12, 0.5);
 }
 
 body {
@@ -508,8 +510,4 @@ select.form-control option {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #ff2a75, #a30e3f);
-}
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #ED145B rgba(10, 10, 12, 0.5);
 }

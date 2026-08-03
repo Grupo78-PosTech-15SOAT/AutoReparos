@@ -2,10 +2,10 @@ import {
   Component,
   input,
   output,
-  OnChanges,
-  SimpleChanges,
   inject,
-  ChangeDetectorRef,
+  signal,
+  computed,
+  effect,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { DatePipe, DecimalPipe, SlicePipe } from '@angular/common';
@@ -15,7 +15,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/placa-badge.component';
 import { ProgressBarComponent } from '../../../../shared/components/progress-bar/progress-bar.component';
 import { OrdemServicoService } from '../../services/ordem-servico.service';
-import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
+import { KanbanCard, OsDetalhe, StatusOS } from '../../models/ordem-servico.model';
 
 @Component({
   selector: 'app-os-drawer',
@@ -41,7 +41,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
         <!-- Linha 1: ID completo da OS e Botão Fechar -->
         <div class="osd-header-top">
           <div class="osd-meta">
-            <span class="osd-num">#{{ os?.id || osId() || '—' }}</span>
+            <span class="osd-num">#{{ os()?.id || osId() || '—' }}</span>
           </div>
           <button class="osd-close" (click)="onClose()" aria-label="Fechar drawer">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -52,28 +52,28 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
         </div>
 
         <!-- Linha 2: Título Principal do Veículo -->
-        <h2 class="osd-vehicle">{{ os?.modeloVeiculo || cardPreview()?.modeloVeiculo || '—' }}</h2>
+        <h2 class="osd-vehicle">{{ os()?.modeloVeiculo || cardPreview()?.modeloVeiculo || '—' }}</h2>
 
         <!-- Linha 3: Metadados secundários (Placa + Cliente + Mecânico alinhados) -->
         <div class="osd-header-info">
-          @if (os?.placaVeiculo || cardPreview()?.placaVeiculo) {
-            <app-placa-badge [placa]="(os?.placaVeiculo || cardPreview()?.placaVeiculo)!" size="md"></app-placa-badge>
+          @if (os()?.placaVeiculo || cardPreview()?.placaVeiculo) {
+            <app-placa-badge [placa]="(os()?.placaVeiculo || cardPreview()?.placaVeiculo)!" size="md"></app-placa-badge>
           }
-          <div class="osd-info-pill osd-client-pill" [title]="'Cliente: ' + (os?.clienteNome || cardPreview()?.clienteNome || '—')">
+          <div class="osd-info-pill osd-client-pill" [title]="'Cliente: ' + (os()?.clienteNome || cardPreview()?.clienteNome || '—')">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
             </svg>
-            <span>{{ os?.clienteNome || cardPreview()?.clienteNome || '—' }}</span>
+            <span>{{ os()?.clienteNome || cardPreview()?.clienteNome || '—' }}</span>
           </div>
-          @if (os?.responsavelNome || os?.responsavelId || cardPreview()?.mecanicoResponsavel) {
-            <div class="osd-info-pill osd-mecanico-pill" [title]="'Mecânico Responsável: ' + (os?.responsavelNome || os?.responsavelId || cardPreview()?.mecanicoResponsavel)">
+          @if (os()?.responsavelNome || os()?.responsavelId || cardPreview()?.mecanicoResponsavel) {
+            <div class="osd-info-pill osd-mecanico-pill" [title]="'Mecânico Responsável: ' + (os()?.responsavelNome || os()?.responsavelId || cardPreview()?.mecanicoResponsavel)">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                    fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
-              <span>{{ os?.responsavelNome || os?.responsavelId || cardPreview()?.mecanicoResponsavel }}</span>
+              <span>{{ os()?.responsavelNome || os()?.responsavelId || cardPreview()?.mecanicoResponsavel }}</span>
             </div>
           }
         </div>
@@ -84,7 +84,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
       <!-- ════════════════════════════════════════ -->
       <div drawer-body class="osd-body">
 
-        @if (loading) {
+        @if (loading()) {
           <!-- Skeleton -->
           <div class="osd-section">
             <div class="skeleton" style="width:45%;height:13px;margin-bottom:1rem;"></div>
@@ -103,7 +103,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
             <div class="skeleton" style="width:50%;height:13px;margin-bottom:0.75rem;"></div>
             <div class="skeleton" style="width:100%;height:10px;border-radius:4px;"></div>
           </div>
-        } @else if (erro) {
+        } @else if (erro()) {
           <div class="osd-empty">
             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
                  fill="none" stroke="#EF4444" stroke-width="2">
@@ -113,7 +113,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
             </svg>
             <span>Erro ao carregar OS</span>
           </div>
-        } @else if (os) {
+        } @else if (os()) {
 
           <!-- ─── 1. Linha do Tempo de Etapas ─── -->
           <div class="osd-section">
@@ -126,7 +126,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                 </svg>
                 Fluxo da Ordem de Serviço
               </h4>
-              <app-status-badge [status]="os.status" size="sm"></app-status-badge>
+              <app-status-badge [status]="os()!.status" size="sm"></app-status-badge>
             </div>
 
             <div class="osd-timeline">
@@ -139,12 +139,12 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                   <div class="osd-tl-header">
                     <span class="osd-tl-title">Abertura</span>
                   </div>
-                  <div class="osd-tl-date">{{ os.criadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
+                  <div class="osd-tl-date">{{ os()!.criadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
                 </div>
               </div>
 
               <!-- Evento: Envio para Aprovação -->
-              @if (os.envioAprovacaoEm) {
+              @if (os()!.envioAprovacaoEm) {
                 <div class="osd-tl-item tl-done">
                   <div class="osd-tl-marker">
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -161,13 +161,13 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                         <span class="osd-tl-badge badge-active">Aguardando</span>
                       }
                     </div>
-                    <div class="osd-tl-date">{{ os.envioAprovacaoEm | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div class="osd-tl-date">{{ os()!.envioAprovacaoEm | date:'dd/MM/yyyy HH:mm' }}</div>
                   </div>
                 </div>
               }
 
               <!-- Evento: Início da Execução -->
-              @if (os.iniciadoEm) {
+              @if (os()!.iniciadoEm) {
                 <div class="osd-tl-item tl-done">
                   <div class="osd-tl-marker">
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -176,13 +176,13 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                     <div class="osd-tl-header">
                       <span class="osd-tl-title">Início Execução</span>
                     </div>
-                    <div class="osd-tl-date">{{ os.iniciadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div class="osd-tl-date">{{ os()!.iniciadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
                   </div>
                 </div>
               }
 
               <!-- Evento: Finalização -->
-              @if (os.finalizadoEm) {
+              @if (os()!.finalizadoEm) {
                 <div class="osd-tl-item tl-done">
                   <div class="osd-tl-marker">
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -191,13 +191,13 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                     <div class="osd-tl-header">
                       <span class="osd-tl-title">Finalização</span>
                     </div>
-                    <div class="osd-tl-date">{{ os.finalizadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div class="osd-tl-date">{{ os()!.finalizadoEm | date:'dd/MM/yyyy HH:mm' }}</div>
                   </div>
                 </div>
               }
 
               <!-- Evento: Entrega -->
-              @if (os.entregueEm) {
+              @if (os()!.entregueEm) {
                 <div class="osd-tl-item tl-delivered">
                   <div class="osd-tl-marker">
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -206,7 +206,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                     <div class="osd-tl-header">
                       <span class="osd-tl-title">Entrega</span>
                     </div>
-                    <div class="osd-tl-date">{{ os.entregueEm | date:'dd/MM/yyyy HH:mm' }}</div>
+                    <div class="osd-tl-date">{{ os()!.entregueEm | date:'dd/MM/yyyy HH:mm' }}</div>
                   </div>
                 </div>
               }
@@ -223,8 +223,8 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
               </svg>
               Diagnóstico
             </h4>
-            <div class="osd-diagnostico" [class.osd-diagnostico-empty]="!os.observacao">
-              {{ os.observacao || 'Diagnóstico ainda não registrado.' }}
+            <div class="osd-diagnostico" [class.osd-diagnostico-empty]="!os()!.observacao">
+              {{ os()!.observacao || 'Diagnóstico ainda não registrado.' }}
             </div>
           </div>
 
@@ -236,16 +236,16 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
               Serviços
-              <span class="osd-count">{{ os.servicos.length }}</span>
+              <span class="osd-count">{{ os()!.servicos.length }}</span>
             </h4>
 
-            @if (os.servicos.length === 0) {
+            @if (os()!.servicos.length === 0) {
               <p class="osd-empty-text">Sem serviços adicionados.</p>
             } @else {
               <div class="osd-progress-block">
                 <app-progress-bar
                   [completed]="servicosConcluidos()"
-                  [total]="os.servicos.length"
+                  [total]="os()!.servicos.length"
                   [showCount]="true"
                   labelPosition="bottom"
                   itemText="serviços"
@@ -254,7 +254,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
               </div>
 
               <div class="osd-list">
-                @for (s of os.servicos; track s.id) {
+                @for (s of os()!.servicos; track s.id) {
                   <div class="osd-list-item">
                     <div class="osd-list-left">
                       <!-- Ícone tri-estado harmonizado com a timeline -->
@@ -294,13 +294,13 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
               </svg>
               Insumos
-              <span class="osd-count">{{ os.insumos.length }}</span>
+              <span class="osd-count">{{ os()!.insumos.length }}</span>
             </h4>
-            @if (os.insumos.length === 0) {
+            @if (os()!.insumos.length === 0) {
               <p class="osd-empty-text">Sem insumos adicionados.</p>
             } @else {
               <div class="osd-list">
-                @for (ins of os.insumos; track ins.id) {
+                @for (ins of os()!.insumos; track ins.id) {
                   <div class="osd-list-item">
                     <div class="osd-list-left" style="flex-direction:column;align-items:flex-start;gap:0.1rem;">
                       <span class="osd-item-name">{{ ins.descricao }}</span>
@@ -338,7 +338,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
               <div class="osd-fin-divider"></div>
               <div class="osd-fin-total">
                 <span>VALOR TOTAL</span>
-                <span class="osd-total-val">R$ {{ os.valorTotal | number:'1.2-2' }}</span>
+                <span class="osd-total-val">R$ {{ os()!.valorTotal | number:'1.2-2' }}</span>
               </div>
             </div>
           </div>
@@ -350,9 +350,9 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
       <!--  FOOTER                                  -->
       <!-- ════════════════════════════════════════ -->
       <div drawer-footer class="osd-footer">
-        @if (os) {
+        @if (os()) {
           <a
-            [routerLink]="['/ordens-servico', os.id]"
+            [routerLink]="['/ordens-servico', os()!.id]"
             class="btn btn-primary osd-action-btn"
             (click)="onClose()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -363,7 +363,7 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
             </svg>
             Abrir OS Completa
           </a>
-        } @else if (loading) {
+        } @else if (loading()) {
           <div class="osd-action-btn osd-action-loading">Carregando…</div>
         }
       </div>
@@ -926,79 +926,79 @@ import { KanbanCard, OsDetalhe } from '../../models/ordem-servico.model';
     }
   `]
 })
-export class OsDrawerComponent implements OnChanges {
+export class OsDrawerComponent {
   isOpen = input<boolean>(false);
   osId = input<string | null>(null);
   cardPreview = input<KanbanCard | null>(null);
 
   closed = output<void>();
 
-  os: OsDetalhe | null = null;
-  loading = false;
-  erro = false;
+  // ── Estado via signals (compatível com OnPush sem cdr.markForCheck) ──
+  readonly os = signal<OsDetalhe | null>(null);
+  readonly loading = signal(false);
+  readonly erro = signal(false);
 
-  private osService = inject(OrdemServicoService);
-  private cdr = inject(ChangeDetectorRef);
+  // ── Computed (I2: isAprovado eliminando lógica duplicada de normalização) ──
+  readonly isAprovado = computed(() => {
+    const status = this.os()?.status;
+    if (status == null) return false;
+    const num = typeof status === 'number' ? status : Number(status);
+    return !isNaN(num) && num > StatusOS.AguardandoAprovacao;
+  });
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['isOpen'] && this.isOpen()) {
-      const currentOsId = this.osId();
-      if (currentOsId) {
-        this.carregarOs(currentOsId);
-      } else {
-        this.os = null;
-        this.erro = true;
-      }
-    } else if (changes['isOpen'] && !this.isOpen()) {
-      // Limpar estado ao fechar
-      setTimeout(() => {
-        this.os = null;
-        this.erro = false;
-        this.cdr.markForCheck();
-      }, 300); // tempo da animação do drawer
-    }
-  }
+  readonly servicosConcluidos = computed(() =>
+    this.os()?.servicos?.filter(s => s.status === 'Concluido').length ?? 0
+  );
 
-  carregarOs(id: string) {
-    this.loading = true;
-    this.erro = false;
-    this.osService.getById(id).subscribe({
-      next: (res) => {
-        this.os = res as any;
-        this.loading = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.erro = true;
-        this.loading = false;
-        this.cdr.markForCheck();
+  readonly subtotalServicos = computed(() =>
+    this.os()?.servicos?.reduce((acc, s) => acc + s.valorCobrado, 0) ?? 0
+  );
+
+  readonly subtotalInsumos = computed(() =>
+    this.os()?.insumos?.reduce((acc, i) => acc + i.valorTotal, 0) ?? 0
+  );
+
+  private readonly osService = inject(OrdemServicoService);
+
+  constructor() {
+    // B2: effect() substitui ngOnChanges + setTimeout — reage aos signals isOpen/osId
+    effect(() => {
+      const open = this.isOpen();
+      const id   = this.osId();
+
+      if (open && id) {
+        this.carregarOs(id);
+      } else if (open && !id) {
+        // Drawer aberto sem ID — estado de erro imediato
+        this.os.set(null);
+        this.erro.set(true);
+        this.loading.set(false);
+      } else if (!open) {
+        // Limpar estado após a animação de fechamento (300 ms)
+        setTimeout(() => {
+          this.os.set(null);
+          this.erro.set(false);
+        }, 300);
       }
     });
   }
 
-  onClose() {
+  carregarOs(id: string): void {
+    this.loading.set(true);
+    this.erro.set(false);
+    this.osService.getById(id).subscribe({
+      next: (res) => {
+        this.os.set(res);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.erro.set(true);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  onClose(): void {
     this.closed.emit();
-  }
-
-  isAprovado(): boolean {
-    if (!this.os) return false;
-    const statusVal = typeof this.os.status === 'number' ? this.os.status : Number(this.os.status);
-    if (!isNaN(statusVal)) {
-      return statusVal > 3; // 4: EmExecucao, 5: Finalizada, 6: Entregue
-    }
-    const s = String(this.os.status).toLowerCase();
-    return s === 'emexecucao' || s === 'execucao' || s === 'finalizada' || s === 'entregue';
-  }
-
-  servicosConcluidos(): number {
-    return this.os?.servicos?.filter((s: any) => s.status === 'Concluido').length || 0;
-  }
-
-  subtotalServicos(): number {
-    return this.os?.servicos?.reduce((acc: number, s: any) => acc + s.valorCobrado, 0) || 0;
-  }
-
-  subtotalInsumos(): number {
-    return this.os?.insumos?.reduce((acc: number, i: any) => acc + i.valorTotal, 0) || 0;
   }
 }

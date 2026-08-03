@@ -10,7 +10,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { timer } from 'rxjs';
+import { Subject, timer } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../../../core/ui/notification.service';
 import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
 import { ApprovalKanbanCardComponent } from '../../components/os-card/approval-kanban-card.component';
@@ -713,6 +714,9 @@ export class OsKanbanPageComponent implements OnInit {
   private readonly osService = inject(OrdemServicoService);
   private readonly notification = inject(NotificationService);
 
+  /** Subject usado para cancelar o polling anterior antes de criar um novo (B4). */
+  private readonly stopPolling$ = new Subject<void>();
+
   ngOnInit(): void {
     this.iniciarPolling();
   }
@@ -731,8 +735,12 @@ export class OsKanbanPageComponent implements OnInit {
   }
 
   private iniciarPolling(): void {
+    this.stopPolling$.next(); // cancela a subscription anterior antes de criar nova
     timer(0, 10000)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        takeUntil(this.stopPolling$),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe(() => this.carregarFila());
   }
 
@@ -764,55 +772,25 @@ export class OsKanbanPageComponent implements OnInit {
     });
   }
 
+  // S1: mapa único substituindo 3 métodos switch no mesmo enum (Repeated Switches smell)
+  private readonly COLUMN_META: Record<string, { title: string; borderClass: string; glowClass: string }> = {
+    Recebida:    { title: 'Recebidas',         borderClass: 'status-recebida-border',    glowClass: 'glow-recebida'    },
+    Diagnostico: { title: 'Em Diagnóstico',    borderClass: 'status-diagnostico-border', glowClass: 'glow-diagnostico' },
+    Aprovacao:   { title: 'Aprovação',         borderClass: 'status-aguardando-border',  glowClass: 'glow-aguardando'  },
+    Execucao:    { title: 'Em Execução',       borderClass: 'status-execucao-border',    glowClass: 'glow-execucao'    },
+    Finalizada:  { title: 'Finalizadas Hoje',  borderClass: 'status-finalizada-border',  glowClass: 'glow-finalizada'  },
+  };
+
   getColumnTitle(status: string): string {
-    switch (status) {
-      case 'Recebida':
-        return 'Recebidas';
-      case 'Diagnostico':
-        return 'Em Diagnóstico';
-      case 'Aprovacao':
-        return 'Aprovação';
-      case 'Execucao':
-        return 'Em Execução';
-      case 'Finalizada':
-        return 'Finalizadas Hoje';
-      default:
-        return status;
-    }
+    return this.COLUMN_META[status]?.title ?? status;
   }
 
   getColumnBorderClass(status: string): string {
-    switch (status) {
-      case 'Recebida':
-        return 'status-recebida-border';
-      case 'Diagnostico':
-        return 'status-diagnostico-border';
-      case 'Aprovacao':
-        return 'status-aguardando-border';
-      case 'Execucao':
-        return 'status-execucao-border';
-      case 'Finalizada':
-        return 'status-finalizada-border';
-      default:
-        return '';
-    }
+    return this.COLUMN_META[status]?.borderClass ?? '';
   }
 
   getColumnGlowClass(status: string): string {
-    switch (status) {
-      case 'Recebida':
-        return 'glow-recebida';
-      case 'Diagnostico':
-        return 'glow-diagnostico';
-      case 'Aprovacao':
-        return 'glow-aguardando';
-      case 'Execucao':
-        return 'glow-execucao';
-      case 'Finalizada':
-        return 'glow-finalizada';
-      default:
-        return '';
-    }
+    return this.COLUMN_META[status]?.glowClass ?? '';
   }
 
   abrirDrawer(card: KanbanCard): void {

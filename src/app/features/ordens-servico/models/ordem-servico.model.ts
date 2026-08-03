@@ -99,8 +99,10 @@ export interface AdicionarInsumoOSRequest {
   quantidade: number;
 }
 
+export type KanbanCardType = 'Received' | 'Diagnosis' | 'Approval' | 'Execution' | 'Finished';
+
 export interface KanbanCard {
-  $type: string;
+  $type: KanbanCardType;
   id: string;
   clienteNome: string;
   placaVeiculo: string;
