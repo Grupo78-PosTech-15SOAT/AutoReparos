@@ -297,7 +297,8 @@ export class OsNovaPageComponent implements OnInit {
         this.veiculoId = draft.veiculoId || '';
         this.observacoesIniciais = draft.observacoesIniciais || '';
         this.rascunhoSalvo = true;
-      } catch (_err) {
+      } catch (err) {
+        console.warn('Rascunho de OS invalido. Removendo do storage:', err);
         this.storage.removeItem(DRAFT_STORAGE_KEY);
       }
     }
