@@ -180,13 +180,13 @@ import { AuthService } from '../../../auth/services/auth.service';
 
     /* Hero Card Style */
     .hero-card {
-      background: linear-gradient(135deg, rgba(20, 20, 26, 0.95), rgba(12, 12, 16, 0.98));
-      border: 1px solid rgba(237, 20, 91, 0.25);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
       border-radius: 20px;
       padding: 3rem 2.75rem;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: var(--shadow-md);
     }
     .hero-glow-bg {
       position: absolute;
@@ -194,7 +194,7 @@ import { AuthService } from '../../../auth/services/auth.service';
       right: -100px;
       width: 320px;
       height: 320px;
-      background: radial-gradient(circle, rgba(237, 20, 91, 0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, transparent 70%);
       pointer-events: none;
     }
     .hero-content {
@@ -205,9 +205,9 @@ import { AuthService } from '../../../auth/services/auth.service';
       display: inline-flex;
       align-items: center;
       gap: 0.6rem;
-      background: rgba(237, 20, 91, 0.1);
-      border: 1px solid rgba(237, 20, 91, 0.3);
-      color: #ED145B;
+      background: var(--primary-subtle);
+      border: 1px solid var(--border-pink);
+      color: var(--primary);
       padding: 0.35rem 0.9rem;
       border-radius: 999px;
       font-size: 0.78rem;
@@ -218,26 +218,26 @@ import { AuthService } from '../../../auth/services/auth.service';
     .pill-dot {
       width: 6px;
       height: 6px;
-      background: #ED145B;
+      background: var(--primary);
       border-radius: 50%;
-      box-shadow: 0 0 6px #ED145B;
+      box-shadow: 0 0 6px var(--primary-glow);
     }
     .hero-title {
       font-family: 'Outfit', sans-serif;
       font-size: 2.6rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
       line-height: 1.15;
       letter-spacing: -0.02em;
     }
     .highlight-pink {
-      color: #ED145B;
-      background: linear-gradient(135deg, #ED145B, #FF5388);
+      color: var(--primary);
+      background: linear-gradient(135deg, var(--primary), #FB7185);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .hero-description {
-      color: #A1A1AA;
+      color: var(--text-muted);
       font-size: 1.05rem;
       max-width: 680px;
       margin-top: 0.85rem;
@@ -264,8 +264,8 @@ import { AuthService } from '../../../auth/services/auth.service';
       display: flex;
       align-items: center;
       gap: 1.25rem;
-      background: rgba(14, 14, 18, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 1rem 1.25rem;
       margin-top: 1.75rem;
@@ -275,8 +275,8 @@ import { AuthService } from '../../../auth/services/auth.service';
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: rgba(237, 20, 91, 0.15);
-      color: #ED145B;
+      background: var(--primary-subtle);
+      color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -287,17 +287,17 @@ import { AuthService } from '../../../auth/services/auth.service';
     }
     .user-greeting-label {
       font-size: 0.75rem;
-      color: #71717A;
+      color: var(--text-subtle);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
     .user-greeting-name {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #F8FAFC;
+      color: var(--text-main);
     }
     .user-role-badge {
-      color: #ED145B;
+      color: var(--primary);
       font-size: 0.8rem;
     }
     .user-actions {
@@ -306,8 +306,6 @@ import { AuthService } from '../../../auth/services/auth.service';
       gap: 0.75rem;
       flex-wrap: wrap;
     }
-
-
 
     /* Modules Section */
     .modules-section {
@@ -320,7 +318,7 @@ import { AuthService } from '../../../auth/services/auth.service';
       font-family: 'Outfit', sans-serif;
       font-size: 1.45rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -329,7 +327,7 @@ import { AuthService } from '../../../auth/services/auth.service';
       font-size: 1.2rem;
     }
     .section-subtitle {
-      color: #71717A;
+      color: var(--text-subtle);
       font-size: 0.88rem;
       margin-top: 0.2rem;
     }
@@ -340,9 +338,9 @@ import { AuthService } from '../../../auth/services/auth.service';
       gap: 1.25rem;
     }
     .module-card {
-      background: rgba(20, 20, 24, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
       border-radius: 14px;
       padding: 1.5rem;
       position: relative;
@@ -351,11 +349,12 @@ import { AuthService } from '../../../auth/services/auth.service';
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.22s ease;
+      box-shadow: var(--shadow-sm);
     }
     .module-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(237, 20, 91, 0.3);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(237, 20, 91, 0.1);
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-md);
     }
     .card-top-line {
       position: absolute;
@@ -363,11 +362,11 @@ import { AuthService } from '../../../auth/services/auth.service';
       height: 3px;
       opacity: 0.8;
     }
-    .blue-line { background: #3B82F6; }
-    .purple-line { background: #8B5CF6; }
-    .orange-line { background: #F97316; }
-    .pink-line { background: #ED145B; }
-    .emerald-line { background: #10B981; }
+    .blue-line { background: #38BDF8; }
+    .purple-line { background: #A78BFA; }
+    .orange-line { background: #FB923C; }
+    .pink-line { background: var(--primary); }
+    .emerald-line { background: #34D399; }
     .cyan-line { background: #06B6D4; }
 
     .card-header {
@@ -385,29 +384,29 @@ import { AuthService } from '../../../auth/services/auth.service';
       justify-content: center;
       flex-shrink: 0;
     }
-    .icon-blue { background: rgba(59, 130, 246, 0.12); color: #3B82F6; }
-    .icon-purple { background: rgba(139, 92, 246, 0.12); color: #8B5CF6; }
-    .icon-orange { background: rgba(249, 115, 22, 0.12); color: #F97316; }
-    .icon-pink { background: rgba(237, 20, 91, 0.12); color: #ED145B; }
-    .icon-emerald { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+    .icon-blue { background: rgba(56, 189, 248, 0.12); color: #38BDF8; }
+    .icon-purple { background: rgba(167, 139, 250, 0.12); color: #A78BFA; }
+    .icon-orange { background: rgba(251, 146, 60, 0.14); color: #FB923C; }
+    .icon-pink { background: var(--primary-subtle); color: var(--primary); }
+    .icon-emerald { background: rgba(52, 211, 153, 0.12); color: #34D399; }
     .icon-cyan { background: rgba(6, 182, 212, 0.12); color: #06B6D4; }
 
     .module-title {
       font-family: 'Outfit', sans-serif;
       font-size: 1.1rem;
       font-weight: 700;
-      color: #ffffff;
+      color: var(--text-main);
       line-height: 1.25;
     }
     .module-desc {
-      color: #A1A1AA;
+      color: var(--text-muted);
       font-size: 0.875rem;
       line-height: 1.5;
       margin-bottom: 1.25rem;
       flex-grow: 1;
     }
     .module-link {
-      color: #ED145B;
+      color: var(--primary);
       font-size: 0.85rem;
       font-weight: 700;
       display: inline-flex;
@@ -416,7 +415,7 @@ import { AuthService } from '../../../auth/services/auth.service';
       transition: gap 0.2s ease, color 0.2s ease;
     }
     .module-link:hover {
-      color: #FF5388;
+      color: var(--primary-hover);
       gap: 0.6rem;
     }
 

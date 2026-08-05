@@ -19,7 +19,7 @@ import { LoadingService } from '../../../core/ui/loading.service';
     .loading-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(10, 10, 12, 0.7);
+      background: rgba(18, 18, 21, 0.75);
       backdrop-filter: blur(4px);
       z-index: 10000;
       display: flex;
@@ -27,28 +27,28 @@ import { LoadingService } from '../../../core/ui/loading.service';
       justify-content: center;
     }
     .spinner-box {
-      background: #18181C;
-      border: 1px solid rgba(237, 20, 91, 0.4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-focus);
       border-radius: 12px;
       padding: 1.5rem 2.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+      box-shadow: var(--shadow-lg);
     }
     .pink-spinner {
       width: 36px;
       height: 36px;
-      border: 3.5px solid rgba(237, 20, 91, 0.2);
-      border-top-color: #ED145B;
+      border: 3.5px solid var(--primary-subtle);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     .loading-text {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #E2E8F0;
+      color: var(--text-main);
     }
     @keyframes spin {
       to { transform: rotate(360deg); }

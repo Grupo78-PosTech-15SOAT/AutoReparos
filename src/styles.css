@@ -1,40 +1,46 @@
 /* ==========================================================================
-   DESIGN SYSTEM - TEMA FIAP FORMAL (ROSA FIAP #ED145B & PRETO CARBON #0A0A0C)
+   PALETA MEIO-TERMO - DEEP CHARCOAL & VIBRANT GLOW (REFINADA)
    ========================================================================== */
 :root {
-  /* Fundo e Superfícies (FIAP Black & Carbon Theme) */
-  --bg-dark: #0A0A0C;          /* Deep Carbon Black */
-  --bg-surface: #18181C;       /* Surface Dark */
-  --bg-surface-hover: #27272A; /* Surface Hover */
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-pink: rgba(237, 20, 91, 0.3);
+  /* Fundos e Superfícies (Equilíbrio e Profundidade) */
+  --bg-dark: #121216;          /* Deep Charcoal - Nobre, profundo e sem palidez */
+  --bg-surface: #1A1A22;       /* Superfícies de Painéis, Sidebar e Modais */
+  --bg-surface-hover: #262633; /* Hover refinado */
+  --bg-card: #21212A;          /* Cards com elevado contraste e presença */
+  
+  /* Bordas Cristalinas */
+  --border-color: rgba(255, 255, 255, 0.1);  /* Borda sutil de recorte */
+  --border-focus: rgba(244, 63, 94, 0.55);   /* Foco sutil Rose */
+  --border-subtle: #2F2F3D;
+  --border-pink: rgba(244, 63, 94, 0.4);
 
-  /* Marca FIAP (Rosa & Preto Formal) */
-  --primary: #ED145B;          /* Official FIAP Pink */
-  --primary-hover: #D0104F;
-  --primary-glow: rgba(237, 20, 91, 0.35);
-  --fiap-black: #1A1A1A;
+  /* Marca FIAP Vibrante */
+  --primary: #F43F5E;          /* Rose FIAP Vibrante */
+  --primary-hover: #E11D48;
+  --primary-subtle: rgba(244, 63, 94, 0.16);
+  --primary-glow: rgba(244, 63, 94, 0.35);
+  --fiap-black: #121216;
 
-  /* Texto Monospaced (Placas, Valores e Tokens - Formal Platinum Silver) */
-  --mono-text: #E2E8F0;        /* Crisp Platinum Silver */
-  --mono-badge-bg: rgba(255, 255, 255, 0.06);
+  /* Texto Monospaced */
+  --mono-text: #F1F5F9;
+  --mono-badge-bg: rgba(255, 255, 255, 0.08);
 
-  /* Paleta Semântica de Status das Ordens de Serviço (OS) */
-  --status-recebida: #3B82F6;            /* Blue */
-  --status-recebida-bg: rgba(59, 130, 246, 0.12);
-  --status-diagnostico: #F59E0B;          /* Amber */
-  --status-diagnostico-bg: rgba(245, 158, 11, 0.12);
-  --status-aguardando: #8B5CF6;           /* Purple */
-  --status-aguardando-bg: rgba(139, 92, 246, 0.12);
-  --status-execucao: #F97316;             /* Orange */
-  --status-execucao-bg: rgba(249, 115, 22, 0.15);
-  --status-finalizada: #10B981;           /* Emerald */
-  --status-finalizada-bg: rgba(16, 185, 129, 0.12);
-  --status-entregue: #64748B;             /* Slate Grey */
-  --status-entregue-bg: rgba(100, 116, 139, 0.15);
+  /* Status Semânticos */
+  --status-recebida: #38BDF8;
+  --status-recebida-bg: rgba(56, 189, 248, 0.15);
+  --status-diagnostico: #FBBF24;
+  --status-diagnostico-bg: rgba(251, 191, 36, 0.15);
+  --status-aguardando: #A78BFA;
+  --status-aguardando-bg: rgba(167, 139, 250, 0.15);
+  --status-execucao: #FB923C;
+  --status-execucao-bg: rgba(251, 146, 60, 0.18);
+  --status-finalizada: #34D399;
+  --status-finalizada-bg: rgba(52, 211, 153, 0.15);
+  --status-entregue: #A1A1AA;
+  --status-entregue-bg: rgba(161, 161, 170, 0.18);
 
-  /* Cores de Texto */
-  --text-main: #F8FAFC;
+  /* Tipografia */
+  --text-main: #F8FAFC;        /* Leitura nítida */
   --text-muted: #A1A1AA;
   --text-subtle: #71717A;
 
@@ -43,17 +49,18 @@
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Sombras de Elevação Profissionais (Tailwind & Radix UI Layered Elevation System) */
+  /* Elevação e Sombras */
   --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
-  --shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 2px 4px -1px rgba(0, 0, 0, 0.25), 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.25), 0 10px 15px -3px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.35), 0 20px 25px -5px rgba(0, 0, 0, 0.45);
-  --shadow-xl: 0 15px 30px -10px rgba(0, 0, 0, 0.45), 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
-  --shadow-glow: 0 0 20px -3px rgba(237, 20, 91, 0.4);
-  --glass-bg: rgba(24, 24, 28, 0.85);
-  --glass-blur: blur(14px);
+  --shadow-xs: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.45);
+  --shadow-xl: 0 24px 32px -6px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 18px -2px rgba(244, 63, 94, 0.3);
+  --glass-bg: rgba(26, 26, 34, 0.88);
+  --glass-blur: blur(12px);
+  
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -66,7 +73,7 @@
   margin: 0;
   padding: 0;
   scrollbar-width: thin;
-  scrollbar-color: #ED145B rgba(10, 10, 12, 0.5);
+  scrollbar-color: #2F2F3D #121216;
 }
 
 body {
@@ -76,8 +83,8 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(237, 20, 91, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(255, 255, 255, 0.02) 0%, transparent 40%);
+    radial-gradient(circle at 15% 15%, rgba(244, 63, 94, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -93,7 +100,12 @@ button, input, select, textarea {
 /* Utilitários Layout */
 .app-layout {
   position: relative;
-  z-index: 1;
+  min-height: 100vh;
+}
+
+.app-main-content {
+  position: relative;
+  z-index: 2;
 }
 
 .container {
@@ -160,8 +172,8 @@ button, input, select, textarea {
 }
 
 .form-control {
-  background: rgba(10, 10, 12, 0.7);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
   color: var(--text-main);
@@ -173,8 +185,8 @@ button, input, select, textarea {
 .form-control:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 12px var(--primary-glow);
-  background: rgba(15, 15, 18, 0.95);
+  box-shadow: 0 0 0 3px var(--border-focus);
+  background: rgba(30, 41, 59, 0.95);
 }
 
 .form-control::placeholder {
@@ -193,7 +205,7 @@ select.form-control option {
   background: var(--mono-badge-bg);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-color);
   font-size: 0.85rem;
   font-weight: 600;
   display: inline-block;
@@ -203,12 +215,12 @@ select.form-control option {
 /* Placa do Veículo (Design adaptado ao tema escuro com faixa azul Mercosul) */
 .badge-placa {
   font-family: var(--font-mono);
-  background: rgba(59, 130, 246, 0.08); /* Fundo sutil azul-escuro */
-  color: #93C5FD;                        /* Texto azul-claro nítido */
-  border-left: 4px solid #3B82F6;        /* Faixa azul característica do Mercosul */
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
-  border-right: 1px solid rgba(59, 130, 246, 0.2);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(56, 189, 248, 0.08); /* Fundo sutil azul-escuro */
+  color: #38BDF8;                        /* Texto azul-claro nítido */
+  border-left: 4px solid #38BDF8;        /* Faixa azul característica do Mercosul */
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  border-right: 1px solid rgba(56, 189, 248, 0.2);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
   padding: 0.15rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
@@ -222,9 +234,9 @@ select.form-control option {
 /* CPF / CNPJ do Cliente (Design verde esmeralda institucional) */
 .badge-documento {
   font-family: var(--font-mono);
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(52, 211, 153, 0.1);
   color: #34D399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(52, 211, 153, 0.3);
   padding: 0.2rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
@@ -234,12 +246,12 @@ select.form-control option {
   letter-spacing: 0.02em;
 }
 
-/* ID de Identificação do Sistema (Design rosa FIAP característico) */
+/* ID de Identificação do Sistema (Design rosa FIAP refinado) */
 .badge-id {
   font-family: var(--font-mono);
-  background: rgba(237, 20, 91, 0.08);
-  color: #ED145B;
-  border: 1px solid rgba(237, 20, 91, 0.25);
+  background: var(--primary-subtle);
+  color: var(--primary);
+  border: 1px solid var(--border-pink);
   padding: 0.2rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
@@ -266,14 +278,14 @@ select.form-control option {
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
   color: #ffffff;
-  box-shadow: 0 4px 16px var(--primary-glow);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover);
+  background: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(237, 20, 91, 0.5);
+  box-shadow: 0 6px 16px rgba(244, 63, 94, 0.35);
 }
 
 .btn-secondary {
@@ -283,13 +295,13 @@ select.form-control option {
 }
 .btn-secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(226, 232, 240, 0.2);
 }
 
 .btn-accent {
-  background: linear-gradient(135deg, var(--primary), #800A30);
+  background: linear-gradient(135deg, var(--primary), #991B1B);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(237, 20, 91, 0.3);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
 }
 .btn-accent:hover:not(:disabled) {
   transform: translateY(-1px);
@@ -429,26 +441,25 @@ select.form-control option {
 /* Ambient Glow & Floating Animations */
 .ambient-glow {
   position: fixed;
-  width: 700px;
-  height: 700px;
+  width: 800px;
+  height: 800px;
   border-radius: 50%;
   pointer-events: none;
-  z-index: -1;
-  filter: blur(140px);
-  opacity: 0.3;
+  z-index: 0;
+  filter: blur(120px);
   mix-blend-mode: screen;
 }
 .glow-1 {
-  background: radial-gradient(circle, #ED145B 0%, transparent 70%);
-  top: -100px;
-  left: -100px;
-  animation: float-glow-1 25s infinite alternate ease-in-out;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.45) 0%, transparent 68%);
+  top: -140px;
+  left: -120px;
+  animation: float-glow-1 22s infinite alternate ease-in-out;
 }
 .glow-2 {
-  background: radial-gradient(circle, #3B82F6 0%, transparent 70%);
-  bottom: -150px;
-  right: -100px;
-  animation: float-glow-2 30s infinite alternate ease-in-out;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.35) 0%, transparent 68%);
+  bottom: -160px;
+  right: -120px;
+  animation: float-glow-2 26s infinite alternate ease-in-out;
 }
 @keyframes float-glow-1 {
   0% { transform: translate(0, 0) scale(1); }
@@ -468,7 +479,7 @@ select.form-control option {
 .table-loading-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(10, 10, 12, 0.65);
+  background: rgba(18, 18, 21, 0.65);
   backdrop-filter: blur(2px);
   z-index: 10;
   display: flex;
@@ -481,8 +492,8 @@ select.form-control option {
 .table-loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid rgba(237, 20, 91, 0.2);
-  border-top-color: #ED145B;
+  border: 3px solid rgba(244, 63, 94, 0.2);
+  border-top-color: #F43F5E;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -502,12 +513,12 @@ select.form-control option {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(10, 10, 12, 0.5);
+  background: rgba(18, 18, 21, 0.5);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ED145B, #800A30);
+  background: #2D2D36;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #ff2a75, #a30e3f);
+  background: #3F3F46;
 }
