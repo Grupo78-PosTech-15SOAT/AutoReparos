@@ -17,7 +17,7 @@ case $action in
   "restore")
     dotnet restore ;;
   "kube-config")
-    ./infra/update-kubeconfig.sh "$2" "$3" ;;
+    ./scripts/infra/update-kubeconfig.sh "$2" "$3" ;;
   *)
-    echo "Uso: ./dev.sh {run|watch|db-update|mig-add|update-tool|restore|kube-config}" ;;
+    echo "Uso: ./scripts/dev/dev.sh {run|watch|db-update|mig-add|update-tool|restore|kube-config}" ;;
 esac

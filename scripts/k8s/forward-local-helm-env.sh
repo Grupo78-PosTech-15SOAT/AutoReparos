@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
-# Carregar variáveis do .env
+# Descobrir o diretório do próprio script e determinar a raiz do projeto AutoReparos
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTOREPAROS_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+cd "$AUTOREPAROS_DIR"
+
+if [[ ! -f .env ]]; then
+  echo "❌ Erro: Arquivo .env não encontrado no diretório $AUTOREPAROS_DIR!"
+  echo "Por favor, crie o arquivo .env com as configurações necessárias."
+  exit 1
+fi
+
+echo "📄 Carregando variáveis de ambiente do .env..."
 export $(grep -v '^#' .env | xargs)
 
 echo "🚀 1. Sincronizando dependências do Helm..."
@@ -30,12 +42,6 @@ sleep 10
 kubectl get pods
 
 echo "🔌 4. Redirecionando portas..."
-pkill -f "kubectl port-forward" || true
-
-kubectl port-forward svc/autoreparos-api-service 8080:8080 > /dev/null 2>&1 &
-kubectl port-forward svc/autoreparos-web-service 80:80 > /dev/null 2>&1 &
-kubectl port-forward svc/autoreparos-grafana 3000:3000 > /dev/null 2>&1 &
-kubectl port-forward svc/autoreparos-jaeger 16686:16686 > /dev/null 2>&1 &
-kubectl port-forward svc/autoreparos-prometheus 9090:9090 > /dev/null 2>&1 &
+./scripts/k8s/dev-forward.sh start
 
 echo "✅ Concluído!"
