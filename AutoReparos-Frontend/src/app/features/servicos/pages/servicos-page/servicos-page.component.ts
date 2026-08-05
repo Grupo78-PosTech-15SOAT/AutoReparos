@@ -1,0 +1,231 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ServicoService } from '../../services/servico.service';
+import { Servico } from '../../models/servico.model';
+import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+
+@Component({
+  selector: 'app-servicos-page',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, FormsModule, PaginationComponent],
+  template: `
+    <div class="container fade-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Catálogo de Serviços
+          </h1>
+        </div>
+        <button (click)="abrirModalNovo()" class="btn btn-primary">
+          + Serviço
+        </button>
+      </div>
+
+      <!-- Tabela de Serviços -->
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Serviço</th>
+              <th style="text-align: center;">Preço Base</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of servicos; track s.id) {
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">{{ s.nome }}</div>
+                  @if (s.descricao) {
+                    <div style="font-size: 0.75rem; color: #A1A1AA;">{{ s.descricao }}</div>
+                  }
+                </td>
+                <td style="text-align: center;">
+                  <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #10B981;">
+                    R$ {{ s.valorTabelado | number:'1.2-2' }}
+                  </span>
+                </td>
+                <td>
+                  <div style="display: inline-flex; gap: 0.5rem;">
+                    <button (click)="editar(s)" class="btn btn-secondary btn-sm" title="Editar Serviço">✏️ Editar</button>
+                    <button (click)="excluir(s.id!)" class="btn btn-danger btn-sm" title="Excluir Serviço">🗑️ Excluir</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 2.5rem; color: #71717A;">
+                  Nenhum serviço cadastrado.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+
+      <!-- Modal de Cadastro / Edição -->
+      @if (exibirModal) {
+        <div class="modal-backdrop fade-in">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h3>{{ editandoId ? 'Editar Serviço' : 'Novo Serviço' }}</h3>
+              <button (click)="exibirModal = false" class="btn-close">&times;</button>
+            </div>
+
+            <form (ngSubmit)="salvar()">
+              <div class="form-group">
+                <label class="form-label">Nome do Serviço</label>
+                <input type="text" [(ngModel)]="formServico.nome" name="nome" required placeholder="Ex: Alinhamento 3D e Balanceamento" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição do Procedimento</label>
+                <input type="text" [(ngModel)]="formServico.descricao" name="descricao" placeholder="Ex: Regulagem de geometria da suspensão dianteira e traseira" class="form-control" />
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Preço Base (R$)</label>
+                  <input type="number" step="0.01" [(ngModel)]="formServico.valorTabelado" name="valorTabelado" required class="form-control" />
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" (click)="exibirModal = false" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar Serviço</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+    .modal-card { background: #18181C; border: 1px solid rgba(237, 20, 91, 0.3); border-radius: 12px; padding: 2rem; max-width: 580px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-header h3 { font-family: 'Outfit', sans-serif; font-weight: 700; color: #fff; }
+    .btn-close { background: none; border: none; color: #A1A1AA; font-size: 1.5rem; cursor: pointer; }
+  `]
+})
+export class ServicosPageComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+  servicos: Servico[] = [];
+  exibirModal = false;
+  editandoId: string | null = null;
+
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+
+  formServico: Servico = {
+    nome: '',
+    descricao: '',
+    valorTabelado: 0
+  };
+
+  loading = false;
+  private servicoService = inject(ServicoService);
+  private notification = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
+
+  ngOnInit() {
+    this.carregar();
+  }
+
+  carregar() {
+    this.loading = true;
+    this.servicoService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.servicos = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregar();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregar();
+  }
+
+  abrirModalNovo() {
+    this.editandoId = null;
+    this.formServico = { nome: '', descricao: '', valorTabelado: 0 };
+    this.exibirModal = true;
+  }
+
+  editar(s: Servico) {
+    this.editandoId = s.id || null;
+    this.formServico = { ...s };
+    this.exibirModal = true;
+  }
+
+  salvar() {
+    if (this.editandoId) {
+      this.servicoService.atualizar(this.editandoId, this.formServico).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.success('Serviço Atualizado', 'Item alterado no catálogo.');
+          this.exibirModal = false;
+          this.carregar();
+        }
+      });
+    } else {
+      this.servicoService.criar(this.formServico).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.success('Serviço Cadastrado', 'Novo serviço incluído.');
+          this.exibirModal = false;
+          this.carregar();
+        }
+      });
+    }
+  }
+
+  excluir(id: string) {
+    if (confirm('Deseja excluir este serviço do catálogo?')) {
+      this.servicoService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.info('Serviço Removido', 'Item excluído.');
+          this.carregar();
+        }
+      });
+    }
+  }
+}
