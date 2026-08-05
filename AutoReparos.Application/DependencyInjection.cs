@@ -72,9 +72,17 @@ namespace AutoReparos.Application
             services.AddScoped<IRemoverEstoqueUseCase, RemoverEstoqueUseCase>();
             services.AddScoped<IExcluirInsumoUseCase, ExcluirInsumoUseCase>();
 
+            // Ordens de Serviço - Kanban Strategies
+            services.AddScoped<AutoReparos.Application.OrdensServicos.Strategies.Interfaces.IKanbanCardStrategy, AutoReparos.Application.OrdensServicos.Strategies.ReceivedKanbanCardStrategy>();
+            services.AddScoped<AutoReparos.Application.OrdensServicos.Strategies.Interfaces.IKanbanCardStrategy, AutoReparos.Application.OrdensServicos.Strategies.DiagnosisKanbanCardStrategy>();
+            services.AddScoped<AutoReparos.Application.OrdensServicos.Strategies.Interfaces.IKanbanCardStrategy, AutoReparos.Application.OrdensServicos.Strategies.ApprovalKanbanCardStrategy>();
+            services.AddScoped<AutoReparos.Application.OrdensServicos.Strategies.Interfaces.IKanbanCardStrategy, AutoReparos.Application.OrdensServicos.Strategies.ExecutionKanbanCardStrategy>();
+            services.AddScoped<AutoReparos.Application.OrdensServicos.Strategies.Interfaces.IKanbanCardStrategy, AutoReparos.Application.OrdensServicos.Strategies.FinishedKanbanCardStrategy>();
+
             // Ordens de Serviço
             services.AddScoped<ICriarOrdemServicoUseCase, CriarOrdemServicoUseCase>();
             services.AddScoped<IListarOrdensServicoUseCase, ListarOrdensServicoUseCase>();
+            services.AddScoped<IListarKanbanOrdensServicoUseCase, ListarKanbanOrdensServicoUseCase>();
             services.AddScoped<IListarFilaOrdensServicoUseCase, ListarFilaOrdensServicoUseCase>();
             services.AddScoped<IObterOrdemServicoPorIdUseCase, ObterOrdemServicoPorIdUseCase>();
             services.AddScoped<IObterOrdemServicoPublicaPorIdUseCase, ObterOrdemServicoPublicaPorIdUseCase>();

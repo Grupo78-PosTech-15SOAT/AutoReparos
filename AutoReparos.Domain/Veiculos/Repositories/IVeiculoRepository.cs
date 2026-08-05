@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Veiculos.Entities;
+using AutoReparos.Domain.Veiculos.Entities;
 
 namespace AutoReparos.Domain.Veiculos.Repositories
 {
@@ -12,5 +12,6 @@ namespace AutoReparos.Domain.Veiculos.Repositories
 
         Task Update(Veiculo veiculo);
         Task Delete(Veiculo veiculo);
+        Task<IEnumerable<Veiculo>> GetByIds(IEnumerable<Guid> ids);
     }
 }

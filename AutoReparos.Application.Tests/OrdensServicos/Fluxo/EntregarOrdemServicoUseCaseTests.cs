@@ -35,8 +35,8 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             var os = new OrdemServico(clienteId, Guid.NewGuid(), "obs");
             var item = new OrdemServicoServico(os.Id, Guid.NewGuid(), 150m);
             os.AdicionarServico(item);
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-123");
+            os.AguardarAprovacao("mecanico-123");
             os.Aprovar();
             os.IniciarServico(item.Id);
             os.ConcluirServico(item.Id);

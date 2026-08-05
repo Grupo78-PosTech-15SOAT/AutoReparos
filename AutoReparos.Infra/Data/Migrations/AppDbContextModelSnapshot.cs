@@ -90,6 +90,9 @@ namespace AutoReparos.Infra.Migrations
                     b.Property<DateTime?>("EntregueEm")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("EnvioAprovacaoEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime?>("FinalizadoEm")
                         .HasColumnType("timestamp with time zone");
 
@@ -99,6 +102,10 @@ namespace AutoReparos.Infra.Migrations
                     b.Property<string>("Observacao")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ResponsavelId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

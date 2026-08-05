@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoReparos — Guia de Estilo (FIAP Pink & Black Formal)</title>
+  
+  <!-- Google Fonts: Outfit (Títulos & Destaques) + Inter (Corpo & Dados) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM - TEMA FIAP FORMAL (ROSA FIAP & PRETO CARBON)
+       ========================================================================== */
+    :root {
+      /* Fundo e Superfícies (FIAP Black & Carbon Theme) */
+      --bg-dark: #0A0A0C;          /* Deep Carbon Black */
+      --bg-surface: #18181C;       /* Surface Dark */
+      --bg-surface-hover: #27272A; /* Surface Hover */
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-pink: rgba(237, 20, 91, 0.3);
+
+      /* Marca FIAP (Rosa & Preto Formal) */
+      --primary: #ED145B;          /* Official FIAP Pink */
+      --primary-hover: #D0104F;
+      --primary-glow: rgba(237, 20, 91, 0.35);
+      --fiap-black: #1A1A1A;
+
+      /* Texto Monospaced (Placas, Valores e Tokens - Formal Platinum Silver) */
+      --mono-text: #E2E8F0;        /* Crisp Platinum Silver (Eliminado o tom cyber) */
+      --mono-badge-bg: rgba(255, 255, 255, 0.06);
+
+      /* Paleta Semântica de Status das Ordens de Serviço (OS) */
+      --status-recebida: #3B82F6;            /* Blue */
+      --status-recebida-bg: rgba(59, 130, 246, 0.12);
+      --status-diagnostico: #F59E0B;          /* Amber */
+      --status-diagnostico-bg: rgba(245, 158, 11, 0.12);
+      --status-aguardando: #8B5CF6;           /* Purple */
+      --status-aguardando-bg: rgba(139, 92, 246, 0.12);
+      --status-execucao: #F97316;             /* Orange */
+      --status-execucao-bg: rgba(249, 115, 22, 0.15);
+      --status-finalizada: #10B981;           /* Emerald */
+      --status-finalizada-bg: rgba(16, 185, 129, 0.12);
+      --status-entregue: #64748B;             /* Slate Grey */
+      --status-entregue-bg: rgba(100, 116, 139, 0.15);
+
+      /* Cores de Texto */
+      --text-main: #F8FAFC;
+      --text-muted: #A1A1AA;
+      --text-subtle: #71717A;
+
+      /* Tipografia */
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Sombras e Efeitos Glassmorphism */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 12px 36px -5px rgba(0, 0, 0, 0.7);
+      --glass-bg: rgba(24, 24, 28, 0.75);
+      --glass-blur: blur(14px);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    /* Reset & Estilos Base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(237, 20, 91, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header e Marca FIAP */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border-pink);
+      margin-bottom: 3rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--primary), #800A30);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px var(--primary-glow);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .brand-logo svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2.3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #F472B6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .badge-tag {
+      background: rgba(237, 20, 91, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(237, 20, 91, 0.4);
+      padding: 0.4rem 0.95rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      box-shadow: 0 0 12px rgba(237, 20, 91, 0.2);
+    }
+
+    /* Seções Principais */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title svg {
+      color: var(--primary);
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+      font-size: 0.95rem;
+    }
+
+    .section {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Grid Layouts */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; }
+
+    /* 1. PALETA DE CORES */
+    .color-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .color-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary);
+    }
+
+    .color-swatch {
+      height: 90px;
+      width: 100%;
+      position: relative;
+    }
+
+    .color-info {
+      padding: 1rem;
+    }
+
+    .color-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .color-hex {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* 2. TIPOGRAFIA SHOWCASE */
+    .type-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .type-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .type-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--primary);
+    }
+
+    .h1-sample { font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; line-height: 1.2; }
+    .h2-sample { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; }
+    .h3-sample { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; }
+    .body-sample { font-size: 0.95rem; color: var(--text-main); }
+    
+    /* Estilo do Monospace Formal */
+    .mono-sample { 
+      font-family: var(--font-mono); 
+      font-size: 0.85rem; 
+      color: var(--mono-text); 
+      background: var(--mono-badge-bg);
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: inline-block;
+      letter-spacing: 0.03em;
+    }
+
+    /* 3. ICONOGRAFIA SHOWCASE */
+    .icon-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .icon-box:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--primary);
+      box-shadow: 0 0 18px var(--primary-glow);
+    }
+
+    .icon-box svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--text-main);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .icon-box:hover svg {
+      stroke: var(--primary);
+    }
+
+    .icon-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* 4. BADGES DE STATUS DE OS */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .status-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-recebida {
+      background: var(--status-recebida-bg);
+      color: var(--status-recebida);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .status-recebida .dot { background: var(--status-recebida); }
+
+    .status-diagnostico {
+      background: var(--status-diagnostico-bg);
+      color: var(--status-diagnostico);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .status-diagnostico .dot { background: var(--status-diagnostico); }
+
+    .status-aguardando {
+      background: var(--status-aguardando-bg);
+      color: var(--status-aguardando);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .status-aguardando .dot { background: var(--status-aguardando); }
+
+    .status-execucao {
+      background: var(--status-execucao-bg);
+      color: var(--status-execucao);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.25);
+    }
+    .status-execucao .dot { 
+      background: var(--status-execucao);
+      animation: pulseDot 1.5s infinite;
+    }
+
+    .status-finalizada {
+      background: var(--status-finalizada-bg);
+      color: var(--status-finalizada);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-finalizada .dot { background: var(--status-finalizada); }
+
+    .status-entregue {
+      background: var(--status-entregue-bg);
+      color: var(--status-entregue);
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+    .status-entregue .dot { background: var(--status-entregue); }
+
+    @keyframes pulseDot {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* 5. CARD COMPONENTE DE DEMONSTRAÇÃO (MOCK KANBAN OS) */
+    .os-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .os-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px -4px rgba(237, 20, 91, 0.25);
+    }
+
+    .os-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .os-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--primary);
+    }
+
+    .os-vehicle {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .os-client {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .placa-badge {
+      font-family: var(--font-mono);
+      color: var(--mono-text);
+      background: var(--mono-badge-bg);
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .os-details-list {
+      background: rgba(10, 10, 12, 0.6);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    .os-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+
+    .os-item-name { color: var(--text-main); font-weight: 500; }
+
+    /* BOTÕES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover { background: var(--border-color); }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--primary), #800A30);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(237, 20, 91, 0.3);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-subtle);
+      font-size: 0.85rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- HEADER DO SISTEMA -->
+    <header>
+      <div class="brand">
+        <div class="brand-logo">
+          <!-- Icone de Chave e Engrenagem (Automotivo) -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">AutoReparos</h1>
+          <p class="brand-subtitle">Design System & Guia de Estilo (Tema FIAP Formal: Rosa & Preto Carbon)</p>
+        </div>
+      </div>
+      <span class="badge-tag">FIAP Identity Formal</span>
+    </header>
+
+    <!-- 1. PALETA DE CORES -->
+    <section class="section">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.7-.75 1.7-1.67 0-.42-.15-.84-.43-1.17-.28-.32-.44-.74-.44-1.16 0-.92.75-1.67 1.67-1.67H17c2.76 0 5-2.24 5-5 0-4.42-4.03-8-10-8z"/></svg>
+        1. Paleta de Cores da Marca (FIAP Institutional)
+      </h2>
+      <p class="section-desc">Identidade formal sofisticada combinando o Rosa FIAP (`#ED145B`) e o Preto Carbon (`#0A0A0C`), com Prata Platinado (`#E2E8F0`) para dados técnicos legíveis.</p>
+      
+      <div class="grid-3">
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--primary);"></div>
+          <div class="color-info">
+            <div class="color-name">FIAP Pink (Marca Primária)</div>
+            <div class="color-hex">#ED145B</div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--bg-dark);"></div>
+          <div class="color-info">
+            <div class="color-name">Deep Carbon Black</div>
+            <div class="color-hex">#0A0A0C</div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--bg-surface);"></div>
+          <div class="color-info">
+            <div class="color-name">Surface Dark</div>
+            <div class="color-hex">#18181C</div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--mono-text);"></div>
+          <div class="color-info">
+            <div class="color-name">Platinum Silver (Dados/Monospace)</div>
+            <div class="color-hex">#E2E8F0</div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--status-execucao);"></div>
+          <div class="color-info">
+            <div class="color-name">Orange Alert (Em Execução)</div>
+            <div class="color-hex">#F97316</div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: var(--status-finalizada);"></div>
+          <div class="color-info">
+            <div class="color-name">Emerald Success (Finalizada)</div>
+            <div class="color-hex">#10B981</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. STATUS DAS ORDENS DE SERVIÇO (BADGES) -->
+    <section class="section">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        2. Badges de Status das Ordens de Serviço (OS)
+      </h2>
+      <p class="section-desc">Estilos semânticos para acompanhamento de status em tempo real com indicador visual ativo.</p>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+        <span class="status-badge status-recebida">
+          <span class="dot"></span> 1. Recebida
+        </span>
+
+        <span class="status-badge status-diagnostico">
+          <span class="dot"></span> 2. Em Diagnóstico
+        </span>
+
+        <span class="status-badge status-aguardando">
+          <span class="dot"></span> 3. Aguardando Aprovação
+        </span>
+
+        <span class="status-badge status-execucao">
+          <span class="dot"></span> 4. Em Execução (Ativo)
+        </span>
+
+        <span class="status-badge status-finalizada">
+          <span class="dot"></span> 5. Finalizada
+        </span>
+
+        <span class="status-badge status-entregue">
+          <span class="dot"></span> 6. Entregue
+        </span>
+      </div>
+    </section>
+
+    <!-- 3. TIPOGRAFIA -->
+    <section class="section">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        3. Tipografia (Outfit + Inter + JetBrains Mono Platinum)
+      </h2>
+      <p class="section-desc">Fontes selecionadas para legibilidade técnica sofisticada e acabamento corporativo formal.</p>
+
+      <div class="type-row">
+        <span class="type-meta">Font Family: Outfit (800) — Títulos Principais</span>
+        <div class="h1-sample">Painel de Gestão da Oficina Mecânica</div>
+      </div>
+
+      <div class="type-row">
+        <span class="type-meta">Font Family: Outfit (700) — Subtítulos e Cartões</span>
+        <div class="h2-sample">Ordem de Serviço #OS-2026-0042</div>
+      </div>
+
+      <div class="type-row">
+        <span class="type-meta">Font Family: Inter (400) — Texto de Corpo & Parágrafos</span>
+        <div class="body-sample">O veículo deu entrada com queixa de ruído na suspensão dianteira direita e necessidade de troca de óleo do motor. Diagnóstico iniciado pelo mecânico responsável.</div>
+      </div>
+
+      <div class="type-row">
+        <span class="type-meta">Font Family: JetBrains Mono (Formal Silver) — Placas, Valores & Tokens</span>
+        <div>
+          <span class="mono-sample">PLACA: BRA2E19</span> &nbsp; 
+          <span class="mono-sample">CPF: 123.456.789-00</span> &nbsp; 
+          <span class="mono-sample">TOTAL: R$ 1.450,00</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ICONOGRAFIA -->
+    <section class="section">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        4. Conjunto de Ícones do Sistema
+      </h2>
+      <p class="section-desc">Ícones vetoriais limpos padronizados para navegação, papéis (Atendente/Mecânico) e ações rápidas.</p>
+
+      <div class="grid-6">
+        <div class="icon-box">
+          <!-- Mecanico / Ferramenta -->
+          <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span class="icon-label">Mecânico</span>
+        </div>
+
+        <div class="icon-box">
+          <!-- Atendente / User -->
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="icon-label">Atendente</span>
+        </div>
+
+        <div class="icon-box">
+          <!-- Veiculo / Carro -->
+          <svg viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 3C2 11.3 2 11.7 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
+          <span class="icon-label">Veículo</span>
+        </div>
+
+        <div class="icon-box">
+          <!-- Insumo / Peça / Caixa -->
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span class="icon-label">Insumos / Peças</span>
+        </div>
+
+        <div class="icon-box">
+          <!-- Fila / Kanban -->
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+          <span class="icon-label">Fila Kanban</span>
+        </div>
+
+        <div class="icon-box">
+          <!-- Orcamento / Check -->
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 15 2 2 4-4"/></svg>
+          <span class="icon-label">Aprovação</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. COMPONENTES E MOCKUPS LIVE DE DEMONSTRAÇÃO -->
+    <section class="section">
+      <h2 class="section-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        5. Componentes de Exemplo & Mockup da Fila da Oficina
+      </h2>
+      <p class="section-desc">Exemplo real do Card de Ordem de Serviço na visão do Mecânico e botões de ação estilizados no tema FIAP Formal.</p>
+
+      <div class="grid-2">
+        <!-- CARD OS DEMO -->
+        <div class="os-card">
+          <div class="os-card-header">
+            <span class="os-number">#OS-1042</span>
+            <span class="status-badge status-execucao">
+              <span class="dot"></span> Em Execução
+            </span>
+          </div>
+
+          <div>
+            <h3 class="os-vehicle">Honda Civic 2.0 EXL (2022)</h3>
+            <div class="os-client">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Cliente: Carlos Eduardo Dotta | Placa: <span class="placa-badge">ABC1D23</span>
+            </div>
+          </div>
+
+          <div class="os-details-list">
+            <div class="os-item">
+              <span class="os-item-name">Troca de Amortecedores Dianteiros</span>
+              <span style="color: var(--status-finalizada); font-weight: 600;">Concluído</span>
+            </div>
+            <div class="os-item">
+              <span class="os-item-name">Alinhamento e Balanceamento</span>
+              <span style="color: var(--status-execucao); font-weight: 600;">Em Execução...</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+            <button class="btn btn-primary" style="flex: 1;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Concluir Serviço
+            </button>
+            <button class="btn btn-secondary">Detalhes</button>
+          </div>
+        </div>
+
+        <!-- MOCKUP BOTOES E AÇÕES -->
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; justify-content: center;">
+          <h3 style="font-family: var(--font-display); font-size: 1.1rem;">Botões & Estilos de Ação (Tema FIAP Formal)</h3>
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <button class="btn btn-primary">+ Nova Ordem de Serviço</button>
+            <button class="btn btn-accent">Enviar para Aprovação</button>
+            <button class="btn btn-secondary">Filtrar por Placa</button>
+          </div>
+
+          <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Resumo Financeiro da OS:</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.9rem; font-weight: 500;">Valor Total Estimado:</span>
+              <span style="font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--status-finalizada);">R$ 1.850,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>AutoReparos — Protótipo Visual de Identidade de Interface FIAP Formal (Rosa #ED145B, Preto Carbon & Prata Platinado)</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

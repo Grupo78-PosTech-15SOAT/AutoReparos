@@ -16,6 +16,7 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Fluxo
         IServicoRepository servicoRepository,
         IAprovacaoTokenService aprovacaoTokenService,
         IClienteRepository clienteRepository,
+        ICurrentUserService currentUserService,
         INotificacaoService notificacaoService,
         ILogger<EnviarOrdemServicoParaAprovacaoUseCase> logger) : IEnviarOrdemServicoParaAprovacaoUseCase
     {
@@ -24,7 +25,8 @@ namespace AutoReparos.Application.OrdensServicos.UseCases.Fluxo
             var os = await repository.GetById(id)
                 ?? throw new NotFoundException(ErrorMessages.OrdemServicoNotFound);
 
-            os.AguardarAprovacao();
+            var mecanicoId = currentUserService.GetUserId();
+            os.AguardarAprovacao(mecanicoId);
             await repository.Update(os);
 
             var token = aprovacaoTokenService.GerarToken(os.Id);

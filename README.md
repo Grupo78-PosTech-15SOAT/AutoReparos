@@ -27,6 +27,7 @@ Este projeto foi desenvolvido como parte do **Tech Challenge (Fases 1 e 2)** da 
   - [Desenho da Arquitetura](#desenho-da-arquitetura)
     - [1. Componentes da Aplicação (Clean Architecture)](#1-componentes-da-aplicação-clean-architecture)
     - [Detalhamento das Camadas (DDD / Clean Architecture)](#detalhamento-das-camadas-ddd--clean-architecture)
+    - [Arquitetura Frontend (`AutoReparos.Web`)](#arquitetura-frontend-autoreparosweb)
     - [2. Infraestrutura Provisionada (AWS e Kubernetes)](#2-infraestrutura-provisionada-aws-e-kubernetes)
     - [3. Fluxo de Deploy (Pipeline CI/CD)](#3-fluxo-de-deploy-pipeline-cicd)
   - [Funcionalidades da Aplicação](#funcionalidades-da-aplicação)
@@ -68,7 +69,8 @@ Após a implantação do MVP na Fase 1, o foco da Fase 2 passou a ser a **alta d
 
 ## Tecnologias Utilizadas e Banco de Dados
 
-- **Linguagem & Framework:** C# (.NET 10) & ASP.NET Core (API REST / Minimal APIs)
+- **Linguagem & Framework Backend:** C# (.NET 10) & ASP.NET Core (API REST / Minimal APIs)
+- **Frontend Web:** Angular 19 (Signals, Standalone Components) & Yarn
 - **Banco de Dados:** PostgreSQL 16 (Banco de dados relacional primário)
 - **ORM:** Entity Framework Core & Npgsql
 - **Segurança & Autenticação:** ASP.NET Core Identity & JWT (JSON Web Tokens)
@@ -109,7 +111,8 @@ A aplicação está dividida em camadas seguindo os princípios de **Clean Archi
   }
 }}%%
 graph TD
-    API[AutoReparos.API] --> Application[AutoReparos.Application]
+    Web[AutoReparos.Web / Angular 19] -->|HTTP / REST API| API[AutoReparos.API]
+    API --> Application[AutoReparos.Application]
     Infra[AutoReparos.Infra] --> Application
     Application --> Domain[AutoReparos.Domain]
     
@@ -145,6 +148,18 @@ graph TD
 - **AutoReparos.Application:** Camada de lógica de aplicação, serviços de orquestração de negócios, DTOs e mapeamentos.
 - **AutoReparos.Infra:** Implementa a persistência no PostgreSQL (EF Core Context e Repositórios), configurações de segurança (Identity/JWT) e integrações de e-mail (SendGrid).
 - **AutoReparos.API:** Ponto de entrada da aplicação, contendo os controladores/endpoints (Minimal APIs), injeção de dependência e tratamento global de erros.
+
+### Arquitetura Frontend (`AutoReparos.Web`)
+
+O frontend foi desenvolvido utilizando **Angular 19** e **Yarn**, estruturado em uma arquitetura moderna e modular por *Features*, com gerenciamento de estado reativo baseado em **Signals**:
+
+- **Arquitetura Feature-Driven:** Módulos isolados (`auth`, `clientes`, `veiculos`, `servicos`, `insumos`, `ordens-servico`, `dashboard`, `portal-publico`, `usuarios`).
+- **Componentes Standalone**
+- **Reatividade com Angular Signals:** Uso de `signal()`, `computed()` e `effect()` para atualização granular do DOM sem dependência da Zone.js tradicional.
+- **Interceptors HTTP Globais:**
+  - `jwtInterceptor`: Injeta o Token Bearer JWT nas requisições autenticadas.
+  - `errorInterceptor`: Captura exceções da API de forma centralizada e notifica o usuário.
+- **Design System & UI/UX:** Interface responsiva construída em Vanilla CSS moderno com paleta escura (Deep Charcoal & FIAP Rose), suporte a acessibilidade (WCAG AA), máscaras dinâmicas de input (`CPF/CNPJ`, `Placa Mercosul`, `Telefone`) e suporte ao Portal Público sem autenticação para aprovação de orçamentos por clientes.
 
 ### 2. Infraestrutura Provisionada (AWS e Kubernetes)
 
@@ -318,10 +333,11 @@ Para subir a API, o banco de dados PostgreSQL e o utilitário pgAdmin localmente
 docker-compose up -d --build
 ```
 
-A API estará disponível em:
+A aplicação e seus serviços estarão disponíveis em:
 
-- Documentação interativa (Swagger): [http://localhost:8080/swagger](http://localhost:8080/swagger)
-- pgAdmin: [http://localhost:5050](http://localhost:5050)
+- **Aplicação Web (Frontend Angular):** [http://localhost:4200](http://localhost:4200)
+- **API REST & Documentação Interativa (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+- **pgAdmin:** [http://localhost:5050](http://localhost:5050)
 
 ### Execução de Testes Automatizados
 

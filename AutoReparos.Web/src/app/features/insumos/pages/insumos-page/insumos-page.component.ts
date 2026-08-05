@@ -1,0 +1,257 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {  Component, OnInit, inject, ChangeDetectorRef, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { InsumoService } from '../../services/insumo.service';
+import { Insumo } from '../../models/insumo.model';
+import { NotificationService } from '../../../../core/ui/notification.service';
+import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
+
+@Component({
+  selector: 'app-insumos-page',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DecimalPipe, FormsModule, PaginationComponent],
+  template: `
+    <div class="container fade-in">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ED145B" stroke-width="2.3"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Estoque de Insumos
+          </h1>
+        </div>
+        <button (click)="abrirModalNovo()" class="btn btn-primary">
+          + Insumo
+        </button>
+      </div>
+
+      <!-- Tabela de Insumos -->
+      <div class="data-table-container table-loading-container">
+        @if (loading) {
+          <div class="table-loading-overlay">
+            <div class="table-loading-spinner"></div>
+            <span class="table-loading-text">Carregando dados...</span>
+          </div>
+        }
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th style="text-align: center;">Preço</th>
+              <th style="text-align: center;">Estoque</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of insumos; track item.id) {
+              <tr>
+                <td>
+                  <div style="font-weight: 600;">{{ item.nome }}</div>
+                  @if (item.descricao) {
+                    <div style="font-size: 0.75rem; color: #A1A1AA;">{{ item.descricao }}</div>
+                  }
+                </td>
+                <td style="text-align: center;">
+                  <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">R$ {{ item.valor | number:'1.2-2' }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1rem;" [style.color]="item.quantidadeEstoque <= 5 ? '#EF4444' : '#F8FAFC'">
+                    {{ item.quantidadeEstoque }}
+                  </span>
+                </td>
+                <td>
+                  @if (item.quantidadeEstoque <= 5) {
+                    <span class="stock-badge danger">
+                      ⚠️ Crítico
+                    </span>
+                  } @else {
+                    <span class="stock-badge success">
+                      ✓ OK
+                    </span>
+                  }
+                </td>
+                <td>
+                  <div style="display: inline-flex; gap: 0.5rem;">
+                    <button (click)="editar(item)" class="btn btn-secondary btn-sm" title="Editar Insumo">✏️ Editar</button>
+                    <button (click)="excluir(item.id!)" class="btn btn-danger btn-sm" title="Excluir Insumo">🗑️ Excluir</button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2.5rem; color: #71717A;">
+                  Nenhum insumo cadastrado.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação Estruturada -->
+      <app-pagination
+        [pageNumber]="pageNumber"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [totalPages]="totalPages"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+
+      <!-- Modal de Cadastro / Edição -->
+      @if (exibirModal) {
+        <div class="modal-backdrop fade-in">
+          <div class="modal-card">
+            <div class="modal-header">
+              <h3>{{ editandoId ? 'Editar Insumo' : 'Novo Insumo' }}</h3>
+              <button (click)="exibirModal = false" class="btn-close">&times;</button>
+            </div>
+
+            <form (ngSubmit)="salvar()">
+              <div class="form-group">
+                <label class="form-label">Nome</label>
+                <input type="text" [(ngModel)]="formInsumo.nome" name="nome" required placeholder="Ex: Amortecedor Dianteiro" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <input type="text" [(ngModel)]="formInsumo.descricao" name="descricao" placeholder="Especificações técnicas..." class="form-control" />
+              </div>
+
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Preço Unitário (R$)</label>
+                  <input type="number" step="0.01" [(ngModel)]="formInsumo.valor" name="valor" required class="form-control" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Qtd em Estoque</label>
+                  <input type="number" [(ngModel)]="formInsumo.quantidadeEstoque" name="quantidadeEstoque" required class="form-control" />
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+                <button type="button" (click)="exibirModal = false" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar Insumo</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+  styles: [`
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stock-badge { padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+    .stock-badge.danger { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .stock-badge.success { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+    .modal-card { background: #18181C; border: 1px solid rgba(237, 20, 91, 0.3); border-radius: 12px; padding: 2rem; max-width: 580px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-header h3 { font-family: 'Outfit', sans-serif; font-weight: 700; color: #fff; }
+    .btn-close { background: none; border: none; color: #A1A1AA; font-size: 1.5rem; cursor: pointer; }
+  `]
+})
+export class InsumosPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  insumos: Insumo[] = [];
+  exibirModal = false;
+  editandoId: string | null = null;
+
+  pageNumber = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 1;
+
+  formInsumo: Insumo = {
+    nome: '',
+    descricao: '',
+    valor: 0,
+    quantidadeEstoque: 10
+  };
+
+  loading = false;
+  private readonly insumoService = inject(InsumoService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  ngOnInit() {
+    this.carregar();
+  }
+
+  carregar() {
+    this.loading = true;
+    this.insumoService.getAll(this.pageNumber, this.pageSize).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: res => {
+        this.insumos = res.items || [];
+        this.totalItems = res.total;
+        this.totalPages = res.totalPages;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.carregar();
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize = size;
+    this.pageNumber = 1;
+    this.carregar();
+  }
+
+  abrirModalNovo() {
+    this.editandoId = null;
+    this.formInsumo = { nome: '', descricao: '', valor: 0, quantidadeEstoque: 10 };
+    this.exibirModal = true;
+  }
+
+  editar(item: Insumo) {
+    this.editandoId = item.id || null;
+    this.formInsumo = { ...item };
+    this.exibirModal = true;
+  }
+
+  salvar() {
+    if (this.editandoId) {
+      this.insumoService.atualizar(this.editandoId, this.formInsumo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.success('Insumo Atualizado', 'Item salvo no estoque.');
+          this.exibirModal = false;
+          this.carregar();
+        }
+      });
+    } else {
+      this.insumoService.criar(this.formInsumo).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.success('Insumo Cadastrado', 'Novo insumo incluído.');
+          this.exibirModal = false;
+          this.carregar();
+        }
+      });
+    }
+  }
+
+  excluir(id: string) {
+    if (confirm('Deseja remover este insumo do catálogo?')) {
+      this.insumoService.excluir(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.info('Insumo Removido', 'Item excluído.');
+          this.carregar();
+        }
+      });
+    }
+  }
+}

@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Entities;
 
 namespace AutoReparos.Domain.Clientes.Repositories
 {
@@ -10,5 +10,6 @@ namespace AutoReparos.Domain.Clientes.Repositories
         Task<Cliente?> GetByDocumentoOrEmail(string documento, string email);
         Task Update(Cliente cliente);
         Task Delete(Cliente cliente);
+        Task<IEnumerable<Cliente>> GetByIds(IEnumerable<Guid> ids);
     }
 }

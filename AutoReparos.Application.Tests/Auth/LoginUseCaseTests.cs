@@ -38,6 +38,7 @@ namespace AutoReparos.Application.Tests.Auth
             result.Token.Should().Be(expectedToken);
             result.Email.Should().Be(usuario.Email.Endereco);
             result.NomeCompleto.Should().Be(usuario.NomeCompleto);
+            result.Role.Should().Be(usuario.Tipo.ToString());
         }
 
         [Fact(DisplayName = "Login With Invalid Email Should Return Null")]

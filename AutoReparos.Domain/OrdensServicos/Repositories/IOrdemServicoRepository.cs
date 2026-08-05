@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.OrdensServicos.Entities;
+using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 
 namespace AutoReparos.Domain.OrdensServicos.Repositories
@@ -10,6 +10,7 @@ namespace AutoReparos.Domain.OrdensServicos.Repositories
         Task<(IEnumerable<OrdemServico> Items, int Total)> GetFila(int skip, int take);
         Task<OrdemServico?> GetById(Guid id);
         Task<(IEnumerable<OrdemServico> Items, int Total)> GetByDocumentoOuPlaca(string? documento, string? placa, int skip, int take);
+        Task<(IEnumerable<OrdemServico> Items, int Total)> GetKanban(int skip, int take);
         Task Update(OrdemServico ordemServico);
     }
 }

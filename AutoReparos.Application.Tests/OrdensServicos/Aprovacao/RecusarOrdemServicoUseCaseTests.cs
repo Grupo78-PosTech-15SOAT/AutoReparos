@@ -39,8 +39,8 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Aprovacao
             var cliente = new Cliente("João Silva", "52998224725", "11999999999", "joao@teste.com");
             var os = new OrdemServico(cliente.Id, Guid.NewGuid(), "obs");
             os.AdicionarServico(new OrdemServicoServico(os.Id, Guid.NewGuid(), 150m));
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-123");
+            os.AguardarAprovacao("mecanico-123");
 
             _aprovacaoTokenService.ValidarToken("token-123").Returns(os.Id);
             _repository.GetById(os.Id).Returns(os);
@@ -70,8 +70,8 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Aprovacao
             var cliente = new Cliente("João Silva", "52998224725", "11999999999", "joao@teste.com");
             var os = new OrdemServico(cliente.Id, Guid.NewGuid(), "obs");
             os.AdicionarServico(new OrdemServicoServico(os.Id, Guid.NewGuid(), 150m));
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-123");
+            os.AguardarAprovacao("mecanico-123");
 
             _aprovacaoTokenService.ValidarToken("token-123").Returns(os.Id);
             _repository.GetById(os.Id).Returns(os);

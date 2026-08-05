@@ -14,6 +14,7 @@ builder.Services.AddInfraestructureSwagger();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHealthChecks();
+builder.Services.AddOpenTelemetryObservability(builder.Configuration, builder.Logging);
 
 var app = builder.Build();
 
@@ -27,7 +28,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
-app.UseHttpsRedirection();
+
+app.UseCors("AllowFrontend");
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -39,6 +46,7 @@ app.MapVeiculosEndpoints();
 app.MapServicosEndpoints();
 app.MapInsumosEndpoints();
 app.MapOrdemServicoEndpoints();
+app.MapDashboardEndpoints();
 
 app.MapHealthChecks("/health");
 

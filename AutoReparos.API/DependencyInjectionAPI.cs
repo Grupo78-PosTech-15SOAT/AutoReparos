@@ -33,6 +33,17 @@ namespace AutoReparos.API
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.SetIsOriginAllowed(_ => true)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -65,6 +76,7 @@ namespace AutoReparos.API
 
             services.AddHttpContextAccessor();
             services.AddScoped<IAppUrlProvider, HttpAppUrlProvider>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

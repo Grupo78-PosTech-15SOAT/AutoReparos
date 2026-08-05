@@ -20,6 +20,12 @@ namespace AutoReparos.API.Endpoints
             .WithSummary("Lista todas as ordens de serviço paginada")
             .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
+            group.MapGet("/kanban", (
+                OrdemServicoController controller) => controller.GetKanban())
+            .WithName("GetKanbanOrdensServico")
+            .WithSummary("Lista as ordens de serviço para o Kanban")
+            .Produces<IEnumerable<KanbanColumnDto>>(StatusCodes.Status200OK);
+
             group.MapGet("/fila", (
                 OrdemServicoController controller,
                 [AsParameters] PagedRequest request) => controller.GetFila(request))

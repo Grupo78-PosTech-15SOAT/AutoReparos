@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.OrdensServicos.Entities;
+using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.OrdensServicos.Enums;
 using AutoReparos.Domain.OrdensServicos.Exceptions;
 using AutoReparos.Domain.Shared.Exceptions;
@@ -46,8 +46,8 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         {
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
             os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-teste-id");
+            os.AguardarAprovacao("mecanico-teste-id");
 
             Action action = () => os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
 
@@ -60,7 +60,7 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         {
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
 
-            os.IniciarDiagnostico();
+            os.IniciarDiagnostico("mecanico-teste-id");
 
             os.Status.Should().Be(EStatusOrdemServico.EmDiagnostico);
         }
@@ -69,9 +69,9 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         public void AguardarAprovacao_WithoutServices_ShouldThrowException()
         {
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
-            os.IniciarDiagnostico();
+            os.IniciarDiagnostico("mecanico-teste-id");
 
-            Action action = () => os.AguardarAprovacao();
+            Action action = () => os.AguardarAprovacao("mecanico-teste-id");
 
             action.Should().Throw<InvalidOrdemServicoException>()
                 .WithMessage("A Ordem de Serviço deve ter pelo menos um serviço para aguardar aprovação.");
@@ -82,8 +82,8 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         {
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
             os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-teste-id");
+            os.AguardarAprovacao("mecanico-teste-id");
 
             os.Aprovar();
 
@@ -100,8 +100,8 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             servico.Iniciar();
 
             os.AdicionarServico(servico);
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-teste-id");
+            os.AguardarAprovacao("mecanico-teste-id");
             os.Aprovar();
 
             os.ConcluirServico(servico.Id);
@@ -115,8 +115,8 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
         {
             var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
             os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-teste-id");
+            os.AguardarAprovacao("mecanico-teste-id");
             os.Aprovar();
 
             Action action = () => os.ConcluirServico(Guid.NewGuid());
@@ -131,8 +131,8 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
             var servico = new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100);
             servico.Iniciar();
             os.AdicionarServico(servico);
-            os.IniciarDiagnostico();
-            os.AguardarAprovacao();
+            os.IniciarDiagnostico("mecanico-teste-id");
+            os.AguardarAprovacao("mecanico-teste-id");
             os.Aprovar();
             os.ConcluirServico(servico.Id);
 
