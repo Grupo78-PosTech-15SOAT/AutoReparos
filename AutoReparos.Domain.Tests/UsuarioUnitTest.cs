@@ -1,3 +1,4 @@
+using AutoReparos.Domain.Shared.Exceptions;
 using AutoReparos.Domain.Usuarios.Entities;
 using AutoReparos.Domain.Usuarios.Enums;
 using FluentAssertions;
@@ -81,5 +82,32 @@ namespace AutoReparos.Domain.Tests
             usuario.CriadoEm.Should().Be(criadoEm);
             usuario.AtualizadoEm.Should().Be(atualizadoEm);
         }
+
+        [Theory(DisplayName = "Usuario Creation With Empty Or Null Name Should Throw ArgumentException")]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void UsuarioCreation_WithInvalidName_ShouldThrowArgumentException(string? invalidName)
+        {
+            // Arrange & Act
+            Action act = () => new Usuario(invalidName!, "test@example.com", ETipoUsuario.Mecanico);
+
+            // Assert
+            act.Should().Throw<ArgumentException>();
+        }
+
+        [Theory(DisplayName = "Usuario Creation With Empty Or Null Email Should Throw DomainException")]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void UsuarioCreation_WithInvalidEmail_ShouldThrowDomainException(string? invalidEmail)
+        {
+            // Arrange & Act
+            Action act = () => new Usuario("John Doe", invalidEmail!, ETipoUsuario.Mecanico);
+
+            // Assert
+            act.Should().Throw<DomainException>();
+        }
     }
 }
+

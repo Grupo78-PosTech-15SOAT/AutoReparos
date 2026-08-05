@@ -1,4 +1,4 @@
-# Docker compose - PostgreSQL e API
+# Docker compose - PostgreSQL, API e Observabilidade OpenTelemetry
 services:
   postgres:
     image: postgres:16
@@ -34,10 +34,13 @@ services:
       - SendGrid__FromEmail=${SENDGRID_FROM_EMAIL}
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
       - App__BaseUrl=${APP_BASE_URL}
+      - OpenTelemetry__Endpoint=http://otel-collector:4317
+      - OpenTelemetry__ServiceName=AutoReparos.API
     ports:
       - "8080:8080"
     depends_on:
       - postgres
+      - otel-collector
     networks:
       - autoreparos-network
 
@@ -57,6 +60,77 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
       - ./servers.json:/pgadmin4/servers.json
+    networks:
+      - autoreparos-network
+
+  # Stack de Observabilidade OpenTelemetry
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: autoreparos-otel-collector
+    restart: always
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./infra/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8889:8889" # Prometheus metrics exporter
+    depends_on:
+      - prometheus
+      - jaeger
+      - loki
+    networks:
+      - autoreparos-network
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: autoreparos-prometheus
+    restart: always
+    volumes:
+      - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - autoreparos-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.55
+    container_name: autoreparos-jaeger
+    restart: always
+    ports:
+      - "16686:16686" # UI
+    networks:
+      - autoreparos-network
+
+  loki:
+    image: grafana/loki:2.9.5
+    container_name: autoreparos-loki
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./infra/otel/loki-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - autoreparos-network
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: autoreparos-grafana
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - jaeger
+      - loki
     networks:
       - autoreparos-network
 

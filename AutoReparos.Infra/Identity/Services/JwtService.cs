@@ -15,6 +15,8 @@ public class JwtService(IOptions<JwtSettings> jwtOptions) : IJwtService
 
     public string GenerateToken(Usuario usuario)
     {
+        if (usuario == null) throw new ArgumentNullException(nameof(usuario));
+
         var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -23,7 +25,8 @@ public class JwtService(IOptions<JwtSettings> jwtOptions) : IJwtService
             [
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Email.Endereco),
-                new Claim(ClaimTypes.Name, usuario.NomeCompleto)
+                new Claim(ClaimTypes.Name, usuario.NomeCompleto),
+                new Claim(ClaimTypes.Role, usuario.Tipo.ToString())
             ]),
             Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpiryHours),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

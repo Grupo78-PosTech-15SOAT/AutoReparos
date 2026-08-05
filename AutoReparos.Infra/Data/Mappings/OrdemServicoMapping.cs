@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.Veiculos.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -31,13 +31,16 @@ namespace AutoReparos.Infra.Data.Mappings
             builder.Property(os => os.IniciadoEm);
             builder.Property(os => os.FinalizadoEm);
             builder.Property(os => os.EntregueEm);
+            builder.Property(os => os.EnvioAprovacaoEm);
+            builder.Property(os => os.ResponsavelId)
+                .HasMaxLength(450);
 
-            builder.HasOne<Cliente>()
+            builder.HasOne(os => os.Cliente)
                 .WithMany()
                 .HasForeignKey(os => os.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne<Veiculo>()
+            builder.HasOne(os => os.Veiculo)
                 .WithMany()
                 .HasForeignKey(os => os.VeiculoId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.OrdensServicos.Entities;
+using AutoReparos.Domain.OrdensServicos.Entities;
 using AutoReparos.Domain.Servicos.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -30,7 +30,7 @@ namespace AutoReparos.Infra.Data.Mappings
 
             builder.Ignore(s => s.TempoExecucao);
 
-            builder.HasOne<Servico>()
+            builder.HasOne(s => s.Servico)
                 .WithMany()
                 .HasForeignKey(s => s.ServicoId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -145,6 +145,19 @@ public class OrdemServicoIntegrationTests(CustomWebApplicationFactory<Program> f
         responseData!.Items.Should().NotBeEmpty();
     }
 
+    [Fact(DisplayName = "GET /api/ordem-servico/kanban - Deve retornar lista paginada e 200 OK com Kanban DTO")]
+    public async Task GetAllOrdensServico_Kanban_DeveRetornarOkEListaPaginada()
+    {
+        await AuthenticateAsync();
+        await CriarOrdemServicoAuxiliarAsync();
+
+        var response = await Client.GetAsync("/api/ordem-servico/kanban?pageNumber=1&pageSize=10");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var responseData = await response.Content.ReadFromJsonAsync<IEnumerable<KanbanColumnDto>>();
+        responseData.Should().NotBeNull();
+        responseData.Should().NotBeEmpty();
+    }
 
     [Fact(DisplayName = "POST /api/ordem-servico/{id}/servicos - Deve adicionar serviço se OS Recebida/Diagnóstico")]
     public async Task AdicionarServico_QuandoOSStatusValido_DeveRetornarNoContent()

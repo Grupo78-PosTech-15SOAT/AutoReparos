@@ -34,8 +34,10 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             _clienteRepository = Substitute.For<IClienteRepository>();
             _notificacaoService = Substitute.For<INotificacaoService>();
             _logger = Substitute.For<ILogger<EnviarOrdemServicoParaAprovacaoUseCase>>();
+            var currentUserService = Substitute.For<ICurrentUserService>();
+            currentUserService.GetUserId().Returns("mecanico-123");
             _useCase = new EnviarOrdemServicoParaAprovacaoUseCase(
-                _repository, _servicoRepository, _aprovacaoTokenService, _clienteRepository, _notificacaoService, _logger);
+                _repository, _servicoRepository, _aprovacaoTokenService, _clienteRepository, currentUserService, _notificacaoService, _logger);
         }
 
         [Fact(DisplayName = "Enviar When OrdemServico Em Diagnostico Com Servico Should Change Status And Send Orcamento")]
@@ -45,7 +47,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             var servico = new Servico("Troca de óleo", "Descrição", 150m);
             var os = new OrdemServico(cliente.Id, Guid.NewGuid(), "obs");
             os.AdicionarServico(new OrdemServicoServico(os.Id, servico.Id, 150m));
-            os.IniciarDiagnostico();
+            os.IniciarDiagnostico("mecanico-123");
 
             _repository.GetById(os.Id).Returns(os);
             _servicoRepository.GetById(servico.Id).Returns(servico);
@@ -78,7 +80,7 @@ namespace AutoReparos.Application.Tests.OrdensServicos.Fluxo
             var servico = new Servico("Troca de óleo", "Descrição", 150m);
             var os = new OrdemServico(cliente.Id, Guid.NewGuid(), "obs");
             os.AdicionarServico(new OrdemServicoServico(os.Id, servico.Id, 150m));
-            os.IniciarDiagnostico();
+            os.IniciarDiagnostico("mecanico-123");
 
             _repository.GetById(os.Id).Returns(os);
             _servicoRepository.GetById(servico.Id).Returns(servico);
