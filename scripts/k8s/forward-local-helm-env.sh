@@ -16,6 +16,8 @@ fi
 echo "📄 Carregando variáveis de ambiente do .env..."
 export $(grep -v '^#' .env | xargs)
 
+GIT_TAG=$(git rev-parse --short HEAD 2>/dev/null || echo "latest")
+
 echo "🚀 1. Sincronizando dependências do Helm..."
 helm dependency update k8s/
 
@@ -23,9 +25,9 @@ echo "☸️ 2. Executando Helm Upgrade/Install..."
 helm upgrade --install autoreparos k8s/ \
   -f k8s/values.yaml \
   --set api.image.repository="josemd12/autoreparos-api" \
-  --set api.image.tag="a987a22" \
+  --set api.image.tag="$GIT_TAG" \
   --set web.image.repository="josemd12/autoreparos-web" \
-  --set web.image.tag="a987a22" \
+  --set web.image.tag="$GIT_TAG" \
   --set api.config.aspnetcoreEnvironment="$ASPNETCORE_ENVIRONMENT" \
   --set api.config.jwtExpiryHours="$JWT_EXPIRY_HOURS" \
   --set api.config.seedUserEmail="$SEED_USER_EMAIL" \
