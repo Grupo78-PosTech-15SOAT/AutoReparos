@@ -54,6 +54,11 @@ namespace AutoReparos.API
                     {
                         options.Endpoint = new Uri(otelEndpoint);
                     });
+                }, options =>
+                {
+                    options.IncludeFormattedMessage = true;
+                    options.IncludeScopes = true;
+                    options.ParseStateValues = true;
                 });
 
             loggingBuilder.AddOpenTelemetry(options =>
@@ -61,11 +66,13 @@ namespace AutoReparos.API
                 options.SetResourceBuilder(resourceBuilder);
                 options.IncludeFormattedMessage = true;
                 options.IncludeScopes = true;
+                options.ParseStateValues = true;
                 options.AddOtlpExporter(otlpOptions =>
                 {
                     otlpOptions.Endpoint = new Uri(otelEndpoint);
                 });
             });
+
 
 
             return services;

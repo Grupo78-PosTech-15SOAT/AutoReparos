@@ -21,6 +21,8 @@ spec:
         runAsGroup: 999
         fsGroup: 999
       containers:
+
+
         - name: postgres
           securityContext:
             allowPrivilegeEscalation: false
