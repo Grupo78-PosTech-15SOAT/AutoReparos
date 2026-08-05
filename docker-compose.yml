@@ -44,6 +44,20 @@ services:
     networks:
       - autoreparos-network
 
+  web:
+    image: autoreparos-web
+    build:
+      context: ./AutoReparos.Web
+      dockerfile: Dockerfile
+    container_name: autoreparos-web
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+    networks:
+      - autoreparos-network
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: autoreparos-pgadmin
