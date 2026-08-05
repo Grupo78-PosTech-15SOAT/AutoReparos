@@ -20,6 +20,7 @@ start_forwards() {
     else
       echo "  ❌ $name — falhou (log: /tmp/pf-$(echo "$name" | tr ' ' '-').log)"
     fi
+    return 0
   }
 
   _forward "API"        "svc/autoreparos-k8s-service" "8080:8080"
@@ -37,6 +38,7 @@ start_forwards() {
   echo "   📋 Loki (API)     → http://localhost:3100/ready"
   echo ""
   echo "   Para parar tudo: ./dev-forward.sh stop"
+  return 0
 }
 
 stop_forwards() {

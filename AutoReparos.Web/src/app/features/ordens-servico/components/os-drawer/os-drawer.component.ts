@@ -943,7 +943,7 @@ export class OsDrawerComponent {
     const status = this.os()?.status;
     if (status == null) return false;
     const num = typeof status === 'number' ? status : Number(status);
-    return !isNaN(num) && num > StatusOS.AguardandoAprovacao;
+    return !Number.isNaN(num) && num > StatusOS.AguardandoAprovacao;
   });
 
   readonly servicosConcluidos = computed(() =>

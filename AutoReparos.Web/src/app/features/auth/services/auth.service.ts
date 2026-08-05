@@ -19,7 +19,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
       tap(response => {
-        if (response && response.token) {
+        if (response?.token) {
           this.storage.setItem('autoreparos_token', response.token);
           const user: UserTokenInfo = response.usuario ? {
             ...response.usuario,

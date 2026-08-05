@@ -215,12 +215,12 @@ select.form-control option {
 /* Placa do Veículo (Design adaptado ao tema escuro com faixa azul Mercosul) */
 .badge-placa {
   font-family: var(--font-mono);
-  background: rgba(56, 189, 248, 0.08); /* Fundo sutil azul-escuro */
-  color: #38BDF8;                        /* Texto azul-claro nítido */
-  border-left: 4px solid #38BDF8;        /* Faixa azul característica do Mercosul */
-  border-top: 1px solid rgba(56, 189, 248, 0.2);
-  border-right: 1px solid rgba(56, 189, 248, 0.2);
-  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(56, 189, 248, 0.12); /* Fundo sutil azul-escuro */
+  color: #0284C7;                        /* Texto azul institucional de alto contraste */
+  border-left: 4px solid #0284C7;        /* Faixa azul característica do Mercosul */
+  border-top: 1px solid rgba(56, 189, 248, 0.3);
+  border-right: 1px solid rgba(56, 189, 248, 0.3);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.3);
   padding: 0.15rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
@@ -235,7 +235,7 @@ select.form-control option {
 .badge-documento {
   font-family: var(--font-mono);
   background: rgba(16, 185, 129, 0.15);
-  color: #10B981;
+  color: #059669;
   border: 1px solid rgba(16, 185, 129, 0.4);
   padding: 0.2rem 0.5rem;
   font-size: 0.8rem;
@@ -309,21 +309,21 @@ select.form-control option {
 
 .btn-danger {
   background: rgba(239, 68, 68, 0.25);
-  color: #FCA5A5;
+  color: #F87171;
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #DC2626;
+  background: #B91C1C;
   color: #FFFFFF;
 }
 
 .btn-success {
   background: rgba(16, 185, 129, 0.25);
-  color: #6EE7B7;
+  color: #34D399;
   border: 1px solid rgba(16, 185, 129, 0.4);
 }
 .btn-success:hover:not(:disabled) {
-  background: #059669;
+  background: #047857;
   color: #FFFFFF;
 }
 
