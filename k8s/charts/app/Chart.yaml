@@ -1,0 +1,6 @@
+apiVersion: v2
+name: app
+description: Subchart Helm para a aplicação AutoReparos (API .NET 10 e Banco de Dados PostgreSQL)
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

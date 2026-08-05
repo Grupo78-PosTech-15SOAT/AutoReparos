@@ -1,32 +1,47 @@
-replicaCount: 1
-
-image:
-  repository: autoreparos-api
-  pullPolicy: IfNotPresent
-  tag: "latest"
-
-service:
-  type: ClusterIP
-  port: 8080
-
-ingress:
-  enabled: true
-  className: nginx
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: Prefix
-
-postgres:
-  image: postgres:16
-  database: autoreparos
-  user: admin
-  password: ""
-  storageSize: 2Gi
-  persistence:
+app:
+  replicaCount: 1
+  image:
+    repository: autoreparos-api
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
     enabled: true
-    storageClass: "hostpath" # Definir como "gp3" no AWS EKS (CSI dynamic driver) ou "hostpath" / "" para local
+    className: nginx
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+  postgres:
+    image: postgres:16
+    database: autoreparos
+    user: admin
+    password: ""
+    storageSize: 2Gi
+    persistence:
+      enabled: true
+      storageClass: "hostpath"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  config:
+    aspnetcoreEnvironment: "Development"
+    jwtExpiryHours: "2"
+    seedUserEmail: "admin@autoreparos.com"
+    sendGridFromEmail: "noreply@autoreparos.com"
+    sendGridFromName: "AutoReparos"
+  secrets:
+    jwtSecret: ""
+    seedUserPassword: ""
+    aprovacaoTokenSecret: ""
+    sendGridApiKey: ""
   resources:
     requests:
       cpu: 100m
@@ -34,32 +49,11 @@ postgres:
     limits:
       cpu: 500m
       memory: 512Mi
+  hpa:
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
 
-
-
-config:
-  aspnetcoreEnvironment: "Development"
-  jwtExpiryHours: "2"
-  seedUserEmail: "admin@autoreparos.com"
-  sendGridFromEmail: "noreply@autoreparos.com"
-  sendGridFromName: "AutoReparos"
-
-secrets:
-  jwtSecret: ""
-  seedUserPassword: ""
-  aprovacaoTokenSecret: ""
-  sendGridApiKey: ""
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-hpa:
-  minReplicas: 1
-  maxReplicas: 4
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+observability:
+  enabled: true

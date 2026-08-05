@@ -513,5 +513,8 @@ CLAUDE.md
 *.toc
 *.fls
 *.fdb_latexmk
-*.synctex.gz
+# Helm build artifacts
+*.tgz
+k8s/charts/*.tgz
+
 

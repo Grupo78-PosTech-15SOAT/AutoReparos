@@ -13,15 +13,16 @@ namespace AutoReparos.API
             ILoggingBuilder loggingBuilder)
         {
             var otelEndpoint = configuration["OpenTelemetry:Endpoint"] ?? "http://localhost:4317";
-            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "AutoReparos.API";
+            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "autoreparos-api";
 
-            var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+            var resourceBuilder = ResourceBuilder.CreateDefault()
+                .AddService(serviceName: serviceName, serviceVersion: "1.0.0");
 
             services.AddOpenTelemetry()
                 .WithTracing(tracing =>
                 {
                     tracing
-                        .ConfigureResource(r => r.AddService(serviceName))
+                        .SetResourceBuilder(resourceBuilder)
                         .AddSource(serviceName)
                         .AddAspNetCoreInstrumentation(options =>
                         {
@@ -37,7 +38,7 @@ namespace AutoReparos.API
                 .WithMetrics(metrics =>
                 {
                     metrics
-                        .ConfigureResource(r => r.AddService(serviceName))
+                        .SetResourceBuilder(resourceBuilder)
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
@@ -45,6 +46,14 @@ namespace AutoReparos.API
                         {
                             options.Endpoint = new Uri(otelEndpoint);
                         });
+                })
+                .WithLogging(logs =>
+                {
+                    logs.SetResourceBuilder(resourceBuilder);
+                    logs.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otelEndpoint);
+                    });
                 });
 
             loggingBuilder.AddOpenTelemetry(options =>
@@ -58,7 +67,9 @@ namespace AutoReparos.API
                 });
             });
 
+
             return services;
         }
     }
 }
+

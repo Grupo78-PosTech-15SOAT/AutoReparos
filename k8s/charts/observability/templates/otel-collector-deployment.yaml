@@ -26,6 +26,20 @@ spec:
               containerPort: 4318
             - name: metrics
               containerPort: 8889
+            - name: healthz
+              containerPort: 13133
+          livenessProbe:
+            httpGet:
+              path: /
+              port: healthz
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: healthz
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             {{- toYaml .Values.otelCollector.resources | nindent 12 }}
           volumeMounts:
@@ -36,3 +50,4 @@ spec:
         - name: config
           configMap:
             name: otel-collector-config
+
