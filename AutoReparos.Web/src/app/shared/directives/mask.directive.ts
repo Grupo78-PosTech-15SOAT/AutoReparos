@@ -19,7 +19,7 @@ export class MaskDirective {
     }
   }
 
-  private readonly applyMask(value: string, type: string): string {
+  private applyMask(value: string, type: string): string {
     if (type === 'placa') {
       return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
     } else if (type === 'cpfCnpj') {
