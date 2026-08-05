@@ -165,7 +165,7 @@ import { DocumentoBadgeComponent } from '../../../../shared/components/documento
   `]
 })
 export class ClientesPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   clientes: Cliente[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -190,9 +190,9 @@ export class ClientesPageComponent implements OnInit {
   };
 
   loading = false;
-  private clienteService = inject(ClienteService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly clienteService = inject(ClienteService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();

@@ -172,7 +172,7 @@ import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/p
   `]
 })
 export class VeiculosPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   veiculos: Veiculo[] = [];
   clientes: Cliente[] = [];
   clienteOptions: SelectOption[] = [];
@@ -195,10 +195,10 @@ export class VeiculosPageComponent implements OnInit {
   };
 
   loading = false;
-  private veiculoService = inject(VeiculoService);
-  private clienteService = inject(ClienteService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly veiculoService = inject(VeiculoService);
+  private readonly clienteService = inject(ClienteService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();

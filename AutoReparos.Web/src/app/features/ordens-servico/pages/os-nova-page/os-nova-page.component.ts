@@ -205,7 +205,7 @@ const DRAFT_STORAGE_KEY = 'autoreparos_draft_nova_os';
   `]
 })
 export class OsNovaPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   clienteId = '';
   veiculoId = '';
   observacoesIniciais = '';
@@ -224,13 +224,13 @@ export class OsNovaPageComponent implements OnInit {
   loadingDados = true;
   rascunhoSalvo = false;
 
-  private osService = inject(OrdemServicoService);
-  private clienteService = inject(ClienteService);
-  private veiculoService = inject(VeiculoService);
-  private notification = inject(NotificationService);
-  private router = inject(Router);
-  private storage = inject(STORAGE_TOKEN);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly osService = inject(OrdemServicoService);
+  private readonly clienteService = inject(ClienteService);
+  private readonly veiculoService = inject(VeiculoService);
+  private readonly notification = inject(NotificationService);
+  private readonly router = inject(Router);
+  private readonly storage = inject(STORAGE_TOKEN);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregarDados();
@@ -297,7 +297,7 @@ export class OsNovaPageComponent implements OnInit {
         this.veiculoId = draft.veiculoId || '';
         this.observacoesIniciais = draft.observacoesIniciais || '';
         this.rascunhoSalvo = true;
-      } catch (e) {
+      } catch (_err) {
         this.storage.removeItem(DRAFT_STORAGE_KEY);
       }
     }
@@ -337,7 +337,7 @@ export class OsNovaPageComponent implements OnInit {
     const doc = this.buscaDocumento.replace(/\D/g, '');
     if (doc.length >= 8) {
       const match = this.clientes.find(c => c.documento.replace(/\D/g, '').includes(doc));
-      if (match && match.id) {
+      if (match?.id) {
         this.clienteId = match.id;
         this.onClienteChange();
         this.salvarRascunho();
@@ -349,7 +349,7 @@ export class OsNovaPageComponent implements OnInit {
     const p = this.buscaPlaca.toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (p.length >= 4) {
       const match = this.todosVeiculos.find(v => v.placa.replace(/[^A-Z0-9]/gi, '').includes(p));
-      if (match && match.id) {
+      if (match?.id) {
         this.veiculoId = match.id;
         if (match.clienteId) {
           this.clienteId = match.clienteId;

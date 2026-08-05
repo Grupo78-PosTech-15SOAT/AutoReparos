@@ -136,7 +136,7 @@ import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/p
   styles: [`.btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }`]
 })
 export class OsListaPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   StatusOS = StatusOS;
   todasOrdens: OrdemServico[] = [];
   ordensFiltradas: OrdemServico[] = [];
@@ -163,11 +163,11 @@ export class OsListaPageComponent implements OnInit {
   loading = false;
   clientes: any[] = [];
   veiculos: any[] = [];
-  private osService = inject(OrdemServicoService);
-  private clienteService = inject(ClienteService);
-  private veiculoService = inject(VeiculoService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly osService = inject(OrdemServicoService);
+  private readonly clienteService = inject(ClienteService);
+  private readonly veiculoService = inject(VeiculoService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregarOrdens();

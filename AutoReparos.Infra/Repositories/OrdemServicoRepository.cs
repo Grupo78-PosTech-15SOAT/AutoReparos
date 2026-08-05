@@ -125,6 +125,7 @@ namespace AutoReparos.Infra.Repositories
         {
             var query = _context.OrdensServico
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(os => os.Cliente)
                 .Include(os => os.Veiculo)
                 .Include(os => os.Servicos)

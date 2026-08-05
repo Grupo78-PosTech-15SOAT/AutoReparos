@@ -1,5 +1,5 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {  Component, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
+import {  Component, inject, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -167,14 +167,14 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `]
 })
 export class LoginPageComponent {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   email = '';
   senha = '';
   loading = false;
 
-  private authService = inject(AuthService);
-  private notification = inject(NotificationService);
-  private router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly notification = inject(NotificationService);
+  private readonly router = inject(Router);
 
   fillEmail(e: string) {
     this.email = e;

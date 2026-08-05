@@ -323,7 +323,7 @@ export class CustomSelectComponent {
     return this.options().filter(o => o.label.toLowerCase().includes(term));
   });
 
-  private el = inject(ElementRef);
+  private readonly el = inject(ElementRef);
 
   toggle() {
     if (this.disabled() || this.loading()) return;

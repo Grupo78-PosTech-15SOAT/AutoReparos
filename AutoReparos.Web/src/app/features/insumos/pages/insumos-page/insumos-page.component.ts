@@ -158,7 +158,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
   `]
 })
 export class InsumosPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   insumos: Insumo[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -176,9 +176,9 @@ export class InsumosPageComponent implements OnInit {
   };
 
   loading = false;
-  private insumoService = inject(InsumoService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly insumoService = inject(InsumoService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();

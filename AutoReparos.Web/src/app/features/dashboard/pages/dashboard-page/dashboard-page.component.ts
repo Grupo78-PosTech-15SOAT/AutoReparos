@@ -236,9 +236,9 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
   chart?: Chart;
   chartCanvas = viewChild<ElementRef<HTMLCanvasElement>>('chartCanvas');
   
-  private destroyRef = inject(DestroyRef);
-  private dashboardService = inject(DashboardService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dashboardService = inject(DashboardService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();
@@ -252,7 +252,7 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
 
   totalServicosConcluidosMes(): number {
     if (!this.historicoMensal || this.historicoMensal.length === 0) return 0;
-    return this.historicoMensal[this.historicoMensal.length - 1].totalServicosRealizados;
+    return this.historicoMensal.at(-1)?.totalServicosRealizados ?? 0;
   }
 
   carregar() {

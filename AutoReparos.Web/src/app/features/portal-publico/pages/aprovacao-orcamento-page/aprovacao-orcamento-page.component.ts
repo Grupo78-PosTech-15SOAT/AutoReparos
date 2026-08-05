@@ -1,5 +1,5 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {  Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
+import {  Component, OnInit, inject, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { OrdemServicoService } from '../../../ordens-servico/services/ordem-servico.service';
@@ -125,15 +125,15 @@ import { NotificationService } from '../../../../core/ui/notification.service';
   `]
 })
 export class AprovacaoOrcamentoPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   token = '';
   loading = false;
   respondido = false;
   aprovado = false;
 
-  private route = inject(ActivatedRoute);
-  private osService = inject(OrdemServicoService);
-  private notification = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly osService = inject(OrdemServicoService);
+  private readonly notification = inject(NotificationService);
 
   ngOnInit() {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';

@@ -7,19 +7,19 @@ import { NgControl } from '@angular/forms';
 })
 export class MaskDirective {
   maskType = input<'cpf' | 'cnpj' | 'cpfCnpj' | 'placa' | 'telefone'>('cpfCnpj', { alias: 'appMask' });
-  private ngControl = inject(NgControl, { optional: true, self: true });
+  private readonly ngControl = inject(NgControl, { optional: true, self: true });
 
   @HostListener('input', ['$event'])
   onInputChange(event: Event) {
     const inputEl = event.target as HTMLInputElement;
     const value = this.applyMask(inputEl.value, this.maskType());
 
-    if (this.ngControl && this.ngControl.control) {
+    if (this.ngControl?.control) {
       this.ngControl.control.setValue(value, { emitEvent: false });
     }
   }
 
-  private applyMask(value: string, type: string): string {
+  private readonly applyMask(value: string, type: string): string {
     if (type === 'placa') {
       return value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7);
     } else if (type === 'cpfCnpj') {
@@ -36,7 +36,7 @@ export class MaskDirective {
       }
     }
 
-    if (this.ngControl && this.ngControl.control) {
+    if (this.ngControl?.control) {
       this.ngControl.control.setValue(value, { emitEvent: false });
     }
     

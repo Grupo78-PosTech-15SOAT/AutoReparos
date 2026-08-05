@@ -215,15 +215,15 @@ import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/p
   `]
 })
 export class ConsultaPublicaPageComponent {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   termoBusca = '';
   loading = false;
   buscou = false;
   ordensEncontradas: OrdemServico[] = [];
 
-  private osService = inject(OrdemServicoService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly osService = inject(OrdemServicoService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   consultar() {
     if (!this.termoBusca.trim()) {

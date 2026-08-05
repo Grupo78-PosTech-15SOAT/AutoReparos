@@ -40,7 +40,7 @@ start_forwards() {
 }
 
 stop_forwards() {
-  if [ ! -f "$PID_FILE" ]; then
+  if [[ ! -f "$PID_FILE" ]]; then
     echo "⚠️  Nenhum port-forward registrado."
     return
   fi
@@ -56,7 +56,7 @@ stop_forwards() {
 }
 
 status_forwards() {
-  if [ ! -f "$PID_FILE" ]; then
+  if [[ ! -f "$PID_FILE" ]]; then
     echo "ℹ️  Nenhum port-forward registrado."
     return
   fi

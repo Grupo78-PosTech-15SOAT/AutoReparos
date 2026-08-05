@@ -143,7 +143,7 @@ import { CustomSelectComponent, SelectOption } from '../../../../shared/componen
   `]
 })
 export class UsuariosPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   usuarios: Usuario[] = [];
   exibirModal = false;
 
@@ -166,9 +166,9 @@ export class UsuariosPageComponent implements OnInit {
   };
 
   loading = false;
-  private usuarioService = inject(UsuarioService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly usuarioService = inject(UsuarioService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   getRoleClass(role?: string): string {
     if (!role) return 'sem-cargo';

@@ -3,7 +3,7 @@ import { NotificationService } from '../ui/notification.service';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor(private injector: Injector) {}
+  constructor(private readonly injector: Injector) {}
 
   handleError(error: any): void {
     const notificationService = this.injector.get(NotificationService);

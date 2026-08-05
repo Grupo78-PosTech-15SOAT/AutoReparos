@@ -1,5 +1,5 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {  Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef , DestroyRef } from '@angular/core';
+import {  Component, OnInit, inject, ChangeDetectionStrategy , DestroyRef } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,6 @@ import { Insumo } from '../../../insumos/models/insumo.model';
 import { Servico } from '../../../servicos/models/servico.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { NotificationService } from '../../../../core/ui/notification.service';
-import { AuthService } from '../../../auth/services/auth.service';
 import { CustomSelectComponent, SelectOption } from '../../../../shared/components/custom-select/custom-select.component';
 import { PageContainerComponent } from '../../../../shared/components/page-container/page-container.component';
 import { IdBadgeComponent } from '../../../../shared/components/id-badge/id-badge.component';
@@ -250,7 +249,7 @@ import { PlacaBadgeComponent } from '../../../../shared/components/placa-badge/p
   `]
 })
 export class OsDetalhePageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   StatusOS = StatusOS;
   osId!: string;
   os!: OrdemServico;
@@ -268,13 +267,13 @@ export class OsDetalhePageComponent implements OnInit {
   clientes: any[] = [];
   veiculos: any[] = [];
 
-  private route = inject(ActivatedRoute);
-  private osService = inject(OrdemServicoService);
-  private servicoService = inject(ServicoService);
-  private insumoService = inject(InsumoService);
-  private clienteService = inject(ClienteService);
-  private veiculoService = inject(VeiculoService);
-  private notification = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly osService = inject(OrdemServicoService);
+  private readonly servicoService = inject(ServicoService);
+  private readonly insumoService = inject(InsumoService);
+  private readonly clienteService = inject(ClienteService);
+  private readonly veiculoService = inject(VeiculoService);
+  private readonly notification = inject(NotificationService);
 
   ngOnInit() {
     this.osId = this.route.snapshot.paramMap.get('id') || '';

@@ -133,7 +133,7 @@ import { PaginationComponent } from '../../../../shared/components/pagination/pa
   `]
 })
 export class ServicosPageComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   servicos: Servico[] = [];
   exibirModal = false;
   editandoId: string | null = null;
@@ -150,9 +150,9 @@ export class ServicosPageComponent implements OnInit {
   };
 
   loading = false;
-  private servicoService = inject(ServicoService);
-  private notification = inject(NotificationService);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly servicoService = inject(ServicoService);
+  private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
     this.carregar();

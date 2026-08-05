@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_ENDPOINTS } from '../../../core/config/api-endpoints';
 import { StatusOS } from '../../ordens-servico/models/ordem-servico.model';
