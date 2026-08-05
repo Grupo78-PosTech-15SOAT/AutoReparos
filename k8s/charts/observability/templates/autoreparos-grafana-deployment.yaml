@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana
+  name: autoreparos-grafana
   labels:
-    app: grafana
+    app: autoreparos-grafana
     {{- include "observability.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: grafana
+      app: autoreparos-grafana
   template:
     metadata:
       labels:
-        app: grafana
+        app: autoreparos-grafana
     spec:
       containers:
-        - name: grafana
+        - name: autoreparos-grafana
           image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
           env:
             - name: GF_SECURITY_ADMIN_USER
@@ -43,10 +43,10 @@ spec:
       volumes:
         - name: datasources-config
           configMap:
-            name: grafana-datasources-config
+            name: autoreparos-grafana-datasources-config
         - name: providers-config
           configMap:
-            name: grafana-providers-config
+            name: autoreparos-grafana-providers-config
         - name: dashboards-json
           configMap:
-            name: grafana-dashboards-config
+            name: autoreparos-grafana-dashboards-config

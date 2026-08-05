@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-providers-config
+  name: autoreparos-grafana-providers-config
   labels:
     {{- include "observability.labels" . | nindent 4 }}
 data:

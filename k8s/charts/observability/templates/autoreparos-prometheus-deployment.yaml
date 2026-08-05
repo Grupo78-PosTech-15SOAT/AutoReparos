@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus
+  name: autoreparos-prometheus
   labels:
-    app: prometheus
+    app: autoreparos-prometheus
     {{- include "observability.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: prometheus
+      app: autoreparos-prometheus
   template:
     metadata:
       labels:
-        app: prometheus
+        app: autoreparos-prometheus
     spec:
       containers:
-        - name: prometheus
+        - name: autoreparos-prometheus
           image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
           args: ["--config.file=/etc/prometheus/prometheus.yml"]
           ports:
@@ -30,4 +30,4 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: prometheus-config
+            name: autoreparos-prometheus-config

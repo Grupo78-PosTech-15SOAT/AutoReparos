@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: otel-collector
+  name: autoreparos-otel-collector
   labels:
-    app: otel-collector
+    app: autoreparos-otel-collector
     {{- include "observability.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector:
-    app: otel-collector
+    app: autoreparos-otel-collector
   ports:
     - name: otlp-grpc
       port: 4317

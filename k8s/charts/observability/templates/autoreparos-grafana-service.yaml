@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus
+  name: autoreparos-grafana
   labels:
-    app: prometheus
+    app: autoreparos-grafana
     {{- include "observability.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector:
-    app: prometheus
+    app: autoreparos-grafana
   ports:
-    - port: 9090
-      targetPort: 9090
+    - port: 3000
+      targetPort: 3000

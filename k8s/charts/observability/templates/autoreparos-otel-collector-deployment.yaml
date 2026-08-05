@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: otel-collector
+  name: autoreparos-otel-collector
   labels:
-    app: otel-collector
+    app: autoreparos-otel-collector
     {{- include "observability.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.otelCollector.replicaCount }}
   selector:
     matchLabels:
-      app: otel-collector
+      app: autoreparos-otel-collector
   template:
     metadata:
       labels:
-        app: otel-collector
+        app: autoreparos-otel-collector
     spec:
       containers:
-        - name: otel-collector
+        - name: autoreparos-otel-collector
           image: "{{ .Values.otelCollector.image.repository }}:{{ .Values.otelCollector.image.tag }}"
-          args: ["--config=/etc/otel-collector-config.yaml"]
+          args: ["--config=/etc/autoreparos-otel-collector-config.yaml"]
           ports:
             - name: otlp-grpc
               containerPort: 4317
@@ -44,10 +44,10 @@ spec:
             {{- toYaml .Values.otelCollector.resources | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /etc/otel-collector-config.yaml
-              subPath: otel-collector-config.yaml
+              mountPath: /etc/autoreparos-otel-collector-config.yaml
+              subPath: autoreparos-otel-collector-config.yaml
       volumes:
         - name: config
           configMap:
-            name: otel-collector-config
+            name: autoreparos-otel-collector-config
 
