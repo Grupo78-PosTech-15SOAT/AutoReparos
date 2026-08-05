@@ -55,12 +55,12 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
       flex-wrap: wrap;
       gap: 1rem;
       padding: 0.85rem 1.25rem;
-      background: rgba(18, 18, 22, 0.85);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(237, 20, 91, 0.25);
+      background: var(--bg-surface);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       margin-top: 1.25rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-sm);
     }
     .pagination-size {
       display: flex;
@@ -69,27 +69,27 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
     }
     .pagination-label {
       font-size: 0.75rem;
-      color: #A1A1AA;
+      color: var(--text-muted);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
     .pagination-info {
       font-size: 0.85rem;
-      color: #E2E8F0;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 0.65rem;
     }
     .pagination-info strong {
-      color: #ED145B;
+      color: var(--primary);
       font-weight: 700;
     }
     .total-badge {
       font-size: 0.75rem;
-      color: #A1A1AA;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      background: var(--mono-badge-bg);
+      border: 1px solid var(--border-color);
       padding: 0.2rem 0.65rem;
       border-radius: 999px;
       font-weight: 600;
@@ -100,9 +100,9 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
       gap: 0.5rem;
     }
     .btn-page {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #F8FAFC;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
       width: 36px;
       height: 36px;
       border-radius: 8px;
@@ -116,11 +116,11 @@ import { CustomSelectComponent, SelectOption } from '../custom-select/custom-sel
       line-height: 1;
     }
     .btn-page:hover:not(:disabled) {
-      background: #ED145B;
-      border-color: #ED145B;
+      background: var(--primary);
+      border-color: var(--primary);
       color: #ffffff;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(237, 20, 91, 0.4);
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
     }
     .btn-page:disabled {
       opacity: 0.3;

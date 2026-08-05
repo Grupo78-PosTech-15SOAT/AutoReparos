@@ -15,9 +15,9 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
     }
     .badge-id {
       font-family: var(--font-mono);
-      background: rgba(237, 20, 91, 0.08);
-      color: #ED145B;
-      border: 1px solid rgba(237, 20, 91, 0.25);
+      background: var(--primary-subtle);
+      color: var(--primary);
+      border: 1px solid var(--border-pink);
       font-weight: 600;
       border-radius: 6px;
       display: inline-flex;

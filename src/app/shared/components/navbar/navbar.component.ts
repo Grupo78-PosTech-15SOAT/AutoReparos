@@ -165,20 +165,20 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     .sidebar {
       width: 260px;
       height: 100vh;
-      background: rgba(18, 18, 22, 0.95);
-      backdrop-filter: blur(16px);
-      border-right: 1px solid rgba(237, 20, 91, 0.25);
+      background: rgba(28, 28, 33, 0.95);
+      backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+      box-shadow: var(--shadow-lg);
       transition: transform 0.3s ease, left 0.3s ease;
     }
     .sidebar-brand {
       padding: 1.5rem 1.25rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--border-color);
     }
     .brand-link {
       display: flex;
@@ -188,13 +188,13 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     .brand-icon {
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #ED145B, #800A30);
+      background: linear-gradient(135deg, #F43F5E, #E11D48);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      box-shadow: 0 0 20px rgba(237, 20, 91, 0.4);
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
       flex-shrink: 0;
     }
     .brand-icon svg { width: 24px; height: 24px; }
@@ -203,13 +203,13 @@ import { AuthService } from '../../../features/auth/services/auth.service';
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
       font-size: 1.25rem;
-      color: #ffffff;
+      color: var(--text-main);
       line-height: 1.1;
       letter-spacing: -0.01em;
     }
     .brand-text .subtitle {
       font-size: 0.725rem;
-      color: #A1A1AA;
+      color: var(--text-muted);
       margin-top: 2px;
     }
     .sidebar-content {
@@ -228,7 +228,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     .nav-section-title {
       font-size: 0.68rem;
       font-weight: 700;
-      color: #71717A;
+      color: var(--text-subtle);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       padding: 0 0.6rem 0.35rem;
@@ -244,43 +244,43 @@ import { AuthService } from '../../../features/auth/services/auth.service';
       gap: 0.75rem;
       padding: 0.65rem 0.85rem;
       border-radius: 8px;
-      color: #A1A1AA;
+      color: var(--text-muted);
       font-size: 0.875rem;
       font-weight: 500;
       transition: all 0.2s ease;
     }
     .nav-item svg {
-      color: #71717A;
+      color: var(--text-subtle);
       transition: color 0.2s ease;
       flex-shrink: 0;
     }
     .nav-item:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      background: var(--bg-surface-hover);
     }
     .nav-item:hover svg {
-      color: #ffffff;
+      color: var(--text-main);
     }
     .nav-item.active {
-      color: #ffffff;
-      background: linear-gradient(90deg, rgba(237, 20, 91, 0.25) 0%, rgba(237, 20, 91, 0.05) 100%);
+      color: var(--text-main);
+      background: linear-gradient(90deg, rgba(244, 63, 94, 0.16) 0%, rgba(244, 63, 94, 0.04) 100%);
       font-weight: 600;
-      border-left: 3px solid #ED145B;
+      border-left: 3px solid var(--primary);
     }
     .nav-item.active svg {
-      color: #ED145B;
+      color: var(--primary);
     }
     .sidebar-footer {
       padding: 1rem 1rem 1.25rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(14, 14, 17, 0.6);
+      border-top: 1px solid var(--border-color);
+      background: rgba(18, 18, 21, 0.6);
     }
     .user-card {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
       padding: 0.65rem 0.85rem;
       border-radius: 10px;
     }
@@ -288,12 +288,12 @@ import { AuthService } from '../../../features/auth/services/auth.service';
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      background: rgba(237, 20, 91, 0.15);
-      border: 1px solid rgba(237, 20, 91, 0.3);
+      background: var(--primary-subtle);
+      border: 1px solid var(--border-pink);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ED145B;
+      color: var(--primary);
       flex-shrink: 0;
     }
     .user-info {
@@ -305,22 +305,22 @@ import { AuthService } from '../../../features/auth/services/auth.service';
     .user-name {
       font-size: 0.825rem;
       font-weight: 600;
-      color: #F8FAFC;
+      color: var(--text-main);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .role-tag {
       font-size: 0.675rem;
-      color: #ED145B;
+      color: var(--primary);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
     .btn-logout {
       background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #A1A1AA;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
       padding: 0.4rem;
       border-radius: 6px;
       cursor: pointer;
@@ -344,9 +344,9 @@ import { AuthService } from '../../../features/auth/services/auth.service';
         align-items: center;
         justify-content: space-between;
         padding: 0.75rem 1.25rem;
-        background: rgba(18, 18, 22, 0.95);
-        backdrop-filter: blur(14px);
-        border-bottom: 1px solid rgba(237, 20, 91, 0.25);
+        background: rgba(28, 28, 33, 0.95);
+        backdrop-filter: var(--glass-blur);
+        border-bottom: 1px solid var(--border-color);
         position: fixed;
         top: 0;
         left: 0;
@@ -367,12 +367,12 @@ import { AuthService } from '../../../features/auth/services/auth.service';
         font-family: 'Outfit', sans-serif;
         font-weight: 800;
         font-size: 1.15rem;
-        color: #ffffff;
+        color: var(--text-main);
       }
       .mobile-toggle-btn {
         background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: #ffffff;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
         padding: 0.4rem;
         border-radius: 6px;
         cursor: pointer;
@@ -396,7 +396,7 @@ import { AuthService } from '../../../features/auth/services/auth.service';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.75);
+        background: rgba(18, 18, 21, 0.75);
         backdrop-filter: blur(4px);
         z-index: 998;
       }

@@ -49,7 +49,7 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#ED145B"
+              stroke="var(--primary)"
               stroke-width="2.3"
             >
               <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -169,7 +169,7 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
             }
 
             @for (col of colunas(); track col.status) {
-              <div class="kanban-column" [class.active-column]="col.status === 'Execucao'">
+              <div class="kanban-column">
                 <div
                   class="column-header"
                   [class]="getColumnBorderClass(col.status) + ' ' + getColumnGlowClass(col.status)"
@@ -177,7 +177,7 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
                   <span class="column-title">
                     {{ getColumnTitle(col.status) }}
                   </span>
-                  <span class="column-count" [class.active-count]="col.status === 'Execucao'">
+                  <span class="column-count">
                     {{ col.cards.length }}
                   </span>
                 </div>
@@ -413,9 +413,9 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
       .kanban-column {
         display: flex;
         flex-direction: column;
-        background: rgba(24, 24, 28, 0.6);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: var(--bg-surface);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 1rem;
         height: 100%;
@@ -436,7 +436,7 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.25rem 0.25rem 0.75rem 0.25rem;
+        padding: 0.5rem 0.6rem 0.75rem 0.65rem;
         border-bottom: 2px solid #3b82f6;
         margin-bottom: 1rem;
         box-sizing: border-box;
@@ -489,25 +489,27 @@ import { OrdemServicoService } from '../../services/ordem-servico.service';
       }
 
       .column-title {
-        font-family: 'Outfit', sans-serif;
+        font-family: var(--font-display);
         font-weight: 700;
         font-size: 0.92rem;
-        color: #f8fafc;
-        transform-origin: left center;
-        display: inline-block;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        padding-left: 0.25rem;
+        line-height: 1.2;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .column-count {
         background: rgba(255, 255, 255, 0.08);
-        color: #a1a1aa;
-        padding: 0.15rem 0.55rem;
+        color: var(--text-muted);
+        padding: 0.2rem 0.6rem;
         border-radius: 999px;
         font-size: 0.72rem;
         font-weight: 700;
-      }
-      .active-count {
-        background: rgba(249, 115, 22, 0.15);
-        color: #f97316;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
       }
 
       .column-cards {

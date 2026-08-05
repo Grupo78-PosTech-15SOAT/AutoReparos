@@ -116,27 +116,27 @@ export interface SelectOption {
       align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
-      background: rgba(10, 10, 12, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(18, 18, 21, 0.6);
+      border: 1px solid var(--border-subtle);
       border-radius: 8px;
       padding: 0.75rem 1rem;
-      color: #F8FAFC;
+      color: var(--text-main);
       font-size: 0.95rem;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-body);
       cursor: pointer;
       transition: all 0.2s ease;
       text-align: left;
     }
 
     .cs-trigger:hover:not(:disabled) {
-      border-color: rgba(237, 20, 91, 0.4);
-      background: rgba(15, 15, 18, 0.9);
+      border-color: var(--border-focus);
+      background: rgba(28, 28, 33, 0.9);
     }
 
     .cs-open .cs-trigger {
-      border-color: #ED145B;
-      box-shadow: 0 0 12px rgba(237, 20, 91, 0.3);
-      background: rgba(15, 15, 18, 0.95);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--border-focus);
+      background: rgba(28, 28, 33, 0.95);
     }
 
     .cs-trigger:disabled {
@@ -152,11 +152,11 @@ export interface SelectOption {
     }
 
     .cs-placeholder {
-      color: #71717A;
+      color: var(--text-subtle);
     }
 
     .cs-arrow {
-      color: #71717A;
+      color: var(--text-subtle);
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       flex-shrink: 0;
       line-height: 0;
@@ -164,16 +164,16 @@ export interface SelectOption {
 
     .cs-open .cs-arrow {
       transform: rotate(180deg);
-      color: #ED145B;
+      color: var(--primary);
     }
 
     .cs-spinner svg {
       animation: spin 0.8s linear infinite;
-      color: #ED145B;
+      color: var(--primary);
     }
 
     .cs-loading-text {
-      color: #71717A;
+      color: var(--text-subtle);
       font-size: 0.9rem;
       flex: 1;
     }
@@ -189,10 +189,10 @@ export interface SelectOption {
       top: calc(100% + 6px);
       left: 0;
       right: 0;
-      background: #18181C;
-      border: 1px solid rgba(237, 20, 91, 0.25);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(237, 20, 91, 0.15);
+      box-shadow: var(--shadow-lg);
       z-index: 9999;
       overflow: hidden;
     }
@@ -214,7 +214,7 @@ export interface SelectOption {
     .cs-drop-up .cs-dropdown {
       top: auto;
       bottom: calc(100% + 6px);
-      box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.6), 0 -4px 16px rgba(237, 20, 91, 0.15);
+      box-shadow: var(--shadow-lg);
     }
     
     .cs-drop-up .fade-in-down {
@@ -227,8 +227,8 @@ export interface SelectOption {
       align-items: center;
       gap: 0.5rem;
       padding: 0.6rem 0.85rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      color: #71717A;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-subtle);
     }
 
     .cs-search {
@@ -236,24 +236,24 @@ export interface SelectOption {
       background: transparent;
       border: none;
       outline: none;
-      color: #F8FAFC;
+      color: var(--text-main);
       font-size: 0.875rem;
-      font-family: 'Inter', sans-serif;
+      font-family: var(--font-body);
     }
 
-    .cs-search::placeholder { color: #71717A; }
+    .cs-search::placeholder { color: var(--text-subtle); }
 
     /* List */
     .cs-list {
       max-height: 240px;
       overflow-y: auto;
       scrollbar-width: thin;
-      scrollbar-color: rgba(237, 20, 91, 0.3) transparent;
+      scrollbar-color: #334155 transparent;
     }
 
     .cs-list::-webkit-scrollbar { width: 4px; }
     .cs-list::-webkit-scrollbar-track { background: transparent; }
-    .cs-list::-webkit-scrollbar-thumb { background: rgba(237, 20, 91, 0.3); border-radius: 2px; }
+    .cs-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
     /* Option */
     .cs-option {
@@ -261,40 +261,40 @@ export interface SelectOption {
       align-items: center;
       gap: 0.5rem;
       padding: 0.7rem 1rem;
-      color: #A1A1AA;
+      color: var(--text-muted);
       font-size: 0.9rem;
       cursor: pointer;
       transition: background 0.15s ease, color 0.15s ease;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--border-color);
     }
 
     .cs-option:last-child { border-bottom: none; }
 
     .cs-option:hover {
-      background: rgba(237, 20, 91, 0.08);
-      color: #F8FAFC;
+      background: var(--bg-surface-hover);
+      color: var(--text-main);
     }
 
     .cs-option-placeholder {
-      color: #71717A;
+      color: var(--text-subtle);
       font-style: italic;
     }
 
     .cs-option.cs-selected {
-      background: rgba(237, 20, 91, 0.12);
-      color: #ED145B;
+      background: var(--primary-subtle);
+      color: var(--primary);
       font-weight: 600;
     }
 
     .cs-check {
       flex-shrink: 0;
-      color: #ED145B;
+      color: var(--primary);
     }
 
     .cs-empty {
       padding: 1.25rem;
       text-align: center;
-      color: #71717A;
+      color: var(--text-subtle);
       font-size: 0.875rem;
     }
   `]

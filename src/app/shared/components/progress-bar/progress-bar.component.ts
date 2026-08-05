@@ -71,14 +71,14 @@ import { Component, ChangeDetectionStrategy, input, computed } from '@angular/co
     }
 
     .progress-fill {
-      background: linear-gradient(90deg, #ED145B 0%, #FF5388 100%);
+      background: linear-gradient(90deg, var(--primary) 0%, #FB7185 100%);
       height: 100%;
       position: absolute;
       left: 0;
       top: 0;
       border-radius: 999px;
       transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 0 10px rgba(237, 20, 91, 0.4);
+      box-shadow: 0 0 8px var(--primary-glow);
     }
 
     .progress-label {
