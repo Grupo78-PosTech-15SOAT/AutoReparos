@@ -1,9 +1,15 @@
 dependencies:
-- name: app
-  repository: file://charts/app
+- name: api
+  repository: file://charts/api
+  version: 1.0.0
+- name: database
+  repository: file://charts/database
+  version: 1.0.0
+- name: web
+  repository: file://charts/web
   version: 1.0.0
 - name: observability
   repository: file://charts/observability
   version: 1.0.0
-digest: sha256:75b66f6a81532d7872bd79516d04b6de75f56610a4e5bfa332f5629ee4a6e57f
-generated: "2026-08-05T16:27:29.791217863-03:00"
+digest: sha256:8a90bdd8780b5f2114762fc9c1156163fda28d84864564465b70b5c2b6f599e7
+generated: "2026-08-05T16:36:03.617297363-03:00"

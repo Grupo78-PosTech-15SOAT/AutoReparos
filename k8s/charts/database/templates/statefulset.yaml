@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "k8s.fullname" . }}-postgres
+  name: {{ include "database.fullname" . }}
   labels:
-    {{- include "k8s.labels" . | nindent 4 }}
+    {{- include "database.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "k8s.fullname" . }}-postgres-service
+  serviceName: {{ include "database.fullname" . }}-service
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "k8s.fullname" . }}-postgres
+      {{- include "database.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ include "k8s.fullname" . }}-postgres
+        {{- include "database.selectorLabels" . | nindent 8 }}
     spec:
       securityContext:
         runAsNonRoot: true
@@ -31,20 +31,20 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: {{ .Values.postgres.image }}
+          image: {{ .Values.image }}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
               name: postgres
           env:
             - name: POSTGRES_DB
-              value: {{ .Values.postgres.database | quote }}
+              value: {{ .Values.database | quote }}
             - name: POSTGRES_USER
-              value: {{ .Values.postgres.user | quote }}
+              value: {{ .Values.user | quote }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "k8s.fullname" . }}-secrets
+                  name: {{ include "database.fullname" . }}-secret
                   key: postgres-password
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
@@ -52,9 +52,8 @@ spec:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
           resources:
-            {{- toYaml .Values.postgres.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
-            claimName: {{ include "k8s.fullname" . }}-postgres-pvc
-
+            claimName: {{ include "database.fullname" . }}-pvc

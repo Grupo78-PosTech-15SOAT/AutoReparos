@@ -1,4 +1,4 @@
-app:
+api:
   replicaCount: 1
   image:
     repository: autoreparos-api
@@ -15,22 +15,6 @@ app:
         paths:
           - path: /
             pathType: Prefix
-  postgres:
-    image: postgres:16
-    database: autoreparos
-    user: admin
-    password: ""
-    storageSize: 2Gi
-    persistence:
-      enabled: true
-      storageClass: "hostpath"
-    resources:
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
   config:
     aspnetcoreEnvironment: "Development"
     jwtExpiryHours: "2"
@@ -54,6 +38,40 @@ app:
     maxReplicas: 4
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: 80
+
+database:
+  image: postgres:16
+  database: autoreparos
+  user: admin
+  password: ""
+  storageSize: 2Gi
+  persistence:
+    enabled: true
+    storageClass: "hostpath"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+web:
+  replicaCount: 1
+  image:
+    repository: autoreparos-web
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
 
 observability:
   enabled: true
