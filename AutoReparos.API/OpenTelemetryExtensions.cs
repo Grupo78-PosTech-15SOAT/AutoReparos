@@ -24,12 +24,16 @@ namespace AutoReparos.API
                     tracing
                         .SetResourceBuilder(resourceBuilder)
                         .AddSource(serviceName)
+                        .AddSource("Npgsql")
                         .AddAspNetCoreInstrumentation(options =>
                         {
                             options.RecordException = true;
                         })
                         .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
                         .AddOtlpExporter(options =>
                         {
                             options.Endpoint = new Uri(otelEndpoint);
@@ -42,6 +46,7 @@ namespace AutoReparos.API
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
+                        .AddProcessInstrumentation()
                         .AddOtlpExporter(options =>
                         {
                             options.Endpoint = new Uri(otelEndpoint);
@@ -73,10 +78,9 @@ namespace AutoReparos.API
                 });
             });
 
-
-
             return services;
         }
     }
 }
+
 
