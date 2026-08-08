@@ -35,7 +35,7 @@ services:
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
       - App__BaseUrl=${APP_BASE_URL}
       - OpenTelemetry__Endpoint=http://otel-collector:4317
-      - OpenTelemetry__ServiceName=AutoReparos.API
+      - OpenTelemetry__ServiceName=autoreparos-api
     ports:
       - "8080:8080"
     depends_on:
