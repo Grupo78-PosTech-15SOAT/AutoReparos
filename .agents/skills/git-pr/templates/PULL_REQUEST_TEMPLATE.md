@@ -1,32 +1,25 @@
-## 📋 Summary of Changes
-<!-- Provide a clear, concise overview of what changes are introduced in this PR and why. -->
+## 📌 Tipo de Alteração
+- [ ] ✨ Feature (Nova funcionalidade)
+- [ ] 🐛 Bugfix (Correção de bug)
+- [ ] 📝 Documentação
+- [ ] ⚙️ Refatoração / Melhoria de Código
+- [ ] 🧪 Testes
 
-- 
+## 📝 Descrição
+Brief description of the changes introduced by this PR and its motivation.
 
-## 🛠️ Type of Change
-<!-- Mark the relevant options with an 'x' -->
-- [ ] 🚀 New Feature (non-breaking change adding functionality)
-- [ ] 🐛 Bug Fix (non-breaking change fixing an issue)
-- [ ] 🔄 Refactoring / Code Cleanup (no functional or logic changes)
-- [ ] 🗄️ Database Migration / Schema Update
-- [ ] ☁️ Infrastructure / DevOps (Docker, Kubernetes, Terraform, Helm)
-- [ ] 📚 Documentation Update
+## 🛠️ Alterações Realizadas
+- [ ] Item 1
+- [ ] Item 2
+- [ ] Item 3
 
-## 🏗️ Architectural & Database Impact
-- **Layer(s) Modified:** `[ ] Domain` `[ ] Application` `[ ] Infra` `[ ] API` `[ ] Web (Angular)`
-- **Clean Architecture Boundaries Preserved:** Yes / No
-- **EF Core Migrations Included:** (List migration name or 'N/A')
-- **Infrastructure Changes:** (Kubernetes `k8s/`, Terraform `infra/`, Docker Compose)
-
-## 🧪 Testing Matrix & Verification
-- [ ] **Domain Unit Tests:** `dotnet test AutoReparos.Domain.Tests`
-- [ ] **Application Unit Tests:** `dotnet test AutoReparos.Application.Tests`
-- [ ] **Integration Tests:** `dotnet test AutoReparos.IntegrationTests`
-- [ ] **Angular Frontend Build & Verification:** `yarn build` (AutoReparos.Web)
-- [ ] **Manual End-to-End Testing:** Tested via Swagger / Postman / Browser UI
-
-## 🔒 Security & Breaking Changes Checklist
-- [ ] **Secrets Check:** No hardcoded secrets, connection strings, or JWT keys committed.
-- [ ] **Authorization:** Endpoints appropriately protected with `[Authorize]` attributes.
-- [ ] **Breaking Changes:** No breaking changes to existing REST contracts or DB tables.
-- [ ] **Input Validation:** Domain invariants and DTO validations enforced.
+## 🧪 Como Testar e Validar?
+1. Execute os testes unitários da aplicação:
+   ```bash
+   dotnet test AutoReparos.slnx --filter "FullyQualifiedName!~IntegrationTests"
+   ```
+2. Suba o ambiente via Docker Compose:
+   ```bash
+   docker compose up -d --build
+   ```
+3. Passos manuais de teste ou verificação de endpoints.
