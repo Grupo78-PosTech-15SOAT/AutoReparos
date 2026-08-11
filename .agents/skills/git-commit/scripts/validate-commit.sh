@@ -1,31 +1,33 @@
 #!/usr/bin/env bash
 set -e
 
-echo "==============================================="
+SEPARATOR="==============================================="
+
+echo "$SEPARATOR"
 echo "   AutoReparos Pre-Commit Validation Runner   "
-echo "==============================================="
+echo "$SEPARATOR"
 
 # 1. Check for staged secrets or forbidden files
 echo "--> Checking staged files for secrets..."
 STAGED_FILES=$(git diff --cached --name-only)
 
-if [ -z "$STAGED_FILES" ]; then
-  echo "❌ Error: No files staged for commit."
+if [[ -z "$STAGED_FILES" ]]; then
+  echo "❌ Error: No files staged for commit." >&2
   exit 1
 fi
 
 FORBIDDEN_PATTERNS="(\.env|local\.json|appsettings\.Local\.json|\.pem|\.key)"
 if echo "$STAGED_FILES" | grep -E -q "$FORBIDDEN_PATTERNS"; then
-  echo "❌ Error: Forbidden secret or local config file staged:"
-  echo "$STAGED_FILES" | grep -E "$FORBIDDEN_PATTERNS"
-  echo "Unstage these files before committing!"
+  echo "❌ Error: Forbidden secret or local config file staged:" >&2
+  echo "$STAGED_FILES" | grep -E "$FORBIDDEN_PATTERNS" >&2
+  echo "Unstage these files before committing!" >&2
   exit 1
 fi
 
 # 2. Check for hardcoded secrets in staged diff
 echo "--> Checking diff for hardcoded secret keywords..."
 if git diff --cached | grep -iE "(password|secret|jwtsecret|sendgrid.*key).*=.*[\"'][a-zA-Z0-9_\-]{8,}[\"']" | grep -v "appsettings.Development.json"; then
-  echo "⚠️ Warning: Potential hardcoded secret detected in staged diff! Double check before committing."
+  echo "⚠️ Warning: Potential hardcoded secret detected in staged diff! Double check before committing." >&2
 fi
 
 # 3. .NET Build Validation
@@ -46,6 +48,6 @@ if echo "$STAGED_FILES" | grep -q "^AutoReparos.Web/"; then
   echo "✅ Angular build succeeded."
 fi
 
-echo "==============================================="
+echo "$SEPARATOR"
 echo "✅ Pre-Commit Validation Complete! Ready to commit."
-echo "==============================================="
+echo "$SEPARATOR"
