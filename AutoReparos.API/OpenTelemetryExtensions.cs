@@ -13,22 +13,27 @@ namespace AutoReparos.API
             ILoggingBuilder loggingBuilder)
         {
             var otelEndpoint = configuration["OpenTelemetry:Endpoint"] ?? "http://localhost:4317";
-            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "AutoReparos.API";
+            var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "autoreparos-api";
 
-            var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+            var resourceBuilder = ResourceBuilder.CreateDefault()
+                .AddService(serviceName: serviceName, serviceVersion: "1.0.0");
 
             services.AddOpenTelemetry()
                 .WithTracing(tracing =>
                 {
                     tracing
-                        .ConfigureResource(r => r.AddService(serviceName))
+                        .SetResourceBuilder(resourceBuilder)
                         .AddSource(serviceName)
+                        .AddSource("Npgsql")
                         .AddAspNetCoreInstrumentation(options =>
                         {
                             options.RecordException = true;
                         })
                         .AddHttpClientInstrumentation()
-                        .AddEntityFrameworkCoreInstrumentation()
+                        .AddEntityFrameworkCoreInstrumentation(options =>
+                        {
+                            options.SetDbStatementForText = true;
+                        })
                         .AddOtlpExporter(options =>
                         {
                             options.Endpoint = new Uri(otelEndpoint);
@@ -37,14 +42,28 @@ namespace AutoReparos.API
                 .WithMetrics(metrics =>
                 {
                     metrics
-                        .ConfigureResource(r => r.AddService(serviceName))
+                        .SetResourceBuilder(resourceBuilder)
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
+                        .AddProcessInstrumentation()
                         .AddOtlpExporter(options =>
                         {
                             options.Endpoint = new Uri(otelEndpoint);
                         });
+                })
+                .WithLogging(logs =>
+                {
+                    logs.SetResourceBuilder(resourceBuilder);
+                    logs.AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otelEndpoint);
+                    });
+                }, options =>
+                {
+                    options.IncludeFormattedMessage = true;
+                    options.IncludeScopes = true;
+                    options.ParseStateValues = true;
                 });
 
             loggingBuilder.AddOpenTelemetry(options =>
@@ -52,6 +71,7 @@ namespace AutoReparos.API
                 options.SetResourceBuilder(resourceBuilder);
                 options.IncludeFormattedMessage = true;
                 options.IncludeScopes = true;
+                options.ParseStateValues = true;
                 options.AddOtlpExporter(otlpOptions =>
                 {
                     otlpOptions.Endpoint = new Uri(otelEndpoint);
@@ -62,3 +82,5 @@ namespace AutoReparos.API
         }
     }
 }
+
+

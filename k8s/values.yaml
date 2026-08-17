@@ -1,24 +1,45 @@
-replicaCount: 1
+api:
+  replicaCount: 1
+  image:
+    repository: autoreparos-api
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    className: nginx
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+  config:
+    aspnetcoreEnvironment: "Development"
+    jwtExpiryHours: "2"
+    seedUserEmail: "admin@autoreparos.com"
+    sendGridFromEmail: "noreply@autoreparos.com"
+    sendGridFromName: "AutoReparos"
+  secrets:
+    jwtSecret: ""
+    seedUserPassword: ""
+    aprovacaoTokenSecret: ""
+    sendGridApiKey: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  hpa:
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
 
-image:
-  repository: autoreparos-api
-  pullPolicy: IfNotPresent
-  tag: "latest"
-
-service:
-  type: ClusterIP
-  port: 8080
-
-ingress:
-  enabled: true
-  className: nginx
-  hosts:
-    - host: ""
-      paths:
-        - path: /
-          pathType: Prefix
-
-postgres:
+database:
   image: postgres:16
   database: autoreparos
   user: admin
@@ -26,7 +47,7 @@ postgres:
   storageSize: 2Gi
   persistence:
     enabled: true
-    storageClass: "hostpath" # Definir como "gp3" no AWS EKS (CSI dynamic driver) ou "hostpath" / "" para local
+    storageClass: "hostpath"
   resources:
     requests:
       cpu: 100m
@@ -35,31 +56,22 @@ postgres:
       cpu: 500m
       memory: 512Mi
 
+web:
+  replicaCount: 1
+  image:
+    repository: autoreparos-web
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: ClusterIP
+    port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 128Mi
 
-
-config:
-  aspnetcoreEnvironment: "Development"
-  jwtExpiryHours: "2"
-  seedUserEmail: "admin@autoreparos.com"
-  sendGridFromEmail: "noreply@autoreparos.com"
-  sendGridFromName: "AutoReparos"
-
-secrets:
-  jwtSecret: ""
-  seedUserPassword: ""
-  aprovacaoTokenSecret: ""
-  sendGridApiKey: ""
-
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
-    memory: 512Mi
-
-hpa:
-  minReplicas: 1
-  maxReplicas: 4
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+observability:
+  enabled: true

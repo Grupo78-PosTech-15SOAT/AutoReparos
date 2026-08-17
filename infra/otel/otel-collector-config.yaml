@@ -14,11 +14,24 @@ processors:
     check_interval: 1s
     limit_percentage: 75
     spike_limit_percentage: 20
+  resource:
+    attributes:
+      - key: environment
+        value: "production"
+        action: insert
+  transform:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(resource.attributes["service.name"], "postgres") where attributes["db.system"] == "postgresql"
 
 exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: "autoreparos"
+    send_timestamps: true
+    metric_expiration: 180s
 
   otlp/jaeger:
     endpoint: jaeger:4317
@@ -37,13 +50,14 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, resource, transform, batch]
       exporters: [otlp/jaeger]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, resource, batch]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, resource, batch]
       exporters: [loki]
+

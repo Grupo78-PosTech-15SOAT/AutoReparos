@@ -100,42 +100,51 @@ A aplicação está dividida em camadas seguindo os princípios de **Clean Archi
   'theme': 'base',
   'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
   'themeVariables': {
-    'background': '#ffffff',
     'primaryColor': '#ED145B',
     'primaryTextColor': '#ffffff',
     'primaryBorderColor': '#000000',
-    'lineColor': '#000000',
-    'secondaryColor': '#1A1A1A',
     'tertiaryColor': '#FDE7EE',
-    'edgeLabelBackground': '#ffffff'
+    'tertiaryBorderColor': '#ED145B',
+    'edgeLabelBackground': '#000000'
   }
 }}%%
-graph TD
-    Web[AutoReparos.Web / Angular 19] -->|HTTP / REST API| API[AutoReparos.API]
-    API --> Application[AutoReparos.Application]
-    Infra[AutoReparos.Infra] --> Application
-    Application --> Domain[AutoReparos.Domain]
-    
-    subgraph AutoReparos.API
-        Endpoints[Endpoints / Handlers]
-        DI[DependencyInjectionAPI.cs]
-    end
-    
-    subgraph AutoReparos.Application
-        Services[Services - OrdemServicoService, NotificacaoService]
-        DTOs[DTOs - Requests & Responses]
-    end
-    
-    subgraph AutoReparos.Infra
-        Context[AppDbContext / EF Core]
-        Repos[Repositories - PostgreSQL]
-        Security[Identity / JWT / TokenServices]
-    end
-    
-    subgraph AutoReparos.Domain
-        Entities[Entities - OrdemServico, Cliente, Veiculo, Insumo, Servico]
-        ValueObjects[Value Objects - CPF, CNPJ, Placa, Email]
-        Enums[Enums - EStatusOrdemServico, EOrigemInsumo]
+graph TB
+    subgraph System["AutoReparos System"]
+        direction LR
+        Web[AutoReparos.Web / Angular 19] -->|HTTP / REST API| API
+        
+        subgraph Backend["Backend Core Architecture"]
+            direction LR
+            API --> Application
+            Infra --> Application
+            Application --> Domain
+            
+            subgraph API[AutoReparos.API]
+                direction LR
+                Endpoints[Endpoints / Handlers]
+                DI[DependencyInjectionAPI.cs]
+            end
+            
+            subgraph Application[AutoReparos.Application]
+                direction LR
+                Services[Services - OrdemServicoService, NotificacaoService]
+                DTOs[DTOs - Requests & Responses]
+            end
+            
+            subgraph Infra[AutoReparos.Infra]
+                direction LR
+                Context[AppDbContext / EF Core]
+                Repos[Repositories - PostgreSQL]
+                Security[Identity / JWT / TokenServices]
+            end
+            
+            subgraph Domain[AutoReparos.Domain]
+                direction LR
+                Entities[Entities - OrdemServico, Cliente, Veiculo, Insumo, Servico]
+                ValueObjects[Value Objects - CPF, CNPJ, Placa, Email]
+                Enums[Enums - EStatusOrdemServico, EOrigemInsumo]
+            end
+        end
     end
 ```
 
@@ -172,17 +181,17 @@ O ambiente em nuvem provisiona uma infraestrutura elástica e resiliente na AWS,
   'theme': 'base',
   'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
   'themeVariables': {
-    'background': '#ffffff',
     'primaryColor': '#ED145B',
     'primaryTextColor': '#ffffff',
     'primaryBorderColor': '#000000',
-    'lineColor': '#000000',
-    'secondaryColor': '#1A1A1A',
     'tertiaryColor': '#FDE7EE',
-    'edgeLabelBackground': '#ffffff'
+    'tertiaryBorderColor': '#ED145B',
+    'edgeLabelBackground': '#000000'
   }
 }}%%
-graph TB
+graph TD
+  subgraph Infra["Nuvem & Infraestrutura AWS"]
+    direction LR
     Client[Cliente / Navegador] --> Ingress[Nginx Ingress Controller]
     Ingress --> APIService[API Service]
     APIService --> APIPods[API Pods - Replicas]
@@ -197,6 +206,7 @@ graph TB
         HPA[Horizontal Pod Autoscaler - CPU/Memória @ 80%]
         HPA -.-> APIPods
     end
+  end
 ```
 
 </div>
@@ -210,45 +220,46 @@ O deploy é totalmente automatizado através do GitHub Actions a cada merge na b
 ```mermaid
 %%{init: {
   'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; } .note rect, .note, .loopBox rect, .loopBox { fill: #FDE7EE !important; }',
+  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
   'themeVariables': {
-    'background': '#ffffff',
     'primaryColor': '#ED145B',
     'primaryTextColor': '#ffffff',
     'primaryBorderColor': '#000000',
-    'lineColor': '#000000',
-    'secondaryColor': '#1A1A1A',
     'tertiaryColor': '#FDE7EE',
-    'actorColor': '#ED145B',
-    'actorTextColor': '#ffffff',
-    'actorLineColor': '#000000',
-    'signalColor': '#000000',
-    'signalTextColor': '#000000',
-    'labelBoxBkgColor': '#1A1A1A',
-    'labelBoxBorderColor': '#000000',
-    'labelTextColor': '#ffffff',
-    'loopLimitBorderColor': '#ED145B',
-    'loopLimitBkgColor': '#FDE7EE',
-    'noteBorderColor': '#ED145B',
-    'noteBkgColor': '#FDE7EE'
+    'tertiaryBorderColor': '#ED145B',
+    'edgeLabelBackground': '#000000'
   }
 }}%%
-sequenceDiagram
-    participant Git as Repositório GitHub
-    participant CI as Pipeline GitHub Actions
-    participant ECR as AWS ECR (Registry)
-    participant TF as Terraform (IaC)
-    participant EKS as AWS EKS Cluster
-    
-    Git->>CI: Push / Merge na branch 'main'
-    Note over CI: 1. Compilação (Build .NET 10)
-    Note over CI: 2. Testes Unitários & Integração (Testcontainers)
-    CI->>TF: 3. Terraform Validate & Apply
-    Note over TF: Provisiona/Garante VPC, EKS, ECR e Addons
-    TF-->>CI: Retorna URLs e Cluster Info
-    CI->>ECR: 4. Build, Tag e Push da Imagem Docker (:SHA / :latest)
-    CI->>EKS: 5. Deploy via Helm Upgrade --install
-    Note over EKS: Atualiza Deployments, StatefulSet, HPA, Services e Ingress
+graph LR
+    subgraph Pipeline["Pipeline de CI/CD & Deploy Automatizado"]
+        direction LR
+
+        subgraph Source["Controle de Versão"]
+            Git[Repositório GitHub / branch main]
+        end
+        
+        subgraph CI["GitHub Actions Runner"]
+            direction TB
+            Build[1. Compilação .NET 10]
+            Test[2. Testes & Testcontainers]
+            Build --> Test
+        end
+        
+        subgraph InfraCode["Provisionamento AWS"]
+            direction TB
+            TF[3. Terraform Apply]
+            ECR[4. Build & Push Docker Image]
+            TF --> ECR
+        end
+        
+        subgraph Orchestration["Orquestração Kubernetes"]
+            EKS[5. Helm Deploy no Cluster EKS]
+        end
+
+        Git -->|Push / Merge| Build
+        Test -->|Sucesso| TF
+        ECR --> EKS
+    end
 ```
 
 </div>

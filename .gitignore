@@ -411,6 +411,11 @@ CLAUDE.md
 *.toc
 *.fls
 *.fdb_latexmk
+# Helm build artifacts
+*.tgz
+k8s/charts/*.tgz
+
+
 *.synctex.gz
 .agents/local.json
 .agents/generated/
