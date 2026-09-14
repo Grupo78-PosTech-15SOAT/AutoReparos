@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,6 +30,10 @@ namespace AutoReparos.Infra.Data.Mappings
                 .IsRequired();
 
             builder.Property(e => e.AtualizadoEm);
+
+            builder.Property(e => e.InativoEm);
+
+            builder.Ignore(e => e.Ativo);
 
             builder.OwnsOne(e => e.Email, email =>
             {

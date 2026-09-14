@@ -32,6 +32,7 @@ namespace AutoReparos.Infra.Data.Mappings
             builder.Property(os => os.FinalizadoEm);
             builder.Property(os => os.EntregueEm);
             builder.Property(os => os.EnvioAprovacaoEm);
+            builder.Property(os => os.DiagnosticoIniciadoEm);
             builder.Property(os => os.ResponsavelId)
                 .HasMaxLength(450);
 
