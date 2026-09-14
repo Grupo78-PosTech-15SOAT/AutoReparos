@@ -193,6 +193,30 @@ mais.**
 
 ---
 
+## Validação dos painéis de erro (executada)
+
+Os dois painéis de 5xx do `dashboard_erros_integracoes.json` foram exercitados contra o
+stack local com **erro de servidor real**, derrubando o container do PostgreSQL com a API
+no ar. O teste serve para verificar três suposições que, se erradas, deixariam os painéis
+permanentemente vazios sem nenhum sinal de falha:
+
+| Suposição | Resultado observado |
+|---|---|
+| A API devolve `5xx` com o banco fora | **`500` em 18/18 requisições** (12 em `/api/clientes/`, 6 em `/api/ordem-servico/kanban`) |
+| A métrica chega ao Prometheus com o nome esperado | `autoreparos_http_server_request_duration_seconds_count` presente, contagens 12 e 6 batendo exatamente com o tráfego enviado |
+| O label existe com esse nome e formato | `http_response_status_code="500"` (string), ao lado de `http_route` e `http_request_method` |
+
+Ambas as expressões dos painéis retornaram dados: o **Painel 3** discriminado por
+`http_route`, e o **Painel 4** com 100% durante o incidente, caindo para 24,57% depois de
+tráfego bem-sucedido novo.
+
+> **Cuidado ao apresentar o Painel 4.** Ele mede a razão dentro da janela de 5 minutos.
+> Com tráfego esparso, as requisições bem-sucedidas saem da janela antes dos erros e o
+> painel exibe **100% de erro** — aritmeticamente correto, mas facilmente lido como uma
+> falha total que não existe. Em demonstrações, gere tráfego contínuo antes de exibi-lo.
+
+---
+
 ## Pendências de validação
 
 Registradas aqui para que não se percam na entrega:
@@ -200,12 +224,7 @@ Registradas aqui para que não se percam na entrega:
 1. **Envio real ao New Relic nunca exercitado.** O caminho está implementado e o stack
    sobe com o overlay, mas ninguém rodou com uma license key válida. O requisito de
    integração com APM de mercado só fecha quando alguém confirmar a chegada dos dados.
-2. **Painéis de 5xx do `dashboard_erros_integracoes.json` não exercitados com erro real.**
-   Foram verificados com respostas `200`, `400` e `404`; falta derrubar o container do
-   PostgreSQL para forçar `500` e confirmar que os dois painéis reagem.
-3. **Interceptor de métricas sem teste automatizado.** `OrdemServicoMetricsInterceptor`
-   não tem cobertura na suíte.
-4. **Dashboards ainda não provisionados automaticamente no Grafana do EKS.** Os três
+2. **Dashboards ainda não provisionados automaticamente no Grafana do EKS.** Os três
    JSON vivem em `docs/observability/dashboards/`. Copiá-los para o ConfigMap
    `autoreparos-grafana-dashboards-configmap.yaml` exige **escapar as chaves duplas do
    Helm** (`{{ "{{" }}`): os arquivos em `docs/` usam legendas no formato `{{status}}`,
