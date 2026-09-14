@@ -646,6 +646,11 @@ A documentação técnica da Fase 3 se divide entre os **documentos formais de a
 - `RFC-002-managed-database-strategy-rds.md`: estratégia de banco gerenciado no AWS RDS.
 - `ADR-001-adoption-aws-api-gateway.md`: comunicação unificada na borda com AWS API Gateway v2.
 
+### Pacote de Entrega
+
+- [`docs/entrega/roteiro_video_demonstracao_15min.md`](./docs/entrega/roteiro_video_demonstracao_15min.md): roteiro cronometrado do vídeo demonstrativo, com checklist de preparação e plano B por bloco.
+- [`docs/entrega/template_entrega_portal_fiap.md`](./docs/entrega/template_entrega_portal_fiap.md): minuta do documento de submissão no Portal FIAP, pronta para compilação em PDF.
+
 ### Especificações Técnicas e Planos de Execução
 
 - **Submódulos & Arquitetura Multi-Repo ([`docs/specs/fase3/submodulos-multirepo/`](./docs/specs/fase3/submodulos-multirepo/)):**
