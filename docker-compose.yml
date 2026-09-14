@@ -81,9 +81,17 @@ services:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: autoreparos-otel-collector
     restart: always
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    # O segundo --config e um overlay opcional de exportacao para nuvem (New Relic/Datadog).
+    # Sem OTEL_VENDOR_CONFIG_ARG no .env, o config base e passado duas vezes (merge no-op)
+    # e o stack local (Jaeger/Loki/Prometheus) continua funcionando sem license key.
+    command:
+      - "--config=/etc/otel-collector-config.yaml"
+      - "${OTEL_VENDOR_CONFIG_ARG:---config=/etc/otel-collector-config.yaml}"
+    environment:
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY:-}
     volumes:
       - ./submodules/AutoReparos.App/docker/observability/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/otel-collector-config.vendor.yaml:/etc/otel-collector-config.vendor.yaml
     ports:
       - "4317:4317" # OTLP gRPC
       - "4318:4318" # OTLP HTTP
