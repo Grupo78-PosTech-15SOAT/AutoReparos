@@ -11,7 +11,7 @@ namespace AutoReparos.API.Endpoints
         {
             var group = app.MapGroup("/api/veiculos")
                 .WithTags("Veiculos")
-                .RequireAuthorization();
+                .RequireAuthorization("OperadorOficina");
 
             group.MapPost("/", (VeiculoCreateDto dto, VeiculoController controller) => controller.Create(dto))
             .WithName("CreateVeiculo")

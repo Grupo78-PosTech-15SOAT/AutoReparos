@@ -4,6 +4,8 @@ using AutoReparos.Application.Clientes.UseCases;
 using AutoReparos.Application.Clientes.UseCases.Interfaces;
 using AutoReparos.Application.Insumos.UseCases;
 using AutoReparos.Application.Insumos.UseCases.Interfaces;
+using AutoReparos.Application.OrdensServicos.UseCases;
+using AutoReparos.Application.OrdensServicos.UseCases.Interfaces;
 using AutoReparos.Application.OrdensServicos.UseCases.Aprovacao;
 using AutoReparos.Application.OrdensServicos.UseCases.Aprovacao.Interfaces;
 using AutoReparos.Application.OrdensServicos.UseCases.Core;
@@ -45,6 +47,7 @@ namespace AutoReparos.Application
             services.AddScoped<IListarClientesUseCase, ListarClientesUseCase>();
             services.AddScoped<IAtualizarClienteUseCase, AtualizarClienteUseCase>();
             services.AddScoped<IExcluirClienteUseCase, ExcluirClienteUseCase>();
+            services.AddScoped<IObterMeusVeiculosUseCase, ObterMeusVeiculosUseCase>();
 
             // Veículos
             services.AddScoped<ICriarVeiculoUseCase, CriarVeiculoUseCase>();
@@ -96,6 +99,7 @@ namespace AutoReparos.Application
             services.AddScoped<IIniciarServicoOrdemServicoUseCase, IniciarServicoOrdemServicoUseCase>();
             services.AddScoped<IConcluirServicoOrdemServicoUseCase, ConcluirServicoOrdemServicoUseCase>();
             services.AddScoped<IEntregarOrdemServicoUseCase, EntregarOrdemServicoUseCase>();
+            services.AddScoped<IObterMinhasOrdensServicoUseCase, ObterMinhasOrdensServicoUseCase>();
 
             return services;
         }

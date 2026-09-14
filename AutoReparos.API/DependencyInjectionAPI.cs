@@ -62,7 +62,16 @@ namespace AutoReparos.API
                 };
             });
 
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                // Operadores da aplicação (oficina) têm acesso amplo às rotas operacionais
+                options.AddPolicy("OperadorOficina", policy =>
+                    policy.RequireRole("Administrador", "Atendente", "Mecanico"));
+
+                // Clientes autenticados via token efêmero da Lambda têm acesso às rotas restritas do portal
+                options.AddPolicy("ClientePolicy", policy =>
+                    policy.RequireRole("Cliente"));
+            });
 
             services.AddScoped<AuthController>();
             services.AddScoped<UsuarioController>();
@@ -74,6 +83,7 @@ namespace AutoReparos.API
             services.AddScoped<OrdemServicoFluxoController>();
             services.AddScoped<OrdemServicoAprovacaoController>();
             services.AddScoped<DashboardController>();
+            services.AddScoped<PortalClienteController>();
 
             services.AddHttpContextAccessor();
             services.AddScoped<IAppUrlProvider, HttpAppUrlProvider>();

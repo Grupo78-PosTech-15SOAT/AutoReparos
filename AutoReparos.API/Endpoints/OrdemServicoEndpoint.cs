@@ -10,23 +10,49 @@ namespace AutoReparos.API.Endpoints
         public static void MapOrdemServicoEndpoints(this WebApplication app)
         {
             var group = app.MapGroup("/api/ordem-servico")
-                .WithTags("OrdensServico")
-                .RequireAuthorization();
+                .WithTags("OrdensServico");
 
-            group.MapGet("/", (
+            // Rota restrita do Portal do Cliente
+            group.MapGet("/minhas-os", (
+                PortalClienteController controller,
+                System.Security.Claims.ClaimsPrincipal user,
+                string? placa,
+                CancellationToken cancellationToken) => controller.GetMinhasOrdensServico(user, placa, cancellationToken))
+            .WithName("GetMinhasOrdensServico")
+            .WithSummary("Lista as ordens de serviço do cliente autenticado (com filtro opcional por placa)")
+            .WithDescription("Endpoint restrito do portal do cliente acessível via token efêmero da Lambda")
+            .RequireAuthorization("ClientePolicy")
+            .Produces<IEnumerable<MinhaOrdemServicoDto>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
+
+            // Alias plural para conformidade estrita com o roteamento
+            app.MapGet("/api/ordens-servico/minhas-os", (
+                PortalClienteController controller,
+                System.Security.Claims.ClaimsPrincipal user,
+                string? placa,
+                CancellationToken cancellationToken) => controller.GetMinhasOrdensServico(user, placa, cancellationToken))
+            .WithTags("OrdensServico")
+            .RequireAuthorization("ClientePolicy")
+            .ExcludeFromDescription();
+
+            // Rotas operacionais da oficina (acesso para Mecânico, Atendente, Admin)
+            var operacaoGroup = group.MapGroup("/")
+                .RequireAuthorization("OperadorOficina");
+
+            operacaoGroup.MapGet("/", (
                 OrdemServicoController controller,
                 [AsParameters] OrdemServicoPagedRequest request) => controller.GetAll(request))
             .WithName("GetAllOrdensServico")
             .WithSummary("Lista todas as ordens de serviço paginada")
             .Produces<PagedResult<OrdemServicoDto>>(StatusCodes.Status200OK);
 
-            group.MapGet("/kanban", (
+            operacaoGroup.MapGet("/kanban", (
                 OrdemServicoController controller) => controller.GetKanban())
             .WithName("GetKanbanOrdensServico")
             .WithSummary("Lista as ordens de serviço para o Kanban")
             .Produces<IEnumerable<KanbanColumnDto>>(StatusCodes.Status200OK);
 
-            group.MapGet("/fila", (
+            operacaoGroup.MapGet("/fila", (
                 OrdemServicoController controller,
                 [AsParameters] PagedRequest request) => controller.GetFila(request))
             .WithName("GetFilaOrdensServico")
@@ -49,19 +75,19 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .AllowAnonymous();
 
-            group.MapPost("/", (CriarOrdemServicoDto dto, OrdemServicoController controller) => controller.Create(dto))
+            operacaoGroup.MapPost("/", (CriarOrdemServicoDto dto, OrdemServicoController controller) => controller.Create(dto))
             .WithName("CreateOrdemServico")
             .WithSummary("Cria uma nova ordem de serviço")
             .Produces<OrdemServicoDto>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapGet("/{id:guid}", (Guid id, OrdemServicoController controller) => controller.GetById(id))
+            operacaoGroup.MapGet("/{id:guid}", (Guid id, OrdemServicoController controller) => controller.GetById(id))
             .WithName("GetOrdemServicoById")
             .WithSummary("Busca uma ordem de serviço por ID com detalhes")
             .Produces<OrdemServicoDetalheDto>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound);
 
-            group.MapPost("/{id:guid}/servicos", (
+            operacaoGroup.MapPost("/{id:guid}/servicos", (
                 Guid id,
                 AdicionarServicoDto dto,
                 OrdemServicoFluxoController controller) => controller.AdicionarServico(id, dto))
@@ -71,14 +97,14 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPost("/{id:guid}/insumos", (Guid id, AdicionarInsumoDto dto, OrdemServicoFluxoController controller) => controller.AdicionarInsumo(id, dto))
+            operacaoGroup.MapPost("/{id:guid}/insumos", (Guid id, AdicionarInsumoDto dto, OrdemServicoFluxoController controller) => controller.AdicionarInsumo(id, dto))
             .WithName("AdicionarInsumo")
             .WithSummary("Adiciona um insumo à ordem de serviço")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPatch("/{id:guid}/iniciar-diagnostico", (
+            operacaoGroup.MapPatch("/{id:guid}/iniciar-diagnostico", (
                 Guid id,
                 OrdemServicoFluxoController controller) => controller.IniciarDiagnostico(id))
             .WithName("IniciarDiagnostico")
@@ -87,7 +113,7 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPatch("/{id:guid}/enviar-para-aprovacao", (
+            operacaoGroup.MapPatch("/{id:guid}/enviar-para-aprovacao", (
                 Guid id,
                 OrdemServicoFluxoController controller) => controller.EnviarParaAprovacao(id))
             .WithName("EnviarParaAprovacao")
@@ -116,18 +142,17 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status400BadRequest)
             .AllowAnonymous();
 
-            group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/iniciar", (
+            operacaoGroup.MapPatch("/{id:guid}/servicos/{servicoId:guid}/iniciar", (
                 Guid id,
                 Guid servicoId,
                 OrdemServicoFluxoController controller) => controller.IniciarServico(id, servicoId))
             .WithName("IniciarServico")
             .WithSummary("Inicia a execução de um serviço da OS")
-            .RequireAuthorization()
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPatch("/{id:guid}/servicos/{servicoId:guid}/concluir", (
+            operacaoGroup.MapPatch("/{id:guid}/servicos/{servicoId:guid}/concluir", (
                 Guid id,
                 Guid servicoId,
                 OrdemServicoFluxoController controller) => controller.ConcluirServico(id, servicoId))
@@ -137,7 +162,7 @@ namespace AutoReparos.API.Endpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest);
 
-            group.MapPatch("/{id:guid}/entregar", (
+            operacaoGroup.MapPatch("/{id:guid}/entregar", (
                 Guid id,
                 OrdemServicoFluxoController controller) => controller.Entregar(id))
             .WithName("EntregarOrdemServico")
