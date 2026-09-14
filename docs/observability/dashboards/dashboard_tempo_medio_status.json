@@ -1,0 +1,365 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Requisito 7 da Fase 3: tempo médio em cada etapa da OS. Os histogramas são gravados pelo OrdemServicoMetricsInterceptor no instante da transição de status, a partir dos carimbos de tempo da própria ordem (DiagnosticoIniciadoEm, EnvioAprovacaoEm, IniciadoEm, FinalizadoEm, CriadoEm, EntregueEm). Valores exibidos em horas.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Tempo Médio de Diagnóstico",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_diagnostico_seconds_sum[30d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_diagnostico_seconds_count[30d])), 1)) / 3600",
+          "legendFormat": "Diagnóstico",
+          "refId": "A",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "min": 0,
+          "max": 48,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 8
+              },
+              {
+                "color": "red",
+                "value": 24
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "EnvioAprovacaoEm - DiagnosticoIniciadoEm, média das amostras da janela."
+    },
+    {
+      "id": 2,
+      "title": "Tempo Médio de Execução",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_execucao_seconds_sum[30d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_execucao_seconds_count[30d])), 1)) / 3600",
+          "legendFormat": "Execução",
+          "refId": "A",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "min": 0,
+          "max": 120,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 24
+              },
+              {
+                "color": "red",
+                "value": 72
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "FinalizadoEm - IniciadoEm."
+    },
+    {
+      "id": 3,
+      "title": "Tempo Total de Permanência",
+      "type": "gauge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_permanencia_seconds_sum[30d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_permanencia_seconds_count[30d])), 1)) / 3600",
+          "legendFormat": "Permanência",
+          "refId": "A",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h",
+          "min": 0,
+          "max": 240,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 72
+              },
+              {
+                "color": "red",
+                "value": 168
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "EntregueEm - CriadoEm: ciclo completo da OS na oficina."
+    },
+    {
+      "id": 4,
+      "title": "Evolução dos Tempos de Atendimento (média móvel semanal)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_diagnostico_seconds_sum[7d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_diagnostico_seconds_count[7d])), 1)) / 3600",
+          "legendFormat": "Diagnóstico",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_execucao_seconds_sum[7d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_execucao_seconds_count[7d])), 1)) / 3600",
+          "legendFormat": "Execução",
+          "refId": "B",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "(sum(increase(autoreparos_ordens_servico_tempo_permanencia_seconds_sum[7d])) / clamp_min(sum(increase(autoreparos_ordens_servico_tempo_permanencia_seconds_count[7d])), 1)) / 3600",
+          "legendFormat": "Permanência total",
+          "refId": "C",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "description": "Janela deslizante de 7 dias sobre cada histograma."
+    },
+    {
+      "id": 5,
+      "title": "Percentil 95 por Etapa",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(autoreparos_ordens_servico_tempo_diagnostico_seconds_bucket[7d]))) / 3600",
+          "legendFormat": "p95 diagnóstico",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(autoreparos_ordens_servico_tempo_execucao_seconds_bucket[7d]))) / 3600",
+          "legendFormat": "p95 execução",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "description": "Mostra a cauda longa que a média esconde: OS que travam em uma etapa."
+    },
+    {
+      "id": 6,
+      "title": "Amostras Coletadas por Etapa",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(autoreparos_ordens_servico_tempo_diagnostico_seconds_count[30d]))",
+          "legendFormat": "Diagnósticos concluídos",
+          "refId": "A",
+          "range": false,
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(autoreparos_ordens_servico_tempo_execucao_seconds_count[30d]))",
+          "legendFormat": "Execuções concluídas",
+          "refId": "B",
+          "range": false,
+          "instant": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(increase(autoreparos_ordens_servico_tempo_permanencia_seconds_count[30d]))",
+          "legendFormat": "OS entregues",
+          "refId": "C",
+          "range": false,
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "description": "Número de OS que contribuíram para cada média, para contextualizar os gauges."
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "autoreparos",
+    "fase3",
+    "negocio"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "AutoReparos - Tempo Médio por Status da Ordem de Serviço",
+  "uid": "autoreparos-tempo-medio-status",
+  "version": 1,
+  "weekStart": ""
+}
