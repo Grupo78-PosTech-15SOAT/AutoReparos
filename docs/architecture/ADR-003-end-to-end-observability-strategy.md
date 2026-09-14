@@ -246,10 +246,48 @@ expondo `uid` `Prometheus`/`Jaeger`/`Loki`, e consulta bem-sucedida via
 
 ---
 
-## Pendências de validação
+## Exportação para o New Relic (validada)
 
-Uma única pendência em aberto:
+O overlay `otel-collector-config.vendor.yaml` foi exercitado com uma **license key de
+ingestão válida** contra o stack local, confirmando o requisito de integração com
+ferramenta de APM de mercado.
 
-1. **Envio real ao New Relic nunca exercitado.** O caminho está implementado e o stack
-   sobe com o overlay, mas ninguém rodou com uma license key válida. O requisito de
-   integração com APM de mercado só fecha quando alguém confirmar a chegada dos dados.
+A autotelemetria do próprio Collector (`:8888/metrics`) é a evidência, porque distingue
+"enviado" de "falhou ao enviar" por exportador e por sinal:
+
+| Sinal | Enviado ao New Relic | Falhas | Exportador local | Igualdade |
+|---|---|---|---|---|
+| Logs | 480 | **0** | Loki: 480 | ✔ |
+| Métricas | 588 | **0** | Prometheus: 588 | ✔ |
+| Traces | 541 | **0** | Jaeger: 541 | ✔ |
+
+Dois fatos que essa tabela estabelece:
+
+1. **Os três sinais atravessam**, com zero falhas — uma chave rejeitada apareceria como
+   `send_failed` diferente de zero, não como ausência de dados.
+2. **O overlay acrescenta sem substituir.** As contagens do New Relic são idênticas às
+   dos exportadores locais, confirmando a premissa do desenho: habilitar o vendor não
+   degrada o stack local, e desabilitá-lo não exige tocar na aplicação.
+
+O log do Collector não registrou nenhuma ocorrência de erro de autenticação no período.
+
+### Detalhes operacionais aprendidos
+
+- **A região da conta define o endpoint.** A mesma chave retorna `202` em
+  `log-api.newrelic.com` (US) e `403` em `log-api.eu.newrelic.com` (EU). Contas
+  europeias exigem trocar o endpoint do overlay para `otlp.eu01.nr-data.net:4317`.
+  Um `403` por região errada é indistinguível de chave inválida.
+- **O tipo de chave importa e a interface engana.** É preciso a **Ingest — License**
+  (40 caracteres, terminando em `NRAL`). No menu da chave, a opção *Copy key ID* copia
+  o identificador interno do registro (64 caracteres hexadecimais), não a credencial —
+  e o resultado é um `403` idêntico ao de uma chave inexistente.
+- **A porta `8888` do Collector não é publicada** no `docker-compose.yml`. A
+  autotelemetria só é acessível de dentro da rede do compose.
+
+> **Escopo desta validação.** O que está verificado é que o Collector entrega os três
+> sinais e o New Relic os aceita sem erro. A consulta dos dados já indexados na interface
+> do New Relic depende de acesso à conta e **não faz parte desta verificação**.
+
+Em cluster, a chave nunca é versionada: o chart lê de um Secret do Kubernetes
+(`existingSecret: autoreparos-otel-vendor`) injetado como `OTEL_VENDOR_API_KEY`. Esse
+caminho está implementado no chart mas **ainda não foi exercitado em cluster real**.
