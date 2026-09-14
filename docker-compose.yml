@@ -72,7 +72,7 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./servers.json:/pgadmin4/servers.json
+      - ./submodules/AutoReparos.App/docker/servers.json:/pgadmin4/servers.json
     networks:
       - autoreparos-network
 
@@ -83,7 +83,7 @@ services:
     restart: always
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ./infra/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
       - "4317:4317" # OTLP gRPC
       - "4318:4318" # OTLP HTTP
@@ -100,7 +100,7 @@ services:
     container_name: autoreparos-prometheus
     restart: always
     volumes:
-      - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./submodules/AutoReparos.App/docker/observability/otel/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
@@ -121,7 +121,7 @@ services:
     restart: always
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./infra/otel/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/loki-config.yaml:/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
     networks:
@@ -136,8 +136,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
     ports:
       - "3000:3000"
     depends_on:
