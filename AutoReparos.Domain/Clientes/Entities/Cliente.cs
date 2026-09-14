@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Exceptions;
+using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Clientes.ValueObjects;
 using AutoReparos.Domain.Shared;
 using AutoReparos.Domain.Shared.ValueObjects;
@@ -38,6 +38,16 @@ namespace AutoReparos.Domain.Clientes.Entities
         public DateTime AtualizadoEm { get; private set; }
 
         /// <summary>
+        /// Data em que o cliente foi inativado. Quando nulo, indica cliente ativo.
+        /// </summary>
+        public DateTime? InativoEm { get; private set; }
+
+        /// <summary>
+        /// Indica se o cadastro do cliente está ativo
+        /// </summary>
+        public bool Ativo => !InativoEm.HasValue;
+
+        /// <summary>
         /// Construtor para uso do Entity Framework
         /// </summary>
         protected Cliente() { }
@@ -68,12 +78,39 @@ namespace AutoReparos.Domain.Clientes.Entities
         /// <param name="telefone">Número de telefone do cliente</param>
         public void Atualizar(string nome, string email, string telefone)
         {
+            if (string.IsNullOrWhiteSpace(nome))
+                throw new InvalidClienteException("Nome é obrigatório");
+
             if (nome.Length > 100)
                 throw new InvalidClienteException("Nome muito longo, o nome deve ter no máximo 100 caracteres.");
 
             Nome = nome;
             Email = Email.Create(email);
             Telefone = Telefone.Create(telefone);
+            AtualizadoEm = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Inativa o cadastro do cliente registrando a data/hora atual
+        /// </summary>
+        public void Inativar()
+        {
+            if (InativoEm.HasValue)
+                throw new InvalidClienteException("Cliente já se encontra inativo.");
+
+            InativoEm = DateTime.UtcNow;
+            AtualizadoEm = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Reativa o cadastro do cliente limpando a data de inativação
+        /// </summary>
+        public void Reativar()
+        {
+            if (!InativoEm.HasValue)
+                throw new InvalidClienteException("Cliente já se encontra ativo.");
+
+            InativoEm = null;
             AtualizadoEm = DateTime.UtcNow;
         }
     }

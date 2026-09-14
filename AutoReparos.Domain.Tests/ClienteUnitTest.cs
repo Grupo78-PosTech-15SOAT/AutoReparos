@@ -1,4 +1,4 @@
-﻿using AutoReparos.Domain.Clientes.Entities;
+using AutoReparos.Domain.Clientes.Entities;
 using AutoReparos.Domain.Clientes.Exceptions;
 using AutoReparos.Domain.Shared.Exceptions;
 using FluentAssertions;
@@ -190,6 +190,89 @@ namespace AutoReparos.Domain.Tests
         {
             Action action = () => new Cliente("Cliente Teste", "52998224725", "11912345678", "clientexample.com");
             action.Should().Throw<InvalidEmailException>().WithMessage("Endereço de E-mail inválido.");
+        }
+
+        #endregion
+
+        #region Status e Ciclo de Vida
+
+        [Fact(DisplayName = "Create Client Should Be Active By Default")]
+        public void CreateClient_ShouldBeActiveByDefault()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+
+            cliente.Ativo.Should().BeTrue();
+            cliente.InativoEm.Should().BeNull();
+        }
+
+        [Fact(DisplayName = "Inactivate Client Should Set InativoEm And AtivoFalse")]
+        public void InactivateClient_ShouldSetInativoEmAndAtivoFalse()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+
+            cliente.Inativar();
+
+            cliente.Ativo.Should().BeFalse();
+            cliente.InativoEm.Should().NotBeNull();
+            cliente.InativoEm.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
+        }
+
+        [Fact(DisplayName = "Inactivate Client Already Inactive Should Throw Exception")]
+        public void InactivateClient_AlreadyInactive_ShouldThrowException()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+            cliente.Inativar();
+
+            Action action = () => cliente.Inativar();
+
+            action.Should().Throw<InvalidClienteException>()
+                .WithMessage("Cliente já se encontra inativo.");
+        }
+
+        [Fact(DisplayName = "Reactivate Client Should Clear InativoEm And AtivoTrue")]
+        public void ReactivateClient_ShouldClearInativoEmAndAtivoTrue()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+            cliente.Inativar();
+
+            cliente.Reativar();
+
+            cliente.Ativo.Should().BeTrue();
+            cliente.InativoEm.Should().BeNull();
+        }
+
+        [Fact(DisplayName = "Reactivate Client Already Active Should Throw Exception")]
+        public void ReactivateClient_AlreadyActive_ShouldThrowException()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+
+            Action action = () => cliente.Reativar();
+
+            action.Should().Throw<InvalidClienteException>()
+                .WithMessage("Cliente já se encontra ativo.");
+        }
+
+        [Fact(DisplayName = "Update Client With Empty Name Should Throw Exception")]
+        public void UpdateClient_WithEmptyName_ShouldThrowException()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+
+            Action action = () => cliente.Atualizar("", "novo@example.com", "11999998888");
+
+            action.Should().Throw<InvalidClienteException>()
+                .WithMessage("Nome é obrigatório");
+        }
+
+        [Fact(DisplayName = "Update Client With Valid Data Should Update Fields")]
+        public void UpdateClient_WithValidData_ShouldUpdateFields()
+        {
+            var cliente = new Cliente("Cliente Teste", "52998224725", "11912345678", "client@example.com");
+
+            cliente.Atualizar("Novo Nome", "novo@example.com", "11999998888");
+
+            cliente.Nome.Should().Be("Novo Nome");
+            cliente.Email.Endereco.Should().Be("novo@example.com");
+            cliente.Telefone.Numero.Should().Be("11999998888");
         }
 
         #endregion
