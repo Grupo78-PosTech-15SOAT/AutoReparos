@@ -1,7 +1,7 @@
 # Relatório de Diagnóstico e Auditoria Técnica: Fase 3 Tech Challenge (13SOAT) [Revisão 2.0]
 
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
-> **Escopo Avaliado:** Backend (.NET 10, EF Core 10), Suítes de Testes (Unitários e Integração), Arquitetura e Especificação Fase 3 (`docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`).  
+> **Escopo Avaliado:** Backend (.NET 10, EF Core 10), Suítes de Testes (Unitários e Integração), Arquitetura e Especificação Fase 3 (`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`).  
 > **Data:** Setembro de 2026 (Atualizado após revisão, Sprint 1, Sprint 2 e migração Multi-Repo)  
 > **Status Global:** Em Andamento (Fases 1 e 2 integradas; Sprint 1 e 2 da Fase 3 concluídas com PRs #33 e #34)  
 > **Nível de Prontidão Fase 3 Estimado:** **72%**
@@ -47,7 +47,7 @@ Para garantir precisão cirúrgica e eliminar qualquer ambiguidade, a presente a
 
 ## 2. Matriz de Analogia Spec vs. Feature (Fase 3 Tech Challenge)
 
-Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`](file:///home/josemd12/Code/AutoReparos/docs/specs/13SOAT%20-%20Fase%203%20-%20Tech%20Challenge.pdf) contra o estado atual da solução:
+Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`](file:///home/josemd12/Code/AutoReparos/docs/tech-challenge/13SOAT%20-%20Fase%203%20-%20Tech%20Challenge.pdf) contra o estado atual da solução:
 
 | Requisito da Especificação (Fase 3) | Estado Atual no Repositório | Nível | Gaps Identificados & O que Falta |
 | :--- | :--- | :---: | :--- |

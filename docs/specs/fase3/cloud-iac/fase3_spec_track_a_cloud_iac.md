@@ -31,7 +31,7 @@ Esta especificação define o escopo integral de **Infraestrutura como Código (
 
 ## 2. Requisitos Mandatórios da Banca Cobertos pelo Track A
 
-Conforme a especificação oficial (`docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`):
+Conforme a especificação oficial (`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`):
 
 | Requisito do Tech Challenge | Componente / Repositório | Entregável do Track A |
 | :--- | :--- | :--- |

@@ -9,15 +9,17 @@ Project-local standard for AGENTS.md + MCP + SKILLS.
 - `agents sync` to materialize generated configuration.
 - `agents sync --check` for CI-safe drift detection.
 
-## Knowledge & Specs
+## Knowledge & Rules
 - `knowledge/`: Architectural knowledge base for AI agents
   - `knowledge/domain-model.md`: Domain entities, value objects, state machines, invariants
   - `knowledge/architecture-overview.md`: Clean Architecture layers, DI setup, Minimal API + Controller pattern, OpenTelemetry
   - `knowledge/database-schema.md`: PostgreSQL schema, EF Core mappings, migration history, seed pipeline
-- `specs/`: Implementation specifications for AI agents
-  - `specs/api-contracts.md`: REST endpoints, request/response DTOs, authentication, ProblemDetails
-  - `specs/branching-strategy.md`: Git Flow branching model, branch taxonomy (feat/, fix/, refactor/), lifecycle, PR base rules, and EKS deploy triggers
-  - `specs/vertical-slice-pattern.md`: Feature implementation walkthrough across Domain, Application, Infra, API, and Web
+  - `knowledge/api-contracts.md`: REST endpoints, request/response DTOs, authentication, ProblemDetails
+- `rules/`: Architectural and operational coding rules for AI agents
+  - `rules/branching-strategy.md`: Git Flow branching model, branch taxonomy (feat/, fix/, refactor/), lifecycle, PR base rules, and EKS deploy triggers
+  - `rules/vertical-slice-pattern.md`: Feature implementation walkthrough across Domain, Application, Infra, API, and Web
+  - `rules/clean-arch-ddd.md`: Clean Architecture & Domain-Driven Design invariants
+  - `rules/submodules-ci-and-docs-integrity.md`: Rules for submodules, CI/CD, and technical documentation integrity
 
 
 ## Root instruction file

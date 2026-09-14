@@ -5,7 +5,7 @@
 > **Responsável:** **Engenheiro de Software, Observabilidade & Arquitetura (Dev 2 / Track B)**  
 > **Repositório Principal de Trabalho:** [`submodules/AutoReparos.App`](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App) e Repositório Central de Documentação  
 > **Status do Documento:** **Pronto para Execução Imediata**  
-> **Arquivo:** `docs/specs/fase3_track_b_tarefas_restantes_spec.md`
+> **Arquivo:** `docs/specs/fase3/observabilidade/fase3_track_b_tarefas_restantes_spec.md`
 
 ---
 

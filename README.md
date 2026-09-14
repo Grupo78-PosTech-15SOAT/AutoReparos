@@ -630,17 +630,28 @@ O projeto adota padrões rigorosos de qualidade verificados via SonarQube e GitH
 
 ## 9. Documentação Técnica e Especificações da Fase 3
 
-A documentação arquitetural e as especificações técnicas da Fase 3 estão consolidadas na pasta [`docs/specs/`](./docs/specs/):
-- **Especificações Técnicas por Track:**
-  - [`fase3_spec_track_a_cloud_iac.md`](./docs/specs/fase3_spec_track_a_cloud_iac.md): Especificação de Cloud AWS, Terraform (RDS e EKS), API Gateway HTTP v2 e Helm Charts.
-  - [`fase3_spec_track_b_observability_docs.md`](./docs/specs/fase3_spec_track_b_observability_docs.md): Especificação de Observabilidade (OpenTelemetry, New Relic/Datadog) e documentação.
-  - [`fase3_track_b_tarefas_restantes_spec.md`](./docs/specs/fase3_track_b_tarefas_restantes_spec.md): Detalhamento dos use cases do portal do cliente, métricas de OS e telemetria.
-- **Análises de Gap e Planos de Arquitetura:**
-  - [`fase3_deep_gap_analysis.md`](./docs/specs/fase3_deep_gap_analysis.md): Análise aprofundada de aderência aos requisitos da Fase 3 FIAP SOAT.
-  - [`plano_arquitetura_submodulos_git.md`](./docs/specs/plano_arquitetura_submodulos_git.md): Decisão e plano de segregação multi-repo com Git Submodules.
-  - [`plano_migracao_submodulo_app.md`](./docs/specs/plano_migracao_submodulo_app.md): Estruturação da aplicação principal e desacoplamento de testes.
-  - [`plano_sprint2_auth_lambda_portal.md`](./docs/specs/plano_sprint2_auth_lambda_portal.md): Especificação da Lambda serverless e do portal do cliente.
-  - [`relatorio_revisao_critica_sprint2.md`](./docs/specs/relatorio_revisao_critica_sprint2.md): Relatório de revisão crítica das entregas do Sprint 2.
+A documentação arquitetural e as especificações técnicas da Fase 3 estão organizadas por entrega na pasta [`docs/specs/fase3/`](./docs/specs/fase3/):
+
+- **Submódulos & Arquitetura Multi-Repo ([`docs/specs/fase3/submodulos-multirepo/`](./docs/specs/fase3/submodulos-multirepo/)):**
+  - [`plano_arquitetura_submodulos_git.md`](./docs/specs/fase3/submodulos-multirepo/plano_arquitetura_submodulos_git.md): Decisão e plano de segregação multi-repo com Git Submodules.
+  - [`plano_migracao_submodulo_app.md`](./docs/specs/fase3/submodulos-multirepo/plano_migracao_submodulo_app.md): Estruturação da aplicação principal e desacoplamento de testes.
+
+- **Autenticação Serverless & Portal do Cliente ([`docs/specs/fase3/auth-lambda-portal/`](./docs/specs/fase3/auth-lambda-portal/)):**
+  - [`plano_sprint2_auth_lambda_portal.md`](./docs/specs/fase3/auth-lambda-portal/plano_sprint2_auth_lambda_portal.md): Especificação da Lambda serverless e do portal do cliente.
+  - [`relatorio_revisao_critica_sprint2.md`](./docs/specs/fase3/auth-lambda-portal/relatorio_revisao_critica_sprint2.md): Relatório de revisão crítica das entregas do Sprint 2.
+
+- **Cloud & Infraestrutura IaC ([`docs/specs/fase3/cloud-iac/`](./docs/specs/fase3/cloud-iac/)):**
+  - [`fase3_spec_track_a_cloud_iac.md`](./docs/specs/fase3/cloud-iac/fase3_spec_track_a_cloud_iac.md): Especificação de Cloud AWS, Terraform (RDS e EKS), API Gateway HTTP v2 e Helm Charts.
+
+- **Observabilidade & Métricas ([`docs/specs/fase3/observabilidade/`](./docs/specs/fase3/observabilidade/)):**
+  - [`fase3_spec_track_b_observability_docs.md`](./docs/specs/fase3/observabilidade/fase3_spec_track_b_observability_docs.md): Especificação de Observabilidade (OpenTelemetry, Prometheus, Jaeger, Loki) e documentação.
+  - [`fase3_track_b_tarefas_restantes_spec.md`](./docs/specs/fase3/observabilidade/fase3_track_b_tarefas_restantes_spec.md): Detalhamento dos use cases do portal do cliente, métricas de OS e telemetria.
+
+- **Gap Analysis & Validação Consolidada ([`docs/specs/fase3/gap-analysis/`](./docs/specs/fase3/gap-analysis/)):**
+  - [`fase3_deep_gap_analysis.md`](./docs/specs/fase3/gap-analysis/fase3_deep_gap_analysis.md): Análise aprofundada de aderência aos requisitos da Fase 3 FIAP SOAT.
+  - [`fase3_validacao_consolidada_e_plano_execucao.md`](./docs/specs/fase3/gap-analysis/fase3_validacao_consolidada_e_plano_execucao.md): Plano consolidado de execução e validação da Fase 3.
+  - [`frontend_deep_gap_analysis.md`](./docs/specs/fase3/gap-analysis/frontend_deep_gap_analysis.md): Análise de gaps de frontend e integração.
+
 - **Enunciados Oficiais da Pós-Graduação:**
   - Arquivados em [`docs/tech-challenge/`](./docs/tech-challenge/) contendo os PDFs das Fases 1, 2 e 3.
 

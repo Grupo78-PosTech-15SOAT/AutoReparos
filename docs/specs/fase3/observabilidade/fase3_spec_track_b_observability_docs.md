@@ -27,7 +27,7 @@ Esta especificação define o escopo integral de **Observabilidade (OpenTelemetr
 
 ## 2. Requisitos Mandatórios da Banca Cobertos pelo Track B
 
-Conforme a especificação oficial (`docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`):
+Conforme a especificação oficial (`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`):
 
 | Requisito do Tech Challenge | Componente / Localização | Entregável do Track B |
 | :--- | :--- | :--- |

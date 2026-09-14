@@ -42,7 +42,7 @@ Foi realizada uma bateria completa de validação técnica sobre todo o ecossist
 
 ## 2. Matriz de Auditoria e Status Real dos Requisitos
 
-Abaixo está o status detalhado e empírico de cada requisito do **Tech Challenge Fase 3** (`docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`):
+Abaixo está o status detalhado e empírico de cada requisito do **Tech Challenge Fase 3** (`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`):
 
 | # | Requisito da Especificação Fase 3 | Estado no Código | Status Empírico | Evidência / Validação |
 | :-: | :--- | :--- | :-: | :--- |

@@ -109,7 +109,13 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
   - O total anunciado deve ser estritamente igual à soma das partes detalhadas (ex: `113 Domínio + 123 Aplicação + 40 Lambda + 67 Integração = 343 testes`).
   - Nunca declare números arbitrários ou desatualizados que contradigam o resultado real de `dotnet test`.
 
-### 3.3 Prevenção de Links Quebrados e Diretórios Fantasmas
+### 3.3 Organização das Especificações Técnicas e Planos de Entrega
+- Todas as especificações técnicas (`spec_*.md`) e planos de execução (`plano_*.md`) devem ser organizados em subdiretórios sob `docs/specs/fase<N>/<entregavel>/`:
+  - Exemplo: `docs/specs/fase3/submodulos-multirepo/`, `docs/specs/fase3/auth-lambda-portal/`, `docs/specs/fase3/cloud-iac/`, `docs/specs/fase3/observabilidade/`, `docs/specs/fase3/gap-analysis/`.
+  - Specs e planos da mesma entrega/task devem residir juntos na mesma subpasta.
+- Documentos normativos e padrões de conduta da IA pertencem a `.agents/rules/` e `.agents/knowledge/`, não a `docs/specs/`.
+
+### 3.4 Prevenção de Links Quebrados e Diretórios Fantasmas
 - Antes de commitar documentação que referencie arquivos de arquitetura (RFCs, ADRs, especificações):
-  - Inspecione a árvore de diretórios do repositório para certificar-se de que o arquivo ou diretório citado existe fisicamente (ex: referenciar `docs/specs/` se `docs/architecture/` não foi criada).
+  - Inspecione a árvore de diretórios do repositório para certificar-se de que o arquivo ou diretório citado existe fisicamente (ex: referenciar `docs/specs/fase3/...` em vez de caminhos planos ou pastas inexistentes).
   - Nunca crie referências a caminhos fictícios.

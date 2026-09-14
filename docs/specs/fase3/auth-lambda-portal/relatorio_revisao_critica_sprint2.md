@@ -2,7 +2,7 @@
 
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
 > **Documento Analisado:** `.tmp/plano_sprint2_auth_lambda_portal.md` e `.tmp/fase3_deep_gap_analysis.md`  
-> **Referência Oficial:** `docs/specs/13SOAT - Fase 3 - Tech Challenge.pdf`  
+> **Referência Oficial:** `docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`  
 > **Perfil do Avaliador:** Avaliador Crítico de Arquitetura e Regras de Negócio (Tech Challenge FIAP SOAT)  
 > **Status da Avaliação:** **APROVADO COM RESSALVAS CRÍTICAS (Ajustes Mandatórios Pré-Codificação)**  
 
