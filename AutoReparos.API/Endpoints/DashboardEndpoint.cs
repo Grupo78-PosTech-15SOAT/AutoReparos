@@ -10,7 +10,7 @@ namespace AutoReparos.API.Endpoints
         {
             var group = app.MapGroup("/api/dashboard")
                 .WithTags("Dashboard")
-                .RequireAuthorization();
+                .RequireAuthorization("OperadorOficina");
 
             group.MapGet("/metrics", (DashboardController controller) => controller.GetMetrics())
                 .WithName("GetDashboardMetrics")
