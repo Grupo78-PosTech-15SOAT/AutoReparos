@@ -113,12 +113,19 @@ AutoReparos/
 - `refactor/<target>` - Code refactoring (e.g., `refactor/cliente-value-objects`)
 - `chore/<task>` - CI/CD or tooling updates
 
-### Commit Messages (Conventional Commits)
-Format: `<type>(<scope>): <short description>`
-- `feat(ordemservico): add discount calculation to budget`
-- `fix(insumos): check stock availability before deducting`
-- `test(clientes): add unit tests for CPF validation`
-- `refactor(web): migrate cliente form component to signals`
+### Padrão de Mensagens de Commit (Gitmoji + Descrição em Português)
+Formato obrigatório: `<gitmoji> <Descrição da ação em Português>`
+Exemplo padrão: `📝 Adicionando especificação técnica`
+
+Exemplos de referência:
+- `✨ Adicionando cálculo de desconto no orçamento`
+- `🐛 Corrigindo verificação de estoque antes da dedução`
+- `🧪 Adicionando testes unitários para validação de CPF`
+- `♻️ Refatorando componente de formulário de clientes com signals`
+- `🔥 Removendo código duplicado e arquivos legados`
+- `👷 Ajustando pipeline de CI/CD para compilação e testes`
+- `🔒 Fixando credenciais e configurações de segurança`
+
 
 ### Pull Request & Review Standard
 Before marking a task complete or submitting a PR:

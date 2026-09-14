@@ -51,19 +51,21 @@ Determine the scope based on the primary directory touched in the diff:
 
 ---
 
-### Step 3: Conventional Commit & Gitmoji Type Selection
+### Step 3: Gitmoji Selection
 
-Select the commit type and optional Gitmoji according to the repository standards:
+Selecione o Gitmoji adequado de acordo com a intenção da alteração:
 
-- `✨` / `feat`: New feature or capability (`✨ (web): adicionar filtro de ordens de serviço por cliente`)
-- `🐛` / `fix`: Bug fix (`🐛 (infra): corrigir recalculo de estoque ao cancelar ordem`)
-- `🚨` / `test` / `fix`: Code smell or SonarQube fix (`🚨 (app): resolver Code Smells apontados pelo SonarQube`)
-- `🎨` / `style` / `refactor`: UI adjustment, contrast, or refactoring (`🎨 (web): ajuste de contraste WCAG AA`)
-- `🔒` / `security`: Security adjustment (`🔒 (infra): ajuste de seguranca Nginx para container sem root`)
-- `🚚` / `refactor`: Structural file move or rename (`🚚 (web): renomeando pasta do frontend para AutoReparos.Web`)
-- `📝` / `docs`: Documentation update (`📝 (readme): atualizar secao de arquitetura no README`)
-- `👷` / `ci`: CI/CD pipeline changes (`👷 (ci): ajustar trigger do workflow de deploy no GitHub Actions`)
-- `chore`: Dependency update or repo tooling adjustment (`chore: atualizar pacotes NuGet`)
+- `✨`: Nova funcionalidade ou recurso (`✨ Adicionando filtro de ordens de serviço por cliente`)
+- `🐛`: Correção de bug (`🐛 Corrigindo recálculo de estoque ao cancelar ordem`)
+- `🚨`: Resolução de code smells ou apontamentos SonarQube (`🚨 Resolvendo code smells apontados pelo SonarQube`)
+- `🎨`: Ajuste visual, UI, acessibilidade ou formatação (`🎨 Corrigindo contraste WCAG AA no frontend`)
+- `🔒`: Segurança, permissões ou credenciais (`🔒 Ajustando segurança Nginx para container sem root`)
+- `🚚`: Movimentação ou renomeação estrutural (`🚚 Renomeando pasta do frontend para AutoReparos.Web`)
+- `🔥`: Remoção de código, dependências ou arquivos legados (`🔥 Removendo código duplicado da raiz do repositório pai`)
+- `📝`: Documentação ou especificações técnicas (`📝 Adicionando especificação técnica`)
+- `👷`: Pipeline de CI/CD ou automação (`👷 Ajustando workflow de deploy no GitHub Actions`)
+- `♻️`: Refatoração de arquitetura ou código (`♻️ Refatorando endpoints para minimal APIs`)
+- `🧪`: Testes unitários ou de integração (`🧪 Adicionando testes de integração com Testcontainers`)
 
 ---
 
@@ -92,24 +94,31 @@ bash .agents/skills/git-commit/scripts/validate-commit.sh
 ---
 
 ### Step 5: Format & Execute Commit
-Construct a concise commit message following this schema:
+Formate a mensagem de commit seguindo estritamente o padrão:
 
 ```text
-<gitmoji> <type>(<scope>): <short summary in imperative mood>
+<gitmoji> <Descrição da ação em Português>
 
-[optional body explaining motivation and changes]
+[corpo detalhado opcional]
 ```
 
-#### Real Repository Commit Examples:
-- `✨ (web): suporte a CORS, envio de Role no Login e integracao monorepo frontend`
-- `🐛 (infra): removendo modificador readonly do metodo applyMask na diretiva de mascara`
-- `🔒 (docker): ajuste de seguranca Nginx para rodar sem root (USER nginx) na porta 8080`
-- `📝 (docs): adicionando secao de Arquitetura Frontend Angular no README`
-- `🚨 (sonar): resolução de apontamentos adicionais de Medium/Low do SonarQube`
+#### Padrão de Referência do Repositório:
+```text
+📝 Adicionando especificação técnica
+```
 
-#### Commit Execution Command:
+#### Exemplos Reais do Repositório:
+- `📝 Adicionando especificação técnica`
+- `✨ Adicionando suporte a CORS e envio de Role no Login`
+- `🐛 Removendo modificador readonly do método applyMask na diretiva de máscara`
+- `🔥 Removendo código duplicado da aplicação principal e lambda da raiz do repositório pai`
+- `🔒 Ajustando segurança Nginx para rodar sem root na porta 8080`
+- `🚨 Resolvendo apontamentos de code smell do SonarQube`
+- `👷 Ajustando pipeline CI/CD para submódulos recursivos`
+
+#### Comando de Execução do Commit:
 ```bash
-git commit -m "✨ (web): suporte a CORS, envio de Role no Login e integracao monorepo frontend"
+git commit -m "📝 Adicionando especificação técnica"
 ```
 
 ---

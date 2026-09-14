@@ -65,9 +65,9 @@ git checkout -b feat/os-drawer-kanban
 ```
 
 ### 2. Developing & Local Commits
-Follow the **Gitmoji + Conventional Commits** standard ([`git-workflow.md`](../rules/git-workflow.md)):
+Follow the **Gitmoji + Descrição em Português** standard ([`git-workflow.md`](../rules/git-workflow.md)):
 ```bash
-git commit -m "✨ (web): adicionar gaveta lateral no kanban de ordens de serviço"
+git commit -m "✨ Adicionando gaveta lateral no kanban de ordens de serviço"
 ```
 
 ### 3. Keeping Branch Up to Date
@@ -81,7 +81,7 @@ git rebase origin/develop
 Target `develop` as the base branch via GitHub CLI or Web UI ([`git-pr/SKILL.md`](../skills/git-pr/SKILL.md)):
 ```bash
 gh pr create \
-  --title "✨ (web): suporte a gaveta lateral no kanban" \
+  --title "🔀 Adicionando suporte a gaveta lateral no kanban" \
   --body-file .agents/skills/git-pr/templates/PULL_REQUEST_TEMPLATE.md \
   --base develop
 ```
