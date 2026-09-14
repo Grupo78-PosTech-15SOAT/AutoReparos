@@ -169,4 +169,8 @@ When executing tasks on this repository:
 1. **Inspect Before Mutating:** Read existing target files and tests to understand existing domain contracts before adding code.
 2. **Preserve DDD Boundaries:** Do not add infrastructure code (EF Core annotations, SQL queries) inside `AutoReparos.Domain`.
 3. **Verify Every Change:** Never declare success without executing `dotnet build` / `dotnet test` or `yarn build`.
-4. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
+4. **Submodules & CI/CD Integrity:** Always use `submodules: recursive` in GitHub Actions checkout, pin all action `uses:` to 40-char commit SHAs (SonarCloud rule), and use HTTPS URLs in `.gitmodules`.
+5. **No Code Duplication:** Completely remove legacy root folders and duplicated test suites when migrating to submodules.
+6. **Documentation Fidelity:** Ensure ERD diagrams match real EF Core mappings, test metrics sum up accurately, and all doc links reference existing paths.
+7. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
+
