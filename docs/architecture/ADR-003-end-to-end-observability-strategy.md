@@ -217,15 +217,39 @@ tráfego bem-sucedido novo.
 
 ---
 
+## Provisionamento dos dashboards
+
+Os três dashboards mandatórios vivem em `docs/observability/dashboards/` e essa é a
+**fonte única** — nenhuma cópia é mantida em paralelo. Os dois ambientes a consomem:
+
+- **Stack local:** o `docker-compose.yml` monta o diretório em
+  `/etc/grafana/provisioning/dashboards/json/mandatorios`, onde o provider de arquivos
+  do Grafana os encontra.
+- **EKS:** os JSON são embutidos no ConfigMap
+  `autoreparos-grafana-dashboards-configmap.yaml` do chart de observabilidade.
+
+Dois detalhes que quebram silenciosamente quem mexer nisso:
+
+1. **Escape das chaves duplas do Helm.** As legendas usam o formato `{{status}}`, e o
+   Helm interpreta `{{` como início de ação. No ConfigMap elas precisam virar
+   `{{ "{{" }}status}}` — a chave de fechamento fica intacta. Um JSON copiado cru
+   quebra a renderização do chart inteiro.
+2. **`uid` explícito nas datasources.** Os dashboards referenciam
+   `"datasource": { "uid": "Prometheus" }`. Se o provisionamento não declarar `uid`, o
+   Grafana gera um automaticamente (`PBFA97CFB590B2093` e similares) e **nenhuma dessas
+   referências resolve** — os painéis sobem vazios, sem erro visível. Por isso o `uid` é
+   fixado igual ao nome nos dois ambientes.
+
+Verificado no Grafana 10.4.1 do stack local: quatro dashboards provisionados, datasources
+expondo `uid` `Prometheus`/`Jaeger`/`Loki`, e consulta bem-sucedida via
+`/api/datasources/proxy/uid/Prometheus`.
+
+---
+
 ## Pendências de validação
 
-Registradas aqui para que não se percam na entrega:
+Uma única pendência em aberto:
 
 1. **Envio real ao New Relic nunca exercitado.** O caminho está implementado e o stack
    sobe com o overlay, mas ninguém rodou com uma license key válida. O requisito de
    integração com APM de mercado só fecha quando alguém confirmar a chegada dos dados.
-2. **Dashboards ainda não provisionados automaticamente no Grafana do EKS.** Os três
-   JSON vivem em `docs/observability/dashboards/`. Copiá-los para o ConfigMap
-   `autoreparos-grafana-dashboards-configmap.yaml` exige **escapar as chaves duplas do
-   Helm** (`{{ "{{" }}`): os arquivos em `docs/` usam legendas no formato `{{status}}`,
-   que quebrariam o template se copiados sem tratamento.
