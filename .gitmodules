@@ -1,12 +1,12 @@
 [submodule "submodules/AutoReparos.AuthLambda"]
 	path = submodules/AutoReparos.AuthLambda
-	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda.git
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda.git
 [submodule "submodules/AutoReparos.App"]
 	path = submodules/AutoReparos.App
-	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.App.git
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App.git
 [submodule "submodules/AutoReparos.Infra.Database"]
 	path = submodules/AutoReparos.Infra.Database
-	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database.git
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database.git
 [submodule "submodules/AutoReparos.Infra.K8s"]
 	path = submodules/AutoReparos.Infra.K8s
-	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s.git
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s.git

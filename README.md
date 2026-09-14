@@ -348,10 +348,11 @@ erDiagram
     CLIENTES ||--o{ VEICULOS : "possui"
     CLIENTES ||--o{ ORDENS_SERVICOS : "solicita"
     VEICULOS ||--o{ ORDENS_SERVICOS : "pertence_a"
-    USUARIOS ||--o{ ORDENS_SERVICOS : "executa_ou_atende"
-    ORDENS_SERVICOS ||--o{ ORDEM_SERVICO_ITENS : "contem"
-    SERVICOS ||--o{ ORDEM_SERVICO_ITENS : "especifica"
-    INSUMOS ||--o{ ORDEM_SERVICO_ITENS : "utiliza"
+    USUARIOS ||--o{ ORDENS_SERVICOS : "atribui_mecanico"
+    ORDENS_SERVICOS ||--o{ ORDEM_SERVICO_SERVICOS : "contem"
+    SERVICOS ||--o{ ORDEM_SERVICO_SERVICOS : "executa"
+    ORDENS_SERVICOS ||--o{ ORDEM_SERVICO_INSUMOS : "contem"
+    INSUMOS |o--o{ ORDEM_SERVICO_INSUMOS : "fornece"
 
     CLIENTES {
         uuid Id PK
@@ -361,6 +362,7 @@ erDiagram
         string Telefone
         string Status "Ativo / Inativo"
         datetime CriadoEm
+        datetime InativoEm "Nullable"
     }
 
     VEICULOS {
@@ -394,28 +396,41 @@ erDiagram
         uuid Id PK
         uuid ClienteId FK
         uuid VeiculoId FK
+        string ResponsavelId "Identity UserId FK (Nullable)"
         string Status "Recebida, EmDiagnostico, AguardandoAprovacao, EmExecucao, Finalizada, Entregue, Cancelada"
         decimal ValorTotal
         datetime CriadoEm
-        datetime DiagnosticoIniciadoEm
-        datetime IniciadoEm
-        datetime FinalizadoEm
-        datetime EntregueEm
-        string AprovacaoToken
+        datetime DiagnosticoIniciadoEm "Nullable"
+        datetime EnvioAprovacaoEm "Nullable"
+        datetime IniciadoEm "Nullable"
+        datetime FinalizadoEm "Nullable"
+        datetime EntregueEm "Nullable"
+        string Observacao "Nullable"
     }
 
-    ORDEM_SERVICO_ITENS {
+    ORDEM_SERVICO_SERVICOS {
         uuid Id PK
         uuid OrdemServicoId FK
-        uuid ServicoId FK "Nullable"
+        uuid ServicoId FK
+        decimal ValorCobrado
+        string Status "Pendente, EmExecucao, Concluido"
+        datetime IniciadoEm "Nullable"
+        datetime ConcluidoEm "Nullable"
+    }
+
+    ORDEM_SERVICO_INSUMOS {
+        uuid Id PK
+        uuid OrdemServicoId FK
         uuid InsumoId FK "Nullable"
-        int Quantidade
+        string Descricao
         decimal ValorUnitario
+        int Quantidade
         decimal ValorTotal
+        string Origem "Estoque, Avulso"
     }
 
     USUARIOS {
-        uuid Id PK
+        string Id PK "Identity UserId"
         string Nome
         string Email "Unique"
         string TipoUsuario "Administrador, Atendente, Mecanico"
@@ -574,7 +589,7 @@ Endpoints disponíveis:
 
 ### Executando os Testes Automatizados
 
-A solução conta com **346 testes automatizados** (100% passando):
+A solução conta com **343 testes automatizados** (100% passando):
 - **Domínio (`AutoReparos.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
 - **Aplicação (`AutoReparos.Application.Tests`):** 123 testes unitários (casos de uso).
 - **Serverless (`AutoReparos.AuthLambda.Tests`):** 40 testes unitários (Módulo 11 CPF, geração de token).
@@ -613,18 +628,21 @@ O projeto adota padrões rigorosos de qualidade verificados via SonarQube e GitH
 
 ---
 
-## 9. Documentação de Arquitetura (RFCs e ADRs)
+## 9. Documentação Técnica e Especificações da Fase 3
 
-A documentação arquitetural da Fase 3 está estruturada na pasta [`docs/`](./docs/):
-- **RFCs (Request for Comments):**
-  - `RFC-001-Cloud-AWS-Strategy.md`: Justificativa da escolha da AWS para hospedagem elástica.
-  - `RFC-002-Database-RDS-PostgreSQL.md`: Justificativa técnica do modelo relacional no AWS RDS.
-  - `RFC-003-Serverless-Auth-Strategy.md`: Decisão de arquitetura para autenticação do cliente final via Lambda e CPF/E-mail.
-- **ADRs (Architecture Decision Records):**
-  - `ADR-001-API-Gateway-Edge-Routing.md`: Padrão de comunicação unificado na borda com AWS API Gateway v2.
-  - `ADR-002-Horizontal-Pod-Autoscaler.md`: Estratégia de escalabilidade dinâmica via HPA no EKS.
-  - `ADR-003-Zero-Trust-Customer-Portal.md`: Padrão de isolamento de dados do cliente sem registro no Identity.
-  - `ADR-004-Multi-Repo-Segregation.md`: Separação em 4 repositórios Git com submódulos para orquestração local.
+A documentação arquitetural e as especificações técnicas da Fase 3 estão consolidadas na pasta [`docs/specs/`](./docs/specs/):
+- **Especificações Técnicas por Track:**
+  - [`fase3_spec_track_a_cloud_iac.md`](./docs/specs/fase3_spec_track_a_cloud_iac.md): Especificação de Cloud AWS, Terraform (RDS e EKS), API Gateway HTTP v2 e Helm Charts.
+  - [`fase3_spec_track_b_observability_docs.md`](./docs/specs/fase3_spec_track_b_observability_docs.md): Especificação de Observabilidade (OpenTelemetry, New Relic/Datadog) e documentação.
+  - [`fase3_track_b_tarefas_restantes_spec.md`](./docs/specs/fase3_track_b_tarefas_restantes_spec.md): Detalhamento dos use cases do portal do cliente, métricas de OS e telemetria.
+- **Análises de Gap e Planos de Arquitetura:**
+  - [`fase3_deep_gap_analysis.md`](./docs/specs/fase3_deep_gap_analysis.md): Análise aprofundada de aderência aos requisitos da Fase 3 FIAP SOAT.
+  - [`plano_arquitetura_submodulos_git.md`](./docs/specs/plano_arquitetura_submodulos_git.md): Decisão e plano de segregação multi-repo com Git Submodules.
+  - [`plano_migracao_submodulo_app.md`](./docs/specs/plano_migracao_submodulo_app.md): Estruturação da aplicação principal e desacoplamento de testes.
+  - [`plano_sprint2_auth_lambda_portal.md`](./docs/specs/plano_sprint2_auth_lambda_portal.md): Especificação da Lambda serverless e do portal do cliente.
+  - [`relatorio_revisao_critica_sprint2.md`](./docs/specs/relatorio_revisao_critica_sprint2.md): Relatório de revisão crítica das entregas do Sprint 2.
+- **Enunciados Oficiais da Pós-Graduação:**
+  - Arquivados em [`docs/tech-challenge/`](./docs/tech-challenge/) contendo os PDFs das Fases 1, 2 e 3.
 
 ---
 
