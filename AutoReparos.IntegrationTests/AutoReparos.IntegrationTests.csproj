@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutoReparos.API\AutoReparos.API.csproj" />
-    <ProjectReference Include="..\AutoReparos.AuthLambda\AutoReparos.AuthLambda.csproj" />
+    <ProjectReference Include="..\submodules\AutoReparos.AuthLambda\src\AutoReparos.AuthLambda.csproj" />
   </ItemGroup>
 
 </Project>

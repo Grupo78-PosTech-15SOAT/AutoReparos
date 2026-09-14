@@ -1,0 +1,3 @@
+[submodule "submodules/AutoReparos.AuthLambda"]
+	path = submodules/AutoReparos.AuthLambda
+	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda.git
