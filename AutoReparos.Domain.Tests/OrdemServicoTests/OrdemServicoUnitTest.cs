@@ -152,5 +152,74 @@ namespace AutoReparos.Domain.Tests.OrdemServicoTests
 
             os.ValorTotal.Should().Be(200.50m);
         }
+
+        [Fact(DisplayName = "Start Diagnosis Should Set DiagnosticoIniciadoEm")]
+        public void IniciarDiagnostico_ShouldSetDiagnosticoIniciadoEm()
+        {
+            var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
+
+            os.IniciarDiagnostico("mecanico-1");
+
+            os.DiagnosticoIniciadoEm.Should().NotBeNull();
+            os.DiagnosticoIniciadoEm.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(2));
+            os.ResponsavelId.Should().Be("mecanico-1");
+        }
+
+        [Fact(DisplayName = "Refuse OS Should Return To EmDiagnostico Without Setting IniciadoEm")]
+        public void Recusar_WhenAwaitingApproval_ShouldReturnToEmDiagnosticoAndNotSetIniciadoEm()
+        {
+            var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
+            os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
+            os.IniciarDiagnostico("mecanico-1");
+            os.AguardarAprovacao("mecanico-1");
+
+            os.Recusar();
+
+            os.Status.Should().Be(EStatusOrdemServico.EmDiagnostico);
+            os.IniciadoEm.Should().BeNull();
+        }
+
+        [Fact(DisplayName = "Refuse OS When Not Awaiting Approval Should Throw Exception")]
+        public void Recusar_WhenNotAwaitingApproval_ShouldThrowException()
+        {
+            var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
+
+            Action action = () => os.Recusar();
+
+            action.Should().Throw<InvalidOrdemServicoException>()
+                .WithMessage("A Ordem de Serviço só pode ser recusada quando estiver aguardando aprovação.");
+        }
+
+        [Fact(DisplayName = "Calculate Diagnostic Time Elapsed")]
+        public void ObterTempoDiagnostico_WhenTimestampsPresent_ShouldCalculateDiff()
+        {
+            var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
+            os.AdicionarServico(new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100));
+            os.IniciarDiagnostico("mecanico-1");
+            os.AguardarAprovacao("mecanico-1");
+
+            var tempo = os.ObterTempoDiagnostico();
+
+            tempo.Should().NotBeNull();
+            tempo!.Value.TotalMilliseconds.Should().BeGreaterThanOrEqualTo(0);
+        }
+
+        [Fact(DisplayName = "Calculate Execution Time Elapsed")]
+        public void ObterTempoExecucao_WhenTimestampsPresent_ShouldCalculateDiff()
+        {
+            var os = new OrdemServico(_clienteIdValido, _veiculoIdValido, null);
+            var servico = new OrdemServicoServico(Guid.NewGuid(), Guid.NewGuid(), 100);
+            servico.Iniciar();
+            os.AdicionarServico(servico);
+            os.IniciarDiagnostico("mecanico-1");
+            os.AguardarAprovacao("mecanico-1");
+            os.Aprovar();
+            os.ConcluirServico(servico.Id);
+
+            var tempo = os.ObterTempoExecucao();
+
+            tempo.Should().NotBeNull();
+            tempo!.Value.TotalMilliseconds.Should().BeGreaterThanOrEqualTo(0);
+        }
     }
 }

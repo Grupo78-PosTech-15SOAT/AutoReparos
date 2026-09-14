@@ -26,6 +26,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
         public DateTime? FinalizadoEm { get; private set; }
         public DateTime? EntregueEm { get; private set; }
         public DateTime? EnvioAprovacaoEm { get; private set; }
+        public DateTime? DiagnosticoIniciadoEm { get; private set; }
         /// <summary>
         /// ID do mecânico responsável pelo diagnóstico.
         /// Definido ao iniciar o diagnóstico; sobrescrito ao finalizar caso outro mecânico assuma.
@@ -58,8 +59,8 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
             ClienteId = clienteId;
             VeiculoId = veiculoId;
             Observacao = observacao;
-            Status = EStatusOrdemServico.Recebida;
             CriadoEm = DateTime.UtcNow;
+            Status = EStatusOrdemServico.Recebida;
         }
 
         public void AdicionarServico(OrdemServicoServico servico)
@@ -95,6 +96,7 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
 
             Status = EStatusOrdemServico.EmDiagnostico;
             ResponsavelId = mecanicoId;
+            DiagnosticoIniciadoEm ??= DateTime.UtcNow;
         }
 
         public void AguardarAprovacao(string mecanicoId)
@@ -125,7 +127,30 @@ namespace AutoReparos.Domain.OrdensServicos.Entities
                 throw new InvalidOrdemServicoException("A Ordem de Serviço só pode ser recusada quando estiver aguardando aprovação.");
 
             Status = EStatusOrdemServico.EmDiagnostico;
-            IniciadoEm = DateTime.UtcNow;
+        }
+
+        public TimeSpan? ObterTempoDiagnostico()
+        {
+            if (!DiagnosticoIniciadoEm.HasValue || !EnvioAprovacaoEm.HasValue)
+                return null;
+
+            return EnvioAprovacaoEm.Value - DiagnosticoIniciadoEm.Value;
+        }
+
+        public TimeSpan? ObterTempoExecucao()
+        {
+            if (!IniciadoEm.HasValue || !FinalizadoEm.HasValue)
+                return null;
+
+            return FinalizadoEm.Value - IniciadoEm.Value;
+        }
+
+        public TimeSpan? ObterTempoFinalizacaoAteEntrega()
+        {
+            if (!FinalizadoEm.HasValue || !EntregueEm.HasValue)
+                return null;
+
+            return EntregueEm.Value - FinalizadoEm.Value;
         }
 
         public void IniciarServico(Guid ordemServicoServicoId)
