@@ -4,3 +4,6 @@
 [submodule "submodules/AutoReparos.App"]
 	path = submodules/AutoReparos.App
 	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.App.git
+[submodule "submodules/AutoReparos.Infra.Database"]
+	path = submodules/AutoReparos.Infra.Database
+	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database.git
