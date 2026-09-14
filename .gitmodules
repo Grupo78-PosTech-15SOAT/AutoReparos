@@ -7,3 +7,6 @@
 [submodule "submodules/AutoReparos.Infra.Database"]
 	path = submodules/AutoReparos.Infra.Database
 	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database.git
+[submodule "submodules/AutoReparos.Infra.K8s"]
+	path = submodules/AutoReparos.Infra.K8s
+	url = git@github.com:Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s.git
