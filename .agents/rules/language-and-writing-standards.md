@@ -27,17 +27,21 @@ All architectural patterns, framework abstractions, design patterns, infrastruct
 
 ## 2. Commit Message & Pull Request Writing Standards
 
-### A. Commit Messages (Gitmoji + Conventional Commits)
-Commit titles must use **imperative mood** in Portuguese (PT-BR) or English (EN-US), prefixed with the appropriate Gitmoji and Conventional Commit type ([`git-workflow.md`](./git-workflow.md)):
+### A. Commit Messages (Gitmoji + Descrição em Português)
+O formato obrigatório para mensagens de commit no repositório é `<gitmoji> <Descrição da ação em Português>` ([`git-workflow.md`](./git-workflow.md)):
 
-- **Correct (Imperative PT-BR)**: `✨ (web): suporte a CORS e envio de Role no Login`
-- **Correct (Imperative PT-BR)**: `🐛 (infra): remover modificador readonly na diretiva de mascara`
-- **Correct (Imperative EN-US)**: `fix(domain): correct price calculation invariant for repair items`
-- **Incorrect (Past Tense / Vague)**: `ajustado backend` or `fixed bugs`
+- **Padrão Canônico de Referência**: `📝 Adicionando especificação técnica`
+- **Exemplos Corretos**:
+  - `✨ Adicionando suporte a CORS e envio de Role no Login`
+  - `🐛 Removendo modificador readonly na diretiva de mascara`
+  - `🔥 Removendo código duplicado da raiz do repositório pai`
+  - `📝 Adicionando especificação técnica para tarefas da Fase 3`
+  - `🔒 Fixando credenciais e configurações de segurança`
+- **Incorreto (fora do padrão)**: `feat(api): add cors`, `fix: bugs`, `ajustado backend`
 
 ### B. Pull Request Titles & Descriptions
-- **Title**: Formatted using Conventional Commits syntax matching the primary branch work (`feat(web): adicionar gaveta lateral no kanban`).
-- **Body**: Detailed markdown in Portuguese (PT-BR) or English (EN-US) using the PR template ([`PULL_REQUEST_TEMPLATE.md`](../skills/git-pr/templates/PULL_REQUEST_TEMPLATE.md)).
+- **Title**: Formatado estritamente com `<gitmoji> <Descrição da ação em Português>` (ex: `✨ Adicionando suporte a gaveta lateral no kanban` ou `📝 Adicionando especificação técnica`).
+- **Body**: Detailed markdown in Portuguese (PT-BR) using the PR template ([`PULL_REQUEST_TEMPLATE.md`](../skills/git-pr/templates/PULL_REQUEST_TEMPLATE.md)).
 
 ---
 
@@ -53,6 +57,8 @@ Commit titles must use **imperative mood** in Portuguese (PT-BR) or English (EN-
    public void Aprovar()
    ```
 
+4. **Relative Paths Only in Documentation & Harness**: ALL paths and links in documentation (`docs/`), specifications, plans, and `.agents/` MUST be relative (e.g. `./`, `../`, `docs/...`, `submodules/...`). Absolute paths (`/home/...`, `C:\...`, `file:///...`) are strictly forbidden.
+
 ---
 
 ## 4. Summary Matrix
@@ -64,4 +70,5 @@ Commit titles must use **imperative mood** in Portuguese (PT-BR) or English (EN-
 | Repository Interfaces & Implementations | **English (EN-US) + PT Entity** | `IClienteRepository`, `ClienteRepository` |
 | Application Use Cases | **Portuguese (PT-BR) + EN UseCase** | `CriarOrdemServicoUseCase` |
 | API Endpoints & Controllers | **Portuguese (PT-BR) + EN Controller** | `ClienteController`, `ClienteEndpoint` |
-| Git Commits & PR Descriptions | **PT-BR / EN Imperative + Gitmoji** | `✨ (web): suporte a CORS e envio de Role` |
+| Git Commits & PR Descriptions | **Gitmoji + Descrição em Português** | `📝 Adicionando especificação técnica` |
+| Docs & AI Harness File Links | **Relative Paths Only (No Absolute Paths)** | `docs/specs/fase3/...`, `../../submodules/...` |

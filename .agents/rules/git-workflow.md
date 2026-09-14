@@ -21,28 +21,36 @@ All feature/fix branches must be lowercase, use hyphens as word separators, and 
 
 ---
 
-## 2. Commit Message Conventions (Gitmoji + Conventional Commits)
+## 2. Commit Message Conventions (Gitmoji + Descrição em Português)
 
-Commit messages in `AutoReparos` follow Conventional Commits combined with Gitmoji prefixes in imperative Portuguese or English:
+As mensagens de commit no repositório `AutoReparos` devem seguir estritamente o padrão de **Gitmoji seguido de descrição clara da ação em Português**:
 
 ```text
-<gitmoji> <type>(<scope>): <short imperative summary>
+<gitmoji> <Descrição da ação em Português>
 
-[optional detailed body]
+[corpo detalhado opcional]
 ```
 
-### Gitmoji & Type Mappings
+### Exemplo Padrão de Referência
+```text
+📝 Adicionando especificação técnica
+```
 
-| Gitmoji | Type | Usage | Example |
-| :--- | :--- | :--- | :--- |
-| `✨` (`:sparkles:`) | `feat` | New feature | `✨ Suporte a CORS e envio de Role no Login` |
-| `🐛` | `fix` | Bug fix | `🐛 Removendo modificador readonly na mascara` |
-| `🚨` | `fix` / `test` | Fixing SonarQube code smells or broken tests | `🚨 Resolução de apontamentos do SonarQube` |
-| `🎨` | `style` / `refactor` | Code formatting, UI contrast, or refactoring | `🎨 Correção de contraste WCAG AA` |
-| `🔒` | `security` | Security adjustments or hardening | `🔒 Ajuste de seguranca Nginx (USER nginx)` |
-| `🚚` | `refactor` / `chore` | File renaming, folder moving, structural changes | `🚚 Renomeando pasta do frontend para AutoReparos.Web` |
-| `📝` | `docs` | Documentation updates | `📝 Adicionando secao de Arquitetura Frontend` |
-| `👷` / `💚` | `ci` / `build` | CI/CD pipeline changes (`.github/workflows/deploy.yml`) | `👷 Ajuste no job de build do GitHub Actions` |
+### Mapeamento de Gitmojis Comuns
+
+| Gitmoji | Finalidade | Exemplo |
+| :--- | :--- | :--- |
+| `✨` | Nova funcionalidade ou recurso | `✨ Adicionando suporte a CORS e envio de Role no Login` |
+| `🐛` | Correção de bug | `🐛 Removendo modificador readonly na mascara` |
+| `🚨` | Resolução de apontamentos do SonarQube / smells | `🚨 Resolvendo apontamentos do SonarQube` |
+| `🎨` | Formatação de código, UI, contraste | `🎨 Corrigindo contraste WCAG AA no frontend` |
+| `🔒` | Segurança, permissões ou credenciais | `🔒 Ajustando segurança Nginx para rodar sem root` |
+| `🔥` | Remoção de código ou arquivos legados | `🔥 Removendo código duplicado da raiz` |
+| `🚚` | Movimentação ou renomeação estrutural de arquivos | `🚚 Renomeando pasta do frontend para AutoReparos.Web` |
+| `📝` | Documentação ou especificações técnicas | `📝 Adicionando especificação técnica` |
+| `👷` | Pipeline de CI/CD e workflows do GitHub Actions | `👷 Ajustando job de build do GitHub Actions` |
+| `♻️` | Refatoração de arquitetura ou código | `♻️ Refatorando endpoints para minimal APIs` |
+| `🧪` | Testes unitários ou de integração | `🧪 Adicionando testes com Testcontainers` |
 
 ---
 
@@ -56,16 +64,18 @@ The repository runs an automated 5-stage pipeline on push/PR to `main` and `deve
 4. **Deploy**: Upgrades Kubernetes EKS deployment using Helm (`helm upgrade --install autoreparos ./k8s`).
 5. **Auto-Destroy**: Automatically cleans up AWS demo environment after 15 minutes.
 
-### Examples
+### Exemplos no Padrão do Repositório
 
 ```text
-feat(clientes): add pagination support for client listing endpoint
+📝 Adicionando especificação técnica
 
-fix(ordem-servico): correct total price recalculation on service removal
+✨ Adicionando paginação no endpoint de listagem de clientes
 
-refactor(auth): simplify JWT payload extraction in HttpContext extension
+🐛 Corrigindo recálculo de valor total na remoção de serviço
 
-docs(readme): add docker setup instructions for local development
+🔥 Removendo código duplicado da raiz do repositório pai
+
+👷 Ajustando pipeline CI/CD para submódulos recursivos
 ```
 
 ---
@@ -81,7 +91,7 @@ docs(readme): add docker setup instructions for local development
 ## 4. Pull Request (PR) Conventions
 
 ### PR Title Format
-PR titles must follow Conventional Commits formatting matching the primary branch work (e.g. `feat(clientes): implement client creation use case`).
+PR titles must follow the repository standard: `<gitmoji> <Descrição da ação em Português>` (e.g. `✨ Adicionando casos de uso de veículos e ordens de serviço do portal do cliente` ou `📝 Adicionando especificação técnica`).
 
 ### PR Description Template
 
