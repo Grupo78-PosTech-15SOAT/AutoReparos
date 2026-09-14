@@ -18,7 +18,7 @@ services:
   api:
     image: autoreparos-api
     build:
-      context: .
+      context: ./submodules/AutoReparos.App
       dockerfile: AutoReparos.API/Dockerfile
     container_name: autoreparos-api
     restart: always
@@ -46,7 +46,7 @@ services:
   web:
     image: autoreparos-web
     build:
-      context: ./AutoReparos.Web
+      context: ./submodules/AutoReparos.App/AutoReparos.Web
       dockerfile: Dockerfile
     container_name: autoreparos-web
     restart: always
