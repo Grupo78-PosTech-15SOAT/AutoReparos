@@ -630,7 +630,23 @@ O projeto adota padrões rigorosos de qualidade verificados via SonarQube e GitH
 
 ## 9. Documentação Técnica e Especificações da Fase 3
 
-A documentação arquitetural e as especificações técnicas da Fase 3 estão organizadas por entrega na pasta [`docs/specs/fase3/`](./docs/specs/fase3/):
+A documentação técnica da Fase 3 se divide entre os **documentos formais de arquitetura** em [`docs/architecture/`](./docs/architecture/) e as **especificações de execução**, organizadas por entrega em [`docs/specs/fase3/`](./docs/specs/fase3/).
+
+### Documentos Formais de Arquitetura (RFCs e ADRs)
+
+**Publicados (Track B — software, dados e observabilidade):**
+- [`RFC-003-serverless-client-authentication.md`](./docs/architecture/RFC-003-serverless-client-authentication.md): autenticação do cliente final via Lambda com CPF + e-mail, sem contas no ASP.NET Core Identity.
+- [`ADR-002-data-isolation-and-zero-trust-claims.md`](./docs/architecture/ADR-002-data-isolation-and-zero-trust-claims.md): isolamento de dados do portal do cliente a partir das claims do JWT, com Zero Data Leakage no filtro por placa.
+- [`ADR-003-end-to-end-observability-strategy.md`](./docs/architecture/ADR-003-end-to-end-observability-strategy.md): observabilidade ponta a ponta com OpenTelemetry e exportação vendor-agnostic via OTel Collector.
+- [`database-selection-and-data-model.md`](./docs/architecture/database-selection-and-data-model.md): justificativa do PostgreSQL 16, modelo ER completo e dicionário de dados.
+- [`diagrams/sequence_portal_auth_and_query.md`](./docs/architecture/diagrams/sequence_portal_auth_and_query.md): diagramas de sequência end-to-end do portal do cliente.
+
+**Pendentes (Track A — nuvem e IaC):**
+- `RFC-001-cloud-architecture-and-repo-segregation.md`: escolha da AWS e segregação em 4 repositórios.
+- `RFC-002-managed-database-strategy-rds.md`: estratégia de banco gerenciado no AWS RDS.
+- `ADR-001-adoption-aws-api-gateway.md`: comunicação unificada na borda com AWS API Gateway v2.
+
+### Especificações Técnicas e Planos de Execução
 
 - **Submódulos & Arquitetura Multi-Repo ([`docs/specs/fase3/submodulos-multirepo/`](./docs/specs/fase3/submodulos-multirepo/)):**
   - [`plano_arquitetura_submodulos_git.md`](./docs/specs/fase3/submodulos-multirepo/plano_arquitetura_submodulos_git.md): Decisão e plano de segregação multi-repo com Git Submodules.
