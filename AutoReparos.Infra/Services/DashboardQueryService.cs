@@ -93,6 +93,9 @@ namespace AutoReparos.Infra.Services
                 .Select(insumo => new DashboardInsumoCriticoDto(insumo.Id, insumo.Nome, insumo.QuantidadeEstoque))
                 .ToListAsync();
 
+            var volumeDiario = await GetVolumeDiarioAsync(30);
+            var temposMedios = await GetTemposMediosStatusAsync();
+
             return new DashboardMetricsDto(
                 faturamentoMesAtual,
                 faturamentoMesAnterior,
@@ -100,7 +103,92 @@ namespace AutoReparos.Infra.Services
                 totalOrdensMesAtual,
                 ultimasOrdens,
                 insumosCriticos,
-                historico);
+                historico,
+                volumeDiario,
+                temposMedios);
+        }
+
+        public async Task<IEnumerable<DashboardVolumeDiarioDto>> GetVolumeDiarioAsync(int dias = 30)
+        {
+            if (dias <= 0) dias = 30;
+            if (dias > 365) dias = 365;
+
+            var hojeUtc = DateTime.UtcNow.Date;
+            var dataInicioUtc = hojeUtc.AddDays(-(dias - 1));
+
+            var ordens = await context.OrdensServico
+                .AsNoTracking()
+                .Where(os => os.CriadoEm >= dataInicioUtc || (os.FinalizadoEm != null && os.FinalizadoEm >= dataInicioUtc))
+                .Select(os => new { os.CriadoEm, os.FinalizadoEm })
+                .ToListAsync();
+
+            var resultado = new List<DashboardVolumeDiarioDto>(dias);
+            for (int i = 0; i < dias; i++)
+            {
+                var dia = DateOnly.FromDateTime(dataInicioUtc.AddDays(i));
+                var criadas = ordens.Count(o => DateOnly.FromDateTime(o.CriadoEm) == dia);
+                var finalizadas = ordens.Count(o => o.FinalizadoEm.HasValue && DateOnly.FromDateTime(o.FinalizadoEm.Value) == dia);
+                resultado.Add(new DashboardVolumeDiarioDto(dia, criadas, finalizadas));
+            }
+
+            return resultado;
+        }
+
+        public async Task<DashboardTempoMedioStatusDto> GetTemposMediosStatusAsync()
+        {
+            var ordens = await context.OrdensServico
+                .AsNoTracking()
+                .Where(os => (os.DiagnosticoIniciadoEm != null && os.EnvioAprovacaoEm != null)
+                          || (os.IniciadoEm != null && os.FinalizadoEm != null)
+                          || (os.FinalizadoEm != null && os.EntregueEm != null))
+                .Select(os => new
+                {
+                    os.DiagnosticoIniciadoEm,
+                    os.EnvioAprovacaoEm,
+                    os.IniciadoEm,
+                    os.FinalizadoEm,
+                    os.EntregueEm
+                })
+                .ToListAsync();
+
+            var temposDiagnostico = ordens
+                .Where(o => o.DiagnosticoIniciadoEm.HasValue && o.EnvioAprovacaoEm.HasValue && o.EnvioAprovacaoEm >= o.DiagnosticoIniciadoEm)
+                .Select(o => (o.EnvioAprovacaoEm!.Value - o.DiagnosticoIniciadoEm!.Value).TotalHours)
+                .ToList();
+
+            var temposExecucao = ordens
+                .Where(o => o.IniciadoEm.HasValue && o.FinalizadoEm.HasValue && o.FinalizadoEm >= o.IniciadoEm)
+                .Select(o => (o.FinalizadoEm!.Value - o.IniciadoEm!.Value).TotalHours)
+                .ToList();
+
+            var temposFinalizacao = ordens
+                .Where(o => o.FinalizadoEm.HasValue && o.EntregueEm.HasValue && o.EntregueEm >= o.FinalizadoEm)
+                .Select(o => (o.EntregueEm!.Value - o.FinalizadoEm!.Value).TotalHours)
+                .ToList();
+
+            var mediaDiagnostico = temposDiagnostico.Count > 0 ? Math.Round(temposDiagnostico.Average(), 2) : 0;
+            var mediaExecucao = temposExecucao.Count > 0 ? Math.Round(temposExecucao.Average(), 2) : 0;
+            var mediaFinalizacao = temposFinalizacao.Count > 0 ? Math.Round(temposFinalizacao.Average(), 2) : 0;
+
+            return new DashboardTempoMedioStatusDto(
+                mediaDiagnostico,
+                mediaExecucao,
+                mediaFinalizacao,
+                FormatarTempo(mediaDiagnostico),
+                FormatarTempo(mediaExecucao),
+                FormatarTempo(mediaFinalizacao),
+                temposDiagnostico.Count,
+                temposExecucao.Count,
+                temposFinalizacao.Count);
+        }
+
+        private static string FormatarTempo(double horas)
+        {
+            if (horas <= 0) return "0h 0m";
+            var ts = TimeSpan.FromHours(horas);
+            if (ts.TotalDays >= 1)
+                return $"{(int)ts.TotalDays}d {ts.Hours}h {ts.Minutes}m";
+            return $"{ts.Hours}h {ts.Minutes}m";
         }
     }
 }

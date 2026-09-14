@@ -83,6 +83,11 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
 
         // InsumosCriticos should be empty since all seeded insumos have Quantity > 5
         metrics.InsumosCriticos.Should().BeEmpty();
+
+        // VolumeDiario and TemposMedios
+        metrics.VolumeDiario.Should().NotBeNull();
+        metrics.VolumeDiario.Should().HaveCount(30);
+        metrics.TemposMedios.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "GET /api/dashboard/metrics - With completed/delivered OS in PostgreSQL should return correct faturamento and detailed lists")]
@@ -196,5 +201,151 @@ public class DashboardIntegrationTests(CustomWebApplicationFactory<Program> fact
         metrics.HistoricoMensal.Should().NotBeEmpty();
         metrics.UltimasOrdens.Should().BeEmpty();
         metrics.InsumosCriticos.Should().BeEmpty();
+        metrics.VolumeDiario.Should().NotBeNull();
+        metrics.VolumeDiario.Should().HaveCount(30);
+        metrics.TemposMedios.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "GET /api/dashboard/volume-diario - Without authorization should return 401 Unauthorized")]
+    public async Task GetVolumeDiario_WithoutAuth_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        Client.DefaultRequestHeaders.Authorization = null;
+
+        // Act
+        var response = await Client.GetAsync("/api/dashboard/volume-diario");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact(DisplayName = "GET /api/dashboard/volume-diario - With auth should return 200 OK with 30 days list")]
+    public async Task GetVolumeDiario_WithAuth_ShouldReturnOkWith30Days()
+    {
+        // Arrange
+        await AuthenticateAsync();
+
+        // Act
+        var response = await Client.GetAsync("/api/dashboard/volume-diario");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var volume = await response.Content.ReadFromJsonAsync<IEnumerable<DashboardVolumeDiarioDto>>();
+        volume.Should().NotBeNull();
+        volume.Should().HaveCount(30);
+
+        var lista = volume!.ToList();
+        var hoje = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+        lista.Last().Data.Should().Be(hoje);
+        lista.First().Data.Should().Be(hoje.AddDays(-29));
+    }
+
+    [Fact(DisplayName = "GET /api/dashboard/volume-diario?dias=7 - With auth should return 200 OK with 7 days list")]
+    public async Task GetVolumeDiario_WithCustomDays_ShouldReturnOkWithSpecifiedDays()
+    {
+        // Arrange
+        await AuthenticateAsync();
+
+        // Act
+        var response = await Client.GetAsync("/api/dashboard/volume-diario?dias=7");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var volume = await response.Content.ReadFromJsonAsync<IEnumerable<DashboardVolumeDiarioDto>>();
+        volume.Should().NotBeNull();
+        volume.Should().HaveCount(7);
+    }
+
+    [Fact(DisplayName = "GET /api/dashboard/tempos-medios - Without authorization should return 401 Unauthorized")]
+    public async Task GetTemposMedios_WithoutAuth_ShouldReturnUnauthorized()
+    {
+        // Arrange
+        Client.DefaultRequestHeaders.Authorization = null;
+
+        // Act
+        var response = await Client.GetAsync("/api/dashboard/tempos-medios");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact(DisplayName = "GET /api/dashboard/tempos-medios - With auth and completed OS should return 200 OK with calculated metrics")]
+    public async Task GetTemposMedios_WithAuthAndCompletedOS_ShouldReturnOkWithCalculatedAverages()
+    {
+        // Arrange
+        await AuthenticateAsync();
+
+        var agora = DateTime.UtcNow;
+
+        using (var scope = Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var cliente = new Cliente("Cliente Tempos", "11144477735", "11977776666", "tempos@email.com");
+            context.Clientes.Add(cliente);
+
+            var veiculo = new Veiculo(
+                cliente.Id,
+                "Fiat",
+                "Pulse",
+                2022,
+                2023,
+                new Placa("BRA2E19"),
+                new Chassi("9BD111060T5002999"),
+                new Renavam("98765432999"));
+            context.Veiculos.Add(veiculo);
+
+            var os = new OrdemServico(cliente.Id, veiculo.Id, "OS Tempos Medios");
+            SetOrdemServicoTimestamps(os,
+                diagnosticoIniciadoEm: agora.AddHours(-10),
+                envioAprovacaoEm: agora.AddHours(-7),   // 3h diagnostico
+                iniciadoEm: agora.AddHours(-7),
+                finalizadoEm: agora.AddHours(-3),       // 4h execucao
+                entregueEm: agora.AddHours(-1));        // 2h finalizacao
+
+            context.OrdensServico.Add(os);
+            await context.SaveChangesAsync();
+        }
+
+        // Act
+        var response = await Client.GetAsync("/api/dashboard/tempos-medios");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var tempos = await response.Content.ReadFromJsonAsync<DashboardTempoMedioStatusDto>();
+        tempos.Should().NotBeNull();
+        tempos!.TotalOrdensComDiagnostico.Should().BeGreaterThanOrEqualTo(1);
+        tempos.TotalOrdensComExecucao.Should().BeGreaterThanOrEqualTo(1);
+        tempos.TotalOrdensComFinalizacao.Should().BeGreaterThanOrEqualTo(1);
+        tempos.TempoMedioDiagnosticoHoras.Should().BeGreaterThan(0);
+        tempos.TempoMedioExecucaoHoras.Should().BeGreaterThan(0);
+        tempos.TempoMedioFinalizacaoHoras.Should().BeGreaterThan(0);
+        tempos.TempoMedioDiagnosticoFormatado.Should().NotBeNullOrWhiteSpace();
+        tempos.TempoMedioExecucaoFormatado.Should().NotBeNullOrWhiteSpace();
+        tempos.TempoMedioFinalizacaoFormatado.Should().NotBeNullOrWhiteSpace();
+    }
+
+    private static void SetOrdemServicoTimestamps(
+        OrdemServico os,
+        DateTime? diagnosticoIniciadoEm = null,
+        DateTime? envioAprovacaoEm = null,
+        DateTime? iniciadoEm = null,
+        DateTime? finalizadoEm = null,
+        DateTime? entregueEm = null)
+    {
+        var type = typeof(OrdemServico);
+        if (diagnosticoIniciadoEm.HasValue)
+            type.GetProperty(nameof(os.DiagnosticoIniciadoEm))?.SetValue(os, diagnosticoIniciadoEm.Value);
+        if (envioAprovacaoEm.HasValue)
+            type.GetProperty(nameof(os.EnvioAprovacaoEm))?.SetValue(os, envioAprovacaoEm.Value);
+        if (iniciadoEm.HasValue)
+            type.GetProperty(nameof(os.IniciadoEm))?.SetValue(os, iniciadoEm.Value);
+        if (finalizadoEm.HasValue)
+            type.GetProperty(nameof(os.FinalizadoEm))?.SetValue(os, finalizadoEm.Value);
+        if (entregueEm.HasValue)
+            type.GetProperty(nameof(os.EntregueEm))?.SetValue(os, entregueEm.Value);
     }
 }

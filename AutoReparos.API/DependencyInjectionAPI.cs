@@ -73,6 +73,7 @@ namespace AutoReparos.API
             services.AddScoped<OrdemServicoController>();
             services.AddScoped<OrdemServicoFluxoController>();
             services.AddScoped<OrdemServicoAprovacaoController>();
+            services.AddScoped<DashboardController>();
 
             services.AddHttpContextAccessor();
             services.AddScoped<IAppUrlProvider, HttpAppUrlProvider>();

@@ -377,6 +377,172 @@ namespace AutoReparos.Application.Tests.Dashboard
             result.UltimasOrdens.Should().BeEmpty();
             result.InsumosCriticos.Should().BeEmpty();
             result.HistoricoMensal.Should().NotBeEmpty();
+            result.VolumeDiario.Should().NotBeNull();
+            result.VolumeDiario.Should().HaveCount(30);
+            result.TemposMedios.Should().NotBeNull();
+            result.TemposMedios!.TempoMedioDiagnosticoHoras.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task GetVolumeDiarioAsync_ShouldReturnContinuousDaysWithCorrectCounts()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var (clientes, veiculos) = SeedBaseEntities(context);
+
+            var hojeUtc = DateTime.UtcNow.Date;
+            var anteontemUtc = hojeUtc.AddDays(-2);
+
+            // OS 1: Criada hoje
+            var os1 = new OrdemServico(clientes[0].Id, veiculos[0].Id, "OS 1", hojeUtc.AddHours(10), EStatusOrdemServico.Recebida);
+
+            // OS 2: Criada anteontem e finalizada hoje
+            var os2 = new OrdemServico(clientes[1].Id, veiculos[1].Id, "OS 2", anteontemUtc.AddHours(8), EStatusOrdemServico.Finalizada);
+            SetOrdemServicoTimestamps(os2, finalizadoEm: hojeUtc.AddHours(14));
+
+            // OS 3: Criada anteontem e finalizada anteontem
+            var os3 = new OrdemServico(clientes[2].Id, veiculos[2].Id, "OS 3", anteontemUtc.AddHours(9), EStatusOrdemServico.Finalizada);
+            SetOrdemServicoTimestamps(os3, finalizadoEm: anteontemUtc.AddHours(16));
+
+            // OS 4: Criada 40 dias atrás (fora do range de 30 dias)
+            var os4 = new OrdemServico(clientes[0].Id, veiculos[0].Id, "OS 4", hojeUtc.AddDays(-40), EStatusOrdemServico.Recebida);
+
+            context.OrdensServico.AddRange(os1, os2, os3, os4);
+            await context.SaveChangesAsync();
+
+            var service = new DashboardQueryService(context);
+
+            // Act
+            var result = (await service.GetVolumeDiarioAsync(30)).ToList();
+
+            // Assert
+            result.Should().HaveCount(30);
+
+            var itemHoje = result.FirstOrDefault(r => r.Data == DateOnly.FromDateTime(hojeUtc));
+            itemHoje.Should().NotBeNull();
+            itemHoje!.TotalCriadas.Should().Be(1); // os1
+            itemHoje.TotalFinalizadas.Should().Be(1); // os2
+
+            var itemAnteontem = result.FirstOrDefault(r => r.Data == DateOnly.FromDateTime(anteontemUtc));
+            itemAnteontem.Should().NotBeNull();
+            itemAnteontem!.TotalCriadas.Should().Be(2); // os2 e os3
+            itemAnteontem.TotalFinalizadas.Should().Be(1); // os3
+        }
+
+        [Fact]
+        public async Task GetVolumeDiarioAsync_WhenDatabaseIsEmpty_ShouldReturnZeroCountsForEachDay()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var service = new DashboardQueryService(context);
+
+            // Act
+            var result = (await service.GetVolumeDiarioAsync(30)).ToList();
+
+            // Assert
+            result.Should().HaveCount(30);
+            result.Should().OnlyContain(r => r.TotalCriadas == 0 && r.TotalFinalizadas == 0);
+        }
+
+        [Fact]
+        public async Task GetTemposMediosStatusAsync_ShouldCalculateCorrectAverageHoursAndFormat()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var (clientes, veiculos) = SeedBaseEntities(context);
+
+            var agora = DateTime.UtcNow;
+
+            // OS 1:
+            // Diagnostico: 2h (agora-10h ate agora-8h)
+            // Execucao: 4h (agora-8h ate agora-4h)
+            // Finalizacao: 1h (agora-4h ate agora-3h)
+            var os1 = new OrdemServico(clientes[0].Id, veiculos[0].Id, "OS 1");
+            SetOrdemServicoTimestamps(os1,
+                diagnosticoIniciadoEm: agora.AddHours(-10),
+                envioAprovacaoEm: agora.AddHours(-8),
+                iniciadoEm: agora.AddHours(-8),
+                finalizadoEm: agora.AddHours(-4),
+                entregueEm: agora.AddHours(-3));
+
+            // OS 2:
+            // Diagnostico: 4h (agora-20h ate agora-16h)
+            // Execucao: 6h (agora-16h ate agora-10h)
+            // Finalizacao: 3h (agora-10h ate agora-7h)
+            var os2 = new OrdemServico(clientes[1].Id, veiculos[1].Id, "OS 2");
+            SetOrdemServicoTimestamps(os2,
+                diagnosticoIniciadoEm: agora.AddHours(-20),
+                envioAprovacaoEm: agora.AddHours(-16),
+                iniciadoEm: agora.AddHours(-16),
+                finalizadoEm: agora.AddHours(-10),
+                entregueEm: agora.AddHours(-7));
+
+            context.OrdensServico.AddRange(os1, os2);
+            await context.SaveChangesAsync();
+
+            var service = new DashboardQueryService(context);
+
+            // Act
+            var result = await service.GetTemposMediosStatusAsync();
+
+            // Assert
+            // Diagnostico medio: (2 + 4) / 2 = 3.0h
+            result.TempoMedioDiagnosticoHoras.Should().Be(3.0);
+            result.TempoMedioDiagnosticoFormatado.Should().Be("3h 0m");
+            result.TotalOrdensComDiagnostico.Should().Be(2);
+
+            // Execucao media: (4 + 6) / 2 = 5.0h
+            result.TempoMedioExecucaoHoras.Should().Be(5.0);
+            result.TempoMedioExecucaoFormatado.Should().Be("5h 0m");
+            result.TotalOrdensComExecucao.Should().Be(2);
+
+            // Finalizacao media: (1 + 3) / 2 = 2.0h
+            result.TempoMedioFinalizacaoHoras.Should().Be(2.0);
+            result.TempoMedioFinalizacaoFormatado.Should().Be("2h 0m");
+            result.TotalOrdensComFinalizacao.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task GetTemposMediosStatusAsync_WhenDatabaseIsEmpty_ShouldReturnZero()
+        {
+            // Arrange
+            using var context = CreateDbContext();
+            var service = new DashboardQueryService(context);
+
+            // Act
+            var result = await service.GetTemposMediosStatusAsync();
+
+            // Assert
+            result.TempoMedioDiagnosticoHoras.Should().Be(0);
+            result.TempoMedioExecucaoHoras.Should().Be(0);
+            result.TempoMedioFinalizacaoHoras.Should().Be(0);
+            result.TempoMedioDiagnosticoFormatado.Should().Be("0h 0m");
+            result.TempoMedioExecucaoFormatado.Should().Be("0h 0m");
+            result.TempoMedioFinalizacaoFormatado.Should().Be("0h 0m");
+            result.TotalOrdensComDiagnostico.Should().Be(0);
+            result.TotalOrdensComExecucao.Should().Be(0);
+            result.TotalOrdensComFinalizacao.Should().Be(0);
+        }
+
+        private static void SetOrdemServicoTimestamps(
+            OrdemServico os,
+            DateTime? diagnosticoIniciadoEm = null,
+            DateTime? envioAprovacaoEm = null,
+            DateTime? iniciadoEm = null,
+            DateTime? finalizadoEm = null,
+            DateTime? entregueEm = null)
+        {
+            var type = typeof(OrdemServico);
+            if (diagnosticoIniciadoEm.HasValue)
+                type.GetProperty(nameof(os.DiagnosticoIniciadoEm))?.SetValue(os, diagnosticoIniciadoEm.Value);
+            if (envioAprovacaoEm.HasValue)
+                type.GetProperty(nameof(os.EnvioAprovacaoEm))?.SetValue(os, envioAprovacaoEm.Value);
+            if (iniciadoEm.HasValue)
+                type.GetProperty(nameof(os.IniciadoEm))?.SetValue(os, iniciadoEm.Value);
+            if (finalizadoEm.HasValue)
+                type.GetProperty(nameof(os.FinalizadoEm))?.SetValue(os, finalizadoEm.Value);
+            if (entregueEm.HasValue)
+                type.GetProperty(nameof(os.EntregueEm))?.SetValue(os, entregueEm.Value);
         }
     }
 }
