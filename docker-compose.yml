@@ -146,6 +146,9 @@ services:
     volumes:
       - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Os 3 dashboards mandatórios da Fase 3 são servidos direto de docs/observability,
+      # a mesma fonte usada pelo ConfigMap do Helm — evita cópias divergentes.
+      - ./docs/observability/dashboards:/etc/grafana/provisioning/dashboards/json/mandatorios:ro
     ports:
       - "3000:3000"
     depends_on:
