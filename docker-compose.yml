@@ -33,7 +33,6 @@ services:
       - SendGrid__ApiKey=${SENDGRID_API_KEY}
       - SendGrid__FromEmail=${SENDGRID_FROM_EMAIL}
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
-      - App__BaseUrl=${APP_BASE_URL}
       - OpenTelemetry__Endpoint=http://otel-collector:4317
       - OpenTelemetry__ServiceName=autoreparos-api
     ports:

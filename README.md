@@ -324,17 +324,11 @@ SENDGRID_API_KEY=SG.dummy_key
 SENDGRID_FROM_EMAIL=noreply@autoreparos.com
 SENDGRID_FROM_NAME=AutoReparos
 
-# Exposição Externa (ngrok/local)
-APP_BASE_URL=http://localhost:8080
-
 # Acesso ao pgAdmin
 PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
 ASPNETCORE_ENVIRONMENT=Development
 ```
-
-> [!TIP]
-> Para testar os links de aprovação de orçamento por e-mail em ambiente de desenvolvimento local, você pode utilizar o **ngrok** para expor a porta local da API e preencher a URL gerada na variável `APP_BASE_URL`.
 
 ### Execução com Docker Compose
 
