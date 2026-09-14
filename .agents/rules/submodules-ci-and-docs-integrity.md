@@ -47,6 +47,40 @@
   ```
 - **Proibido:** Utilizar tags mutáveis como `@v4`, `@v3`, `@main` ou `@latest`, o que viola as regras de segurança estática do SonarCloud.
 
+### 1.6 Padrão Canônico para Workflows de CI dos Submódulos (Baseado no `deploy.yml`)
+Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`) devem seguir rigorosamente o padrão sintático e estrutural do pipeline principal ([`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)):
+
+1. **Controle de Concorrência**:
+   ```yaml
+   concurrency:
+     group: ${{ github.workflow }}-${{ github.ref }}
+     cancel-in-progress: true
+   ```
+2. **Gatilhos e Filtros de Arquivos**:
+   - Sempre cobrir as branches `main` e `develop`.
+   - Ignorar arquivos de documentação e gitignore para economizar minutos de runner:
+     ```yaml
+     paths-ignore:
+       - '**.md'
+       - '.gitignore'
+       - '.dockerignore'
+     ```
+3. **Nomenclatura Padrão**:
+   - `name: CI - <NomeDoSubmodulo>`
+   - Jobs e steps nomeados com clareza e verbos de ação em Português (`Checkout Code`, `Setup .NET Core`, `Restore Dependencies`, `Build Application`, `Run Unit Tests`).
+4. **Hashes SHA Canônicos Fixados**:
+   | Action | Commit SHA Pinned | Versão Semântica |
+   | :--- | :--- | :--- |
+   | `actions/checkout` | `11bd71901bbe5b1630ceea73d27597364c9af683` | `# v4.2.2` |
+   | `actions/setup-dotnet` | `67a3573c9a986a3f9c594539f4ab511d57bb3ce9` | `# v4.3.1` |
+   | `actions/setup-node` | `49933ea5288caeca8642d1e84afbd3f7d6820020` | `# v4.4.0` |
+   | `actions/upload-artifact` | `ea165f8d65b6e75b540449e92b4886f43607fa02` | `# v4.6.2` |
+   | `actions/download-artifact` | `d3f86a106a0bac45b974a628896c90dbdf5c8093` | `# v4.3.0` |
+   | `aws-actions/configure-aws-credentials` | `ff717079ee2060e4bcee96c4779b553acc87447c` | `# v4.0.2` |
+   | `hashicorp/setup-terraform` | `b9cd54a3c349d3f38e8881555d616ced269862dd` | `# v3.1.2` |
+   | `azure/setup-helm` | `1a275c3b69536ee54be43f2070a358922e12c8d4` | `# v4.3.1` |
+   | `aws-actions/amazon-ecr-login` | `062340a7de7a9da2b919efc70d2a5638c4be725c` | `# v2.0.1` |
+
 ---
 
 ## 2. Regras de Limpeza e Migração Multi-Repo
