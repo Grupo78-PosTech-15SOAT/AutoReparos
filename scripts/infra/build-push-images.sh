@@ -32,12 +32,12 @@ echo "=========================================================="
 # 1. Build da API .NET
 echo ""
 echo "🏗️  1/4 Building API .NET image ($API_IMAGE:$TAG)..."
-docker build -t "$API_IMAGE:$TAG" -t "$API_IMAGE:latest" -f AutoReparos.API/Dockerfile .
+docker build -t "$API_IMAGE:$TAG" -t "$API_IMAGE:latest" -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
 
 # 2. Build do Frontend Web (Angular)
 echo ""
 echo "🏗️  2/4 Building Frontend Web image ($WEB_IMAGE:$TAG)..."
-docker build -t "$WEB_IMAGE:$TAG" -t "$WEB_IMAGE:latest" -f AutoReparos.Web/Dockerfile ./AutoReparos.Web
+docker build -t "$WEB_IMAGE:$TAG" -t "$WEB_IMAGE:latest" -f submodules/AutoReparos.App/AutoReparos.Web/Dockerfile submodules/AutoReparos.App/AutoReparos.Web
 
 # 3. Push da API
 echo ""

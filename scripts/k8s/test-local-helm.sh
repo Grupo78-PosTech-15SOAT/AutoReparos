@@ -5,7 +5,7 @@ echo "🚀 1. Atualizando dependências do Helm Chart..."
 helm dependency update k8s/
 
 echo "📦 2. Construindo imagem Docker local da API..."
-docker build -t autoreparos-api:latest -f AutoReparos.API/Dockerfile .
+docker build -t autoreparos-api:latest -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
 
 echo "🚢 3. Carregando imagem para o cluster Kind ('auto-reparos')..."
 kind load docker-image autoreparos-api:latest --name auto-reparos
