@@ -7,7 +7,7 @@
 > 1. [`AutoReparos.App`](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App) (Backend .NET 10, OpenTelemetry, Healthchecks, Logging)
 > 2. Repositório Central (`AutoReparos`) - Testes, Dashboards, Telemetria & Documentação Formal  
 > **Status:** Pronto para Implementação Paralela e Assíncrona  
-> **Documento Complementar:** [`fase3_spec_track_a_cloud_iac.md`](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_a_cloud_iac.md) (Track A: Infraestrutura Cloud, IaC Terraform, API Gateway & Multi-Repo CI/CD)
+> **Documento Complementar:** [`fase3_spec_track_a_cloud_iac.md`](../cloud-iac/fase3_spec_track_a_cloud_iac.md) (Track A: Infraestrutura Cloud, IaC Terraform, API Gateway & Multi-Repo CI/CD)
 
 ---
 
@@ -113,7 +113,7 @@ Para manter o trabalho 100% assíncrono:
    - `OpenTelemetry.Instrumentation.EntityFrameworkCore`
    - `OpenTelemetry.Instrumentation.Runtime`
    - `OpenTelemetry.Exporter.OpenTelemetryProtocol`
-2. **Configuração de Tracing & Metrics em [`DependencyInjectionAPI.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.API/DependencyInjectionAPI.cs):**
+2. **Configuração de Tracing & Metrics em [`DependencyInjectionAPI.cs`](../../../../submodules/AutoReparos.App/AutoReparos.API/DependencyInjectionAPI.cs):**
    - Registrar `Meter` de negócio: `AutoReparos.BusinessMetrics` (versão `"1.0.0"`).
    - Exportador OTLP configurado para ler endpoint via configuração:
      ```csharp

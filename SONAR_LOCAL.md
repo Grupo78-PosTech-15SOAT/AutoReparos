@@ -19,7 +19,7 @@ Este guia explica passo a passo como subir o SonarQube local usando Docker e rea
 
 ## 🚀 Passo 1: Subir o Container do SonarQube
 
-Criamos um arquivo de configuração específico do Docker Compose ([docker-compose-sonar.yml](file:///mnt/c/Users/joseh/Documents/Github/Fiap/AutoReparos/docker-compose-sonar.yml)). Para iniciar o SonarQube, execute o comando abaixo no terminal dentro do diretório `./AutoReparos`:
+Criamos um arquivo de configuração específico do Docker Compose ([docker-compose-sonar.yml](./docker-compose-sonar.yml)). Para iniciar o SonarQube, execute o comando abaixo no terminal dentro do diretório `./AutoReparos`:
 
 ```bash
 docker compose -f docker-compose-sonar.yml up -d

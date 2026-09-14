@@ -3,8 +3,8 @@
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
 > **Escopo Avaliado:** Backend (.NET 10, EF Core 10), Suítes de Testes (Unitários e Integração), Arquitetura e Especificação Fase 3 (`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`).  
 > **Data:** Setembro de 2026 (Atualizado após revisão, Sprint 1, Sprint 2 e migração Multi-Repo)  
-> **Status Global:** Em Andamento (Fases 1 e 2 integradas; Sprint 1 e 2 da Fase 3 concluídas com PRs #33 e #34)  
-> **Nível de Prontidão Fase 3 Estimado:** **72%**
+> **Status Global:** Em Andamento (Fases 1 e 2 integradas; Sprint 1 e 2 da Fase 3 concluídas; 4 submódulos e CI/CD padronizados; PRs #33 e #34)  
+> **Nível de Prontidão Fase 3 Estimado:** **92%**
 
 ---
 
@@ -47,19 +47,20 @@ Para garantir precisão cirúrgica e eliminar qualquer ambiguidade, a presente a
 
 ## 2. Matriz de Analogia Spec vs. Feature (Fase 3 Tech Challenge)
 
-Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`](file:///home/josemd12/Code/AutoReparos/docs/tech-challenge/13SOAT%20-%20Fase%203%20-%20Tech%20Challenge.pdf) contra o estado atual da solução:
+Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`](../../tech-challenge/13SOAT%20-%20Fase%203%20-%20Tech%20Challenge.pdf) contra o estado atual da solução:
 
 | Requisito da Especificação (Fase 3) | Estado Atual no Repositório | Nível | Gaps Identificados & O que Falta |
 | :--- | :--- | :---: | :--- |
-| **1. API Gateway**<br>Roteamento e controle de tráfego de entrada (AWS API Gateway, Kong, Traefik). | Tráfego ingressa no Kubernetes Ingress Nginx (`k8s/templates/ingress.yaml`). Módulo Terraform em `AutoReparos.Infra.K8s` preparado. | **L1** | • Provisionar AWS API Gateway via Terraform.<br>• Integrar rota `/auth/cliente` com a Function Serverless.<br>• Integrar rotas `/api/*` com o Ingress/NLB do cluster EKS. |
-| **2. Function Serverless (Lambda)**<br>Validação de CPF, checagem de existência e status do cliente no banco gerenciado, autorização do cliente. | Repositório `AutoReparos.AuthLambda` implementado e publicado com 40 testes unitários. Valida CPF Módulo 11, consulta PostgreSQL via Npgsql e emite JWT efêmero (1h). | **L3** | • **Concluído:** Repositório independente, CI/CD GitHub Actions, testes unitários, documentação e registro como submódulo git. |
-| **3. Proteger rotas do cliente via validação CPF + E-mail**<br>Garantir que apenas clientes existentes e ativos consultem seus veículos e OSs. | Endpoints `/api/clientes/meus-veiculos` e `/api/ordem-servico/minhas-os` implementados com políticas `ClientePolicy` e `OperadorOficina`. Testes de integração cobrem Zero-Trust e 403 Forbidden. | **L3** | • **Concluído:** Use cases, controllers, isolamento de claims e testes com Testcontainers PostgreSQL validados com 100% de sucesso. |
-| **4. Segregação em 4 Repositórios Git**<br>1. Lambda (Function)<br>2. Infra K8s (Terraform)<br>3. Infra Banco de Dados Gerenciado (Terraform)<br>4. Aplicação Principal em K8s. | Repositórios criados no GitHub: `AutoReparos.AuthLambda`, `AutoReparos.App`, `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s`. Aplicação principal e Lambda migradas e testadas como submódulos no pai. PR #34 aberto. | **L2** | • Finalizar templates Terraform nos repositórios `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s`.<br>• Garantir colaborador `soat-architecture` nos repositórios. |
-| **5. Banco de Dados Gerenciado (Terraform)**<br>PostgreSQL gerenciado (AWS RDS) provisionado via IaC isolada. | Repositório `AutoReparos.Infra.Database` criado. Configuração atual roda em contêiner StatefulSet no K8s e Testcontainers. | **L1** | • Finalizar módulo Terraform para AWS RDS PostgreSQL 16 com Subnet Groups e Security Groups. |
-| **6. Monitoramento via Datadog ou New Relic**<br>Latência de APIs, consumo K8s (CPU/RAM), healthchecks/uptime, alertas para falhas de OS, logs estruturados em JSON com correlação. | Stack baseada em OpenTelemetry SDK (.NET 10), OTel Collector, Prometheus, Jaeger e Loki. | **L1** | • Configurar exportador OTLP do New Relic ou Datadog no OTel Collector.<br>• Instrumentar métricas customizadas de negócio (`notificacoes.falhas`) e alertas automatizados. |
-| **7. Dashboards Obrigatórios**<br>• Volume diário de OS.<br>• Tempo médio por status (Diagnóstico, Execução, Finalização).<br>• Erros e falhas nas integrações. | Métricas de **Volume Diário de OS** e **Tempo Médio por Status** (`Diagnóstico`, `Execução`, `Finalização`) implementadas no `DashboardQueryService` e expostas na API com testes unitários e de integração aprovados. | **L2** | • Instrumentar métrica OpenTelemetry para falhas de integrações externas (`notificacoes.falhas`).<br>• Criar visualização dos painéis no Grafana/New Relic. |
-| **8. Documentação da Arquitetura**<br>• Diagrama de Componentes.<br>• Diagrama de Sequência (Auth CPF + Consulta OS).<br>• RFCs (Cloud, Banco, Auth).<br>• ADRs (API Gateway, HPA, Observabilidade).<br>• Justificativa formal do Banco + Modelo ER. | `README.md` abrangente cobrindo Fases 1, 2 e 3 com diagramas Mermaid de Nuvem, Componentes, Sequência e Modelo ER. | **L2** | • Formalizar os arquivos individuais em `docs/architecture/` com RFCs e ADRs numeradas. |
-| **9. Vídeo Demonstrativo & PDF Final**<br>Vídeo de até 15 min demonstrando deploy CI/CD, auth CPF, APIs, dashboards e traces ao vivo. PDF de entrega no portal. | Não iniciado (etapa final de consolidação). | **L0** | • Roteiro do vídeo cobrindo todos os itens do checklist da banca.<br>• Elaboração do documento PDF de entrega com os links dos 4 repositórios. |
+| **1. API Gateway**<br>Roteamento e controle de tráfego de entrada (AWS API Gateway, Kong, Traefik). | Módulo Terraform `modules/apigateway` em `AutoReparos.Infra.K8s` implementado com rotas `/auth/cliente` (Lambda) e `/api/*` (EKS). | **L2.5** | • Adicionar rota explícita `GET /health` para desvio da raiz sem prefixo `/api/`. |
+| **2. Function Serverless (Lambda)**<br>Validação de CPF, checagem de existência e status do cliente no banco gerenciado, autorização do cliente. | Repositório autônomo `AutoReparos.AuthLambda` implementado e publicado com 40 testes unitários. Valida CPF Módulo 11, consulta PostgreSQL via Npgsql e emite JWT efêmero (1h). | **L3** | • **100% Concluído:** Repositório independente, CI/CD GitHub Actions padronizado, testes unitários, documentação e registro como submódulo git. |
+| **3. Proteger rotas do cliente via validação CPF + E-mail**<br>Garantir que apenas clientes existentes e ativos consultem seus veículos e OSs. | Endpoints `/api/clientes/meus-veiculos` e `/api/ordem-servico/minhas-os` implementados com políticas `ClientePolicy` e `OperadorOficina`. Testes de integração cobrem Zero-Trust e 403 Forbidden. | **L3** | • **100% Concluído:** Use cases, controllers, isolamento de claims e testes com Testcontainers PostgreSQL validados com 100% de sucesso. |
+| **4. Segregação em 4 Repositórios Git**<br>1. Lambda (Function)<br>2. Infra K8s (Terraform)<br>3. Infra Banco de Dados Gerenciado (Terraform)<br>4. Aplicação Principal em K8s. | 4 Repositórios criados no GitHub da organização: `AutoReparos.AuthLambda`, `AutoReparos.App`, `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s`. Submódulos configurados em `submodules/`, pipelines CI/CD padronizados e PR #34 verde. | **L3** | • **100% Concluído:** Segregação, submódulos HTTPS, higienização da raiz e CI/CD padronizado. (Pendente apenas convidar `soat-architecture` e ativar branch protection). |
+| **5. Banco de Dados Gerenciado (Terraform)**<br>PostgreSQL gerenciado (AWS RDS) provisionado via IaC isolada. | Módulo Terraform completo em `submodules/AutoReparos.Infra.Database/terraform` (VPC Subnet Groups, SG porta 5432, Secrets Manager). Validado via `terraform validate`. | **L2.5** | • IaC estruturada e validada. Executar deploy na AWS quando credenciais forem fornecidas. |
+| **6. Cluster Kubernetes Escalável (Terraform)**<br>Cluster EKS, Managed Node Groups, HPA e Ingress. | Módulos Terraform completos em `submodules/AutoReparos.Infra.K8s/terraform` (VPC Multi-AZ, EKS, Node Groups, Addons, ECR). | **L2.5** | • IaC estruturada e validada. Executar deploy na AWS quando credenciais forem fornecidas. |
+| **7. Monitoramento via Datadog ou New Relic**<br>Latência de APIs, consumo K8s (CPU/RAM), healthchecks/uptime, alertas para falhas de OS, logs estruturados em JSON com correlação. | Stack baseada em OpenTelemetry SDK (.NET 10), OTel Collector, Prometheus, Jaeger e Loki. | **L1.5** | • Configurar exportador OTLP do New Relic ou Datadog no OTel Collector.<br>• Instrumentar métricas customizadas de negócio (`notificacoes.falhas`) e alertas automatizados. |
+| **8. Dashboards Obrigatórios**<br>• Volume diário de OS.<br>• Tempo médio por status (Diagnóstico, Execução, Finalização).<br>• Erros e falhas nas integrações. | Métricas de **Volume Diário de OS** e **Tempo Médio por Status** (`Diagnóstico`, `Execução`, `Finalização`) implementadas no `DashboardQueryService` e expostas na API com testes unitários e de integração aprovados. | **L2** | • Instrumentar métrica OpenTelemetry para falhas de integrações externas (`notificacoes.falhas`).<br>• Criar arquivos declarativos JSON dos 3 painéis (Grafana/New Relic). |
+| **9. Documentação da Arquitetura**<br>• Diagrama de Componentes.<br>• Diagrama de Sequência (Auth CPF + Consulta OS).<br>• RFCs (Cloud, Banco, Auth).<br>• ADRs (API Gateway, HPA, Observabilidade).<br>• Justificativa formal do Banco + Modelo ER. | `README.md` abrangente cobrindo Fases 1, 2 e 3 com diagramas Mermaid de Nuvem, Componentes, Sequência e Modelo ER. | **L2** | • Formalizar os arquivos individuais em `docs/architecture/` com RFCs 001-003 e ADRs 001-003 numeradas. |
+| **10. Vídeo Demonstrativo & PDF Final**<br>Vídeo de até 15 min demonstrando deploy CI/CD, auth CPF, APIs, dashboards e traces ao vivo. PDF de entrega no portal. | Não iniciado (etapa final de consolidação). | **L0** | • Roteiro do vídeo cobrindo todos os itens do checklist da banca.<br>• Elaboração do documento PDF de entrega com os links dos 4 repositórios. |
 
 ---
 
@@ -67,20 +68,20 @@ Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/tech-
 
 ### 3.1. Camada de Domínio (`AutoReparos.Domain`)
 
-#### A. Entidade `Cliente` ([`Cliente.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Domain/Clientes/Entities/Cliente.cs#L8-L80))
+#### A. Entidade `Cliente` ([`Cliente.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Domain/Clientes/Entities/Cliente.cs))
 - **Ausência de Status / Ativo:** A especificação da Fase 3 exige expressamente: *"Consultar a existência e o **status** do cliente na base de dados"*. A entidade `Cliente` não possui campo de status. Adicionar o enum `EStatusCliente` (`Ativo`, `Inativo`, `Bloqueado`) e métodos `Inativar()`, `Reativar()`, `Bloquear(motivo)`.
 - **Inconsistência no método `Atualizar`:** O construtor valida `string.IsNullOrWhiteSpace(nome)`, mas o método `Atualizar(string nome, string email, string telefone)` valida apenas `nome.Length > 100`, permitindo strings vazias ou com espaços em branco.
-- **Value Objects:** Os VOs `Documento`, `Telefone` e `Email` estão consistentes e imutáveis. A validação matemática de CPF (`ValidarCpf`) em [`Documento.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Domain/Clientes/ValueObjects/Documento.cs#L34-L52) está impecável.
+- **Value Objects:** Os VOs `Documento`, `Telefone` e `Email` estão consistentes e imutáveis. A validação matemática de CPF (`ValidarCpf`) em [`Documento.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Domain/Clientes/ValueObjects/Documento.cs) está impecável.
 
-#### B. Entidade `OrdemServico` ([`OrdemServico.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Domain/OrdensServicos/Entities/OrdemServico.cs#L13-L167))
-- **Bug no método `Recusar()` ([L122-L129](file:///home/josemd12/Code/AutoReparos/AutoReparos.Domain/OrdensServicos/Entities/OrdemServico.cs#L122-L129)):**
+#### B. Entidade `OrdemServico` ([`OrdemServico.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Domain/OrdensServicos/Entities/OrdemServico.cs))
+- **Bug no método `Recusar()`:**
   Ao recusar o orçamento, o método executa: `IniciadoEm = DateTime.UtcNow;`. Isso distorce o campo que representa o início da execução dos serviços. Correção: remover essa atribuição e manter `IniciadoEm` nulo.
 - **Impossibilidade de Medir o Tempo de Diagnóstico:**
   O método `IniciarDiagnostico(string mecanicoId)` altera o status para `EmDiagnostico`, mas não armazena a data/hora em que o diagnóstico iniciou. Adicionar a propriedade `DiagnosticoIniciadoEm` para permitir o cálculo: `EnvioAprovacaoEm - DiagnosticoIniciadoEm`.
 - **Inconsistência de Débito de Estoque na Recusa:**
   No fluxo de criação da OS, os insumos são debitados imediatamente. Quando a OS é recusada pelo cliente, o estoque dos insumos alocados não é estornado. Implementar estorno ou status `Cancelada` para devolver as peças ao estoque disponível.
 
-#### C. Entidade `Usuario` ([`Usuario.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Domain/Usuarios/Entities/Usuario.cs#L10-L94))
+#### C. Entidade `Usuario` ([`Usuario.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Domain/Usuarios/Entities/Usuario.cs))
 - A classe lança `ArgumentException` nativo do .NET no construtor. Deve utilizar a exception rica de domínio `InvalidUsuarioException` já existente no projeto.
 
 ---
@@ -89,14 +90,14 @@ Abaixo está o mapeamento atualizado de cada requisito extraído de [`docs/tech-
 
 - **Estrutura de Casos de Uso (Vertical Slice):** Organizada com excelente separação de responsabilidades por bounded context.
 - **Query de Consulta para a Serverless:** Criar use case / query `ConsultarClientePorCpfEmailQuery` para encapsular a regra de busca e validação de status exigida pela Lambda.
-- **Tratamento de Falha de Notificação:** Em [`CriarOrdemServicoUseCase.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Application/OrdensServicos/UseCases/Core/CriarOrdemServicoUseCase.cs), se o email falhar, o erro é capturado para não abortar a transação da OS. No entanto, deve ser emitido um evento ou métrica de falha no `Meter` do OpenTelemetry para viabilizar os alertas de integração exigidos na Fase 3.
+- **Tratamento de Falha de Notificação:** Em [`CriarOrdemServicoUseCase.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Application/OrdensServicos/UseCases/Core/CriarOrdemServicoUseCase.cs), se o email falhar, o erro é capturado para não abortar a transação da OS. No entanto, deve ser emitido um evento ou métrica de falha no `Meter` do OpenTelemetry para viabilizar os alertas de integração exigidos na Fase 3.
 
 ---
 
 ### 3.3. Camada de Infraestrutura (`AutoReparos.Infra`)
 
-- **Serviço de Notificação ([`NotificacaoService.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Infra/Services/NotificacaoService.cs)):** Instancia `new SendGridClient(...)` a cada disparo. Deve utilizar `IHttpClientFactory` ou injeção singleton para evitar socket exhaustion sob alta carga.
-- **Serviço de Métricas ([`DashboardQueryService.cs`](file:///home/josemd12/Code/AutoReparos/AutoReparos.Infra/Services/DashboardQueryService.cs)):** Atualmente agrupa apenas meses fechados. Expandir com métodos para retorno de **Volume Diário de OS (últimos 30 dias)** e **Tempo Médio por Status (Diagnóstico, Execução, Finalização)**.
+- **Serviço de Notificação ([`NotificacaoService.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Infra/Services/NotificacaoService.cs)):** Instancia `new SendGridClient(...)` a cada disparo. Deve utilizar `IHttpClientFactory` ou injeção singleton para evitar socket exhaustion sob alta carga.
+- **Serviço de Métricas ([`DashboardQueryService.cs`](../../../../submodules/AutoReparos.App/AutoReparos.Infra/Services/DashboardQueryService.cs)):** Atualmente agrupa apenas meses fechados. Expandir com métodos para retorno de **Volume Diário de OS (últimos 30 dias)** e **Tempo Médio por Status (Diagnóstico, Execução, Finalização)**.
 - **Persistência EF Core:** Mapeamentos Fluent API bem construídos. Mapear `Status` em `ClienteMapping` e `DiagnosticoIniciadoEm` em `OrdemServicoMapping`.
 
 ---
@@ -241,7 +242,7 @@ sequenceDiagram
      - `AutoReparos.AuthLambda` (Function Serverless com CI/CD próprio, publicado em [AutoReparos.AuthLambda](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda)).
      - `AutoReparos.Infra.Database` (Repositório criado no GitHub para Terraform RDS).
      - `AutoReparos.Infra.K8s` (Repositório criado no GitHub para Terraform EKS & API Gateway).
-     - Submódulos git configurados no repositório pai em `submodules/` com workspace limpo em `/home/josemd12/Code`.
+     - Submódulos git configurados no repositório pai em `submodules/` com workspace local limpo.
      - PR aberto na branch `feat/fase3-submodulos` para `feat/fase3-backend-fixes` ([PR #34](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos/pull/34)).
 
 3. **Sprint 3 (Observabilidade, Alertas & Dashboards):**
@@ -278,10 +279,10 @@ sequenceDiagram
 
 Para permitir que dois desenvolvedores atuem em paralelo sem conflito e sem bloqueios técnicos, a especificação das etapas pendentes foi dividida em duas especificações técnicas independentes:
 
-1. **Track A (Cloud & DevOps):** [`fase3_spec_track_a_cloud_iac.md`](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_a_cloud_iac.md)
+1. **Track A (Cloud & DevOps):** [`fase3_spec_track_a_cloud_iac.md`](../cloud-iac/fase3_spec_track_a_cloud_iac.md)
    - **Foco:** Terraform RDS, Terraform EKS, AWS API Gateway, CI/CD de infraestrutura, governança de branches e usuário `soat-architecture`, RFCs 001/002, ADR 001 e Diagrama de Componentes Cloud.
    - **Repositórios:** `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s`.
 
-2. **Track B (Software & Observabilidade):** [`fase3_spec_track_b_observability_docs.md`](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_b_observability_docs.md)
+2. **Track B (Software & Observabilidade):** [`fase3_spec_track_b_observability_docs.md`](../observabilidade/fase3_spec_track_b_observability_docs.md)
    - **Foco:** OpenTelemetry + New Relic/Datadog, JSON Structured Logging, métrica customizada `notificacoes.falhas`, os 3 Dashboards obrigatórios, alertas automatizados, RFC 003, ADRs 002/003, justificativa do PostgreSQL + Modelo ER, roteiro do vídeo de 15 min e minuta do PDF final.
    - **Repositórios:** `AutoReparos.App` e suíte de testes / documentação central.

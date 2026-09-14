@@ -1,7 +1,7 @@
 # Relatório Crítico de Avaliação Arquitetural e Regras de Negócio: Sprint 2 (Fase 3 Tech Challenge SOAT)
 
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
-> **Documento Analisado:** `.tmp/plano_sprint2_auth_lambda_portal.md` e `.tmp/fase3_deep_gap_analysis.md`  
+> **Documento Analisado:** `plano_sprint2_auth_lambda_portal.md` e `../gap-analysis/fase3_deep_gap_analysis.md`  
 > **Referência Oficial:** `docs/tech-challenge/13SOAT - Fase 3 - Tech Challenge.pdf`  
 > **Perfil do Avaliador:** Avaliador Crítico de Arquitetura e Regras de Negócio (Tech Challenge FIAP SOAT)  
 > **Status da Avaliação:** **APROVADO COM RESSALVAS CRÍTICAS (Ajustes Mandatórios Pré-Codificação)**  
@@ -10,7 +10,7 @@
 
 ## 1. Diagnóstico Geral
 
-O plano de implementação proposto para a **Sprint 2** (`.tmp/plano_sprint2_auth_lambda_portal.md`) apresenta um direcionamento técnico correto em relação às diretrizes acordadas para a **Fase 3 da FIAP SOAT**. A proposta acerta ao:
+O plano de implementação proposto para a **Sprint 2** (`plano_sprint2_auth_lambda_portal.md`) apresenta um direcionamento técnico correto em relação às diretrizes acordadas para a **Fase 3 da FIAP SOAT**. A proposta acerta ao:
 1. **Evitar a contaminação da tabela `AspNetUsers`**: O cliente final consulta exclusivamente seus dados sem a criação de contas com senha no ASP.NET Core Identity.
 2. **Adotar o modelo Serverless desacoplado**: A autenticação é delegada a uma função serverless independente que valida o cliente diretamente no PostgreSQL e emite um JWT efêmero de 1 hora.
 3. **Respeitar os pilares da Clean Architecture**: Separação clara entre Casos de Uso na camada de Aplicação e Interface Adapters na camada de Apresentação (Controllers).

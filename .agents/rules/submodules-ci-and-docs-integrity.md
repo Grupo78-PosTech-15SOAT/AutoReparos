@@ -119,3 +119,11 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
 - Antes de commitar documentação que referencie arquivos de arquitetura (RFCs, ADRs, especificações):
   - Inspecione a árvore de diretórios do repositório para certificar-se de que o arquivo ou diretório citado existe fisicamente (ex: referenciar `docs/specs/fase3/...` em vez de caminhos planos ou pastas inexistentes).
   - Nunca crie referências a caminhos fictícios.
+
+### 3.5 Proibição Estrita de Caminhos Absolutos (Uso Obrigatório de Caminhos Relativos)
+- **NUNCA USE CAMINHOS ABSOLUTOS** para arquivos como documentações (`docs/`), especificações técnicas, planos de entrega ou arquivos de harness de IA em `.agents/`.
+- **Todos os caminhos e links devem ser estritamente relativos** (ex: `./`, `../`, `docs/specs/...`, `submodules/AutoReparos.App/...`, `.agents/rules/...`).
+- **Proibições expressas:**
+  - Caminhos absolutos do sistema operacional (`/home/...`, `C:\...`, `/mnt/...`, `/Users/...`).
+  - URIs com schema `file:///home/...` ou `file:///mnt/...`.
+- **Justificativa:** O uso de caminhos absolutos quebra a portabilidade da documentação e das regras do agente de IA entre diferentes máquinas de desenvolvedores, sistemas operacionais e runners de CI/CD.

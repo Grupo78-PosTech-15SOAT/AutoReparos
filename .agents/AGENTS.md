@@ -173,4 +173,5 @@ When executing tasks on this repository:
 5. **No Code Duplication:** Completely remove legacy root folders and duplicated test suites when migrating to submodules.
 6. **Documentation Fidelity:** Ensure ERD diagrams match real EF Core mappings, test metrics sum up accurately, and all doc links reference existing paths.
 7. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
+8. **Strict Relative Paths Only (Proibição de Caminhos Absolutos):** NUNCA use caminhos absolutos (`/home/...`, `C:\...`, `/Users/...`, `file:///...`) em documentações (`docs/`), especificações técnicas, planos, diagramas ou arquivos de harness de IA (`.agents/`). TODOS os caminhos e links devem ser estritamente relativos (`./`, `../`, `docs/...`, `submodules/...`), garantindo portabilidade entre diferentes máquinas, desenvolvedores e ambientes de CI/CD.
 

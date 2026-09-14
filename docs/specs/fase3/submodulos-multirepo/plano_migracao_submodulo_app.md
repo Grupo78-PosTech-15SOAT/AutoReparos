@@ -13,12 +13,12 @@
 ## 1. Diretriz Mandatória de Workspace
 
 > [!IMPORTANT]
-> **Isolamento Estrito em `/home/josemd12/Code`:**  
-> O diretório `/home/josemd12/Code` deve conter **exclusivamente**:
+> **Isolamento Estrito no Workspace Raiz:**  
+> O diretório raiz de projetos deve conter **exclusivamente**:
 > 1. `FinanceHub` (outra aplicação independente)
 > 2. `AutoReparos` (repositório pai / orquestrador)  
-> **Nenhum submódulo ou pasta intermediária pode residir solta em `/home/josemd12/Code`.**  
-> Todos os 4 repositórios da Fase 3 residem obrigatoriamente dentro de `/home/josemd12/Code/AutoReparos/submodules/`:
+> **Nenhum submódulo ou pasta intermediária pode residir solta no workspace raiz.**  
+> Todos os 4 repositórios da Fase 3 residem obrigatoriamente dentro de `AutoReparos/submodules/`:
 > - `submodules/AutoReparos.AuthLambda`
 > - `submodules/AutoReparos.App`
 > - `submodules/AutoReparos.Infra.Database`
@@ -29,7 +29,7 @@
 ## 2. Conteúdo e Responsabilidades dos Repositórios
 
 ```
-/home/josemd12/Code/
+workspace/
 ├── FinanceHub/                                  # Aplicação externa (intocada)
 └── AutoReparos/                                 # REPOSITÓRIO PAI (Umbrella)
     ├── .agents/                                 # AI Harness centralizado
@@ -90,15 +90,15 @@ Para que `submodules/AutoReparos.App` seja 100% autônomo (sem qualquer dependê
 
 ---
 
-## 5. Garantia de Conformidade do Diretório `/home/josemd12/Code`
-
-Ao final do processo, a estrutura física em `/home/josemd12/Code` será:
+## 5. Garantia de Conformidade do Workspace Raiz
+ 
+Ao final do processo, a estrutura física no workspace será:
 ```
-/home/josemd12/Code/
+workspace/
 ├── AutoReparos/
 │   └── submodules/
 │       ├── AutoReparos.AuthLambda/
 │       └── AutoReparos.App/
 └── FinanceHub/
 ```
-Nenhuma pasta adicional será criada em `/home/josemd12/Code`.
+Nenhuma pasta adicional será criada no diretório raiz do workspace.

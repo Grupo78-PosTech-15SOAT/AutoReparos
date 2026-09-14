@@ -2,17 +2,17 @@
 
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
 > **Data da Auditoria:** Setembro de 2026 (Atualizado após validação empírica da migração para submódulos)  
-> **Status Global:** **88% Concluído** (Backend, Domínio, Testes, Serverless Lambda, 4 Repositórios Git, IaC RDS e IaC EKS/API Gateway prontos e validados)  
-> **Localização do Documento:** `.tmp/fase3_validacao_consolidada_e_plano_execucao.md`  
+> **Status Global:** **92% Concluído** (Backend, Domínio, Testes, Serverless Lambda, 4 Repositórios Git, IaC RDS, IaC EKS/API Gateway, CI/CD padronizado em todos os repositórios, Docker e limpeza de raiz 100% validados)  
+> **Localização do Documento:** `docs/specs/fase3/gap-analysis/fase3_validacao_consolidada_e_plano_execucao.md`  
 > **Especificações de Execução Paralela Vinculadas:**
-> - [Track A - Cloud Infrastructure & IaC](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_a_cloud_iac.md)
-> - [Track B - Observabilidade, Dashboards & Arquitetura](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_b_observability_docs.md)
+> - [Track A - Cloud Infrastructure & IaC](../cloud-iac/fase3_spec_track_a_cloud_iac.md)
+> - [Track B - Observabilidade, Dashboards & Arquitetura](../observabilidade/fase3_spec_track_b_observability_docs.md)
 
 ---
 
 ## 1. Sumário Executivo da Validação Empírica
 
-Foi realizada uma bateria completa de validação técnica sobre todo o ecossistema do **AutoReparos** após a reestruturação da solução e a integração oficial dos **4 submódulos Git**.
+Foi realizada uma bateria completa de validação técnica sobre todo o ecossistema do **AutoReparos** após a reestruturação da solução, a segregação multi-repo nos **4 submódulos Git**, a padronização de CI/CD e a sanitização total de arquivos legados.
 
 ### Principais Conquistas Comprovadas por Testes:
 1. **343 Testes Automatizados Aprovados (0 Falhas, 0 Ignorados):**
@@ -20,19 +20,22 @@ Foi realizada uma bateria completa de validação técnica sobre todo o ecossist
    - `AutoReparos.Application.Tests`: **123/123 aprovados** (100% de sucesso).
    - `AutoReparos.AuthLambda.Tests`: **40/40 aprovados** (100% de sucesso).
    - `AutoReparos.IntegrationTests`: **67/67 aprovados** (100% de sucesso, executados contra banco real PostgreSQL 16 via **Testcontainers**).
-2. **Topologia Multi-Repo com 4 Submódulos Oficializada:**
+2. **Topologia Multi-Repo com 4 Submódulos Oficializada & Higienizada:**
    - `submodules/AutoReparos.App` (Aplicação principal .NET 10 + Angular 19).
    - `submodules/AutoReparos.AuthLambda` (Function Serverless de autenticação por CPF + E-mail).
    - `submodules/AutoReparos.Infra.Database` (Terraform do AWS RDS PostgreSQL 16).
    - `submodules/AutoReparos.Infra.K8s` (Terraform do AWS EKS, Ingress e AWS API Gateway v2).
-3. **Limpeza e Desacoplamento da Raiz do Repositório Pai:**
-   - 70 arquivos legados duplicados de Terraform e Helm foram removidos da raiz (Commit `425b9b8`).
-   - O arquivo de solução `AutoReparos.slnx` foi reconfigurado para apontar exclusivamente para os projetos dentro de `submodules/`, compilando com **0 erros**.
-   - O `docker-compose.yml` foi ajustado com contextos de build em `submodules/AutoReparos.App`.
-   - O script `scripts/k8s/test-local-helm.sh` foi atualizado para apontar para `submodules/AutoReparos.Infra.K8s/k8s`.
-4. **Validação de Sintaxe IaC (Terraform RDS):**
-   - O código Terraform em `submodules/AutoReparos.Infra.Database/terraform` foi inicializado e validado via `terraform validate`, retornando status: **`Success! The configuration is valid.`**
-5. **AWS API Gateway v2 HTTP API Modelado:**
+   - `.gitmodules` configurado com URLs HTTPS, submodules rastreados em `main`.
+3. **Pipelines de CI/CD Padronizados & 100% Green:**
+   - Workflows `ci.yml` idênticos e padronizados nos 4 submódulos com controle de concorrência (`cancel-in-progress: true`), `paths-ignore` e actions fixadas em commit SHAs de 40 caracteres (regra SonarCloud).
+   - PR #34 com 100% dos apontamentos do Copilot AI resolvidos e checks de CI e SonarCloud aprovados.
+4. **Limpeza e Desacoplamento da Raiz do Repositório Pai:**
+   - 70 arquivos legados duplicados de Terraform e Helm removidos da raiz.
+   - Pasta legada `infra/` e `servers.json` completamente excluídos da raiz; arquivos de observabilidade migrados para `submodules/AutoReparos.App/docker/`.
+   - Arquivo de solução `AutoReparos.slnx` apontando exclusivamente para os projetos dentro de `submodules/`, compilando com **0 erros**.
+   - `docker-compose.yml` da raiz reconfigurado e `docker-compose.yml` + `Dockerfile` independentes criados em cada um dos 4 submódulos.
+5. **Validação de Sintaxe IaC (Terraform RDS & EKS):**
+   - O código Terraform em `submodules/AutoReparos.Infra.Database/terraform` foi validado via `terraform validate`, retornando status: **`Success! The configuration is valid.`**
    - O módulo `submodules/AutoReparos.Infra.K8s/terraform/modules/apigateway` já contém o roteamento unificado:
      - `POST /auth/cliente` -> Integração `AWS_PROXY` direta com a Lambda.
      - `ANY /api/{proxy+}` -> Integração `HTTP_PROXY` com o Ingress/NLB do cluster EKS.
@@ -97,26 +100,28 @@ gantt
 
 ---
 
-### 4.1. Tarefas Restantes do Track A (DevOps & Cloud)
+### 4.1. Tarefas do Track A (DevOps & Cloud)
 *Responsável: Dev 1 | Repositórios: `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s`*
 
 - [x] Módulo Terraform RDS PostgreSQL 16 configurado e validado (`terraform validate` OK).
 - [x] Módulos Terraform EKS, VPC e Ingress estruturados.
 - [x] Módulo AWS API Gateway v2 implementado com rotas `/auth/cliente` e `/api/{proxy+}`.
-- [ ] **Ajuste Fino no Gateway:** Adicionar rota `GET /health` no módulo `apigateway/main.tf`.
-- [ ] **CI/CD de Infraestrutura:** Finalizar os workflows do GitHub Actions nos repositórios `AutoReparos.Infra.Database` e `AutoReparos.Infra.K8s` para validação em PR e deploy em homolog/prod.
+- [x] **CI/CD de Infraestrutura & Submódulos:** Workflows GitHub Actions `ci.yml` padronizados e validados nos 4 submódulos com commit SHAs de 40 caracteres, concorrência e paths-ignore.
+- [x] **Docker & Isolamento Local:** Dockerfile e docker-compose.yml autônomos criados em todos os 4 submódulos; remoção completa da pasta `infra/` da raiz.
+- [ ] **Ajuste Fino no Gateway:** Adicionar rota `GET /health` no módulo `apigateway/main.tf` para bypass direto sem prefixo `/api/`.
 - [ ] **Governança no GitHub:**
   - Habilitar proteção de branch na `main` dos 4 repositórios (sem push direto, PR obrigatório, CI checks obrigatórios).
-  - Convidar o usuário **`soat-architecture`** com permissão de colaborador nos 4 repositórios.
-- [ ] **Documentação de Infra:** Redigir `RFC-001`, `RFC-002`, `ADR-001` e Diagrama de Componentes de Nuvem em `docs/architecture/`.
+  - Convidar o usuário **`soat-architecture`** com permissão de colaborador nos 4 repositórios da organização.
+- [ ] **Documentação de Infra:** Redigir `RFC-001` (Cloud AWS), `RFC-002` (RDS PostgreSQL), `ADR-001` (Modularização Terraform) e Diagrama de Componentes de Nuvem em `docs/architecture/`.
 
 ---
 
-### 4.2. Tarefas Restantes do Track B (Software & Observabilidade)
+### 4.2. Tarefas do Track B (Software & Observabilidade)
 *Responsável: Dev 2 | Repositório: `AutoReparos.App` e `docs/`*
 
-- [x] Endpoints e use cases de consulta restrita do cliente (`/meus-veiculos`, `/minhas-os`) 100% testados.
+- [x] Endpoints e use cases de consulta restrita do cliente (`/meus-veiculos`, `/minhas-os`) 100% testados com Testcontainers.
 - [x] Métricas de dashboard (volume diário e tempo médio por status) implementadas e testadas.
+- [x] Suíte de testes automatizados com 343 testes (100% passing).
 - [ ] **Instrumentação de Falhas de Notificação:**
   - Adicionar contador `notificacoes.falhas` no `Meter` OTel em `NotificacaoService.cs`.
   - Criar teste unitário em `NotificacaoServiceTests.cs` simulando falha do SendGrid e validando incremento da métrica.
@@ -127,9 +132,9 @@ gantt
   - Criar arquivos declarativos JSON dos 3 dashboards (Volume diário, Tempos médios por status, Erros e falhas de integrações).
   - Configurar alertas automatizados para latência de APIs (p95 > 2s) e falhas no processamento de OSs.
 - [ ] **Documentação de Software e Banco:**
-  - Redigir `RFC-003`, `ADR-002`, `ADR-003` em `docs/architecture/`.
+  - Redigir `RFC-003` (Auth Serverless CPF+Email), `ADR-002` (Zero-Trust Cliente), `ADR-003` (OpenTelemetry Stack) em `docs/architecture/`.
   - Elaborar documento de Justificativa Formal da Escolha do PostgreSQL 16 com Diagrama ER completo e Dicionário de Dados.
-  - Diagrama de Sequência do fluxo de autenticação e abertura de OS.
+  - Diagrama de Sequência do fluxo de autenticação e consulta de OS.
 - [ ] **Pacote de Entrega Final:**
   - Redigir roteiro de gravação do vídeo de até 15 minutos cobrindo todos os 6 tópicos mandatórios da banca.
   - Montar a minuta consolidada do documento PDF para submissão no Portal FIAP com os links dos 4 repositórios e evidência de convite de `soat-architecture`.

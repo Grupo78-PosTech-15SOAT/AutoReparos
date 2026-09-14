@@ -57,6 +57,8 @@ O formato obrigatório para mensagens de commit no repositório é `<gitmoji> <D
    public void Aprovar()
    ```
 
+4. **Relative Paths Only in Documentation & Harness**: ALL paths and links in documentation (`docs/`), specifications, plans, and `.agents/` MUST be relative (e.g. `./`, `../`, `docs/...`, `submodules/...`). Absolute paths (`/home/...`, `C:\...`, `file:///...`) are strictly forbidden.
+
 ---
 
 ## 4. Summary Matrix
@@ -69,3 +71,4 @@ O formato obrigatório para mensagens de commit no repositório é `<gitmoji> <D
 | Application Use Cases | **Portuguese (PT-BR) + EN UseCase** | `CriarOrdemServicoUseCase` |
 | API Endpoints & Controllers | **Portuguese (PT-BR) + EN Controller** | `ClienteController`, `ClienteEndpoint` |
 | Git Commits & PR Descriptions | **Gitmoji + Descrição em Português** | `📝 Adicionando especificação técnica` |
+| Docs & AI Harness File Links | **Relative Paths Only (No Absolute Paths)** | `docs/specs/fase3/...`, `../../submodules/...` |

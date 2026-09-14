@@ -8,7 +8,7 @@
 > 2. [`AutoReparos.Infra.K8s`](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s) (IaC AWS EKS, Ingress & AWS API Gateway)
 > 3. Repositório Pai / Orquestrador (`AutoReparos`) - Atualização de submódulos e governança  
 > **Status:** Pronto para Implementação Paralela e Assíncrona  
-> **Documento Complementar:** [`fase3_spec_track_b_observability_docs.md`](file:///home/josemd12/Code/AutoReparos/.tmp/fase3_spec_track_b_observability_docs.md) (Track B: Observabilidade, Métricas, Dashboards & Arquitetura)
+> **Documento Complementar:** [`fase3_spec_track_b_observability_docs.md`](../observabilidade/fase3_spec_track_b_observability_docs.md) (Track B: Observabilidade, Métricas, Dashboards & Arquitetura)
 
 ---
 
@@ -134,24 +134,24 @@ Para garantir zero fricção entre o Track A e o Track B, os seguintes contratos
 **Branch de trabalho:** `feat/fase3-rds-terraform`  
 
 1. **Revisar e Blindar o Código Terraform Existente:**
-   - Conferir se [`terraform/main.tf`](file:///home/josemd12/Code/AutoReparos/submodules/AutoReparos.Infra.Database/terraform/main.tf) cobre:
+   - Conferir se [`terraform/main.tf`](../../../../submodules/AutoReparos.Infra.Database/terraform/main.tf) cobre:
      - `aws_db_subnet_group.rds` referenciando pelo menos 2 subnets privadas em AZs distintas.
      - `aws_security_group.rds` com regra de entrada TCP 5432 restrita estritamente ao `security_groups = [var.eks_nodes_security_group_id, var.lambda_security_group_id]` e blocos CIDR autorizados.
      - `aws_db_instance.postgres` configurado com `engine = "postgres"`, `engine_version = "16.3"`, `instance_class = "db.t4g.micro"`, `allocated_storage = 20`, `storage_encrypted = true`, `backup_retention_period = 7`, `skip_final_snapshot = false` (com snapshot para produção).
      - `aws_secretsmanager_secret` e `aws_secretsmanager_secret_version` persistindo a connection string completa em formato JSON e plain text para consumo da Lambda e do EKS.
-2. **Definir Outputs Obrigatórios ([`terraform/outputs.tf`](file:///home/josemd12/Code/AutoReparos/submodules/AutoReparos.Infra.Database/terraform/outputs.tf)):**
+2. **Definir Outputs Obrigatórios ([`terraform/outputs.tf`](../../../../submodules/AutoReparos.Infra.Database/terraform/outputs.tf)):**
    - `db_endpoint`: Host e porta do RDS (ex: `autoreparos-db.xxx.us-east-1.rds.amazonaws.com:5432`).
    - `db_address`: Endereço puro (sem porta).
    - `db_name`: `autoreparos_db`.
    - `db_security_group_id`: ID do SG do banco para amarrar nas regras do EKS.
    - `db_secret_arn`: ARN do segredo no AWS Secrets Manager.
-3. **Pipeline de CI/CD GitHub Actions ([`.github/workflows/terraform-db.yml`](file:///home/josemd12/Code/AutoReparos/submodules/AutoReparos.Infra.Database/.github/workflows)):**
+3. **Pipeline de CI/CD GitHub Actions ([`.github/workflows/terraform-db.yml`](../../../../submodules/AutoReparos.Infra.Database/.github/workflows)):**
    - Step 1: `terraform fmt -check`
    - Step 2: `terraform init -backend=false`
    - Step 3: `terraform validate`
    - Step 4 (em PR): `terraform plan` com comentário do plan no Pull Request.
    - Step 5 (em merge na `main`): `terraform apply -auto-approve`.
-4. **Documentação do Repositório ([`README.md`](file:///home/josemd12/Code/AutoReparos/submodules/AutoReparos.Infra.Database/README.md)):**
+4. **Documentação do Repositório ([`README.md`](../../../../submodules/AutoReparos.Infra.Database/README.md)):**
    - Propósito do repositório, diagrama de arquitetura do RDS, tabela de variáveis (`variables.tf`), instruções passo a passo para `terraform init`, `plan`, `apply` e `destroy`.
 
 ---

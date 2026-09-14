@@ -8,7 +8,7 @@
 > **Status:** **100% CONCLUÍDO COM SUCESSO**  
 > **Diretrizes Críticas Respeitadas:**  
 > 1. **Nenhum reset destrutivo (`git reset --hard`) executado.**  
-> 2. **Isolamento Estrito em `/home/josemd12/Code` mantido** (apenas `AutoReparos` e `FinanceHub`). Todos os submódulos residem exclusivamente dentro de `AutoReparos/submodules/`.  
+> 2. **Isolamento Estrito no workspace raiz mantido** (apenas `AutoReparos` e `FinanceHub`). Todos os submódulos residem exclusivamente dentro de `AutoReparos/submodules/`.  
 > 3. **Padrão de Commits:** Gitmoji + Português (`✨ <Gitmoji> <Descrição em português>`).  
 > 4. **Planos não commitados** (mantidos localmente).
 
@@ -55,7 +55,7 @@ A especificação da Fase 3 (*13SOAT - Fase 3 - Tech Challenge.pdf*, páginas 2 
 | **Submódulo 3 (`AutoReparos.Infra.K8s`)** | Repositório autônomo no GitHub, Terraform para VPC Multi-AZ, EKS Cluster, Node Groups com Auto-scaling, ECR, Addons, AWS API Gateway v2 HTTP API (`/auth/cliente` e `/api/*`), Helm Charts completos (api, web, ingress, observability), CI/CD e `README.md`. Submódulo registrado em `.gitmodules`. | Branch `main` em [`AutoReparos.Infra.K8s`](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s). Submódulo ativo. |
 | **Submódulo 4 (`AutoReparos.App`)** | Repositório autônomo no GitHub, Backend ASP.NET Core e Frontend Angular 19, desacoplamento de testes da Lambda, 303 testes passando (113 Domain, 123 Application, 67 Integration), CI/CD e `README.md`. Submódulo registrado em `.gitmodules`. | Branch `main` em [`AutoReparos.App`](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App). Submódulo ativo. |
 | **Repositório Pai (`AutoReparos`)** | Código duplicado de aplicação e Lambda removido da raiz. Manifestos duplicados de infraestrutura removidos. `AutoReparos.slnx` consolidada compilando com 0 erros (276 testes unitários passando). `docker-compose.yml` validado. `.gitmodules` com 4 submódulos oficiais. | Commits pushados para `origin feat/fase3-submodulos` (PR #34 atualizado). |
-| **Isolamento de Workspace** | Diretório `/home/josemd12/Code` mantido estritamente limpo com apenas `AutoReparos` e `FinanceHub`. | Confirmado via `ls -la /home/josemd12/Code`. |
+| **Isolamento de Workspace** | Diretório raiz do workspace mantido estritamente limpo com apenas `AutoReparos` e `FinanceHub`. | Confirmado via listagem do workspace. |
 
 ---
 
@@ -99,7 +99,7 @@ A especificação da Fase 3 (*13SOAT - Fase 3 - Tech Challenge.pdf*, páginas 2 
 - Validação de `dotnet build AutoReparos.slnx` -> 0 erros.
 - Validação de testes unitários: 276 testes aprovados (113 Domain, 40 Lambda, 123 Application).
 - Validação de `docker compose config` -> 100% válido.
-- Validação de isolamento do diretório `/home/josemd12/Code` -> Apenas `AutoReparos` e `FinanceHub`.
+- Validação de isolamento do diretório raiz do workspace -> Apenas `AutoReparos` e `FinanceHub`.
 - Commit no pai: `🔥 Removendo manifestos duplicados legados de Terraform e Helm da raiz do repositório pai`
 - `git push origin feat/fase3-submodulos` (PR #34 atualizado no GitHub).
 
