@@ -13,7 +13,27 @@ namespace AutoReparos.IntegrationTests.Infrastructure
 {
     public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram>, IAsyncLifetime where TProgram : class
     {
+        private const string ConnectionStringsDbConnection = "ConnectionStrings__DbConnection";
         private static readonly DbContainerSettings Settings = new();
+
+        static CustomWebApplicationFactory()
+        {
+            var testConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.Testing.json");
+            if (File.Exists(testConfigPath))
+            {
+                var config = new ConfigurationBuilder()
+                    .AddJsonFile(testConfigPath)
+                    .Build();
+
+                foreach (var kvp in config.AsEnumerable())
+                {
+                    if (!string.IsNullOrEmpty(kvp.Value) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable(kvp.Key.Replace(":", "__"))))
+                    {
+                        Environment.SetEnvironmentVariable(kvp.Key.Replace(":", "__"), kvp.Value);
+                    }
+                }
+            }
+        }
 
         private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder(Settings.Image)
             .WithDatabase(Settings.Database)
@@ -31,12 +51,11 @@ namespace AutoReparos.IntegrationTests.Infrastructure
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            builder.UseEnvironment("Testing");
             builder.ConfigureAppConfiguration((context, configBuilder) =>
             {
-                configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:DbConnection"] = ConnectionString
-                });
+                var testConfigPath = Path.Combine(AppContext.BaseDirectory, "appsettings.Testing.json");
+                configBuilder.AddJsonFile(testConfigPath, optional: true);
             });
         }
 
@@ -65,10 +84,12 @@ namespace AutoReparos.IntegrationTests.Infrastructure
         public async Task InitializeAsync()
         {
             await _dbContainer.StartAsync();
+            Environment.SetEnvironmentVariable(ConnectionStringsDbConnection, ConnectionString);
         }
 
         async Task IAsyncLifetime.DisposeAsync()
         {
+            Environment.SetEnvironmentVariable(ConnectionStringsDbConnection, null);
             if (_dbConnection != null)
             {
                 await _dbConnection.DisposeAsync();
