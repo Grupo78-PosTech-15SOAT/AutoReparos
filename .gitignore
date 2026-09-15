@@ -432,3 +432,6 @@ k8s/charts/*.tgz
 opencode.json
 .junie/mcp/
 .junie/skills
+
+# Test State Files
+**/test_state.json

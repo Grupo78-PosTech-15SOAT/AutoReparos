@@ -10,6 +10,8 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds, calc}
 
+\usepackage{fontawesome5}
+
 \definecolor{primary}{HTML}{1E3A8A}
 \definecolor{secondary}{HTML}{0D9488}
 \definecolor{accent}{HTML}{EF4444}
@@ -71,7 +73,7 @@
 % --- PAINEL DE LINKS E INTEGRANTES ---
 \begin{tcolorbox}[elegantbox]
     \begin{minipage}[t]{0.52\textwidth}
-        \textbf{\color{primary}🔗 Links do Projeto}
+        \textbf{\color{primary}\faIcon{link} Links do Projeto}
         \vspace{0.2cm}
         \begin{itemize}
             \item \textbf{Repositório GitHub:} \\
@@ -85,7 +87,7 @@
     \end{minipage}
     \hfill
     \begin{minipage}[t]{0.42\textwidth}
-        \textbf{\color{primary}👥 Integrantes do Grupo 78}
+        \textbf{\color{primary}\faIcon{users} Integrantes do Grupo 78}
         \vspace{0.2cm}
         \begin{itemize}
             \item Enrico Gollner (RM 370737)
@@ -101,7 +103,7 @@
 
 % --- ARQUITETURA CLOUD ---
 \begin{center}
-    \textbf{\large \color{primary} ☁️ Desenho da Arquitetura Cloud (AWS \& Kubernetes)}
+    \textbf{\large \color{primary}\faIcon{cloud} Desenho da Arquitetura Cloud (AWS \& Kubernetes)}
 \end{center}
 \vspace{0.1cm}
 \begin{center}
@@ -148,7 +150,7 @@
 % --- DESCRIÇÃO TÉCNICA E RESUMO ---
 \begin{tcolorbox}[colback=white, colframe=borderlight, boxrule=0.5pt, arc=4pt, left=8pt, right=8pt, top=6pt, bottom=6pt]
     \small
-    \textbf{\color{primary}🛠️ Visão Geral e Principais Componentes Implementados na Fase 2:}
+    \textbf{\color{primary}\faIcon{tools} Visão Geral e Principais Componentes Implementados na Fase 2:}
     \vspace{0.15cm}
     \begin{itemize}
         \item \textbf{Automação da Infraestrutura (IaC):} Provisionamento 100\% via \textbf{Terraform} na AWS (VPC, EKS Cluster, ECR, e Addons de rede/ingress), garantindo replicação e infraestrutura idêntica de forma rápida e segura.
