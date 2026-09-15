@@ -161,8 +161,23 @@ A plataforma mantém seu acervo de decisões arquiteturais estruturado sob os pa
 * **[RFC-002: Estratégia de Banco de Dados Gerenciado (AWS RDS vs StatefulSet)](./RFC-002-managed-database-strategy-rds.md)**  
   *Análise multidimensional comparativa fundamentando a transição do StatefulSet in-cluster da Fase 2 para o AWS RDS PostgreSQL 16 na Fase 3. Avaliação de SLA (99.95%), RPO/RTO contínuo via PITR, criptografia KMS e adequação estrita ao Free Tier da AWS (`db.t4g.micro`, 20 GiB).*
 
+* **[RFC-003: Autenticação Serverless de Clientes via CPF e E-mail](./RFC-003-serverless-client-authentication.md)**  
+  *Desenho da autenticação do portal do cliente via AWS Lambda sem poluição da base Identity, emissão de JWT efêmero com role restrita e comparativo de alternativas.*
+
 * **[ADR-001: Adoção do AWS API Gateway HTTP API v2 com VPC Link](./ADR-001-adoption-aws-api-gateway.md)**  
   *Registro formal da decisão arquitetural de borda através de um comparativo quádruplo formal: (1) HTTP API v2 + VPC Link, (2) REST API v1, (3) Ingress Nginx exposto publicamente e (4) Application Load Balancer (ALB). Fundamentação de latência p99, custo reduzido ($1.00/milhão), integração serverless e conformidade Zero-Trust.*
+
+* **[ADR-002: Isolamento de Dados e Política Zero-Trust no Portal do Cliente](./ADR-002-data-isolation-and-zero-trust-claims.md)**  
+  *Garantia estrita contra vulnerabilidade BOLA (OWASP API Security), extração do titular via claims e bloqueio de vazamento de dados.*
+
+* **[ADR-003: Estratégia de Observabilidade Ponta a Ponta com OpenTelemetry](./ADR-003-end-to-end-observability-strategy.md)**  
+  *Instrumentação vendor-agnostic baseada em W3C TraceContext e OpenTelemetry SDK (.NET 10), exportação OTLP e integração com New Relic/Datadog.*
+
+* **[Seleção de Banco de Dados e Modelo de Dados](./database-selection-and-data-model.md)**  
+  *Justificativa do PostgreSQL 16 (ACID, integridade referencial com Restrict/Cascade), modelo ER completo em Mermaid e dicionário das 8 tabelas.*
+
+* **[Diagrama de Sequência End-to-End](./diagrams/sequence_portal_auth_and_query.md)**  
+  *Fluxo completo de autenticação e consulta de veículos e histórico de ordens de serviço.*
 
 ---
 
