@@ -93,7 +93,7 @@ flowchart TD
 
     ClientPortal -->|1. POST /auth/cliente| APIGW
     APIGW --> APIGW_Route_Auth
-    APIGW_Route_Auth -->|Payload {cpf, email}| AuthLambda
+    APIGW_Route_Auth -->|"Payload: CPF e E-mail"| AuthLambda
     AuthLambda -->|Valida status cliente| RDS
 
     ClientPortal -->|2. GET /api/clientes/meus-veiculos<br/>Bearer JWT| APIGW

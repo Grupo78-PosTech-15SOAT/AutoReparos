@@ -161,18 +161,6 @@ Em conformidade com a especificação da Fase 3:
 ### Diagrama Geral de Componentes (Fase 3)
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000',
-    'tertiaryColor': '#FDE7EE',
-    'tertiaryBorderColor': '#ED145B',
-    'edgeLabelBackground': '#000000'
-  }
-}}%%
 graph TB
     subgraph Clients["Camada de Clientes e Acesso"]
         Browser["Portal Web do Cliente (Angular 19)"]
@@ -189,7 +177,7 @@ graph TB
 
     subgraph ServerlessModule["Repositório 1: AutoReparos.AuthLambda"]
         Lambda["AWS Lambda Function (.NET 10)<br/>Autenticação por CPF + E-mail"]
-        RouteAuth -->|Payload {cpf, email}| Lambda
+        RouteAuth -->|"Payload: CPF e E-mail"| Lambda
     end
 
     subgraph AppCluster["Repositório 4: AutoReparos.App (AWS EKS Cluster)"]
@@ -279,18 +267,8 @@ Em conformidade com a especificação da Fase 3 e as diretrizes do projeto:
 - Caso o cliente tente acessar qualquer rota operacional interna da oficina (ex: `/api/clientes`, `/api/ordem-servico/kanban`), a API rejeita com **HTTP 403 Forbidden** via política `OperadorOficina`.
 
 ### Diagrama de Sequência: Autenticação Serverless e Consulta de OS
-
+ 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000',
-    'edgeLabelBackground': '#000000'
-  }
-}}%%
 sequenceDiagram
     autonumber
     actor Cliente as Cliente (Browser)
@@ -335,15 +313,6 @@ A adoção do **PostgreSQL 16** como banco relacional do AutoReparos baseia-se e
 ### Diagrama Entidade-Relacionamento (ERD)
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000'
-  }
-}}%%
 erDiagram
     CLIENTES ||--o{ VEICULOS : "possui"
     CLIENTES ||--o{ ORDENS_SERVICOS : "solicita"
@@ -448,15 +417,6 @@ Na Fase 2, o PostgreSQL era executado em um StatefulSet conteinerizado no cluste
 ### Fluxo de Estados da Ordem de Serviço
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000'
-  }
-}}%%
 stateDiagram-v2
     [*] --> Recebida: Criação da OS
     Recebida --> EmDiagnostico: Mecânico assume a triagem (grava DiagnosticoIniciadoEm)
@@ -589,9 +549,9 @@ Endpoints disponíveis:
 
 ### Executando os Testes Automatizados
 
-A solução conta com **343 testes automatizados** (100% passando):
+A solução conta com **354 testes automatizados** (100% passando):
 - **Domínio (`AutoReparos.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
-- **Aplicação (`AutoReparos.Application.Tests`):** 123 testes unitários (casos de uso).
+- **Aplicação (`AutoReparos.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
 - **Serverless (`AutoReparos.AuthLambda.Tests`):** 40 testes unitários (Módulo 11 CPF, geração de token).
 - **Integração (`AutoReparos.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
 
