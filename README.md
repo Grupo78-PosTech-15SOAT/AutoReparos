@@ -2,480 +2,660 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
+  <img src="https://img.shields.io/badge/Angular-19-dd0031" alt="Angular 19">
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled">
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
   <img src="https://img.shields.io/badge/Architecture-DDD%20%2F%20Clean-blue" alt="Architecture DDD/Clean">
-  <img src="https://img.shields.io/badge/Kubernetes-HPA%20Enabled-326ce5" alt="Kubernetes HPA">
+  <img src="https://img.shields.io/badge/AWS-Serverless%20%26%20EKS-ff9900" alt="AWS EKS & Serverless">
   <img src="https://img.shields.io/badge/IaC-Terraform-7b42bc" alt="Terraform IaC">
+  <img src="https://img.shields.io/badge/Multi--Repo-Git%20Submodules-orange" alt="Multi-Repo Submodules">
 </p>
 
-Este repositório contém a solução do **AutoReparos**, um Sistema Integrado de Atendimento e Execução de Serviços projetado para modernizar as operações de oficinas mecânicas de médio porte.
+Este repositório é o **repositório pai e orquestrador (Umbrella)** do **AutoReparos**, uma plataforma corporativa integrada de atendimento, execução de serviços, controle de estoque e portal do cliente para oficinas automotivas.
 
-Este projeto foi desenvolvido como parte do **Tech Challenge (Fases 1 e 2)** da Pós-Graduação em **Software Architecture** pela **FIAP (SOAT)**.
-
----
-
-## Sumário
-
-- [AutoReparos - Sistema Integrado de Oficina Mecânica](#autoreparos---sistema-integrado-de-oficina-mecânica)
-  - [Sumário](#sumário)
-  - [Objetivos e Problema](#objetivos-e-problema)
-    - [O Problema (Fase 1)](#o-problema-fase-1)
-    - [A Evolução (Fase 2)](#a-evolução-fase-2)
-  - [Tecnologias Utilizadas e Banco de Dados](#tecnologias-utilizadas-e-banco-de-dados)
-    - [Justificativa da Escolha do Banco de Dados](#justificativa-da-escolha-do-banco-de-dados)
-  - [Desenho da Arquitetura](#desenho-da-arquitetura)
-    - [1. Componentes da Aplicação (Clean Architecture)](#1-componentes-da-aplicação-clean-architecture)
-    - [Detalhamento das Camadas (DDD / Clean Architecture)](#detalhamento-das-camadas-ddd--clean-architecture)
-    - [Arquitetura Frontend (`AutoReparos.Web`)](#arquitetura-frontend-autoreparosweb)
-    - [2. Infraestrutura Provisionada (AWS e Kubernetes)](#2-infraestrutura-provisionada-aws-e-kubernetes)
-    - [3. Fluxo de Deploy (Pipeline CI/CD)](#3-fluxo-de-deploy-pipeline-cicd)
-  - [Funcionalidades da Aplicação](#funcionalidades-da-aplicação)
-    - [Regras de Negócio Principais](#regras-de-negócio-principais)
-    - [Fluxo de Ordens de Serviço](#fluxo-de-ordens-de-serviço)
-    - [Gestão Administrativa](#gestão-administrativa)
-  - [Guia de Execução Local](#guia-de-execução-local)
-    - [Pré-requisitos](#pré-requisitos)
-    - [Configuração de Credenciais (.env e Secrets)](#configuração-de-credenciais-env-e-secrets)
-    - [Execução com Docker Compose](#execução-com-docker-compose)
-    - [Execução de Testes Automatizados](#execução-de-testes-automatizados)
-  - [Guia de Kubernetes (Deploy Local com Helm)](#guia-de-kubernetes-deploy-local-com-helm)
-  - [Guia de Infraestrutura como Código (Terraform na AWS)](#guia-de-infraestrutura-como-código-terraform-na-aws)
-  - [Pipeline de CI/CD (GitHub Actions)](#pipeline-de-cicd-github-actions)
-  - [Qualidade de Código (SonarQube) e Vulnerabilidades](#qualidade-de-código-sonarqube-e-vulnerabilidades)
-    - [Análise Estática de Qualidade](#análise-estática-de-qualidade)
-    - [Relatório de Análise de Vulnerabilidades](#relatório-de-análise-de-vulnerabilidades)
-  - [Entregáveis e Links Úteis](#entregáveis-e-links-úteis)
-  - [Integrantes do Grupo](#integrantes-do-grupo)
+O projeto foi concebido e evoluído ao longo das três fases do **Tech Challenge** da Pós-Graduação em **Software Architecture (SOAT - Turmas 13/15)** pela **FIAP**:
+- **Fase 1 (MVP & DDD):** Modelagem de Domínio Estratégico (DDD), Clean Architecture, API REST .NET 10, Entity Framework Core e persistência relacional.
+- **Fase 2 (Cloud & DevOps):** Escalabilidade elástica com Kubernetes (HPA), Helm Charts, esteira de CI/CD GitHub Actions, observabilidade distribuída com OpenTelemetry e provisionamento em nuvem AWS via Terraform.
+- **Fase 3 (Corporativa & Serverless):** Desacoplamento arquitetural em **4 Repositórios Git Independentes**, autenticação serverless de clientes via AWS Lambda (CPF + E-mail), banco de dados gerenciado (AWS RDS PostgreSQL), API Gateway de borda, dashboards de telemetria de negócio e portal Zero-Trust.
 
 ---
 
-## Objetivos e Problema
+## 📑 Sumário Completo
 
-### O Problema (Fase 1)
-
-Originalmente, a oficina mecânica realizava todo o controle de forma manual ou por planilhas rudimentares, resultando em:
-
-- Erros na priorização dos atendimentos.
-- Perda de histórico de veículos e clientes.
-- Ineficiência no fluxo de aprovação de orçamentos.
-- Falhas graves no controle de estoque de peças.
-
-### A Evolução (Fase 2)
-
-Após a implantação do MVP na Fase 1, o foco da Fase 2 passou a ser a **alta disponibilidade, resiliência, automação de infraestrutura e escalabilidade dinâmica**, preparando a aplicação para suportar picos de demanda através de práticas modernas de nuvem e DevOps.
+1. [Visão Geral e Jornada das Fases 1, 2 e 3](#1-visão-geral-e-jornada-das-fases-1-2-e-3)
+   - [Fase 1: O Desafio Operacional e a Solução DDD](#fase-1-o-desafio-operacional-e-a-solução-ddd)
+   - [Fase 2: Nuvem, DevOps, Escalabilidade e Observabilidade](#fase-2-nuvem-devops-escalabilidade-e-observabilidade)
+   - [Fase 3: Operação Corporativa, Serverless e Segregação Multi-Repo](#fase-3-operação-corporativa-serverless-e-segregação-multi-repo)
+2. [Arquitetura Multi-Repo e Submódulos Git](#2-arquitetura-multi-repo-e-submódulos-git)
+   - [Os 4 Repositórios Oficiais da Fase 3](#os-4-repositórios-oficiais-da-fase-3)
+   - [Organização dos Repositórios no Ecossistema](#organização-dos-repositórios-no-ecossistema)
+   - [Estratégia de Branches e Proteção](#estratégia-de-branches-e-proteção)
+3. [Desenho e Padrões da Arquitetura](#3-desenho-e-padrões-da-arquitetura)
+   - [Diagrama Geral de Componentes (Fase 3)](#diagrama-geral-de-componentes-fase-3)
+   - [Clean Architecture & DDD na Aplicação Principal](#clean-architecture--ddd-na-aplicação-principal)
+   - [Frontend Web Angular 19 (Signals & Standalone)](#frontend-web-angular-19-signals--standalone)
+   - [Arquitetura Serverless & Fluxo de Autenticação de Clientes](#arquitetura-serverless--fluxo-de-autenticação-de-clientes)
+   - [Diagrama de Sequência: Autenticação Serverless e Consulta de OS](#diagrama-de-sequência-autenticação-serverless-e-consulta-de-os)
+4. [Banco de Dados: Modelo Relacional e Justificativa](#4-banco-de-dados-modelo-relacional-e-justificativa)
+   - [Justificativa Formal do Banco de Dados (PostgreSQL 16)](#justificativa-formal-do-banco-de-dados-postgresql-16)
+   - [Diagrama Entidade-Relacionamento (ERD)](#diagrama-entidade-relacionamento-erd)
+   - [Evolução para Banco de Dados Gerenciado (AWS RDS)](#evolução-para-banco-de-dados-gerenciado-aws-rds)
+5. [Funcionalidades de Negócio e Ciclo de Vida da OS](#5-funcionalidades-de-negócio-e-ciclo-de-vida-da-os)
+   - [Fluxo de Estados da Ordem de Serviço](#fluxo-de-estados-da-ordem-de-serviço)
+   - [Fila Inteligente de Atendimento](#fila-inteligente-de-atendimento)
+   - [Controle de Estoque e Baixa Automática](#controle-de-estoque-e-baixa-automática)
+   - [Portal do Cliente com Proteção Zero-Trust](#portal-do-cliente-com-proteção-zero-trust)
+6. [Monitoramento, Observabilidade e Dashboards](#6-monitoramento-observabilidade-e-dashboards)
+   - [Stack de Telemetria (OpenTelemetry, Prometheus, Jaeger, Loki)](#stack-de-telemetria-opentelemetry-prometheus-jaeger-loki)
+   - [Métricas e Dashboards Obrigatórios da Fase 3](#métricas-e-dashboards-obrigatórios-da-fase-3)
+   - [Rastreamento Distribuído e Correlação de Logs](#rastreamento-distribuído-e-correlação-de-logs)
+7. [Guia de Execução Local](#7-guia-de-execução-local)
+   - [Pré-requisitos](#pré-requisitos)
+   - [Clonando o Projeto com Submódulos](#clonando-o-projeto-com-submódulos)
+   - [Configuração de Ambiente (.env)](#configuração-de-ambiente-env)
+   - [Executando via Docker Compose](#executando-via-docker-compose)
+   - [Executando os Testes Automatizados](#executando-os-testes-automatizados)
+8. [Pipelines de CI/CD e Qualidade de Código](#8-pipelines-de-cicd-e-qualidade-de-código)
+   - [Esteiras de Integração Contínua nos Repositórios](#esteiras-de-integração-contínua-nos-repositórios)
+   - [Análise Estática de Código (SonarQube) e Qualidade](#análise-estática-de-código-sonarqube-e-qualidade)
+9. [Documentação Técnica e Especificações da Fase 3](#9-documentação-técnica-e-especificações-da-fase-3)
+10. [Entregáveis Oficiais e Links](#10-entregáveis-oficiais-e-links)
+11. [Integrantes do Grupo](#11-integrantes-do-grupo)
 
 ---
 
-## Tecnologias Utilizadas e Banco de Dados
+## 1. Visão Geral e Jornada das Fases 1, 2 e 3
 
-- **Linguagem & Framework Backend:** C# (.NET 10) & ASP.NET Core (API REST / Minimal APIs)
-- **Frontend Web:** Angular 19 (Signals, Standalone Components) & Yarn
-- **Banco de Dados:** PostgreSQL 16 (Banco de dados relacional primário)
-- **ORM:** Entity Framework Core & Npgsql
-- **Segurança & Autenticação:** ASP.NET Core Identity & JWT (JSON Web Tokens)
-- **Documentação:** Swagger / OpenAPI
-- **Provedor de E-mail:** SendGrid API
+O projeto AutoReparos foi desenvolvido incrementalmente para solucionar os gargalos reais de gestão de oficinas mecânicas modernas:
 
-### Justificativa da Escolha do Banco de Dados
+### Fase 1: O Desafio Operacional e a Solução DDD
+- **Cenário Inicial:** A oficina operava com controle manual, planilhas dispersas, perda de histórico de clientes/veículos e falta de visibilidade no estoque de peças.
+- **Entregas da Fase 1:**
+  - Modelagem rica baseada em **Domain-Driven Design (DDD)** com entidades não anêmicas e invariantes de negócio protegidas.
+  - Value Objects imutáveis (`CPF`, `CNPJ`, `Placa Mercosul`, `Email`).
+  - **Clean Architecture** em 4 camadas (`Domain`, `Application`, `Infra`, `API`) com isolamento total da camada de domínio.
+  - API REST com ASP.NET Core (.NET 10), mapeamentos de persistência com Entity Framework Core e PostgreSQL 16.
+  - Ciclo de vida completo da Ordem de Serviço com envio de links seguros e efêmeros para aprovação de orçamentos por e-mail (SendGrid).
+  - Suíte de testes unitários com **xUnit**, **FluentAssertions** e **NSubstitute**.
 
-O **PostgreSQL** foi adotado por sua alta robustez e confiabilidade como banco relacional. Suas vantagens principais para o projeto são:
+### Fase 2: Nuvem, DevOps, Escalabilidade e Observabilidade
+- **Cenário de Evolução:** Com o aumento na base de clientes, tornou-se mandatória a operação em nuvem de alta disponibilidade, com capacidade de absorver picos de tráfego.
+- **Entregas da Fase 2:**
+  - **Kubernetes & Helm:** Manifestos Helm organizados com **Horizontal Pod Autoscaler (HPA)** baseado em CPU e Memória (80%), Probes de Liveness/Readiness e Ingress Nginx.
+  - **Infraestrutura como Código (Terraform):** Provisionamento de VPC na AWS com subnets públicas/privadas, NAT Gateways, cluster AWS EKS e repositórios AWS ECR com State remoto em AWS S3.
+  - **Pipeline de CI/CD (GitHub Actions):** Esteira automatizada contendo validação de concorrência, build, execução de testes unitários e de integração, `terraform apply`, build/push de contêineres e deploy no EKS via Helm.
+  - **Observabilidade Completa:** Instrumentação nativa de tracing distribuído e métricas com **OpenTelemetry (OTel Collector)**, exportação para Prometheus, visualização de traces no Jaeger e agregação de logs no Loki.
+  - **Frontend Moderno:** Aplicação web responsiva em **Angular 19** utilizando **Standalone Components** e **Signals**, com interceptors globais e design system acessível.
 
-1. **Consistência ACID:** Essencial para transações críticas de baixa de estoque e fechamento financeiro de orçamentos.
-2. **Integração de Ecossistema:** Excelente compatibilidade e performance com o Entity Framework Core via o driver Npgsql.
-3. **Escalabilidade & Flexibilidade:** Capacidade de persistir de forma consistente o histórico de ordens de serviço a longo prazo.
+### Fase 3: Operação Corporativa, Serverless e Segregação Multi-Repo
+- **Desafio Corporativo:** A expansão da oficina para múltiplas unidades exigiu elevar a arquitetura ao padrão corporativo:
+  - **Isolamento de Segurança para Clientes:** O cliente final não deve ter login de usuário interno nem poluir as tabelas de operadores (`AspNetUsers`).
+  - **Autenticação Serverless:** Criação de Function Serverless independente para autenticação via CPF e E-mail, gerando tokens JWT efêmeros.
+  - **Arquitetura Multi-Repo:** Divisão estrita da solução em **4 repositórios Git independentes**, cada um com sua esteira de CI/CD e governança de releases.
+  - **Banco de Dados Gerenciado (AWS RDS):** Segregação do banco de dados para instância PostgreSQL gerenciada na AWS.
+  - **Borda com API Gateway:** Roteamento de borda unificado conectando a Function Serverless e a aplicação em Kubernetes.
+  - **Dashboards de Negócio:** Monitoramento em tempo real do volume diário de OSs, tempo médio por status e detecção proativa de falhas em integrações externas.
 
 ---
 
-## Desenho da Arquitetura
+## 2. Arquitetura Multi-Repo e Submódulos Git
 
-### 1. Componentes da Aplicação (Clean Architecture)
+Para atender integralmente aos requisitos corporativos da Fase 3 sem perder a capacidade de orquestração local unificada, o AutoReparos adota a abordagem **Multi-Repo com Git Submodules**.
 
-A aplicação está dividida em camadas seguindo os princípios de **Clean Architecture** e **DDD**, garantindo isolamento da lógica de domínio e facilidade de testes.
+### Os 4 Repositórios Oficiais da Fase 3
 
-<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
+| # | Repositório | Responsabilidade | Tecnologias Principais |
+|---|---|---|---|
+| **1** | [**AutoReparos.AuthLambda**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda) | Function Serverless para autenticação de clientes externos via CPF + E-mail, emissão de JWT efêmero (1h) e validação matemática de CPF. | .NET 10, C#, AWS Lambda Core, Npgsql, JWT |
+| **2** | [**AutoReparos.Infra.Database**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database) | Provisionamento IaC dedicado do banco de dados relacional gerenciado (AWS RDS PostgreSQL 16), Subnet Groups, Security Groups e backup automatizado. | Terraform, AWS RDS PostgreSQL 16 |
+| **3** | [**AutoReparos.Infra.K8s**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s) | Provisionamento IaC do Cluster AWS EKS, Node Groups escaláveis, VPC e AWS API Gateway HTTP v2 integrado às rotas da aplicação e da Lambda. | Terraform, AWS EKS, AWS API Gateway v2 |
+| **4** | [**AutoReparos.App**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App) | Núcleo da aplicação corporativa: API REST (.NET 10 Minimal APIs), Domínio (DDD), Infraestrutura (EF Core), suíte de testes e Frontend Angular 19. | .NET 10, EF Core 10, Angular 19, Yarn, Docker |
+
+### Organização dos Repositórios no Ecossistema
+
+No repositório pai (`AutoReparos`), os projetos são orquestrados através de submódulos git configurados em [`.gitmodules`](./.gitmodules):
+
+```
+AutoReparos/                                         # Repositório Pai / Orquestrador
+├── .gitmodules                                      # Registro oficial dos submódulos
+├── docker-compose.yml                               # Orquestração local unificada
+├── AutoReparos.slnx                                 # Solution consolidada .NET 10
+├── docs/                                            # Documentação centralizada (ADRs, RFCs, Especificações)
+│   ├── specs/                                       # PDFs de requisitos oficiais
+│   └── architecture/                                # Decisões arquiteturais
+│
+└── submodules/
+    ├── AutoReparos.AuthLambda/                      # Submódulo 1: Function Serverless (Autônoma)
+    │   ├── src/AutoReparos.AuthLambda/
+    │   ├── tests/AutoReparos.AuthLambda.Tests/
+    │   ├── .github/workflows/ci.yml
+    │   └── README.md
+    │
+    ├── AutoReparos.App/                             # Submódulo 4: Aplicação Principal
+    │   ├── AutoReparos.API/                         # Endpoints REST & Controllers
+    │   ├── AutoReparos.Application/                 # Casos de Uso & DTOs
+    │   ├── AutoReparos.Domain/                      # Entidades DDD & Value Objects
+    │   ├── AutoReparos.Infra/                       # EF Core 10 & PostgreSQL
+    │   ├── AutoReparos.Web/                         # Frontend Angular 19 (Signals)
+    │   ├── AutoReparos.Domain.Tests/                # 113 testes unitários
+    │   ├── AutoReparos.Application.Tests/           # 123 testes unitários
+    │   ├── AutoReparos.IntegrationTests/            # 67 testes com Testcontainers
+    │   ├── AutoReparos.App.slnx                     # Solution autônoma
+    │   ├── .github/workflows/ci.yml                 # CI/CD (Testes + Docker)
+    │   └── README.md
+    │
+    ├── AutoReparos.Infra.Database/                  # Submódulo 2: Terraform AWS RDS
+    └── AutoReparos.Infra.K8s/                       # Submódulo 3: Terraform AWS EKS & API Gateway
+```
+
+### Estratégia de Branches e Proteção
+Em conformidade com a especificação da Fase 3:
+- A branch `main` de todos os repositórios possui **Branch Protection Rules** ativada (bloqueio de commits diretos).
+- Alterações são submetidas obrigatoriamente através de **Pull Requests**, exigindo aprovação de code review e sucesso nas esteiras de CI.
+- O usuário avaliador da banca (`soat-architecture`) está adicionado como colaborador em todos os repositórios.
+
+---
+
+## 3. Desenho e Padrões da Arquitetura
+
+### Diagrama Geral de Componentes (Fase 3)
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000',
-    'tertiaryColor': '#FDE7EE',
-    'tertiaryBorderColor': '#ED145B',
-    'edgeLabelBackground': '#000000'
-  }
-}}%%
 graph TB
-    subgraph System["AutoReparos System"]
-        direction LR
-        Web[AutoReparos.Web / Angular 19] -->|HTTP / REST API| API
-        
-        subgraph Backend["Backend Core Architecture"]
-            direction LR
-            API --> Application
-            Infra --> Application
-            Application --> Domain
-            
-            subgraph API[AutoReparos.API]
-                direction LR
-                Endpoints[Endpoints / Handlers]
-                DI[DependencyInjectionAPI.cs]
-            end
-            
-            subgraph Application[AutoReparos.Application]
-                direction LR
-                Services[Services - OrdemServicoService, NotificacaoService]
-                DTOs[DTOs - Requests & Responses]
-            end
-            
-            subgraph Infra[AutoReparos.Infra]
-                direction LR
-                Context[AppDbContext / EF Core]
-                Repos[Repositories - PostgreSQL]
-                Security[Identity / JWT / TokenServices]
-            end
-            
-            subgraph Domain[AutoReparos.Domain]
-                direction LR
-                Entities[Entities - OrdemServico, Cliente, Veiculo, Insumo, Servico]
-                ValueObjects[Value Objects - CPF, CNPJ, Placa, Email]
-                Enums[Enums - EStatusOrdemServico, EOrigemInsumo]
-            end
-        end
+    subgraph Clients["Camada de Clientes e Acesso"]
+        Browser["Portal Web do Cliente (Angular 19)"]
+        Operator["Estação de Trabalho do Operador (Angular 19)"]
     end
+
+    subgraph Edge["Borda de Nuvem (AWS API Gateway v2)"]
+        APIGW["AWS API Gateway HTTP API"]
+        RouteAuth["/auth/cliente (POST)"]
+        RouteCore["/api/* (Proxy Reverso)"]
+        APIGW --> RouteAuth
+        APIGW --> RouteCore
+    end
+
+    subgraph ServerlessModule["Repositório 1: AutoReparos.AuthLambda"]
+        Lambda["AWS Lambda Function (.NET 10)<br/>Autenticação por CPF + E-mail"]
+        RouteAuth -->|"Payload: CPF e E-mail"| Lambda
+    end
+
+    subgraph AppCluster["Repositório 4: AutoReparos.App (AWS EKS Cluster)"]
+        Ingress["Nginx Ingress Controller"]
+        RouteCore --> Ingress
+        
+        subgraph Pods["Deployments & Pods Escaláveis"]
+            APIService["AutoReparos.API (.NET 10)"]
+            HPA["Horizontal Pod Autoscaler (HPA)"]
+            HPA -.->|CPU/RAM > 80%| APIService
+        end
+        Ingress --> APIService
+    end
+
+    subgraph DatabaseModule["Repositório 2: AutoReparos.Infra.Database"]
+        RDS[("AWS RDS PostgreSQL 16<br/>Multi-AZ / Subnets Privadas")]
+        Lambda -->|Npgsql Direct Query| RDS
+        APIService -->|EF Core 10 / Npgsql| RDS
+    end
+
+    subgraph Observability["Observabilidade e Telemetria"]
+        OTel["OpenTelemetry Collector"]
+        APIService -->|OTLP Traces & Metrics| OTel
+        OTel --> Prom["Prometheus (Métricas)"]
+        OTel --> Jaeger["Jaeger (Traces)"]
+        OTel --> Loki["Grafana Loki (Logs Estruturados)"]
+        Grafana["Dashboards de Negócio (Grafana)"]
+        Grafana --> Prom
+        Grafana --> Loki
+    end
+
+    Browser -->|1. Solicita Token| APIGW
+    Browser -->|2. Requisições com JWT| APIGW
+    Operator -->|Login Operacional| APIGW
 ```
 
-</div>
+### Clean Architecture & DDD na Aplicação Principal
 
-### Detalhamento das Camadas (DDD / Clean Architecture)
+A aplicação principal (`AutoReparos.App`) implementa estritamente os preceitos de **Clean Architecture** e **DDD**, garantindo inversão de dependências e isolamento completo do domínio:
 
-- **AutoReparos.Domain:** Núcleo puro (sem dependências externas) contendo as entidades de domínio, objetos de valor (CPF, CNPJ, Placa), enums e os contratos (interfaces) de repositório.
+```
+AutoReparos.API (Controllers / Minimal APIs)
+       ↓
+AutoReparos.Application (Casos de Uso / DTOs / Validação)
+       ↓
+AutoReparos.Domain (Entidades Ricas / Value Objects / Interfaces)
+       ↑
+AutoReparos.Infra (EF Core / Repositórios PostgreSQL / Identity / SendGrid)
+```
 
-- **AutoReparos.Application:** Camada de lógica de aplicação, serviços de orquestração de negócios, DTOs e mapeamentos.
-- **AutoReparos.Infra:** Implementa a persistência no PostgreSQL (EF Core Context e Repositórios), configurações de segurança (Identity/JWT) e integrações de e-mail (SendGrid).
-- **AutoReparos.API:** Ponto de entrada da aplicação, contendo os controladores/endpoints (Minimal APIs), injeção de dependência e tratamento global de erros.
+- **`AutoReparos.Domain` (Zero Dependências Externas):**
+  - Entidades ricas com encapsulamento de invariantes (`OrdemServico`, `Cliente`, `Veiculo`, `Insumo`, `Servico`, `Usuario`).
+  - Value Objects imutáveis com validação embutida (`Documento` com validação de algoritmo Módulo 11 de CPF e CNPJ, `Placa` com suporte a padrão convencional e Mercosul, `Email`).
+  - Exceções ricas de domínio (`DomainException`, `BusinessRuleException`).
+- **`AutoReparos.Application`:**
+  - Padrão **Vertical Slice** organizado por Bounded Contexts.
+  - Orquestração de casos de uso com mapeamento estrito para DTOs de entrada e saída.
+- **`AutoReparos.Infra`:**
+  - Persistência via Entity Framework Core com mapeamentos Fluent API explícitos.
+  - Repositórios com transações ACID consistentes.
+- **`AutoReparos.API`:**
+  - Dupla camada de adaptadores: **Endpoints** (ASP.NET Minimal APIs) e **Controllers** (Clean Architecture Adapters) para total desacoplamento do framework.
+  - Middlewares globais de tratamento de exceções e mapeamento de Problem Details.
 
-### Arquitetura Frontend (`AutoReparos.Web`)
+### Frontend Web Angular 19 (Signals & Standalone)
 
-O frontend foi desenvolvido utilizando **Angular 19** e **Yarn**, estruturado em uma arquitetura moderna e modular por *Features*, com gerenciamento de estado reativo baseado em **Signals**:
+O frontend (`AutoReparos.Web`) é construído com os mais modernos padrões de arquitetura Angular:
+- **Standalone Components:** 100% livre de `NgModule`, proporcionando carregamento assíncrono e tree-shaking otimizado.
+- **Reatividade com Signals:** Uso de `signal()`, `computed()` e `effect()` para atualização granular e previsível da UI.
+- **Interceptors Funcionais:**
+  - `jwtInterceptor`: Injeção automática de Token Bearer nas requisições.
+  - `errorInterceptor`: Captura unificada de erros HTTP com notificações amigáveis ao usuário.
+- **Design System Acessível:** Estilização responsiva em tons escuros (Deep Charcoal & FIAP Rose) com conformidade WCAG AA.
 
-- **Arquitetura Feature-Driven:** Módulos isolados (`auth`, `clientes`, `veiculos`, `servicos`, `insumos`, `ordens-servico`, `dashboard`, `portal-publico`, `usuarios`).
-- **Componentes Standalone**
-- **Reatividade com Angular Signals:** Uso de `signal()`, `computed()` e `effect()` para atualização granular do DOM sem dependência da Zone.js tradicional.
-- **Interceptors HTTP Globais:**
-  - `jwtInterceptor`: Injeta o Token Bearer JWT nas requisições autenticadas.
-  - `errorInterceptor`: Captura exceções da API de forma centralizada e notifica o usuário.
-- **Design System & UI/UX:** Interface responsiva construída em Vanilla CSS moderno com paleta escura (Deep Charcoal & FIAP Rose), suporte a acessibilidade (WCAG AA), máscaras dinâmicas de input (`CPF/CNPJ`, `Placa Mercosul`, `Telefone`) e suporte ao Portal Público sem autenticação para aprovação de orçamentos por clientes.
+### Arquitetura Serverless & Fluxo de Autenticação de Clientes
 
-### 2. Infraestrutura Provisionada (AWS e Kubernetes)
+Em conformidade com a especificação da Fase 3 e as diretrizes do projeto:
+- O **cliente da oficina não possui conta nem senha no Identity (`AspNetUsers`)**.
+- Para consultar o andamento de seus serviços, o cliente acessa o **Portal do Cliente** e informa apenas seu **CPF** e **E-mail**.
+- A requisição é direcionada para a **AWS Lambda (`AutoReparos.AuthLambda`)**, que:
+  1. Valida matematicamente o CPF (algoritmo Módulo 11).
+  2. Consulta a base de dados PostgreSQL via query parametrizada direta, verificando a existência do cliente e seu status (`Ativo`).
+  3. Gera um token JWT efêmero (validade de 1 hora) assinado criptograficamente (HMAC-SHA256), contendo as claims mínimas necessárias: `sub`, `cpf`, `email`, `role: "Cliente"`.
+- O cliente utiliza esse JWT para consumir os endpoints protegidos:
+  - `GET /api/clientes/meus-veiculos`
+  - `GET /api/ordem-servico/minhas-os` (com filtro opcional por placa)
+- Caso o cliente tente acessar qualquer rota operacional interna da oficina (ex: `/api/clientes`, `/api/ordem-servico/kanban`), a API rejeita com **HTTP 403 Forbidden** via política `OperadorOficina`.
 
-O ambiente em nuvem provisiona uma infraestrutura elástica e resiliente na AWS, contendo os recursos orquestrados descritos abaixo:
+### Diagrama de Sequência: Autenticação Serverless e Consulta de OS
+ 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente as Cliente (Browser)
+    participant APIGW as AWS API Gateway
+    participant Lambda as AutoReparos.AuthLambda
+    participant RDS as PostgreSQL (RDS)
+    participant API as AutoReparos.API (EKS)
 
-<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
+    Note over Cliente,APIGW: 1. Autenticação Serverless (Sem Senha)
+    Cliente->>APIGW: POST /auth/cliente { cpf: "976.321.800-44", email: "leandro.silva@email.com" }
+    APIGW->>Lambda: Dispara Function Serverless
+    Lambda->>Lambda: Valida Módulo 11 do CPF
+    Lambda->>RDS: SELECT id, nome, status FROM "Clientes" WHERE "Documento" = @cpf AND "Email" = @email
+    RDS-->>Lambda: Retorna Registro do Cliente (Status = Ativo)
+    Lambda->>Lambda: Assina JWT Efêmero (Claims: id, cpf, email, role="Cliente", Exp: 1h)
+    Lambda-->>APIGW: 200 OK { token: "eyJhbGci...", expiresIn: 3600 }
+    APIGW-->>Cliente: 200 OK com Token de Acesso
+
+    Note over Cliente,API: 2. Consulta de Ordens de Serviço (Zero-Trust)
+    Cliente->>APIGW: GET /api/ordem-servico/minhas-os (Header: Bearer eyJhbGci...)
+    APIGW->>API: Proxy para AutoReparos.API
+    API->>API: Valida assinatura do JWT e checa Policy "ClientePolicy"
+    API->>API: Extrai ID do Cliente da claim 'sub' (Isolamento de Dados)
+    API->>RDS: Busca apenas OSs vinculadas ao ID do cliente autenticado
+    RDS-->>API: Lista de OSs do Cliente
+    API-->>Cliente: 200 OK [ { id: "...", status: "EmExecucao", placa: "ABC1D23", total: 450.00 } ]
+```
+
+---
+
+## 4. Banco de Dados: Modelo Relacional e Justificativa
+
+### Justificativa Formal do Banco de Dados (PostgreSQL 16)
+
+A adoção do **PostgreSQL 16** como banco relacional do AutoReparos baseia-se em critérios técnicos fundamentados:
+
+1. **Garantias ACID e Consistência Financeira:** Em uma oficina mecânica, operações de baixa de estoque e fechamento de ordens de serviço exigem transacionalidade atômica. A perda ou inconsistência no saldo de uma peça pode paralisar a linha de reparo.
+2. **Consultas Complexas e Índices Otimizados:** O ciclo de vida da OS demanda filtros dinâmicos de alta performance (busca de veículos por placa com índices parciais, histórico de revisões por cliente e agregação de tempo médio de atendimento).
+3. **Maturidade e Suporte a Nuvem (AWS RDS):** O PostgreSQL possui suporte nativo gerenciado na AWS com réplicas de leitura, backups automatizados em tempo point-in-time, criptografia KMS em repouso e alta disponibilidade Multi-AZ.
+4. **Driver de Alta Performance (.NET / Npgsql):** O ecossistema .NET possui no **Npgsql** um dos drivers mais maduros e performáticos do mercado, permitindo mapeamento avançado com Entity Framework Core 10 e conexão ultrarrápida na AWS Lambda.
+
+### Diagrama Entidade-Relacionamento (ERD)
 
 ```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000',
-    'tertiaryColor': '#FDE7EE',
-    'tertiaryBorderColor': '#ED145B',
-    'edgeLabelBackground': '#000000'
-  }
-}}%%
-graph TD
-  subgraph Infra["Nuvem & Infraestrutura AWS"]
-    direction LR
-    Client[Cliente / Navegador] --> Ingress[Nginx Ingress Controller]
-    Ingress --> APIService[API Service]
-    APIService --> APIPods[API Pods - Replicas]
-    APIPods --> PostgresService[Postgres Service]
-    PostgresService --> PostgresPod[Postgres StatefulSet Pod]
-    PostgresPod --> PVC[Persistent Volume Claim]
-    PVC --> PV[Persistent Volume - gp3 / hostPath]
+erDiagram
+    CLIENTES ||--o{ VEICULOS : "possui"
+    CLIENTES ||--o{ ORDENS_SERVICOS : "solicita"
+    VEICULOS ||--o{ ORDENS_SERVICOS : "pertence_a"
+    USUARIOS ||--o{ ORDENS_SERVICOS : "atribui_mecanico"
+    ORDENS_SERVICOS ||--o{ ORDEM_SERVICO_SERVICOS : "contem"
+    SERVICOS ||--o{ ORDEM_SERVICO_SERVICOS : "executa"
+    ORDENS_SERVICOS ||--o{ ORDEM_SERVICO_INSUMOS : "contem"
+    INSUMOS |o--o{ ORDEM_SERVICO_INSUMOS : "fornece"
+
+    CLIENTES {
+        uuid Id PK
+        string Nome
+        string Documento "CPF ou CNPJ (Indexed)"
+        string Email "Indexed"
+        string Telefone
+        string Status "Ativo / Inativo"
+        datetime CriadoEm
+        datetime InativoEm "Nullable"
+    }
+
+    VEICULOS {
+        uuid Id PK
+        uuid ClienteId FK
+        string Placa "Padrao ou Mercosul (Unique Index)"
+        string Marca
+        string Modelo
+        int Ano
+        int Quilometragem
+    }
+
+    SERVICOS {
+        uuid Id PK
+        string Nome
+        string Descricao
+        decimal ValorMaoDeObra
+        int TempoEstimadoMinutos
+    }
+
+    INSUMOS {
+        uuid Id PK
+        string Nome
+        string CodigoReferencia
+        int QuantidadeEstoque
+        int EstoqueMinimo
+        decimal ValorUnitario
+    }
+
+    ORDENS_SERVICOS {
+        uuid Id PK
+        uuid ClienteId FK
+        uuid VeiculoId FK
+        string ResponsavelId "Identity UserId FK (Nullable)"
+        string Status "Recebida, EmDiagnostico, AguardandoAprovacao, EmExecucao, Finalizada, Entregue, Cancelada"
+        decimal ValorTotal
+        datetime CriadoEm
+        datetime DiagnosticoIniciadoEm "Nullable"
+        datetime EnvioAprovacaoEm "Nullable"
+        datetime IniciadoEm "Nullable"
+        datetime FinalizadoEm "Nullable"
+        datetime EntregueEm "Nullable"
+        string Observacao "Nullable"
+    }
+
+    ORDEM_SERVICO_SERVICOS {
+        uuid Id PK
+        uuid OrdemServicoId FK
+        uuid ServicoId FK
+        decimal ValorCobrado
+        string Status "Pendente, EmExecucao, Concluido"
+        datetime IniciadoEm "Nullable"
+        datetime ConcluidoEm "Nullable"
+    }
+
+    ORDEM_SERVICO_INSUMOS {
+        uuid Id PK
+        uuid OrdemServicoId FK
+        uuid InsumoId FK "Nullable"
+        string Descricao
+        decimal ValorUnitario
+        int Quantidade
+        decimal ValorTotal
+        string Origem "Estoque, Avulso"
+    }
+
+    USUARIOS {
+        string Id PK "Identity UserId"
+        string Nome
+        string Email "Unique"
+        string TipoUsuario "Administrador, Atendente, Mecanico"
+        string PasswordHash
+    }
+```
+
+### Evolução para Banco de Dados Gerenciado (AWS RDS)
+Na Fase 2, o PostgreSQL era executado em um StatefulSet conteinerizado no cluster Kubernetes. Na Fase 3, através do repositório dedicado **`AutoReparos.Infra.Database`**, o banco de dados foi segregado para uma instância gerenciada **AWS RDS PostgreSQL 16**, garantindo escalabilidade vertical sem downtime, backup automatizado diário e isolamento de rede em subnets privadas da VPC.
+
+---
+
+## 5. Funcionalidades de Negócio e Ciclo de Vida da OS
+
+### Fluxo de Estados da Ordem de Serviço
+
+```mermaid
+stateDiagram-v2
+    [*] --> Recebida: Criação da OS
+    Recebida --> EmDiagnostico: Mecânico assume a triagem (grava DiagnosticoIniciadoEm)
+    EmDiagnostico --> AguardandoAprovacao: Orçamento montado (link efêmero enviado por e-mail)
     
-    subgraph AWS VPC / Kubernetes Cluster
-        APIPods
-        PostgresPod
-        HPA[Horizontal Pod Autoscaler - CPU/Memória @ 80%]
-        HPA -.-> APIPods
-    end
-  end
+    AguardandoAprovacao --> EmExecucao: Cliente aprova orçamento (Baixa no estoque)
+    AguardandoAprovacao --> Cancelada: Cliente recusa orçamento (Estorno de peças)
+    
+    EmExecucao --> Finalizada: Serviços e testes concluídos
+    Finalizada --> Entregue: Veículo retirado pelo cliente
+    Entregue --> [*]
+    Cancelada --> [*]
 ```
 
-</div>
+### Fila Inteligente de Atendimento
+O endpoint `/api/ordem-servico/fila` implementa uma ordenação dinâmica prioritária:
+1. **Prioridade de Status:** Ordens `Em Execução` têm precedência máxima, seguidas por `Aguardando Aprovação`, `Em Diagnóstico` e `Recebida`.
+2. **Antiguidade Transacional:** Dentro de um mesmo status, as ordens mais antigas são atendidas primeiro (FIFO justo).
+3. **Exclusão Lógica:** Ordens `Finalizadas`, `Entregues` ou `Canceladas` saem automaticamente da fila de trabalho da oficina.
 
-### 3. Fluxo de Deploy (Pipeline CI/CD)
+### Controle de Estoque e Baixa Automática
+- Na aprovação da Ordem de Serviço, a aplicação efetua a baixa imediata e atômica da quantidade de insumos alocados.
+- Caso o estoque atinja o patamar mínimo (`EstoqueMinimo`), alertas automáticos são disparados para a equipe de compras.
+- Em caso de cancelamento da OS, as peças reservadas têm o estoque recomposto automaticamente.
 
-O deploy é totalmente automatizado através do GitHub Actions a cada merge na branch `main`:
-
-<div style="background: white; padding: 20px; border-radius: 8px; margin: 15px 0;">
-
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeCSS': 'svg { background-color: #ffffff !important; } .subgraph rect { fill: #FDE7EE !important; }',
-  'themeVariables': {
-    'primaryColor': '#ED145B',
-    'primaryTextColor': '#ffffff',
-    'primaryBorderColor': '#000000',
-    'tertiaryColor': '#FDE7EE',
-    'tertiaryBorderColor': '#ED145B',
-    'edgeLabelBackground': '#000000'
-  }
-}}%%
-graph LR
-    subgraph Pipeline["Pipeline de CI/CD & Deploy Automatizado"]
-        direction LR
-
-        subgraph Source["Controle de Versão"]
-            Git[Repositório GitHub / branch main]
-        end
-        
-        subgraph CI["GitHub Actions Runner"]
-            direction TB
-            Build[1. Compilação .NET 10]
-            Test[2. Testes & Testcontainers]
-            Build --> Test
-        end
-        
-        subgraph InfraCode["Provisionamento AWS"]
-            direction TB
-            TF[3. Terraform Apply]
-            ECR[4. Build & Push Docker Image]
-            TF --> ECR
-        end
-        
-        subgraph Orchestration["Orquestração Kubernetes"]
-            EKS[5. Helm Deploy no Cluster EKS]
-        end
-
-        Git -->|Push / Merge| Build
-        Test -->|Sucesso| TF
-        ECR --> EKS
-    end
-```
-
-</div>
+### Portal do Cliente com Proteção Zero-Trust
+- O cliente possui acesso exclusivo às suas informações sem necessidade de senha prévia.
+- A consulta à API valida dinamicamente o ID do cliente emitido no JWT:
+  - `GET /api/clientes/meus-veiculos`: Lista apenas os carros registrados sob o CPF do requisitante.
+  - `GET /api/ordem-servico/minhas-os?placa=...`: Filtra apenas as ordens vinculadas ao cliente. Se o cliente tentar consultar a placa de outro proprietário, a API retorna uma lista vazia, impossibilitando vazamento de dados de terceiros.
 
 ---
 
-## Funcionalidades da Aplicação
+## 6. Monitoramento, Observabilidade e Dashboards
 
-### Regras de Negócio Principais
+### Stack de Telemetria (OpenTelemetry, Prometheus, Jaeger, Loki)
 
-- **Identificação Unificada:** Cadastro flexível de clientes por CPF (Pessoa Física) ou CNPJ (Pessoa Jurídica).
-- **Consistência de Estoque:** Validação automática e baixa de insumos/peças no estoque após a aprovação de uma Ordem de Serviço.
-- **Aprovação Sem Autenticação:** Links gerados com tokens temporários assinados e enviados por e-mail para aprovar ou recusar orçamentos sem exigir login do cliente final.
-- **Fila Dinâmica e Ordenada:** Priorização de Ordens de Serviço em andamento (`Em Execução` primeiro), seguidas pela antiguidade (mais antigas primeiro). Ordens finalizadas ou entregues são excluídas da visualização da fila.
+A arquitetura conta com instrumentação de observabilidade distribuída completa:
+- **OpenTelemetry SDK (.NET 10):** Rastreamento automático de chamadas HTTP, consultas de banco Npgsql/EF Core e métricas de aplicação.
+- **OTel Collector:** Agente central de coleta e roteamento de telemetria.
+- **Prometheus:** Coleta periódica de métricas de runtime (.NET Garbage Collection, Threads, HTTP Latency) e métricas customizadas de negócio.
+- **Jaeger:** Rastreamento distribuído ponto a ponto com visualização gráfica dos spans de cada requisição.
+- **Grafana Loki:** Ingestão de logs estruturados em formato JSON nativo contendo `TraceId` e `SpanId` correlacionados.
 
-### Fluxo de Ordens de Serviço
+### Métricas e Dashboards Obrigatórios da Fase 3
 
-1. **Criação da OS (`POST /api/ordem-servico`):** Vincula cliente (CPF/CNPJ), veículo, serviços e insumos na mesma operação transacional.
-2. **Acompanhamento de Status:**
-   - **Fluxo de Transições:** `Recebida` ➔ `Em Diagnóstico` ➔ `Aguardando Aprovação` ➔ `Em Execução` ➔ `Finalizada` ➔ `Entregue`.
-   - **Notificações:** O cliente recebe atualizações por e-mail a cada mudança de status.
-3. **Aprovação de Orçamento:** O cliente recebe a lista detalhada do orçamento por e-mail e aprova ou recusa através de links com tokens assinados temporários (sem precisar estar autenticado).
-4. **Fila de Trabalho (`GET /api/ordem-servico/fila`):**
-   - **Priorização:** Ordenado dinamicamente: `Em Execução` > `Aguardando Aprovação` > `Em Diagnóstico` > `Recebida`.
-   - **Antiguidade:** Exibe as ordens mais antigas primeiro dentro de cada prioridade.
-   - **Filtro Ativo:** Exclui logicamente ordens já `Finalizadas` ou `Entregues`.
+Em conformidade com os requisitos da Fase 3, o sistema expõe:
+1. **Volume Diário de Ordens de Serviço:** Gráfico de linha temporal detalhando a entrada de ordens criadas por dia.
+2. **Tempo Médio por Status (Lead Time):**
+   - Tempo médio na fase de **Diagnóstico** (`EnvioAprovacaoEm - DiagnosticoIniciadoEm`).
+   - Tempo médio na fase de **Execução** (`FinalizadoEm - IniciadoEm`).
+   - Tempo total até a **Entrega**.
+3. **Alertas e Monitoramento de Integrações:**
+   - Métrica de latência e contadores de erro para serviços externos (SendGrid API de e-mail e AWS Lambda).
+   - Alertas para falhas no processamento de transições de status da OS.
 
-### Gestão Administrativa
-
-- CRUD de Clientes, Veículos, Serviços e Insumos (Peças).
-
-- Controle de estoque mínimo e baixa automática de peças consumidas em OS.
-- Monitoramento do tempo médio de execução de cada tipo de serviço para fins analíticos.
+### Rastreamento Distribuído e Correlação de Logs
+Todo log gerado pela aplicação emite campos estruturados em JSON:
+```json
+{
+  "Timestamp": "2026-09-14T03:30:00.000Z",
+  "LogLevel": "Information",
+  "TraceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "SpanId": "00f067aa0ba902b7",
+  "Message": "Ordem de serviço OS-1048 aprovada com sucesso pelo cliente.",
+  "ClienteId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+```
 
 ---
 
-## Guia de Execução Local
+## 7. Guia de Execução Local
 
 ### Pré-requisitos
+- [Docker e Docker Compose](https://www.docker.com/) (versão 24+)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (opcional, para compilação fora de contêineres)
+- [Node.js 22 & Yarn](https://yarnpkg.com/) (opcional, para frontend fora do Docker)
+- [Git](https://git-scm.com/)
 
-- [Docker e Docker Compose](https://www.docker.com/) instalados.
+### Clonando o Projeto com Submódulos
+Como a solução é organizada em submódulos Git, utilize o comando `--recurse-submodules`:
 
-- .NET 10 SDK (apenas se quiser compilar fora do Docker).
+```bash
+# Clonar repositório pai e inicializar todos os submódulos automaticamente
+git clone --recurse-submodules https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.git
+cd AutoReparos
 
-### Configuração de Credenciais (.env e Secrets)
+# Caso já tenha clonado sem os submódulos:
+git submodule update --init --recursive
+```
 
-Crie um arquivo `.env` na raiz do diretório `./AutoReparos` com o seguinte modelo:
+### Configuração de Ambiente (.env)
+Crie o arquivo `.env` na raiz do repositório pai:
 
 ```env
-# Configurações do Banco de Dados
+# Banco de Dados PostgreSQL
 DB_PASSWORD=admin123
 
-# Configurações de Segurança
+# Segurança e JWT
 JWT_SECRET=FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9
 JWT_EXPIRY_HOURS=2
 SEED_USER_EMAIL=admin@autoreparos.com
 SEED_USER_PASSWORD=Admin@123
 APROVACAO_TOKEN_SECRET=another_super_secret_key_for_approval_tokens_with_enough_length
 
-# Provedor de Email (SendGrid)
+# Integração de E-mail (SendGrid)
 SENDGRID_API_KEY=SG.dummy_key
 SENDGRID_FROM_EMAIL=noreply@autoreparos.com
 SENDGRID_FROM_NAME=AutoReparos
 
-# Exposição Externa (ngrok/local)
-APP_BASE_URL=http://localhost:8080
-
-# Acesso ao pgAdmin
+# pgAdmin
 PGADMIN_EMAIL=admin@admin.com
 PGADMIN_PASSWORD=admin
 ASPNETCORE_ENVIRONMENT=Development
 ```
 
-> [!TIP]
-> Para testar os links de aprovação de orçamento por e-mail em ambiente de desenvolvimento local, você pode utilizar o **ngrok** para expor a porta local da API e preencher a URL gerada na variável `APP_BASE_URL`.
-
-### Execução com Docker Compose
-
-Para subir a API, o banco de dados PostgreSQL e o utilitário pgAdmin localmente, execute na pasta `./AutoReparos`:
+### Executando via Docker Compose
+Para subir todo o ecossistema localmente (API, Banco PostgreSQL, Frontend Angular, pgAdmin e stack de Observabilidade):
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
-A aplicação e seus serviços estarão disponíveis em:
+Endpoints disponíveis:
+- **Aplicação Web (Angular 19):** [http://localhost:4200](http://localhost:4200)
+- **API REST & Swagger:** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+- **pgAdmin (Gerenciador do PostgreSQL):** [http://localhost:5050](http://localhost:5050)
+- **Jaeger (Distributed Traces):** [http://localhost:16686](http://localhost:16686)
+- **Prometheus (Métricas):** [http://localhost:9090](http://localhost:9090)
 
-- **Aplicação Web (Frontend Angular):** [http://localhost:4200](http://localhost:4200)
-- **API REST & Documentação Interativa (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
-- **pgAdmin:** [http://localhost:5050](http://localhost:5050)
+### Executando os Testes Automatizados
 
-### Execução de Testes Automatizados
-
-Para rodar a suíte completa de testes locais, exporte as variáveis no terminal e execute:
+A solução conta com **354 testes automatizados** (100% passando):
+- **Domínio (`AutoReparos.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
+- **Aplicação (`AutoReparos.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
+- **Serverless (`AutoReparos.AuthLambda.Tests`):** 40 testes unitários (Módulo 11 CPF, geração de token).
+- **Integração (`AutoReparos.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
 
 ```bash
-# Exportando variáveis exigidas pelos testes locais (Linux/macOS)
-export ConnectionStrings__DbConnection="Host=localhost;Database=autoreparos_test;Username=admin;Password=admin123"
-export Jwt__Secret="FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
-export Jwt__ExpiryHours="2"
-export SeedUser__Email="admin@autoreparos.com"
-export SeedUser__Password="Admin@123"
-export AprovacaoToken__Secret="another_super_secret_key_for_approval_tokens_with_enough_length"
-export SendGrid__ApiKey="SG.dummy_key"
-export SendGrid__FromEmail="noreply@autoreparos.com"
-export SendGrid__FromName="AutoReparos"
-export App__BaseUrl="http://localhost:8080"
+# Executar todos os testes da solução unificada:
+dotnet test AutoReparos.slnx
 
-dotnet test
+# Executar testes da aplicação principal (submódulo):
+dotnet test submodules/AutoReparos.App/AutoReparos.App.slnx
+
+# Executar testes da Lambda Serverless (submódulo):
+dotnet test submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj
 ```
 
 ---
 
-## Guia de Kubernetes (Deploy Local com Helm)
+## 8. Pipelines de CI/CD e Qualidade de Código
 
-A pasta [/k8s](./k8s) contém o Helm Chart completo configurado para orquestração da aplicação.
+### Esteiras de Integração Contínua nos Repositórios
 
-1. **Habilitar Ingress Controller** (no Kind):
+Cada um dos 4 repositórios possui sua própria esteira automatizada no **GitHub Actions**:
+1. **`AutoReparos.AuthLambda`:** Restauração, compilação .NET 10, execução de 40 testes unitários com cobertura e empacotamento do arquivo zip serverless.
+2. **`AutoReparos.App`:** Validação paralela:
+   - Backend: Compilação .NET 10, testes unitários, testes de integração com Testcontainers PostgreSQL e build da imagem Docker.
+   - Frontend: Instalação via Yarn, build de produção Angular 19 e testes de componentes.
+3. **`AutoReparos.Infra.Database`:** `terraform fmt`, `terraform validate`, `tflint`, security scanning com tfsec/Checkov e `terraform plan`.
+4. **`AutoReparos.Infra.K8s`:** Validação de sintaxe Terraform e validação de templates de Helm Charts.
 
-   Aplique o manifesto oficial do Ingress Nginx para clusters Kind:
-
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-   ```
-
-2. **Configurar os Segredos Locais** criando o arquivo `k8s/values-secrets.yaml` (este arquivo está ignorado no Git por segurança):
-
-   ```yaml
-   postgres:
-     password: "admin123"
-   secrets:
-     jwtSecret: "FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9"
-     seedUserPassword: "Admin@123"
-     aprovacaoTokenSecret: "another_super_secret_key_for_approval_tokens_with_enough_length"
-     sendGridApiKey: "SG.dummy_key"
-   ```
-
-3. **Instalar o Helm Chart**:
-
-   ```bash
-   helm upgrade --install autoreparos ./k8s -f k8s/values.yaml -f k8s/values-secrets.yaml
-   ```
-
-4. **Mapeamento do DNS local (Ingress)**:
-   Como o Kind expõe o Ingress diretamente na porta 80 e 443 do host Docker, mapeie o IP `127.0.0.1` no seu arquivo `/etc/hosts` (ou `hosts` do Windows) apontando para o DNS local:
-
-   ```text
-   127.0.0.1 autoreparos.local
-   ```
-
-   A aplicação estará acessível em [http://autoreparos.local/swagger](http://autoreparos.local/swagger).
+### Análise Estática de Código (SonarQube) e Qualidade
+O projeto adota padrões rigorosos de qualidade verificados via SonarQube e GitHub Dependabot:
+- **Clean Architecture Gate:** Camada de domínio com 0 acoplamento a frameworks.
+- **Segurança de Dependências (SCA):** Verificação contínua de pacotes NuGet e Yarn contra o banco de advisories do GitHub.
+- Guia detalhado de execução local do Sonar em [SONAR_LOCAL.md](./SONAR_LOCAL.md).
 
 ---
 
-## Guia de Infraestrutura como Código (Terraform na AWS)
+## 9. Documentação Técnica e Especificações da Fase 3
 
-O diretório [/infra](./infra) contém o provisionamento completo de rede e cluster gerenciado utilizando Terraform:
+A documentação técnica da Fase 3 se divide entre os **documentos formais de arquitetura** em [`docs/architecture/`](./docs/architecture/) e as **especificações de execução**, organizadas por entrega em [`docs/specs/fase3/`](./docs/specs/fase3/).
 
-1. **Criar o bucket S3 prévio** na AWS para armazenar o estado:
+### Documentos Formais de Arquitetura (RFCs e ADRs)
 
-   ```bash
-   aws s3api create-bucket --bucket meu-bucket-state-autoreparos --region us-east-1
-   ```
+Todos os documentos foram formalizados e publicados em [`docs/architecture/`](./docs/architecture/):
 
-2. **Inicializar o Terraform** apontando para o bucket dinamicamente:
+- **[`RFC-001-cloud-architecture-and-repo-segregation.md`](./docs/architecture/RFC-001-cloud-architecture-and-repo-segregation.md):** Arquitetura Cloud AWS, abordagem híbrida orquestradora e segregação em 4 repositórios independentes.
+- **[`RFC-002-managed-database-strategy-rds.md`](./docs/architecture/RFC-002-managed-database-strategy-rds.md):** Estratégia de banco de dados gerenciado no AWS RDS PostgreSQL 16 vs StatefulSet in-cluster.
+- **[`RFC-003-serverless-client-authentication.md`](./docs/architecture/RFC-003-serverless-client-authentication.md):** Autenticação do cliente final via AWS Lambda com CPF + e-mail, sem contas no ASP.NET Core Identity.
+- **[`ADR-001-adoption-aws-api-gateway.md`](./docs/architecture/ADR-001-adoption-aws-api-gateway.md):** Comunicação unificada na borda com AWS API Gateway HTTP v2 e Private VPC Link.
+- **[`ADR-002-data-isolation-and-zero-trust-claims.md`](./docs/architecture/ADR-002-data-isolation-and-zero-trust-claims.md):** Isolamento de dados do portal do cliente a partir das claims do JWT, com Zero Data Leakage no filtro por placa (OWASP BOLA).
+- **[`ADR-003-end-to-end-observability-strategy.md`](./docs/architecture/ADR-003-end-to-end-observability-strategy.md):** Observabilidade ponta a ponta com OpenTelemetry e exportação vendor-agnostic via OTel Collector (New Relic / Datadog).
+- **[`database-selection-and-data-model.md`](./docs/architecture/database-selection-and-data-model.md):** Justificativa do PostgreSQL 16 (transações ACID e integridade referencial), modelo ER completo e dicionário de 8 tabelas.
+- **[`diagrams/sequence_portal_auth_and_query.md`](./docs/architecture/diagrams/sequence_portal_auth_and_query.md):** Diagramas de sequência end-to-end do portal do cliente.
 
-   ```bash
-   cd infra
-   terraform init -backend-config="bucket=meu-bucket-state-autoreparos"
-   ```
+### Pacote de Entrega Acadêmica
 
-3. **Validar e Aplicar**:
+- **[`docs/entrega/roteiro_video_demonstracao_15min.md`](./docs/entrega/roteiro_video_demonstracao_15min.md):** Roteiro cronometrado do vídeo demonstrativo (15 minutos), com checklist de preparação, script de tráfego contínuo e plano B por bloco.
+- **[`docs/entrega/template_entrega_portal_fiap.md`](./docs/entrega/template_entrega_portal_fiap.md):** Minuta do documento de submissão no Portal FIAP, pronta para compilação em PDF.
 
-   ```bash
-   terraform apply -auto-approve
-   ```
+### Especificações Técnicas e Planos de Execução
 
-*Recursos Criados:* VPC completa (Subnets públicas/privadas, IGW, NAT Gateways), AWS EKS (cluster com Node Groups de instâncias de Worker Nodes escaláveis), repositório privado AWS ECR para imagens Docker e OIDC Provider.
+- **Submódulos & Arquitetura Multi-Repo ([`docs/specs/fase3/submodulos-multirepo/`](./docs/specs/fase3/submodulos-multirepo/)):**
+  - [`plano_arquitetura_submodulos_git.md`](./docs/specs/fase3/submodulos-multirepo/plano_arquitetura_submodulos_git.md): Decisão e plano de segregação multi-repo com Git Submodules.
+  - [`plano_migracao_submodulo_app.md`](./docs/specs/fase3/submodulos-multirepo/plano_migracao_submodulo_app.md): Estruturação da aplicação principal e desacoplamento de testes.
 
----
+- **Autenticação Serverless & Portal do Cliente ([`docs/specs/fase3/auth-lambda-portal/`](./docs/specs/fase3/auth-lambda-portal/)):**
+  - [`plano_sprint2_auth_lambda_portal.md`](./docs/specs/fase3/auth-lambda-portal/plano_sprint2_auth_lambda_portal.md): Especificação da Lambda serverless e do portal do cliente.
+  - [`relatorio_revisao_critica_sprint2.md`](./docs/specs/fase3/auth-lambda-portal/relatorio_revisao_critica_sprint2.md): Relatório de revisão crítica das entregas do Sprint 2.
 
-## Pipeline de CI/CD (GitHub Actions)
+- **Cloud & Infraestrutura IaC — Track A ([`docs/specs/fase3/cloud-iac/`](./docs/specs/fase3/cloud-iac/)):**
+  - [`plano_execucao_track_a_cloud_iac.md`](./docs/specs/fase3/cloud-iac/plano_execucao_track_a_cloud_iac.md): Plano mestre de execução e governança da infraestrutura em nuvem.
+  - [`planos-detalhados/`](./docs/specs/fase3/cloud-iac/planos-detalhados/): Planos aprofundados das Subfases 1 (RDS), 2 (EKS/API Gateway), 3 (Governança Git) e 4 (Docs de Arquitetura).
 
-A pipeline é definida no arquivo [.github/workflows/deploy.yml](./.github/workflows/deploy.yml) e executa o seguinte fluxo seguro:
+- **Observabilidade & Software — Track B ([`docs/specs/fase3/observabilidade/`](./docs/specs/fase3/observabilidade/)):**
+  - [`plano_execucao_track_b_observabilidade.md`](./docs/specs/fase3/observabilidade/plano_execucao_track_b_observabilidade.md): Plano mestre de telemetria, observabilidade e pacote de entrega.
+  - [`planos-detalhados/`](./docs/specs/fase3/observabilidade/planos-detalhados/): Planos aprofundados das Subfases 1 (Métricas), 2 (APM Vendor), 3 (Dashboards), 4 (Arquitetura) e 5 (Pacote FIAP).
 
-1. **Controle de Concorrência:** Cancela execuções antigas na mesma branch para evitar corrupção de estado remoto do Terraform (State Lock).
-2. **Restore & Build** da aplicação em ambiente temporário (.NET 10).
-3. **Testes Unitários & Integração:** Roda todos os testes em containers efêmeros via Testcontainers.
-4. **Provisionamento IaC (Terraform):** Executa o plan e aplica infraestrutura da AWS S3/EKS automaticamente.
-5. **Build & Push Docker:** Gera a imagem otimizada e publica com tags exclusivas baseadas no SHA no AWS ECR.
-6. **Helm Deploy:** Realiza o upgrade dos manifestos do Kubernetes apontando a nova imagem para o cluster AWS EKS.
+- **Gap Analysis & Validação Consolidada ([`docs/specs/fase3/gap-analysis/`](./docs/specs/fase3/gap-analysis/)):**
+  - [`fase3_deep_gap_analysis.md`](./docs/specs/fase3/gap-analysis/fase3_deep_gap_analysis.md): Análise aprofundada de aderência aos requisitos da Fase 3 FIAP SOAT.
+  - [`fase3_validacao_consolidada_e_plano_execucao.md`](./docs/specs/fase3/gap-analysis/fase3_validacao_consolidada_e_plano_execucao.md): Plano consolidado de execução e validação da Fase 3.
+  - [`frontend_deep_gap_analysis.md`](./docs/specs/fase3/gap-analysis/frontend_deep_gap_analysis.md): Análise de gaps de frontend e integração.
 
----
-
-## Qualidade de Código (SonarQube) e Vulnerabilidades
-
-### Análise Estática de Qualidade
-
-Para rodar a análise estática e verificar o índice de segurança, bugs, code smells e cobertura de testes localmente com o SonarQube, consulte o guia passo a passo em [SONAR_LOCAL.md](./SONAR_LOCAL.md).
-
-### Relatório de Análise de Vulnerabilidades
-
-O scan de vulnerabilidades de segurança de dependências (SCA) e a análise estática de segurança do código (SAST) fazem parte dos relatórios de qualidade gerados pelo SonarQube e pelos alertas de segurança do GitHub (Dependabot), estando anexados e descritos de forma transparente no documento de entrega da Fase 2.
+- **Enunciados Oficiais da Pós-Graduação:**
+  - Arquivados em [`docs/tech-challenge/`](./docs/tech-challenge/) contendo os PDFs das Fases 1, 2 e 3.
 
 ---
 
-## Entregáveis e Links Úteis
+## 10. Entregáveis Oficiais e Links
 
-- **Desenho Estratégico (DDD) no Miro:** [Link para o Miro Board](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405) (Event Storming, Linguagem Ubíqua, Diagrama de Domínio).
-- **Collection do Postman:** Arquivo localizado na pasta [/Postman/AutoReparos.postman_collection.json](./Postman/AutoReparos.postman_collection.json).
-- **Link para o Vídeo Demonstrativo:** *[Adicione aqui o link do vídeo publicado no YouTube/Vimeo de até 15 minutos]*
+- **Repositórios Oficiais da Fase 3 no GitHub:**
+  - 🚀 **Repositório 1 (Serverless Lambda):** [AutoReparos.AuthLambda](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda)
+  - 🗄️ **Repositório 2 (Infra Banco RDS):** [AutoReparos.Infra.Database](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database)
+  - ☁️ **Repositório 3 (Infra EKS & API Gateway):** [AutoReparos.Infra.K8s](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s)
+  - 💻 **Repositório 4 (Aplicação Principal):** [AutoReparos.App](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App)
+  - 📦 **Repositório Pai / Orquestrador:** [AutoReparos](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos)
+- **Desenho Estratégico DDD no Miro:** [Miro Board Oficial](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405) (Event Storming, Bounded Contexts, Linguagem Ubíqua).
+- **Collection do Postman:** [AutoReparos.postman_collection.json](./Postman/AutoReparos.postman_collection.json).
+- **Vídeo Demonstrativo de até 15 Minutos:** *[Link da gravação demonstrando deploy CI/CD, login com CPF via Lambda, consultas protegidas, traces e dashboards]*
+- **Usuário Avaliador:** O usuário `soat-architecture` foi adicionado com permissão de colaborador em todos os 4 repositórios da Fase 3.
 
 ---
 
-## Integrantes do Grupo
+## 11. Integrantes do Grupo
 
-**Grupo 78 - PosTech - 15SOAT (FIAP)**
+**Grupo 78 - Pós-Graduação em Software Architecture (SOAT) - FIAP**
 
 - 👨‍💻 **Enrico Gollner** - rm370737
 - 👨‍💻 **José Dotta** - rm372959

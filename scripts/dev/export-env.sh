@@ -40,6 +40,5 @@ export AprovacaoToken__Secret="${APROVACAO_TOKEN_SECRET:-another_super_secret_ke
 export SendGrid__ApiKey="${SENDGRID_API_KEY:-SG.dummy_key}"
 export SendGrid__FromEmail="${SENDGRID_FROM_EMAIL:-noreply@autoreparos.com}"
 export SendGrid__FromName="${SENDGRID_FROM_NAME:-AutoReparos}"
-export App__BaseUrl="${APP_BASE_URL:-http://localhost:8080}"
 
 echo "✅ Variáveis da sessão exportadas com sucesso!"

@@ -113,12 +113,24 @@ AutoReparos/
 - `refactor/<target>` - Code refactoring (e.g., `refactor/cliente-value-objects`)
 - `chore/<task>` - CI/CD or tooling updates
 
-### Commit Messages (Conventional Commits)
-Format: `<type>(<scope>): <short description>`
-- `feat(ordemservico): add discount calculation to budget`
-- `fix(insumos): check stock availability before deducting`
-- `test(clientes): add unit tests for CPF validation`
-- `refactor(web): migrate cliente form component to signals`
+### Padrão de Mensagens de Commit (Gitmoji + Descrição em Português)
+Formato obrigatório: `<gitmoji> <Descrição da ação em Português>`
+Exemplo padrão: `📝 Adicionando especificação técnica`
+
+Exemplos de referência:
+- `✨ Adicionando cálculo de desconto no orçamento`
+- `🐛 Corrigindo verificação de estoque antes da dedução`
+- `🧪 Adicionando testes unitários para validação de CPF`
+- `♻️ Refatorando componente de formulário de clientes com signals`
+- `🔥 Removendo código duplicado e arquivos legados`
+- `👷 Ajustando pipeline de CI/CD para compilação e testes`
+- `🔒 Fixando credenciais e configurações de segurança`
+
+
+### Submodule Branching & Pull Request Standard
+- **Branch Dedicada nos Submódulos:** Sempre que qualquer submódulo necessitar de alterações, **NUNCA commite diretamente na branch `main`**. Crie uma nova branch com o **mesmo nome da branch do repositório pai ou nome da task** (ex: `feat/fase3-track-a-cloud-iac`).
+- **Padrão de Pull Requests:** Os submódulos seguem exatamente o mesmo padrão do repositório pai: `develop` cria PR para `main`, e as demais branches criam por default PR para `develop`.
+- **Padrão de Commits:** Rigorosamente idêntico ao repositório pai (`<gitmoji> <Descrição em Português>`).
 
 ### Pull Request & Review Standard
 Before marking a task complete or submitting a PR:
@@ -162,4 +174,10 @@ When executing tasks on this repository:
 1. **Inspect Before Mutating:** Read existing target files and tests to understand existing domain contracts before adding code.
 2. **Preserve DDD Boundaries:** Do not add infrastructure code (EF Core annotations, SQL queries) inside `AutoReparos.Domain`.
 3. **Verify Every Change:** Never declare success without executing `dotnet build` / `dotnet test` or `yarn build`.
-4. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
+4. **Submodules & CI/CD Integrity:** Always use `submodules: recursive` in GitHub Actions checkout, pin all action `uses:` to 40-char commit SHAs (SonarCloud rule), and use HTTPS URLs in `.gitmodules`.
+5. **No Code Duplication:** Completely remove legacy root folders and duplicated test suites when migrating to submodules.
+6. **Documentation Fidelity:** Ensure ERD diagrams match real EF Core mappings, test metrics sum up accurately, and all doc links reference existing paths.
+7. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
+8. **Strict Relative Paths Only (Proibição de Caminhos Absolutos):** NUNCA use caminhos absolutos (`/home/...`, `C:\...`, `/Users/...`, `file:///...`) em documentações (`docs/`), especificações técnicas, planos, diagramas ou arquivos de harness de IA (`.agents/`). TODOS os caminhos e links devem ser estritamente relativos (`./`, `../`, `docs/...`, `submodules/...`), garantindo portabilidade entre diferentes máquinas, desenvolvedores e ambientes de CI/CD.
+9. **Submodule Branching & PR Discipline:** Sempre crie branches nos submódulos com o mesmo nome da branch do repositório pai (ou nome da task) e use PRs para merge (`develop` -> `main`, demais branches -> `develop`). Nunca commite diretamente na `main` dos submódulos.
+

@@ -1,0 +1,261 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "Requisito 8 da Fase 3: detecção de falhas de integração e erros de servidor. Cobre o contador notificacoes.falhas (SendGrid), respostas 5xx da API e a latência das chamadas a banco e serviços externos.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Taxa de Falhas de Notificação",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(autoreparos_notificacoes_falhas_total[5m]))",
+          "legendFormat": "falhas/s",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "description": "rate(notificacoes.falhas[5m]); dispara o alerta CRITICAL quando > 0 por 3 minutos."
+    },
+    {
+      "id": 2,
+      "title": "Falhas por Canal e Motivo",
+      "type": "piechart",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (canal, tipo, motivo, status_code) (increase(autoreparos_notificacoes_falhas_total[24h]))",
+          "legendFormat": "{{canal}} / {{tipo}} / {{motivo}}{{status_code}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "description": "A tag motivo traz o tipo da exceção (ex.: HttpRequestException); status_code traz a resposta HTTP do SendGrid quando houve resposta."
+    },
+    {
+      "id": 3,
+      "title": "Respostas HTTP 5xx na API",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (http_route) (rate(autoreparos_http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m]))",
+          "legendFormat": "{{http_route}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "description": "Erros de servidor por rota."
+    },
+    {
+      "id": 4,
+      "title": "Taxa de Erro Geral da API (%)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "100 * (sum(rate(autoreparos_http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(autoreparos_http_server_request_duration_seconds_count[5m])), 0.001)",
+          "legendFormat": "taxa de erro",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "description": "O `or vector(0)` mantém a série em 0% quando não há nenhum 5xx, em vez de deixar o painel vazio. Base da política de alerta de taxa de erro."
+    },
+    {
+      "id": 5,
+      "title": "Latência p95 da API por Rota",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, http_route) (rate(autoreparos_http_server_request_duration_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "{{http_route}}",
+          "refId": "A",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "description": "Base da política de alerta de latência (limiar 2000 ms)."
+    },
+    {
+      "id": 6,
+      "title": "Latência de Comunicação com Banco e Serviços Externos",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(autoreparos_db_client_operation_duration_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "p95 banco (Npgsql)",
+          "refId": "A",
+          "range": true
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, server_address) (rate(autoreparos_http_client_request_duration_seconds_bucket[5m]))) * 1000",
+          "legendFormat": "p95 {{server_address}}",
+          "refId": "B",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "description": "HttpClient cobre SendGrid e demais integrações de saída; a série de banco depende do meter Npgsql registrado no MeterProvider."
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "autoreparos",
+    "fase3",
+    "confiabilidade"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "AutoReparos - Erros e Falhas nas Integrações",
+  "uid": "autoreparos-erros-integracoes",
+  "version": 1,
+  "weekStart": ""
+}

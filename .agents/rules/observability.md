@@ -6,21 +6,21 @@ This document defines mandatory guidelines and best practices for OpenTelemetry 
 
 ## 1. Relevant Architecture & Code References
 
-- **API OTel Registration**: [`AutoReparos.API/OpenTelemetryExtensions.cs`](file:///mnt/c/Code/AutoReparos/AutoReparos.API/OpenTelemetryExtensions.cs)
-- **API Entrypoint**: [`AutoReparos.API/Program.cs`](file:///mnt/c/Code/AutoReparos/AutoReparos.API/Program.cs)
-- **Container Infrastructure**: [`docker-compose.yml`](file:///mnt/c/Code/AutoReparos/docker-compose.yml)
-- **OTel Collector Configuration**: [`infra/otel/otel-collector-config.yaml`](file:///mnt/c/Code/AutoReparos/infra/otel/otel-collector-config.yaml)
-- **Prometheus Scraper Config**: [`infra/otel/prometheus.yml`](file:///mnt/c/Code/AutoReparos/infra/otel/prometheus.yml)
-- **Loki Log Config**: [`infra/otel/loki-config.yaml`](file:///mnt/c/Code/AutoReparos/infra/otel/loki-config.yaml)
-- **Grafana Datasources**: [`infra/grafana/provisioning/datasources/datasources.yaml`](file:///mnt/c/Code/AutoReparos/infra/grafana/provisioning/datasources/datasources.yaml)
-- **Grafana Provisioned Dashboards**: [`infra/grafana/provisioning/dashboards/dashboards.yaml`](file:///mnt/c/Code/AutoReparos/infra/grafana/provisioning/dashboards/dashboards.yaml)
+- **API OTel Registration**: [`AutoReparos.API/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.App/AutoReparos.API/OpenTelemetryExtensions.cs)
+- **API Entrypoint**: [`AutoReparos.API/Program.cs`](../../submodules/AutoReparos.App/AutoReparos.API/Program.cs)
+- **Container Infrastructure**: [`docker-compose.yml`](../../docker-compose.yml)
+- **OTel Collector Configuration**: [`docker/otel/otel-collector-config.yaml`](../../submodules/AutoReparos.App/docker/otel/otel-collector-config.yaml)
+- **Prometheus Scraper Config**: [`docker/otel/prometheus.yml`](../../submodules/AutoReparos.App/docker/otel/prometheus.yml)
+- **Loki Log Config**: [`docker/otel/loki-config.yaml`](../../submodules/AutoReparos.App/docker/otel/loki-config.yaml)
+- **Grafana Datasources**: [`docker/grafana/provisioning/datasources/datasources.yaml`](../../submodules/AutoReparos.App/docker/grafana/provisioning/datasources/datasources.yaml)
+- **Grafana Provisioned Dashboards**: [`docker/grafana/provisioning/dashboards/dashboards.yaml`](../../submodules/AutoReparos.App/docker/grafana/provisioning/dashboards/dashboards.yaml)
 
 ---
 
 ## 2. OpenTelemetry (OTel) Instrumentation in C# .NET 10
 
 ### 2.1 Core Registration & Configuration
-Instrumentation MUST be registered in [`AutoReparos.API/OpenTelemetryExtensions.cs`](file:///mnt/c/Code/AutoReparos/AutoReparos.API/OpenTelemetryExtensions.cs) using standard OpenTelemetry SDK extensions for .NET 10.
+Instrumentation MUST be registered in [`AutoReparos.API/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.App/AutoReparos.API/OpenTelemetryExtensions.cs) using standard OpenTelemetry SDK extensions for .NET 10.
 
 - **Resource Builder**: Always set `service.name`, `service.version`, and `deployment.environment`.
 - **Automatic Instrumentation**:
@@ -145,14 +145,14 @@ using (logger.BeginScope(new Dictionary<string, object> { ["ClienteId"] = client
 ### 3.1 Endpoint & Protocol Conventions
 - **gRPC Export (Port 4317)**: Default protocol for high-throughput service-to-collector communication within Docker container network (`http://otel-collector:4317`).
 - **HTTP Export (Port 4318)**: Alternative for edge services, browser clients, or firewalled infrastructure (`http://otel-collector:4318/v1/traces`).
-- Configuration variables in [`docker-compose.yml`](file:///mnt/c/Code/AutoReparos/docker-compose.yml):
+- Configuration variables in [`docker-compose.yml`](../../docker-compose.yml):
   ```yaml
   OpenTelemetry__Endpoint=http://otel-collector:4317
   OpenTelemetry__ServiceName=AutoReparos.API
   ```
 
 ### 3.2 OTel Collector Configuration Guidelines
-The OpenTelemetry Collector defined in [`infra/otel/otel-collector-config.yaml`](file:///mnt/c/Code/AutoReparos/infra/otel/otel-collector-config.yaml) MUST maintain standard pipelines for `traces`, `metrics`, and `logs`.
+The OpenTelemetry Collector defined in [`docker/otel/otel-collector-config.yaml`](../../submodules/AutoReparos.App/docker/otel/otel-collector-config.yaml) MUST maintain standard pipelines for `traces`, `metrics`, and `logs`.
 
 ```yaml
 # GOOD: OTel Collector pipeline configuration
@@ -222,7 +222,7 @@ Follow OpenTelemetry Semantic Conventions for attribute keys:
 | Domain Cliente ID | `autoreparos.cliente.id` | `e5f6g7h8-...` |
 
 ### 4.3 Jaeger UI Inspection
-- Access Jaeger UI at `http://localhost:16686` as configured in [`docker-compose.yml`](file:///mnt/c/Code/AutoReparos/docker-compose.yml).
+- Access Jaeger UI at `http://localhost:16686` as configured in [`docker-compose.yml`](../../docker-compose.yml).
 - Search traces by `service_name=AutoReparos.API` or operation name.
 
 ---
@@ -245,7 +245,7 @@ Follow OpenTelemetry Semantic Conventions for attribute keys:
 - Low-cardinality labels allowed: `status`, `tipo_servico`, `environment`.
 
 ### 5.3 Prometheus Scraper Configuration
-In [`infra/otel/prometheus.yml`](file:///mnt/c/Code/AutoReparos/infra/otel/prometheus.yml), scrape targets are pointed at the OTel Collector metrics exporter on port `8889`.
+In [`docker/otel/prometheus.yml`](../../submodules/AutoReparos.App/docker/otel/prometheus.yml), scrape targets are pointed at the OTel Collector metrics exporter on port `8889`.
 
 ```yaml
 global:
@@ -275,13 +275,13 @@ scrape_configs:
 ## 7. Grafana Dashboard Provisioning Guidelines
 
 ### 7.1 Datasource Setup
-Datasources are automatically provisioned in [`infra/grafana/provisioning/datasources/datasources.yaml`](file:///mnt/c/Code/AutoReparos/infra/grafana/provisioning/datasources/datasources.yaml) with explicit service URLs:
+Datasources are automatically provisioned in [`docker/grafana/provisioning/datasources/datasources.yaml`](../../submodules/AutoReparos.App/docker/grafana/provisioning/datasources/datasources.yaml) with explicit service URLs:
 - **Prometheus**: `http://prometheus:9090`
 - **Jaeger**: `http://jaeger:16686`
 - **Loki**: `http://loki:3100`
 
 ### 7.2 Dashboard Provisioning Path
-Dashboards MUST be registered via [`infra/grafana/provisioning/dashboards/dashboards.yaml`](file:///mnt/c/Code/AutoReparos/infra/grafana/provisioning/dashboards/dashboards.yaml) pointing to JSON definitions in [`infra/grafana/provisioning/dashboards/json/`](file:///mnt/c/Code/AutoReparos/infra/grafana/provisioning/dashboards/json/dotnet_api_overview.json).
+Dashboards MUST be registered via [`docker/grafana/provisioning/dashboards/dashboards.yaml`](../../submodules/AutoReparos.App/docker/grafana/provisioning/dashboards/dashboards.yaml) pointing to JSON definitions in [`docker/grafana/provisioning/dashboards/json/`](../../submodules/AutoReparos.App/docker/grafana/provisioning/dashboards/json/dotnet_api_overview.json).
 
 ### 7.3 Key Dashboard Metrics (Golden Signals)
 Every production dashboard must present:
@@ -295,7 +295,7 @@ Every production dashboard must present:
 ## 8. New Relic OTLP Export Integration Guidelines
 
 ### 8.1 Integration Architecture
-To export telemetry data to New Relic, configure an OTLP exporter in [`infra/otel/otel-collector-config.yaml`](file:///mnt/c/Code/AutoReparos/infra/otel/otel-collector-config.yaml) or directly in .NET API via `OtlpExporterOptions`.
+To export telemetry data to New Relic, configure an OTLP exporter in [`docker/otel/otel-collector-config.yaml`](../../submodules/AutoReparos.App/docker/otel/otel-collector-config.yaml) or directly in .NET API via `OtlpExporterOptions`.
 
 ### 8.2 Endpoint & Header Specification
 
@@ -305,7 +305,7 @@ To export telemetry data to New Relic, configure an OTLP exporter in [`infra/ote
 | **EU Data Center** | `otlp.eu01.nr-data.net:4317` | `https://otlp.eu01.nr-data.net/v1/traces` |
 
 ### 8.3 Collector Exporter Configuration for New Relic
-Add a dedicated exporter block in [`infra/otel/otel-collector-config.yaml`](file:///mnt/c/Code/AutoReparos/infra/otel/otel-collector-config.yaml):
+Add a dedicated exporter block in [`docker/otel/otel-collector-config.yaml`](../../submodules/AutoReparos.App/docker/otel/otel-collector-config.yaml):
 
 ```yaml
 exporters:

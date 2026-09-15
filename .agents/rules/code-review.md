@@ -77,3 +77,13 @@ When reviewing code or validating changes:
    - Are C# 12/13 primary constructors used consistently?
    - Is Angular control flow (`@if`, `@for`) used instead of `*ngIf`/`*ngFor`?
    - Are signals used for reactive state in Angular components?
+5. **Submodules & Multi-Repo Integrity**:
+   - Do all `.github/workflows/*.yml` use `submodules: recursive` on checkout?
+   - Are all actions pinned to full 40-character commit SHAs (SonarCloud security rule)?
+   - Are `.gitmodules` URLs strictly HTTPS?
+   - Was all duplicated code in the parent root eliminated upon submodule migration?
+6. **Documentation & Metrics Fidelity**:
+   - Does the ERD diagram match real EF Core entities and database columns?
+   - Do all test count sums add up correctly?
+   - Are all file links in documentation verified against existing directories?
+

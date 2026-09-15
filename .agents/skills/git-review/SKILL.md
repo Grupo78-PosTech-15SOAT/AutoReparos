@@ -101,13 +101,13 @@ Synthesize review findings into a clean Markdown review report using the followi
 
 ## 🚨 Critical Security & Breaking Findings
 <!-- Blockers that MUST be resolved before merging -->
-- [ ] **[SECURITY/BREAKING]** `file:///path/to/file.cs#L45`: Description of issue.
+- [ ] **[SECURITY/BREAKING]** `path/to/file.cs#L45`: Description of issue.
 
 ---
 
 ## 🏛️ Architecture & Code Improvements
 <!-- Recommendations and code quality suggestions -->
-- [ ] **[QUALITY]** `file:///path/to/file.cs#L120`: Suggestion for optimization or readability.
+- [ ] **[QUALITY]** `path/to/file.cs#L120`: Suggestion for optimization or readability.
 
 ---
 

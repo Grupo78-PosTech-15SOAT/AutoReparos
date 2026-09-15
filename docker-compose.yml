@@ -18,7 +18,7 @@ services:
   api:
     image: autoreparos-api
     build:
-      context: .
+      context: ./submodules/AutoReparos.App
       dockerfile: AutoReparos.API/Dockerfile
     container_name: autoreparos-api
     restart: always
@@ -33,7 +33,6 @@ services:
       - SendGrid__ApiKey=${SENDGRID_API_KEY}
       - SendGrid__FromEmail=${SENDGRID_FROM_EMAIL}
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
-      - App__BaseUrl=${APP_BASE_URL}
       - OpenTelemetry__Endpoint=http://otel-collector:4317
       - OpenTelemetry__ServiceName=autoreparos-api
     ports:
@@ -47,7 +46,7 @@ services:
   web:
     image: autoreparos-web
     build:
-      context: ./AutoReparos.Web
+      context: ./submodules/AutoReparos.App/AutoReparos.Web
       dockerfile: Dockerfile
     container_name: autoreparos-web
     restart: always
@@ -55,6 +54,7 @@ services:
       - "4200:8080"
     depends_on:
       - api
+      - otel-collector
     networks:
       - autoreparos-network
 
@@ -73,7 +73,7 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./servers.json:/pgadmin4/servers.json
+      - ./submodules/AutoReparos.App/docker/servers.json:/pgadmin4/servers.json
     networks:
       - autoreparos-network
 
@@ -82,9 +82,17 @@ services:
     image: otel/opentelemetry-collector-contrib:0.96.0
     container_name: autoreparos-otel-collector
     restart: always
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    # O segundo --config e um overlay opcional de exportacao para nuvem (New Relic/Datadog).
+    # Sem OTEL_VENDOR_CONFIG_ARG no .env, o config base e passado duas vezes (merge no-op)
+    # e o stack local (Jaeger/Loki/Prometheus) continua funcionando sem license key.
+    command:
+      - "--config=/etc/otel-collector-config.yaml"
+      - "${OTEL_VENDOR_CONFIG_ARG:---config=/etc/otel-collector-config.yaml}"
+    environment:
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY:-}
     volumes:
-      - ./infra/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/otel-collector-config.vendor.yaml:/etc/otel-collector-config.vendor.yaml
     ports:
       - "4317:4317" # OTLP gRPC
       - "4318:4318" # OTLP HTTP
@@ -101,7 +109,7 @@ services:
     container_name: autoreparos-prometheus
     restart: always
     volumes:
-      - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./submodules/AutoReparos.App/docker/observability/otel/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     networks:
@@ -122,7 +130,7 @@ services:
     restart: always
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./infra/otel/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./submodules/AutoReparos.App/docker/observability/otel/loki-config.yaml:/etc/loki/local-config.yaml
     ports:
       - "3100:3100"
     networks:
@@ -137,8 +145,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - ./infra/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./infra/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./submodules/AutoReparos.App/docker/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Os 3 dashboards mandatórios da Fase 3 são servidos direto de docs/observability,
+      # a mesma fonte usada pelo ConfigMap do Helm — evita cópias divergentes.
+      - ./docs/observability/dashboards:/etc/grafana/provisioning/dashboards/json/mandatorios:ro
     ports:
       - "3000:3000"
     depends_on:

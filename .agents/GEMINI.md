@@ -78,6 +78,11 @@ yarn test --watch=false
 - Always run `dotnet build AutoReparos.slnx` and `dotnet test AutoReparos.slnx` after backend changes.
 - Always run `yarn build` inside `AutoReparos.Web` after frontend changes.
 
+### Rule 5: Strict Relative Paths Only (Proibição de Caminhos Absolutos)
+- **NUNCA USE CAMINHOS ABSOLUTOS** para arquivos como documentações (`docs/`), especificações, planos ou arquivos do harness de IA em `.agents/`.
+- Todos os links e referências a caminhos de arquivos devem ser estritamente relativos (`./`, `../`, `docs/...`, `submodules/...`).
+- Proibido utilizar caminhos absolutos do sistema de arquivos (`/home/...`, `C:\...`, `/Users/...`) ou schemas como `file:///...`.
+
 ---
 
 ## 4. Problem Diagnosis & Log Inspection Strategy
