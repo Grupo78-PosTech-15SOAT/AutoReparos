@@ -127,6 +127,11 @@ Exemplos de referência:
 - `🔒 Fixando credenciais e configurações de segurança`
 
 
+### Submodule Branching & Pull Request Standard
+- **Branch Dedicada nos Submódulos:** Sempre que qualquer submódulo necessitar de alterações, **NUNCA commite diretamente na branch `main`**. Crie uma nova branch com o **mesmo nome da branch do repositório pai ou nome da task** (ex: `feat/fase3-track-a-cloud-iac`).
+- **Padrão de Pull Requests:** Os submódulos seguem exatamente o mesmo padrão do repositório pai: `develop` cria PR para `main`, e as demais branches criam por default PR para `develop`.
+- **Padrão de Commits:** Rigorosamente idêntico ao repositório pai (`<gitmoji> <Descrição em Português>`).
+
 ### Pull Request & Review Standard
 Before marking a task complete or submitting a PR:
 1. Ensure solution builds without errors: `dotnet build AutoReparos.slnx`
@@ -174,4 +179,5 @@ When executing tasks on this repository:
 6. **Documentation Fidelity:** Ensure ERD diagrams match real EF Core mappings, test metrics sum up accurately, and all doc links reference existing paths.
 7. **Report Findings:** Clearly report implemented changes, test results, and any residual risks.
 8. **Strict Relative Paths Only (Proibição de Caminhos Absolutos):** NUNCA use caminhos absolutos (`/home/...`, `C:\...`, `/Users/...`, `file:///...`) em documentações (`docs/`), especificações técnicas, planos, diagramas ou arquivos de harness de IA (`.agents/`). TODOS os caminhos e links devem ser estritamente relativos (`./`, `../`, `docs/...`, `submodules/...`), garantindo portabilidade entre diferentes máquinas, desenvolvedores e ambientes de CI/CD.
+9. **Submodule Branching & PR Discipline:** Sempre crie branches nos submódulos com o mesmo nome da branch do repositório pai (ou nome da task) e use PRs para merge (`develop` -> `main`, demais branches -> `develop`). Nunca commite diretamente na `main` dos submódulos.
 

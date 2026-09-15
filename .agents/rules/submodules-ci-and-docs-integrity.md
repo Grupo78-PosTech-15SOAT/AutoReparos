@@ -81,6 +81,16 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
    | `azure/setup-helm` | `1a275c3b69536ee54be43f2070a358922e12c8d4` | `# v4.3.1` |
    | `aws-actions/amazon-ecr-login` | `062340a7de7a9da2b919efc70d2a5638c4be725c` | `# v2.0.1` |
 
+### 1.7 Estratégia de Branching, Pull Requests e Versionamento em Submódulos
+- **Branch Dedicada Obrigatória:** Sempre que qualquer submódulo necessitar de modificações (seja código de aplicação, lambdas, banco RDS ou k8s/IaC), **NUNCA commite diretamente na branch `main`**.
+- **Alinhamento de Nomenclatura:** Crie obrigatoriamente uma nova branch no submódulo com o **mesmo nome da branch do repositório pai** ou nome da task em execução (ex: `feat/fase3-track-a-cloud-iac`).
+- **Fluxo e Padrão de Pull Requests:**
+  - Os submódulos devem seguir rigorosamente os mesmos padrões de PR do repositório pai.
+  - `develop` cria PR para `main`.
+  - Demais branches (`feat/*`, `fix/*`, `refactor/*`) criam por default PR direcionado para `develop`.
+- **Padrão de Mensagens de Commit:** Segue rigorosamente o padrão Gitmoji + Descrição em Português (`<gitmoji> <Descrição em Português>`).
+- **Objetivo Arquitetural:** Garantir versionamento contínuo, code review formal e validação de esteiras via PR em todos os 4 repositórios, eliminando pushes diretos em branches protegidas.
+
 ---
 
 ## 2. Regras de Limpeza e Migração Multi-Repo
