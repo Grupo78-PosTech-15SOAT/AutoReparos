@@ -102,3 +102,16 @@ When a milestone is reached:
    - Builds Docker container (`autoreparos-api:${GITHUB_SHA}`).
    - Pushes image to Amazon ECR.
    - Deploys to EKS via Helm (`helm upgrade --install autoreparos ./k8s`).
+
+---
+
+## 5. Submodule Branching, Pull Requests & Versioning Strategy
+
+When making changes to any git submodule (`submodules/*`):
+1. **Never commit directly to `main`** in submodules.
+2. **Dedicated Branching:** Create a feature branch inside the submodule matching the parent repository branch or current task name (e.g., `git checkout -b feat/fase3-track-a-cloud-iac`).
+3. **Pull Request Workflow:**
+   - Submodules follow the exact same PR policies as the parent repository:
+   - `develop` ➔ `main` for release promotion.
+   - All feature/fix/refactor branches ➔ `develop` by default (or `main` in repositories with direct main protection flow).
+4. **Commit Conventions:** Follow the same mandatory Gitmoji + Portuguese description standard (`<gitmoji> <Descrição em Português>`).
