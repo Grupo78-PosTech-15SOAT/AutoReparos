@@ -85,14 +85,14 @@ Todos os documentos estão em [`docs/architecture/`](../architecture/) no reposi
 
 | Documento | Conteúdo |
 |---|---|
+| [RFC-001](../architecture/RFC-001-cloud-architecture-and-repo-segregation.md) | Arquitetura Cloud AWS e segregação em 4 repositórios autônomos. Topologia detalhada de VPC, subnets privadas, diagramas de tráfego e matriz RACI |
+| [RFC-002](../architecture/RFC-002-managed-database-strategy-rds.md) | Estratégia de banco de dados gerenciado: transição de StatefulSet in-cluster para AWS RDS PostgreSQL 16, SLA 99.95%, PITR, KMS e Free Tier |
 | [RFC-003](../architecture/RFC-003-serverless-client-authentication.md) | Autenticação serverless por CPF e e-mail, sem contas no Identity. Alternativas avaliadas (Cognito, magic link, autorizador nativo) e riscos aceitos |
-| [ADR-002](../architecture/ADR-002-data-isolation-and-zero-trust-claims.md) | Isolamento de dados do portal a partir das claims do JWT, com Zero Data Leakage no filtro por placa |
+| [ADR-001](../architecture/ADR-001-adoption-aws-api-gateway.md) | Adoção do AWS API Gateway HTTP API v2 com VPC Link: comparativo com REST API v1, ALB e Ingress NGINX, latência, custos e Zero-Trust |
+| [ADR-002](../architecture/ADR-002-data-isolation-and-zero-trust-claims.md) | Isolamento de dados do portal a partir das claims do JWT, com Zero Data Leakage no filtro por placa e proteção BOLA |
 | [ADR-003](../architecture/ADR-003-end-to-end-observability-strategy.md) | Observabilidade ponta a ponta com OpenTelemetry vendor-agnostic, com as validações executadas |
 | [Modelo de dados](../architecture/database-selection-and-data-model.md) | Justificativa do PostgreSQL 16, comparativo com MongoDB e MySQL, modelo ER e dicionário de dados |
 | [Diagramas de sequência](../architecture/diagrams/sequence_portal_auth_and_query.md) | Fluxo end-to-end do portal: caminho feliz, filtro por placa e caminhos de erro |
-
-🔲 *Track A: acrescentar `RFC-001` (nuvem AWS), `RFC-002` (RDS) e `ADR-001` (API Gateway)
-quando publicados.*
 
 ---
 
@@ -100,10 +100,10 @@ quando publicados.*
 
 | Requisito | Atendimento | Evidência |
 |---|---|---|
-| Segregação em repositórios independentes | 4 repositórios + orquestrador por submódulos | Seção 2 |
+| Segregação em repositórios independentes | 4 repositórios + orquestrador por submódulos | Seção 2 e RFC-001 |
 | Função serverless de autenticação | `AutoReparos.AuthLambda` com validação de CPF por módulo 11 e JWT de 1 hora | RFC-003 |
-| Banco de dados gerenciado | AWS RDS PostgreSQL 16 via Terraform | `AutoReparos.Infra.Database` |
-| API Gateway na borda | API Gateway v2: `POST /auth/cliente` → Lambda, `ANY /api/{proxy+}` → EKS | ADR-001 (Track A) |
+| Banco de dados gerenciado | AWS RDS PostgreSQL 16 via Terraform | `AutoReparos.Infra.Database` e RFC-002 |
+| API Gateway na borda | API Gateway v2: `POST /auth/cliente` → Lambda, `ANY /api/{proxy+}` → EKS, `GET /health` | ADR-001 |
 | Isolamento de dados do cliente | `ClienteId` extraído da claim; resposta vazia indistinguível no filtro por placa | ADR-002 |
 | CI/CD automatizado | Esteira própria por repositório no GitHub Actions | Seção 6 |
 | Dashboards de monitoramento | 3 dashboards mandatórios provisionados automaticamente | Seção 7 |
