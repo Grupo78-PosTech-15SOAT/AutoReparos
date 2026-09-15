@@ -1,0 +1,335 @@
+\documentclass[9pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage[margin=1.1cm]{geometry}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+\usepackage{hyperref}
+\usepackage{fontawesome5}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc}
+
+% --- PALETA DE CORES CORPORATIVA ---
+\definecolor{primary}{HTML}{0F172A}       % Azul Marinho Profundo
+\definecolor{accentblue}{HTML}{1D4ED8}     % Azul Royal
+\definecolor{secondary}{HTML}{0D9488}      % Verde Petróleo / Teal
+\definecolor{alertred}{HTML}{DC2626}       % Vermelho Alerta
+\definecolor{purplelambda}{HTML}{7C3AED}   % Roxo Serverless / Lambda
+\definecolor{awsamber}{HTML}{D97706}       % Laranja / Âmbar AWS
+\definecolor{k8sblue}{HTML}{2563EB}        % Azul Kubernetes
+\definecolor{rdsblue}{HTML}{0284C7}        % Azul RDS
+\definecolor{bglight}{HTML}{F8FAFC}        % Cinza Claro Fundo
+\definecolor{borderlight}{HTML}{CBD5E1}    % Borda Suave
+\definecolor{panelbg}{HTML}{F1F5F9}        % Painel Suave
+\definecolor{taggreen}{HTML}{16A34A}       % Verde Sucesso
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentblue,
+    filecolor=accentblue,
+    urlcolor=accentblue,
+    citecolor=accentblue
+}
+
+\tcbset{
+    cardbox/.style={
+        colback=bglight,
+        colframe=accentblue,
+        boxrule=0.8pt,
+        arc=4pt,
+        left=7pt,
+        right=7pt,
+        top=6pt,
+        bottom=6pt
+    },
+    subtlebox/.style={
+        colback=panelbg,
+        colframe=borderlight,
+        boxrule=0.5pt,
+        arc=3pt,
+        left=6pt,
+        right=6pt,
+        top=5pt,
+        bottom=5pt
+    }
+}
+
+\tikzset{
+    box/.style={draw, rectangle, rounded corners=3pt, minimum width=2.1cm, minimum height=0.9cm, align=center, font=\sffamily\tiny, line width=0.8pt},
+    client/.style={box, draw=accentblue!80!black, fill=accentblue!10},
+    apigw/.style={box, draw=awsamber!90!black, fill=awsamber!12, font=\sffamily\tiny\bfseries},
+    lambda/.style={box, draw=purplelambda!90!black, fill=purplelambda!12, font=\sffamily\tiny\bfseries},
+    k8ssvc/.style={box, draw=secondary!90!black, fill=secondary!12},
+    k8spod/.style={box, draw=k8sblue!90!black, fill=k8sblue!10},
+    hpa/.style={box, draw=alertred!90!black, fill=alertred!10},
+    rdsdb/.style={draw=rdsblue!90!black, cylinder, shape border rotate=90, fill=rdsblue!12, minimum width=1.6cm, minimum height=1.1cm, align=center, font=\sffamily\tiny\bfseries, line width=0.8pt},
+    otel/.style={box, draw=teal!90!black, fill=teal!12, font=\sffamily\tiny\bfseries},
+    extapm/.style={box, draw=green!70!black, fill=green!10, font=\sffamily\tiny\bfseries},
+    arrow/.style={->, >=stealth, thick, draw=black!75},
+    dasharrow/.style={->, >=stealth, semithick, dashed, draw=accentblue!90!black},
+    alertarrow/.style={->, >=stealth, semithick, dashed, draw=alertred!90!black}
+}
+
+\begin{document}
+\pagestyle{empty}
+
+% =========================================================================
+% PÁGINA 1: IDENTIFICAÇÃO, REPOSITÓRIOS, VÍDEO E DIAGRAMA DE ARQUITETURA
+% =========================================================================
+
+% --- CABEÇALHO ---
+\begin{center}
+    {\Large \textbf{\color{primary} AUTO REPAROS -- SISTEMA INTEGRADO DE OFICINA MECÂNICA}} \\
+    \vspace{0.08cm}
+    {\small \textbf{\color{accentblue}Fase 3: Operação Corporativa, Serverless, Banco Gerenciado e Segregação Multi-Repo}} \\
+    \vspace{0.04cm}
+    {\footnotesize \textbf{FIAP -- Pós-Tech Software Architecture (Grupo 78 -- Turma 15SOAT)}}
+\end{center}
+
+\vspace{0.1cm}
+
+% --- PAINEL DE METADADOS: REPOSITÓRIOS, VÍDEO E INTEGRANTES ---
+\begin{tcolorbox}[cardbox]
+    \begin{minipage}[t]{0.54\textwidth}
+        \textbf{\color{accentblue}\faIcon{folder-open} Repositórios Oficiais \& Governança Git}\par\vspace{0.12cm}
+        \begin{itemize}\setlength{\itemsep}{2.5pt}\setlength{\parskip}{0pt}\footnotesize
+            \item \textbf{1. AutoReparos.App} [\href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App}{GitHub}] \\
+            \textit{Aplicação Principal: API .NET 10, Domínio DDD, Angular 19.}
+            \item \textbf{2. AutoReparos.AuthLambda} [\href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda}{GitHub}] \\
+            \textit{Função Serverless: Validação CPF Módulo 11, consulta DB e JWT efêmero.}
+            \item \textbf{3. AutoReparos.Infra.Database} [\href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database}{GitHub}] \\
+            \textit{Terraform IaC: AWS RDS PostgreSQL 16 Multi-AZ, PITR e KMS.}
+            \item \textbf{4. AutoReparos.Infra.K8s} [\href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s}{GitHub}] \\
+            \textit{Terraform IaC: Cluster EKS, API Gateway v2, VPC Link e Helm Charts.}
+            \item \textbf{Hub / Orquestrador:} \href{https://github.com/Grupo78-PosTech-15SOAT/AutoReparos}{\texttt{AutoReparos}} (Submódulos Git e Compose).
+        \end{itemize}
+        \vspace{0.08cm}
+        \textbf{\color{taggreen}\faIcon{check-circle} Confirmação Avaliador:} Usuário \texttt{soat-architecture} adicionado com permissão em todos os 5 repositórios.
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.43\textwidth}
+        \textbf{\color{accentblue}\faIcon{users} Integrantes do Grupo 78}\par\vspace{0.12cm}
+        \begin{itemize}\setlength{\itemsep}{2pt}\setlength{\parskip}{0pt}\footnotesize
+            \item Enrico Gollner (RM 370737)
+            \item José Dotta (RM 372959)
+            \item Júlia Santos (RM 370364)
+            \item Lucas Bastos (RM 370749)
+            \item Mateus Lecchi (RM 371085)
+        \end{itemize}
+        \vspace{0.15cm}
+        \textbf{\color{accentblue}\faIcon{video} Vídeo Demonstrativo (Até 15 Minutos)}\par\vspace{0.05cm}
+        \footnotesize \textbf{Link:} \href{https://drive.google.com/file/d/1wpeMYPY7q6-YYxHCgSaO52PLPLOrK1k3/view?usp=sharing}{\texttt{Vídeo de Apresentação no Google Drive}} \\
+        \textit{\scriptsize Demonstração: 4 repositórios, CI/CD, Auth Lambda CPF, APIs protegidas Zero-Trust, 3 dashboards ao vivo no Grafana, Traces e APM New Relic.}
+    \end{minipage}
+\end{tcolorbox}
+
+\vspace{0.1cm}
+
+% --- DIAGRAMA DE ARQUITETURA CLOUD (TIKZ VETORIAL) ---
+\begin{center}
+    \textbf{\footnotesize \color{primary}\faIcon{cloud} Arquitetura Corporativa em Nuvem (AWS API Gateway, Lambda, EKS, RDS e Observabilidade)}
+\end{center}
+\vspace{-0.1cm}
+
+\begin{center}
+    \begin{tikzpicture}[node distance=1.1cm and 0.8cm, scale=0.88, every node/.style={transform shape}]
+        
+        % Cliente e Entrada
+        \node[client] (client) {\faIcon{user} Cliente / Portal\\Angular 19};
+        \node[apigw, right=1.0cm of client] (apigw) {\faIcon{network-wired} AWS API Gateway\\HTTP API v2};
+        
+        % Serverless e Roteamento
+        \node[lambda, above right=0.35cm and 1.2cm of apigw] (lambda) {\faIcon{bolt} AWS Lambda\\AutoReparos.AuthLambda\\(Auth CPF / JWT)};
+        \node[k8ssvc, below right=0.45cm and 1.2cm of apigw] (vpclink) {\faIcon{shield-alt} VPC Link /\\Ingress Controller};
+        
+        % Cluster EKS
+        \node[k8spod, right=1.1cm of vpclink, yshift=0.55cm] (pod1) {\faIcon{server} API Pod 1\\AutoReparos.API};
+        \node[k8spod, right=1.1cm of vpclink, yshift=-0.55cm] (pod2) {\faIcon{server} API Pod 2\\AutoReparos.API};
+        \node[hpa, above=0.35cm of pod1] (hpa) {\faIcon{chart-line} HPA (CPU/Mem > 80\%)};
+        
+        % Banco RDS
+        \node[rdsdb, right=1.4cm of pod1, yshift=-0.55cm] (rds) {\faIcon{database}\\AWS RDS\\PostgreSQL 16\\(Multi-AZ)};
+        
+        % Observabilidade
+        \node[otel, below=1.05cm of vpclink, xshift=1.2cm] (otel) {\faIcon{satellite-dish} OpenTelemetry Collector (OTel DaemonSet/Sidecar)};
+        \node[extapm, below left=0.6cm and 0.2cm of otel] (jaeger) {\faIcon{project-diagram} Jaeger (Traces)};
+        \node[extapm, below=0.6cm of otel] (grafana) {\faIcon{tachometer-alt} Grafana / Prom (3 Dashboards)};
+        \node[extapm, below right=0.6cm and 0.2cm of otel] (newrelic) {\faIcon{cloud-upload-alt} New Relic APM (OTLP)};
+
+        % Conexões
+        \draw[arrow] (client) -- node[above, font=\sffamily\tiny] {HTTPS} (apigw);
+        \draw[arrow] (apigw) |- node[above, font=\sffamily\tiny, pos=0.7] {POST /auth/cliente} (lambda.west);
+        \draw[arrow] (apigw) |- node[below, font=\sffamily\tiny, pos=0.7] {ANY /api/\{proxy+\}} (vpclink.west);
+        
+        \draw[arrow] (vpclink.east) -- +(0.3,0) |- (pod1.west);
+        \draw[arrow] (vpclink.east) -- +(0.3,0) |- (pod2.west);
+        
+        \draw[alertarrow] (hpa.south) -- (pod1.north);
+        \draw[alertarrow] (hpa.west) -| node[left, font=\sffamily\tiny\color{alertred}, pos=0.2] {Escala 2..10} (vpclink.north);
+        
+        \draw[arrow] (pod1.east) -- +(0.3,0) |- (rds.west);
+        \draw[arrow] (pod2.east) -- +(0.3,0) |- (rds.west);
+        \draw[dasharrow] (lambda.east) -| node[right, font=\sffamily\tiny, pos=0.25] {Consulta Cliente} (rds.north);
+        
+        % Telemetria
+        \draw[dasharrow] (pod1.south) |- (otel.east);
+        \draw[dasharrow] (pod2.south) |- (otel.east);
+        \draw[arrow] (otel.south) -- (grafana.north);
+        \draw[arrow] (otel.south) -- (jaeger.north);
+        \draw[arrow] (otel.south) -- (newrelic.north);
+
+        % Background Boxes
+        \begin{pgfonlayer}{background}
+            \node[draw=k8sblue!70, dashed, fill=k8sblue!3, fill opacity=0.04, line width=0.8pt, rounded corners=4pt,
+                  fit=(vpclink) (pod1) (pod2) (hpa),
+                  label={[anchor=south, yshift=0.05cm, font=\sffamily\tiny\bfseries\color{k8sblue}]below:AWS EKS Cluster (Private Subnets)}] (eks) {};
+            
+            \node[draw=awsamber!70, dashed, fill=awsamber!3, fill opacity=0.04, line width=0.8pt, rounded corners=4pt,
+                  fit=(rds),
+                  label={[anchor=south, yshift=0.05cm, font=\sffamily\tiny\bfseries\color{awsamber}]below:AWS RDS Subnet Group}] (rdsvpc) {};
+                  
+            \node[draw=teal!70, dashed, fill=teal!3, fill opacity=0.04, line width=0.8pt, rounded corners=4pt,
+                  fit=(otel) (jaeger) (grafana) (newrelic),
+                  label={[anchor=north, yshift=-0.05cm, font=\sffamily\tiny\bfseries\color{teal}]above:Plataforma Unificada de Observabilidade}] (obsgroup) {};
+                  
+            \node[draw=gray!50, line width=1.0pt, rounded corners=6pt, inner sep=8pt,
+                  fit=(apigw) (lambda) (eks) (rdsvpc) (obsgroup),
+                  label={[anchor=north, yshift=-0.05cm, font=\sffamily\tiny\bfseries\color{gray}]above:AWS Cloud Infrastructure (VPC Segregada \& Serviços Gerenciados)}] (cloudvpc) {};
+        \end{pgfonlayer}
+
+    \end{tikzpicture}
+\end{center}
+
+\vspace{-0.1cm}
+
+% --- ROTEIRO DO VÍDEO DEMONSTRATIVO ---
+\begin{tcolorbox}[subtlebox]
+    \footnotesize
+    \textbf{\color{primary}\faIcon{stopwatch} Estrutura Cronometrada do Vídeo Demonstrativo (15 Minutos):}\par\vspace{0.08cm}
+    \begin{tabularx}{\textwidth}{c|c|X}
+        \textbf{Bloco} & \textbf{Janela} & \textbf{Objetivo e Conteúdo Apresentado} \\
+        \hline
+        \textbf{1} & \texttt{00:00 - 02:00} & Apresentação da equipe Grupo 78 (15SOAT), desafio da oficina e topologia de 4 repositórios Git independentes. \\
+        \textbf{2} & \texttt{02:00 - 05:00} & Pipelines de CI/CD automatizadas no GitHub Actions, suíte de testes unitários/integração e governança de PR. \\
+        \textbf{3} & \texttt{05:00 - 07:30} & Autenticação Serverless via CPF no API Gateway (\texttt{POST /auth/cliente}), validação Módulo 11 e emissão JWT efêmero. \\
+        \textbf{4} & \texttt{07:30 - 10:00} & Consumo de rotas protegidas com JWT e demonstração prática do isolamento Zero-Trust (filtro de placa sem vazamento de dados). \\
+        \textbf{5} & \texttt{10:00 - 13:00} & Análise em tempo real dos 3 dashboards mandatórios no Grafana (Volume de OS, Tempo Médio por Status e Erros/Latência). \\
+        \textbf{6} & \texttt{13:00 - 15:00} & Rastreamento distribuído de requisições no Jaeger, logs estruturados em JSON e exportação de telemetria ao New Relic APM. \\
+    \end{tabularx}
+\end{tcolorbox}
+
+\newpage
+
+% =========================================================================
+% PÁGINA 2: RFCs/ADRs, REQUISITOS ATENDIDOS, QUALIDADE E OBSERVABILIDADE
+% =========================================================================
+
+\begin{center}
+    {\Large \textbf{\color{primary} AUTO REPAROS -- DEFESA ARQUITETURAL E EVIDÊNCIAS}} \\
+    \vspace{0.08cm}
+    {\small \textbf{\color{accentblue}Documentação Técnica, Requisitos do Edital, Observabilidade e Qualidade}}
+\end{center}
+
+\vspace{0.1cm}
+
+% --- CONFORMIDADE COM O EDITAL DA FASE 3 ---
+\begin{tcolorbox}[cardbox]
+    \textbf{\color{accentblue}\faIcon{tasks} Mapeamento de Conformidade com o Edital (Tech Challenge Fase 3)}\par\vspace{0.1cm}
+    \begin{tabularx}{\textwidth}{l|c|X}
+        \textbf{Requisito FIAP} & \textbf{Status} & \textbf{Implementação \& Evidência Técnica} \\
+        \hline
+        \textbf{1. 4 Repositórios Git} & \textbf{\color{taggreen}Atendido} & Repositórios autônomos para App, AuthLambda, Infra.Database e Infra.K8s com CI/CD autônomo. \\
+        \textbf{2. Auth Serverless (CPF)} & \textbf{\color{taggreen}Atendido} & AWS Lambda validando CPF (Módulo 11), checando banco RDS e emitindo JWT de 1h sem sujar Identity. \\
+        \textbf{3. Banco Gerenciado (RDS)} & \textbf{\color{taggreen}Atendido} & Migração de StatefulSet local para AWS RDS PostgreSQL 16 provisionado 100\% via Terraform IaC. \\
+        \textbf{4. API Gateway na Borda} & \textbf{\color{taggreen}Atendido} & AWS API Gateway v2 com VPC Link: roteia \texttt{/auth/cliente} para Lambda e \texttt{/api/*} para EKS. \\
+        \textbf{5. Isolamento Zero-Trust} & \textbf{\color{taggreen}Atendido} & Dados do portal filtrados estritamente pela claim \texttt{ClienteId}; busca de placa alheia retorna vazio HTTP 200. \\
+        \textbf{6. CI/CD \& Proteção Main} & \textbf{\color{taggreen}Atendido} & Branch \texttt{main} com proteção obrigatória de PR e execução de esteiras automáticas de compilação e testes. \\
+        \textbf{7. 3 Dashboards de Negócio} & \textbf{\color{taggreen}Atendido} & Dashboards Grafana: (1) Volume Diário de OS; (2) Tempo Médio por Status; (3) Falhas em Integrações/DB. \\
+        \textbf{8. APM de Mercado} & \textbf{\color{taggreen}Atendido} & Integração validada com New Relic via OpenTelemetry OTLP (0 falhas em logs, métricas e spans). \\
+    \end{tabularx}
+\end{tcolorbox}
+
+\vspace{0.15cm}
+
+% --- PAINEL DIVIDIDO: DECISÕES ARQUITETURAIS (RFCS/ADRS) & OBSERVABILIDADE ---
+\noindent
+\begin{minipage}[t]{0.49\textwidth}
+    \begin{tcolorbox}[subtlebox]
+        \textbf{\color{accentblue}\faIcon{book} Decisões Arquiteturais (RFCs \& ADRs)}\par\vspace{0.08cm}
+        \begin{itemize}\setlength{\itemsep}{1.5pt}\setlength{\parskip}{0pt}\scriptsize
+            \item \textbf{RFC-001 (Multi-Repo \& Cloud):} Topologia de VPC AWS, subnets privadas e segregação em 4 repositórios com matriz RACI.
+            \item \textbf{RFC-002 (RDS PostgreSQL 16):} Decisão de migração de StatefulSet para banco gerenciado RDS com SLA 99.95\%, PITR e KMS.
+            \item \textbf{RFC-003 (Auth Serverless):} Arquitetura de autenticação de clientes por CPF/e-mail em Lambda sem contas no Identity.
+            \item \textbf{ADR-001 (AWS API Gateway v2):} Escolha de HTTP API v2 com VPC Link para menor latência e custo reduzido vs ALB/Traefik.
+            \item \textbf{ADR-002 (Zero-Trust \& BOLA):} Mitigação de vulnerabilidades BOLA no portal com validação contextual de claims JWT.
+            \item \textbf{ADR-003 (Observabilidade OTel):} Estratégia de telemetria neutra vendor-agnostic exportando para Jaeger e New Relic.
+            \item \textbf{Modelo de Dados \& ERD:} Justificativa formal do PostgreSQL 16 vs NoSQL/MySQL com dicionário relacional completo.
+        \end{itemize}
+    \end{tcolorbox}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.49\textwidth}
+    \begin{tcolorbox}[subtlebox]
+        \textbf{\color{accentblue}\faIcon{tachometer-alt} Observabilidade \& Dashboards Mandatórios}\par\vspace{0.08cm}
+        \begin{itemize}\setlength{\itemsep}{1.5pt}\setlength{\parskip}{0pt}\scriptsize
+            \item \textbf{Dashboard 1 -- Volume Diário de OS:} Monitora total de OS criadas em 30 dias, fluxo diário e evolução de status (Kanban).
+            \item \textbf{Dashboard 2 -- Tempo Médio por Status:} Acompanha permanência das ordens nas fases de Diagnóstico, Execução e Finalização.
+            \item \textbf{Dashboard 3 -- Falhas e Integrações:} Mede taxa de erros HTTP 5xx, falhas de notificação e latência de queries no banco RDS.
+            \item \textbf{Logs Estruturados em JSON:} Logs contêm atributos correlacionados \texttt{TraceId} e \texttt{SpanId} para rastreabilidade de ponta a ponta.
+            \item \textbf{Métricas de Negócio Nativas:} Interceptor de persistência no EF Core garante emissão de métricas em qualquer mutação de status.
+            \item \textbf{Validação Real no New Relic:} Carga com zero falhas na autotelemetria do Collector (logs, spans e metric points entregues).
+        \end{itemize}
+    \end{tcolorbox}
+\end{minipage}
+
+\vspace{0.15cm}
+
+% --- QUALIDADE, SUÍTE DE TESTES E EXECUÇÃO ---
+\begin{tcolorbox}[cardbox]
+    \begin{minipage}[t]{0.54\textwidth}
+        \textbf{\color{accentblue}\faIcon{vial} Suíte de Testes Automatizados (354 Testes -- 100\% Verde)}\par\vspace{0.08cm}
+        \begin{tabularx}{\textwidth}{X|c|c}
+            \textbf{Projeto de Testes} & \textbf{Qtd} & \textbf{Resultado} \\
+            \hline
+            \texttt{Domain.Tests} & 113 & \textbf{\color{taggreen}113 Passaram} (0 Falhas) \\
+            \texttt{AuthLambda.Tests} & 40 & \textbf{\color{taggreen}40 Passaram} (0 Falhas) \\
+            \texttt{Application.Tests} & 134 & \textbf{\color{taggreen}134 Passaram} (0 Falhas) \\
+            \texttt{IntegrationTests} (DB Real) & 67 & \textbf{\color{taggreen}67 Passaram} (0 Falhas) \\
+            \hline
+            \textbf{Total Consolidado} & \textbf{354} & \textbf{\color{taggreen}354 Testes Aprovados} \\
+        \end{tabularx}
+        \vspace{0.05cm}
+        \textit{\scriptsize Testes de integração utilizam contêineres reais via Testcontainers, validando concorrência e banco sem mocks.}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.43\textwidth}
+        \textbf{\color{accentblue}\faIcon{terminal} Como Executar Localmente}\par\vspace{0.08cm}
+        \begin{tcolorbox}[colback=white, colframe=borderlight, boxrule=0.4pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt]
+            \ttfamily\tiny
+            git clone --recurse-submodules \textbackslash\\
+            \phantom{xx}https://github.com/Grupo78-PosTech-15SOAT/\textbackslash\\
+            \phantom{xx}AutoReparos.git\\
+            cd AutoReparos \&\& cp .env.example .env\\
+            docker compose up -d --build
+        \end{tcolorbox}
+        \vspace{0.04cm}
+        \textbf{\scriptsize Serviços disponíveis após o boot:}
+        \begin{itemize}\setlength{\itemsep}{0.5pt}\setlength{\parskip}{0pt}\tiny
+            \item \textbf{Swagger API:} \texttt{http://localhost:8080/swagger}
+            \item \textbf{Grafana:} \texttt{http://localhost:3000} (admin / admin)
+            \item \textbf{Jaeger UI:} \texttt{http://localhost:16686}
+            \item \textbf{Prometheus:} \texttt{http://localhost:9090}
+        \end{itemize}
+    \end{minipage}
+\end{tcolorbox}
+
+\vspace{0.1cm}
+\begin{center}
+    \scriptsize \color{gray} AutoReparos -- FIAP Pós-Tech Software Architecture (15SOAT / Grupo 78) -- Documento Oficial de Submissão da Fase 3
+\end{center}
+
+\end{document}
