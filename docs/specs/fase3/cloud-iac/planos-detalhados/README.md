@@ -47,7 +47,7 @@ flowchart TD
 | **Subfase 1** | [`plano_subfase1_database_rds.md`](./plano_subfase1_database_rds.md) | `AutoReparos.Infra.Database` | AWS RDS PostgreSQL 16 (`db.t4g.micro`), AWS SSM Parameter Store, Subnet Groups privados, Secrets Manager e GitHub Actions CI/CD. | **Concluído** (`1dede09`) |
 | **Subfase 2** | [`plano_subfase2_k8s_api_gateway.md`](./plano_subfase2_k8s_api_gateway.md) | `AutoReparos.Infra.K8s` | AWS API Gateway HTTP v2 com VPC Link Privado, rotas `/auth/cliente`, `/api/*`, `/health`, EKS v1.30, Ingress NGINX e Helm Charts. | **Concluído** (`8fc46e9`) |
 | **Subfase 3** | [`plano_subfase3_governanca_git.md`](./plano_subfase3_governanca_git.md) | Repositório Pai (`scripts/infra/`) | Automação de Branch Protection Rules na `main` dos 4 repositórios via GitHub CLI (`gh api`), auditoria e bloqueio de push direto. | **Concluído** (`980065c`) |
-| **Subfase 4** | [`plano_subfase4_documentacao_arquitetura.md`](./plano_subfase4_documentacao_arquitetura.md) | `docs/architecture/` | Redação de RFC-001 (Multi-Repo & Cloud), RFC-002 (RDS vs StatefulSet), ADR-001 (API Gateway HTTP v2) e Diagrama Geral de Componentes Cloud. | A Iniciar |
+| **Subfase 4** | [`plano_subfase4_documentacao_arquitetura.md`](./plano_subfase4_documentacao_arquitetura.md) | `docs/architecture/` | Redação de RFC-001 (Multi-Repo & Cloud), RFC-002 (RDS vs StatefulSet), ADR-001 (API Gateway HTTP v2) e Diagrama Geral de Componentes Cloud. | **Concluído** (`5032ea0`) |
 
 ---
 
