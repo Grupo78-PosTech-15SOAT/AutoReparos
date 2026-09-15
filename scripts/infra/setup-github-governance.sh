@@ -36,10 +36,15 @@ for arg in "$@"; do
       echo "  --dry-run   Simula as chamadas de API sem aplicar alterações reais"
       exit 0
       ;;
+    *)
+      echo "Opção desconhecida: $arg"
+      echo "Uso: $0 [--dry-run]"
+      exit 1
+      ;;
   esac
 done
 
-if [ "$DRY_RUN" = true ]; then
+if [[ "$DRY_RUN" == true ]]; then
   echo -e "${YELLOW}ℹ Modo DRY-RUN ativado. Nenhuma alteração real será enviada para a API do GitHub.${NC}\n"
 fi
 
@@ -85,7 +90,7 @@ for REPO in "${REPOS[@]}"; do
   FULL_REPO="${ORG}/${REPO}"
   echo -e "${CYAN}▶ Processando repositório: ${FULL_REPO}${NC}"
 
-  if [ "$DRY_RUN" = true ]; then
+  if [[ "$DRY_RUN" == true ]]; then
     echo -e "  ${YELLOW}[DRY-RUN] Enviaria PUT para /repos/${FULL_REPO}/branches/main/protection com as regras:${NC}"
     echo -e "    - Exigência de Pull Request (mínimo 1 aprovação)"
     echo -e "    - Dismiss de reviews obsoletas (dismiss_stale_reviews = true)"
@@ -114,7 +119,7 @@ done
 echo -e "${BLUE}=== Relatório de Governança ===${NC}"
 echo -e "Repositórios configurados com sucesso: ${GREEN}${SUCCESS_COUNT}/${TOTAL_COUNT}${NC}"
 
-if [ "$SUCCESS_COUNT" -eq "$TOTAL_COUNT" ]; then
+if [[ "$SUCCESS_COUNT" -eq "$TOTAL_COUNT" ]]; then
   echo -e "${GREEN}✔ Todas as branches principais foram protegidas com sucesso!${NC}"
   exit 0
 else
