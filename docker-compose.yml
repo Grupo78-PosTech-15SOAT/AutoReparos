@@ -54,6 +54,7 @@ services:
       - "4200:8080"
     depends_on:
       - api
+      - otel-collector
     networks:
       - autoreparos-network
 

@@ -186,6 +186,6 @@ A plataforma mantém seu acervo de decisões arquiteturais estruturado sob os pa
 Conforme alinhado na sessão de refinamento arquitetural, todas as alterações de código e infraestrutura nos repositórios satélites e no repositório pai seguem padrões rígidos de qualidade:
 
 1. **Proteção da Branch `main`:** Nenhum push direto é permitido na branch `main`. Toda alteração deve tramitar obrigatoriamente via Pull Request com validação de status check de CI verde.
-2. **Estratégia de Branching dos Submódulos:** Mudanças que afetem submódulos devem ser desenvolvidas em branches com o mesmo nome da branch do repositório pai (`feat/fase3-track-a-cloud-iac`), garantindo paridade de versionamento.
+2. **Estratégia de Branching dos Submódulos:** Mudanças que afetem submódulos devem ser desenvolvidas em branches com o mesmo nome da branch do repositório pai (ex.: `feat/fase3-track-a-cloud-iac`, `feat/fase3-track-b-observabilidade` ou `feat/fase3-backend-fixes`), garantindo paridade de versionamento.
 3. **Padrão de Mensagens de Commit:** Uso obrigatório do padrão Gitmoji com descrição concisa em português (ex.: `✨ Adicionando parâmetros SSM no RDS`, `📝 Atualizando documentação de arquitetura`).
 4. **Caminhos Estritamente Relativos:** Todos os links de documentação utilizam referências relativas (`./` ou `../`), assegurando portabilidade e integridade cross-plataforma.

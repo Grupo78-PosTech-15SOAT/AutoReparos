@@ -58,7 +58,7 @@ O projeto foi concebido e evoluído ao longo das três fases do **Tech Challenge
 8. [Pipelines de CI/CD e Qualidade de Código](#8-pipelines-de-cicd-e-qualidade-de-código)
    - [Esteiras de Integração Contínua nos Repositórios](#esteiras-de-integração-contínua-nos-repositórios)
    - [Análise Estática de Código (SonarQube) e Qualidade](#análise-estática-de-código-sonarqube-e-qualidade)
-9. [Documentação de Arquitetura (RFCs e ADRs)](#9-documentação-de-arquitetura-rfcs-e-adrs)
+9. [Documentação Técnica e Especificações da Fase 3](#9-documentação-técnica-e-especificações-da-fase-3)
 10. [Entregáveis Oficiais e Links](#10-entregáveis-oficiais-e-links)
 11. [Integrantes do Grupo](#11-integrantes-do-grupo)
 
@@ -634,22 +634,21 @@ A documentação técnica da Fase 3 se divide entre os **documentos formais de a
 
 ### Documentos Formais de Arquitetura (RFCs e ADRs)
 
-**Publicados (Track B — software, dados e observabilidade):**
-- [`RFC-003-serverless-client-authentication.md`](./docs/architecture/RFC-003-serverless-client-authentication.md): autenticação do cliente final via Lambda com CPF + e-mail, sem contas no ASP.NET Core Identity.
-- [`ADR-002-data-isolation-and-zero-trust-claims.md`](./docs/architecture/ADR-002-data-isolation-and-zero-trust-claims.md): isolamento de dados do portal do cliente a partir das claims do JWT, com Zero Data Leakage no filtro por placa.
-- [`ADR-003-end-to-end-observability-strategy.md`](./docs/architecture/ADR-003-end-to-end-observability-strategy.md): observabilidade ponta a ponta com OpenTelemetry e exportação vendor-agnostic via OTel Collector.
-- [`database-selection-and-data-model.md`](./docs/architecture/database-selection-and-data-model.md): justificativa do PostgreSQL 16, modelo ER completo e dicionário de dados.
-- [`diagrams/sequence_portal_auth_and_query.md`](./docs/architecture/diagrams/sequence_portal_auth_and_query.md): diagramas de sequência end-to-end do portal do cliente.
+Todos os documentos foram formalizados e publicados em [`docs/architecture/`](./docs/architecture/):
 
-**Pendentes (Track A — nuvem e IaC):**
-- `RFC-001-cloud-architecture-and-repo-segregation.md`: escolha da AWS e segregação em 4 repositórios.
-- `RFC-002-managed-database-strategy-rds.md`: estratégia de banco gerenciado no AWS RDS.
-- `ADR-001-adoption-aws-api-gateway.md`: comunicação unificada na borda com AWS API Gateway v2.
+- **[`RFC-001-cloud-architecture-and-repo-segregation.md`](./docs/architecture/RFC-001-cloud-architecture-and-repo-segregation.md):** Arquitetura Cloud AWS, abordagem híbrida orquestradora e segregação em 4 repositórios independentes.
+- **[`RFC-002-managed-database-strategy-rds.md`](./docs/architecture/RFC-002-managed-database-strategy-rds.md):** Estratégia de banco de dados gerenciado no AWS RDS PostgreSQL 16 vs StatefulSet in-cluster.
+- **[`RFC-003-serverless-client-authentication.md`](./docs/architecture/RFC-003-serverless-client-authentication.md):** Autenticação do cliente final via AWS Lambda com CPF + e-mail, sem contas no ASP.NET Core Identity.
+- **[`ADR-001-adoption-aws-api-gateway.md`](./docs/architecture/ADR-001-adoption-aws-api-gateway.md):** Comunicação unificada na borda com AWS API Gateway HTTP v2 e Private VPC Link.
+- **[`ADR-002-data-isolation-and-zero-trust-claims.md`](./docs/architecture/ADR-002-data-isolation-and-zero-trust-claims.md):** Isolamento de dados do portal do cliente a partir das claims do JWT, com Zero Data Leakage no filtro por placa (OWASP BOLA).
+- **[`ADR-003-end-to-end-observability-strategy.md`](./docs/architecture/ADR-003-end-to-end-observability-strategy.md):** Observabilidade ponta a ponta com OpenTelemetry e exportação vendor-agnostic via OTel Collector (New Relic / Datadog).
+- **[`database-selection-and-data-model.md`](./docs/architecture/database-selection-and-data-model.md):** Justificativa do PostgreSQL 16 (transações ACID e integridade referencial), modelo ER completo e dicionário de 8 tabelas.
+- **[`diagrams/sequence_portal_auth_and_query.md`](./docs/architecture/diagrams/sequence_portal_auth_and_query.md):** Diagramas de sequência end-to-end do portal do cliente.
 
-### Pacote de Entrega
+### Pacote de Entrega Acadêmica
 
-- [`docs/entrega/roteiro_video_demonstracao_15min.md`](./docs/entrega/roteiro_video_demonstracao_15min.md): roteiro cronometrado do vídeo demonstrativo, com checklist de preparação e plano B por bloco.
-- [`docs/entrega/template_entrega_portal_fiap.md`](./docs/entrega/template_entrega_portal_fiap.md): minuta do documento de submissão no Portal FIAP, pronta para compilação em PDF.
+- **[`docs/entrega/roteiro_video_demonstracao_15min.md`](./docs/entrega/roteiro_video_demonstracao_15min.md):** Roteiro cronometrado do vídeo demonstrativo (15 minutos), com checklist de preparação, script de tráfego contínuo e plano B por bloco.
+- **[`docs/entrega/template_entrega_portal_fiap.md`](./docs/entrega/template_entrega_portal_fiap.md):** Minuta do documento de submissão no Portal FIAP, pronta para compilação em PDF.
 
 ### Especificações Técnicas e Planos de Execução
 
@@ -661,12 +660,13 @@ A documentação técnica da Fase 3 se divide entre os **documentos formais de a
   - [`plano_sprint2_auth_lambda_portal.md`](./docs/specs/fase3/auth-lambda-portal/plano_sprint2_auth_lambda_portal.md): Especificação da Lambda serverless e do portal do cliente.
   - [`relatorio_revisao_critica_sprint2.md`](./docs/specs/fase3/auth-lambda-portal/relatorio_revisao_critica_sprint2.md): Relatório de revisão crítica das entregas do Sprint 2.
 
-- **Cloud & Infraestrutura IaC ([`docs/specs/fase3/cloud-iac/`](./docs/specs/fase3/cloud-iac/)):**
-  - [`fase3_spec_track_a_cloud_iac.md`](./docs/specs/fase3/cloud-iac/fase3_spec_track_a_cloud_iac.md): Especificação de Cloud AWS, Terraform (RDS e EKS), API Gateway HTTP v2 e Helm Charts.
+- **Cloud & Infraestrutura IaC — Track A ([`docs/specs/fase3/cloud-iac/`](./docs/specs/fase3/cloud-iac/)):**
+  - [`plano_execucao_track_a_cloud_iac.md`](./docs/specs/fase3/cloud-iac/plano_execucao_track_a_cloud_iac.md): Plano mestre de execução e governança da infraestrutura em nuvem.
+  - [`planos-detalhados/`](./docs/specs/fase3/cloud-iac/planos-detalhados/): Planos aprofundados das Subfases 1 (RDS), 2 (EKS/API Gateway), 3 (Governança Git) e 4 (Docs de Arquitetura).
 
-- **Observabilidade & Métricas ([`docs/specs/fase3/observabilidade/`](./docs/specs/fase3/observabilidade/)):**
-  - [`fase3_spec_track_b_observability_docs.md`](./docs/specs/fase3/observabilidade/fase3_spec_track_b_observability_docs.md): Especificação de Observabilidade (OpenTelemetry, Prometheus, Jaeger, Loki) e documentação.
-  - [`fase3_track_b_tarefas_restantes_spec.md`](./docs/specs/fase3/observabilidade/fase3_track_b_tarefas_restantes_spec.md): Detalhamento dos use cases do portal do cliente, métricas de OS e telemetria.
+- **Observabilidade & Software — Track B ([`docs/specs/fase3/observabilidade/`](./docs/specs/fase3/observabilidade/)):**
+  - [`plano_execucao_track_b_observabilidade.md`](./docs/specs/fase3/observabilidade/plano_execucao_track_b_observabilidade.md): Plano mestre de telemetria, observabilidade e pacote de entrega.
+  - [`planos-detalhados/`](./docs/specs/fase3/observabilidade/planos-detalhados/): Planos aprofundados das Subfases 1 (Métricas), 2 (APM Vendor), 3 (Dashboards), 4 (Arquitetura) e 5 (Pacote FIAP).
 
 - **Gap Analysis & Validação Consolidada ([`docs/specs/fase3/gap-analysis/`](./docs/specs/fase3/gap-analysis/)):**
   - [`fase3_deep_gap_analysis.md`](./docs/specs/fase3/gap-analysis/fase3_deep_gap_analysis.md): Análise aprofundada de aderência aos requisitos da Fase 3 FIAP SOAT.
