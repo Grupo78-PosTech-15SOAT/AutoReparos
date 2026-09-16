@@ -1,0 +1,95 @@
+{
+  "config": {
+    "base_url_local": "http://localhost:8080",
+    "web_url_local": "http://localhost:4200",
+    "swagger_url_local": "http://localhost:8080/swagger/index.html",
+    "grafana_url_local": "http://localhost:3000",
+    "jaeger_url_local": "http://localhost:16686",
+    "prometheus_url_local": "http://localhost:9090",
+    "test_cliente_email": "exemplo@email.com",
+    "seed_user_email": "admin@autoreparos.com",
+    "seed_user_password": "sua_senha_aqui",
+    "new_relic_license_key": "sua_licenca_new_relic_aqui",
+    "aws_region": "us-east-1",
+    "aws_account_id": "000000000000"
+  },
+  "tc01_auth": {
+    "admin_token": "exemplo.jwt.token",
+    "expires_in": 3600,
+    "status": "PASSED"
+  },
+  "tc02_cadastros": {
+    "cliente_id": "00000000-0000-0000-0000-000000000000",
+    "cliente_documento": "12345678909",
+    "cliente_email": "exemplo@email.com",
+    "veiculo_id": "00000000-0000-0000-0000-000000000000",
+    "veiculo_placa": "BRA2E19",
+    "status": "PASSED"
+  },
+  "tc03_catalogo": {
+    "insumo_id": "00000000-0000-0000-0000-000000000000",
+    "insumo_nome": "Óleo Sintético 5W30",
+    "insumo_estoque_inicial": 10,
+    "insumo_valor": 45.0,
+    "servico_id": "00000000-0000-0000-0000-000000000000",
+    "servico_nome": "Troca de Óleo e Filtros",
+    "servico_valor": 120.0,
+    "status": "PASSED"
+  },
+  "tc04_ordem_servico": {
+    "os_id": "00000000-0000-0000-0000-000000000000",
+    "status_final": "Entregue",
+    "insumo_id": "00000000-0000-0000-0000-000000000000",
+    "estoque_remanescente": 6,
+    "status": "PASSED"
+  },
+  "tc05_negativos": {
+    "checks_passed": 5,
+    "status": "PASSED"
+  },
+  "tc06_observabilidade": {
+    "jaeger_status": "HEALTHY",
+    "traces_count": 5,
+    "prometheus_status": "HEALTHY",
+    "targets_up": 3,
+    "grafana_status": "HEALTHY",
+    "otel_collector_status": "HEALTHY",
+    "new_relic_configured": true
+  },
+  "aws_infra": {
+    "vpc_id": "vpc-00000000000000000",
+    "private_subnet_ids": [
+      "subnet-00000000000000001",
+      "subnet-00000000000000002"
+    ],
+    "cluster_name": "autoreparos-eks-cluster",
+    "api_gateway_endpoint": "https://0000000000.execute-api.us-east-1.amazonaws.com",
+    "ecr_repository_url": "000000000000.dkr.ecr.us-east-1.amazonaws.com/autoreparos",
+    "db_endpoint": "autoreparos-db.000000000000.us-east-1.rds.amazonaws.com:5432",
+    "status": "PROVISIONED"
+  },
+  "aws_deploy": {
+    "helm_status": "DEPLOYED",
+    "ingress_hostname": "k8s-default-ingress-0000000000.us-east-1.elb.amazonaws.com",
+    "status": "PASSED"
+  },
+  "aws_smoke": {
+    "api_gateway_health": "OK",
+    "auth_lambda_status": "OK",
+    "cliente_jwt_emitted": true,
+    "vpc_link_proxy": "OK",
+    "cors_status": "OK"
+  },
+  "aws_links": {
+    "links": {
+      "frontend_web_entrance": "http://k8s-default-ingress-0000000000.us-east-1.elb.amazonaws.com",
+      "backend_swagger_ui": "https://0000000000.execute-api.us-east-1.amazonaws.com/swagger/index.html",
+      "api_gateway_endpoint": "https://0000000000.execute-api.us-east-1.amazonaws.com",
+      "new_relic_one": "https://one.newrelic.com",
+      "grafana_dashboards": "http://localhost:3000",
+      "jaeger_tracing": "http://localhost:16686",
+      "prometheus_metrics": "http://localhost:9090"
+    },
+    "status": "GENERATED"
+  }
+}

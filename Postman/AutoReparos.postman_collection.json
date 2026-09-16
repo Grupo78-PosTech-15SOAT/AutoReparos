@@ -82,25 +82,18 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 201) {\r",
-                  "    const response = pm.response.json();\r",
-                  "    if (response.id) {\r",
-                  "        pm.collectionVariables.set(\"clienteId\", response.id);\r",
-                  "        console.log(\"Variável 'clienteId' atualizada com sucesso!\");\r",
-                  "    } else {\r",
-                  "        console.warn(\"A propriedade 'clienteId' não foi encontrada no corpo da resposta.\");\r",
-                  "    }\r",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set(\"clienteId\", response.id);",
+                  "        console.log(\"Variável 'clienteId' atualizada com sucesso!\");",
+                  "    }",
+                  "    if (response.documento) {",
+                  "        pm.collectionVariables.set(\"documentoCliente\", response.documento);",
+                  "        console.log(\"Variável 'documentoCliente' atualizada com sucesso!\");",
+                  "    }",
                   "}"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [],
                 "type": "text/javascript"
               }
             }
@@ -290,25 +283,18 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 201) {\r",
-                  "    const response = pm.response.json();\r",
-                  "    if (response.id) {\r",
-                  "        pm.collectionVariables.set(\"veiculoId\", response.id);\r",
-                  "        console.log(\"Variável 'veiculoId' atualizada com sucesso!\");\r",
-                  "    } else {\r",
-                  "        console.warn(\"A propriedade 'veiculoId' não foi encontrada no corpo da resposta.\");\r",
-                  "    }\r",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.id) {",
+                  "        pm.collectionVariables.set(\"veiculoId\", response.id);",
+                  "        console.log(\"Variável 'veiculoId' atualizada com sucesso!\");",
+                  "    }",
+                  "    if (response.placa) {",
+                  "        pm.collectionVariables.set(\"placaVeiculo\", response.placa);",
+                  "        console.log(\"Variável 'placaVeiculo' atualizada com sucesso!\");",
+                  "    }",
                   "}"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [],
                 "type": "text/javascript"
               }
             }
@@ -404,6 +390,16 @@
                 "api",
                 "veiculos",
                 "{{veiculoId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1118,7 +1114,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"documentoCliente\": \"{{documentoCliente}}\",\r\n  \"placaVeiculo\": \"{{placaVeiculo}}\",\r\n  \"observacao\": \"Observação do serviço\",\r\n  \"servicos\": [\r\n    {\r\n      \"servicoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"valorCobrado\": 200\r\n    }\r\n  ],\r\n  \"insumos\": [\r\n    {\r\n      \"insumoId\": \"8fc840c6-fd20-41a1-8c53-6f956a9c8a01\",\r\n      \"descricao\": \"Óleo motor 15W-40\",\r\n      \"valorUnitario\": 50,\r\n      \"quantidade\": 1,\r\n      \"origem\": 2\r\n    },\r\n    {\r\n      \"insumoId\": \"2768e51b-8243-41b8-bcc3-cbcb1627b198\",\r\n      \"descricao\": \"Pastilha de freio honda civic 2007\",\r\n      \"valorUnitario\": 104.99,\r\n      \"quantidade\": 2,\r\n      \"origem\": 1\r\n    },\r\n    {\r\n      \"insumoId\": \"5f45409d-875a-4944-9731-0d1ccbaddfb4\",\r\n      \"descricao\": \"Retrovisor esquerdo peugeot 206\",\r\n      \"valorUnitario\": 155.90,\r\n      \"quantidade\": 3,\r\n      \"origem\": 2\r\n    }\r\n  ]\r\n}",
+              "raw": "{\n  \"documentoCliente\": \"{{documentoCliente}}\",\n  \"placaVeiculo\": \"{{placaVeiculo}}\",\n  \"observacao\": \"Observação do serviço de manutenção preventiva\",\n  \"servicos\": [\n    {\n      \"servicoId\": \"{{servicoId}}\",\n      \"valorCobrado\": 129.9\n    }\n  ],\n  \"insumos\": [\n    {\n      \"insumoId\": \"{{insumoId}}\",\n      \"descricao\": \"Lítro Óleo - 1L - 5w40\",\n      \"valorUnitario\": 52.99,\n      \"quantidade\": 2,\n      \"origem\": 1\n    },\n    {\n      \"descricao\": \"Filtro de Óleo Específico (Compra Externa)\",\n      \"valorUnitario\": 45.0,\n      \"quantidade\": 1,\n      \"origem\": 2\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1425,28 +1421,24 @@
         {
           "name": "AprovarOrdemServico",
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PATCH",
+            "auth": null,
+            "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/aprovar",
+              "raw": "{{baseUrl}}/api/ordem-servico/aprovar?token={{approvalToken}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "ordem-servico",
-                "{{ordemServicoId}}",
                 "aprovar"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{approvalToken}}"
+                }
               ]
             }
           },
@@ -1468,7 +1460,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/Iniciar",
+              "raw": "{{baseUrl}}/api/ordem-servico/{{ordemServicoId}}/servicos/{{ordemServicoServicoId}}/iniciar",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1478,7 +1470,7 @@
                 "{{ordemServicoId}}",
                 "servicos",
                 "{{ordemServicoServicoId}}",
-                "Iniciar"
+                "iniciar"
               ]
             }
           },
@@ -1541,6 +1533,70 @@
                 "ordem-servico",
                 "{{ordemServicoId}}",
                 "entregar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GetFilaOrdensServico",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordem-servico/fila?pageNumber=1&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordem-servico",
+                "fila"
+              ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RecusarOrdemServico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ordem-servico/recusar?token={{approvalToken}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ordem-servico",
+                "recusar"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{approvalToken}}"
+                }
               ]
             }
           },
@@ -1755,6 +1811,23 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "HealthCheck",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [
@@ -1825,6 +1898,11 @@
     {
       "key": "documentoCliente",
       "value": ""
+    },
+    {
+      "key": "approvalToken",
+      "value": "",
+      "type": "string"
     }
   ]
 }

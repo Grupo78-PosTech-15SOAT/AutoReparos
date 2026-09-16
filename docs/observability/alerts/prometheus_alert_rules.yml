@@ -1,0 +1,47 @@
+# Tradução direta de alert_policies.json para regras carregáveis pelo Prometheus.
+# Uso: montar este arquivo no container do Prometheus e referenciá-lo em rule_files.
+#
+#   rule_files:
+#     - /etc/prometheus/prometheus_alert_rules.yml
+#
+# As mesmas condições estão expressas em NRQL no alert_policies.json para o New Relic.
+
+groups:
+  - name: autoreparos-confiabilidade
+    interval: 30s
+    rules:
+      - alert: FalhasIntegracaoNotificacao
+        expr: sum(rate(autoreparos_notificacoes_falhas_total[1m])) > 0
+        for: 3m
+        labels:
+          severity: critical
+          service: autoreparos-api
+        annotations:
+          summary: "Falhas no envio de notificações ao cliente"
+          description: >-
+            O contador notificacoes.falhas está sendo incrementado há 3 minutos.
+            Verifique as tags motivo e status_code no dashboard de erros de integração.
+
+      - alert: LatenciaExcessivaAPI
+        expr: >-
+          histogram_quantile(0.95, sum by (le)
+            (rate(autoreparos_http_server_request_duration_seconds_bucket[5m]))) * 1000 > 2000
+        for: 5m
+        labels:
+          severity: warning
+          service: autoreparos-api
+        annotations:
+          summary: "Latência p95 acima de 2000 ms"
+          description: "O percentil 95 das requisições HTTP ultrapassou 2 segundos por 5 minutos."
+
+      - alert: TaxaErroServidor
+        expr: >-
+          100 * (sum(rate(autoreparos_http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m])) or vector(0))
+          / clamp_min(sum(rate(autoreparos_http_server_request_duration_seconds_count[5m])), 0.001) > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: autoreparos-api
+        annotations:
+          summary: "Taxa de erro 5xx acima de 5%"
+          description: "Mais de 5% das requisições estão respondendo com erro de servidor."

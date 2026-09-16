@@ -1,0 +1,74 @@
+{
+  "$comment": "Políticas de alerta do AutoReparos - Tech Challenge FIAP SOAT Fase 3. Cada política traz a expressão PromQL (Grafana/Alertmanager) e a consulta NRQL equivalente (New Relic), para que a mesma regra valha no stack local e no backend de observabilidade em nuvem.",
+  "policy": {
+    "name": "AutoReparos - Confiabilidade da Aplicação",
+    "incidentPreference": "PER_CONDITION",
+    "service": "autoreparos-api"
+  },
+  "notificationChannels": [
+    {
+      "id": "suporte-oficina-email",
+      "type": "EMAIL",
+      "description": "E-mail da equipe de suporte da oficina.",
+      "configHint": "Definir o destinatário no Alertmanager (receivers[].email_configs) ou no workflow do New Relic."
+    },
+    {
+      "id": "suporte-oficina-slack",
+      "type": "SLACK",
+      "description": "Canal do Slack da equipe de suporte da oficina.",
+      "configHint": "Webhook armazenado em Secret; nunca versionar a URL neste arquivo."
+    }
+  ],
+  "conditions": [
+    {
+      "id": "falhas-integracao-notificacao",
+      "name": "Falhas em Integrações de Notificação",
+      "severity": "CRITICAL",
+      "description": "Qualquer falha no envio de notificações ao cliente (SendGrid) sustentada por 3 minutos. Cobre tanto respostas HTTP de erro quanto exceções de rede, já que o contador é incrementado nos dois caminhos do NotificacaoService.",
+      "signal": "notificacoes.falhas",
+      "threshold": {
+        "operator": "ABOVE",
+        "value": 0,
+        "durationSeconds": 180
+      },
+      "promql": "sum(rate(autoreparos_notificacoes_falhas_total[1m])) > 0",
+      "nrql": "SELECT rate(sum(notificacoes.falhas), 1 minute) FROM Metric WHERE service.name = 'autoreparos-api'",
+      "runbook": "Verificar o painel 'Falhas por Canal e Motivo' no dashboard de Erros e Falhas nas Integrações. A tag motivo identifica a exceção e status_code a resposta do SendGrid (401 indica API key inválida ou expirada).",
+      "notify": ["suporte-oficina-email", "suporte-oficina-slack"]
+    },
+    {
+      "id": "latencia-excessiva-api",
+      "name": "Latência Excessiva nas APIs",
+      "severity": "WARNING",
+      "description": "Percentil 95 da duração das requisições HTTP acima de 2000 ms por 5 minutos consecutivos.",
+      "signal": "http.server.request.duration",
+      "threshold": {
+        "operator": "ABOVE",
+        "value": 2000,
+        "unit": "ms",
+        "durationSeconds": 300
+      },
+      "promql": "histogram_quantile(0.95, sum by (le) (rate(autoreparos_http_server_request_duration_seconds_bucket[5m]))) * 1000 > 2000",
+      "nrql": "SELECT percentile(http.server.request.duration, 95) FROM Metric WHERE service.name = 'autoreparos-api'",
+      "runbook": "Comparar com o painel 'Latência de Comunicação com Banco e Serviços Externos' para separar lentidão de banco, de integração externa e de processamento próprio.",
+      "notify": ["suporte-oficina-email"]
+    },
+    {
+      "id": "taxa-erro-servidor",
+      "name": "Taxa de Erro 5xx Acima do Limite",
+      "severity": "CRITICAL",
+      "description": "Mais de 5% das requisições respondendo com erro de servidor por 5 minutos. Complementa a regra de latência: uma API que falha rápido não dispara o alerta de p95.",
+      "signal": "http.server.request.duration",
+      "threshold": {
+        "operator": "ABOVE",
+        "value": 5,
+        "unit": "percent",
+        "durationSeconds": 300
+      },
+      "promql": "100 * (sum(rate(autoreparos_http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(autoreparos_http_server_request_duration_seconds_count[5m])), 0.001) > 5",
+      "nrql": "SELECT percentage(count(*), WHERE numeric(http.response.status_code) >= 500) FROM Metric WHERE service.name = 'autoreparos-api'",
+      "runbook": "Abrir o painel 'Respostas HTTP 5xx na API' para identificar a rota afetada e correlacionar pelo TraceId presente nos logs JSON.",
+      "notify": ["suporte-oficina-email", "suporte-oficina-slack"]
+    }
+  ]
+}
