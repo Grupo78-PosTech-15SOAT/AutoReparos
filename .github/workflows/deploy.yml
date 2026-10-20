@@ -18,11 +18,12 @@ on:
       - '.gitignore'
       - '.dockerignore'
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
-  # Região padrão da AWS
   AWS_REGION: "us-east-1"
-  
-  # Configurações do Aplicativo (não-sensíveis)
   SEED_USER_EMAIL: "admin@autoreparos.com"
 
 jobs:
@@ -32,32 +33,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        submodules: recursive
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
-      with:
-        dotnet-version: '10.0.x'
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-    - name: Restore Dependencies
-      run: dotnet restore AutoReparos.slnx
+      - name: Restore Dependencies
+        run: dotnet restore AutoReparos.slnx
 
-    - name: Build Application
-      run: dotnet build AutoReparos.slnx --no-restore -c Release
+      - name: Build Application
+        run: dotnet build AutoReparos.slnx --no-restore -c Release
 
-    # Salva os binários para que os testes rodem sem precisar recompilar
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      with:
-        name: build-artifacts
-        path: |
-          **/bin/
-          **/obj/
-        retention-days: 1
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            **/bin/
+            **/obj/
+          retention-days: 1
 
+  # 🧪 Bloco 2: Testes (Unitários & Integração)
   tests:
     name: Testes (Unitários & Integração)
     needs: compilation
@@ -74,32 +75,31 @@ jobs:
       SendGrid__FromName: "AutoReparos"
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        submodules: recursive
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
-      with:
-        dotnet-version: '10.0.x'
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
 
-    - name: Download Build Artifacts
-      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-      with:
-        name: build-artifacts
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
 
-    - name: Run Unit Tests
-      run: |
-        dotnet test submodules/AutoReparos.App/AutoReparos.Domain.Tests/AutoReparos.Domain.Tests.csproj -c Release --no-build --verbosity normal
-        dotnet test submodules/AutoReparos.App/AutoReparos.Application.Tests/AutoReparos.Application.Tests.csproj -c Release --no-build --verbosity normal
-        dotnet test submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj -c Release --no-build --verbosity normal
+      - name: Run Unit Tests
+        run: |
+          dotnet test submodules/AutoReparos.App/AutoReparos.Domain.Tests/AutoReparos.Domain.Tests.csproj -c Release --no-build --verbosity normal
+          dotnet test submodules/AutoReparos.App/AutoReparos.Application.Tests/AutoReparos.Application.Tests.csproj -c Release --no-build --verbosity normal
+          dotnet test submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj -c Release --no-build --verbosity normal
 
-    - name: Run Integration Tests
-      run: dotnet test submodules/AutoReparos.App/AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj -c Release --no-build --verbosity normal
+      - name: Run Integration Tests
+        run: dotnet test submodules/AutoReparos.App/AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj -c Release --no-build --verbosity normal
 
-
-  # ☁️ Bloco 3: Infraestrutura (Terraform Setup, Apply, Validação, Login, Push Image)
+  # ☁️ Bloco 3: Infraestrutura (Terraform & ECR Push)
   infra:
     name: Infraestrutura (Terraform & ECR Push)
     needs: tests
@@ -110,56 +110,69 @@ jobs:
       cluster_name: ${{ steps.tf-outputs.outputs.cluster_name }}
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        submodules: recursive
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4.0.2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+      - name: Validar Configuração OIDC
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "::error::Secret AWS_ROLE_ARN não configurado. Autenticação GitHub Actions OIDC requer a ARN da IAM Role configurada."
+            exit 1
+          fi
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-      with:
-        terraform_version: 1.8.0
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
-    - name: Terraform Validate
-      working-directory: submodules/AutoReparos.Infra.K8s/terraform
-      env:
-        TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
-      run: |
-        terraform init -backend-config="bucket=$TF_STATE_BUCKET"
-        terraform validate
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0
 
-    - name: Terraform Apply
-      working-directory: submodules/AutoReparos.Infra.K8s/terraform
-      run: terraform apply -auto-approve
+      - name: Terraform Validate
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform
+        run: |
+          terraform init
+          terraform validate
 
-    - name: Get Terraform Outputs
-      id: tf-outputs
-      working-directory: submodules/AutoReparos.Infra.K8s/terraform
-      run: |
-        echo "ecr_repository_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
-        echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+      - name: Terraform Apply
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform
+        run: terraform apply -auto-approve
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@062340a7de7a9da2b919efc70d2a5638c4be725c # v2.0.1
+      - name: Get Terraform Outputs
+        id: tf-outputs
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform
+        run: |
+          echo "ecr_repository_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
+          echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
 
-    - name: Build, Tag and Push Image to ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG -t $ECR_REGISTRY/autoreparos-api:latest -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
-        docker push $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG
-        docker push $ECR_REGISTRY/autoreparos-api:latest
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-  # ☸️ Bloco 4: Deploy (Kubeconfig, Upgrade, Configure URL)
+      - name: Build, Tag and Push Container Images to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "=== Building and pushing Backend API image ==="
+          docker build -t $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG -t $ECR_REGISTRY/autoreparos-api:latest \
+            -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
+          docker push $ECR_REGISTRY/autoreparos-api:$IMAGE_TAG
+          docker push $ECR_REGISTRY/autoreparos-api:latest
+
+          echo "=== Building and pushing Frontend Web image ==="
+          docker build -t $ECR_REGISTRY/autoreparos-web:$IMAGE_TAG -t $ECR_REGISTRY/autoreparos-web:latest \
+            -f submodules/AutoReparos.App/AutoReparos.Web/Dockerfile submodules/AutoReparos.App/AutoReparos.Web
+          docker push $ECR_REGISTRY/autoreparos-web:$IMAGE_TAG
+          docker push $ECR_REGISTRY/autoreparos-web:latest
+
+  # ☸️ Bloco 4: Deploy (Kubernetes & Helm)
   deploy:
     name: Deploy (Kubernetes & Helm)
     needs: infra
@@ -167,173 +180,76 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        submodules: recursive
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4.0.2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Update Kubeconfig
-      run: |
-        aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
-
-    - name: Helm Upgrade Deploy
-      env:
-        SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
-        SENDGRID_FROM_NAME: ${{ secrets.SENDGRID_FROM_NAME }}
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
-        APROVACAO_TOKEN_SECRET: ${{ secrets.APROVACAO_TOKEN_SECRET }}
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      run: |
-        helm upgrade --install autoreparos ./submodules/AutoReparos.Infra.K8s/k8s \
-          -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml \
-          -f submodules/AutoReparos.Infra.K8s/k8s/values-production.yaml \
-          --set image.repository=${{ needs.infra.outputs.ecr_repository_url }} \
-          --set image.tag=${{ github.sha }} \
-          --set config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
-          --set config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
-          --set config.sendGridFromName="$SENDGRID_FROM_NAME" \
-          --set secrets.jwtSecret="$JWT_SECRET" \
-          --set secrets.seedUserPassword="$SEED_USER_PASSWORD" \
-          --set secrets.aprovacaoTokenSecret="$APROVACAO_TOKEN_SECRET" \
-          --set secrets.sendGridApiKey="$SENDGRID_API_KEY" \
-          --set postgres.password="$POSTGRES_PASSWORD"
-
-    - name: Configure URL Display
-      run: |
-        echo "Application is deployed. You can retrieve the load balancer URL using:"
-        echo "kubectl get ingress"
-
-  destroy:
-    name: Auto-Destroy (Terraform & Helm Cleanup)
-    needs: [infra, deploy]
-    if: |
-      always() &&
-      (needs.infra.result == 'success' || needs.infra.result == 'failure') &&
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      with:
-        submodules: recursive
-
-    - name: Wait 20 Minutes
-      run: |
-        echo "Waiting 20 minutes before destroying infrastructure..."
-        sleep 1200
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4.0.2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-      with:
-        terraform_version: 1.8.0
-
-    - name: Terraform Init
-      working-directory: submodules/AutoReparos.Infra.K8s/terraform
-      env:
-        TF_STATE_BUCKET: ${{ secrets.TF_STATE_BUCKET }}
-      run: |
-        terraform init -backend-config="bucket=$TF_STATE_BUCKET"
-
-    - name: Get Infrastructure Details
-      id: get-infra-details
-      working-directory: infra
-      run: |
-        CLUSTER_NAME=$(terraform output -raw cluster_name || echo "")
-        VPC_ID=$(terraform output -raw vpc_id || echo "")
-        echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
-        echo "vpc_id=$VPC_ID" >> $GITHUB_OUTPUT
-
-    - name: Setup Kubeconfig
-      run: |
-        CLUSTER_NAME="${{ steps.get-infra-details.outputs.cluster_name }}"
-        if [ -z "$CLUSTER_NAME" ]; then
-          CLUSTER_NAME="${{ needs.infra.outputs.cluster_name }}"
-        fi
-        if [ -n "$CLUSTER_NAME" ]; then
-          aws eks update-kubeconfig --name "$CLUSTER_NAME" --region ${{ env.AWS_REGION }}
-        else
-          echo "No cluster name found, skipping kubeconfig update."
-        fi
-
-    - name: Uninstall Helm Releases
-      run: |
-        if kubectl cluster-info >/dev/null 2>&1; then
-          echo "Connected to EKS cluster. Starting Helm cleanup..."
-          
-          # Desinstala o autoreparos aguardando a exclusão dos pods/recursos
-          helm uninstall autoreparos --wait || true
-          
-          # Desinstala ingress-nginx e prometheus
-          helm uninstall ingress-nginx -n ingress-nginx --wait || true
-          helm uninstall prometheus -n monitoring --wait || true
-          
-          # Garante a remoção forçada de qualquer ingress ou serviço restante do tipo LoadBalancer
-          kubectl delete ingress --all --all-namespaces || true
-          kubectl delete service -n ingress-nginx ingress-nginx-controller || true
-          kubectl delete service -n monitoring prometheus-grafana || true
-        else
-          echo "Cannot connect to EKS cluster. Skipping Helm/Kubernetes cleanup steps."
-        fi
-
-    - name: Wait for AWS Resources to be Released (Polling)
-      run: |
-        VPC_ID="${{ steps.get-infra-details.outputs.vpc_id }}"
-        if [ -z "$VPC_ID" ]; then
-          echo "VPC ID not found, skipping AWS resource polling."
-          exit 0
-        fi
-
-        echo "VPC ID: $VPC_ID"
-
-        # 1. Aguarda a deleção de todos os Load Balancers no VPC
-        echo "Waiting for all Load Balancers in VPC $VPC_ID to be deleted..."
-        while true; do
-          LBS=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?VpcId=='$VPC_ID'].LoadBalancerArn" --output text 2>/dev/null || echo "")
-          if [ -z "$LBS" ]; then
-            echo "All Load Balancers in VPC deleted."
-            break
+      - name: Validar Configuração OIDC
+        run: |
+          if [ -z "${{ secrets.AWS_ROLE_ARN }}" ]; then
+            echo "::error::Secret AWS_ROLE_ARN não configurado. Autenticação GitHub Actions OIDC requer a ARN da IAM Role configurada."
+            exit 1
           fi
-          echo "Still waiting for Load Balancers to be deleted: $LBS"
-          sleep 10
-        done
 
-        # 2. Aguarda a deleção de todas as interfaces de rede (ENIs) de ELB no VPC
-        echo "Waiting for all ELB network interfaces (ENIs) in VPC $VPC_ID to be deleted..."
-        while true; do
-          ENIS=$(aws ec2 describe-network-interfaces \
-            --filters "Name=vpc-id,Values=$VPC_ID" "Name=description,Values='ELB net/*','ELB app/*','ELB *'" \
-            --query "NetworkInterfaces[*].NetworkInterfaceId" \
-            --output text 2>/dev/null || echo "")
-          if [ -z "$ENIS" ]; then
-            echo "All ELB ENIs in VPC deleted."
-            break
-          fi
-          echo "Still waiting for ELB ENIs to be deleted: $ENIS"
-          sleep 10
-        done
-        
-        echo "All dynamically created AWS resources have been successfully deleted!"
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
-    - name: Terraform Destroy
-      working-directory: submodules/AutoReparos.Infra.K8s/terraform
-      run: terraform destroy -auto-approve
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ needs.infra.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
 
+      - name: Apply Kubernetes Secret via STDIN (Secure Injection)
+        env:
+          DB_CONNECTION: ${{ secrets.CONNECTION_STRING }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
+          APROVACAO_TOKEN_SECRET: ${{ secrets.APROVACAO_TOKEN_SECRET }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        run: |
+          set +x
+          cat <<EOF | kubectl apply -f -
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: autoreparos-api-secrets
+            namespace: default
+          type: Opaque
+          stringData:
+            ConnectionStrings__DbConnection: "${DB_CONNECTION}"
+            Jwt__Secret: "${JWT_SECRET}"
+            SeedUser__Password: "${SEED_USER_PASSWORD}"
+            AprovacaoToken__Secret: "${APROVACAO_TOKEN_SECRET}"
+            SendGrid__ApiKey: "${SENDGRID_API_KEY}"
+          EOF
 
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
 
+      - name: Helm Upgrade Deploy
+        env:
+          ECR_REGISTRY: ${{ needs.infra.outputs.ecr_repository_url }}
+          SENDGRID_FROM_EMAIL: ${{ vars.SENDGRID_FROM_EMAIL || 'noreply@autoreparos.com' }}
+          SENDGRID_FROM_NAME: ${{ vars.SENDGRID_FROM_NAME || 'AutoReparos' }}
+        run: |
+          helm upgrade --install autoreparos ./submodules/AutoReparos.Infra.K8s/k8s \
+            -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml \
+            -f submodules/AutoReparos.Infra.K8s/k8s/values-production.yaml \
+            --set api.image.repository="${ECR_REGISTRY}/autoreparos-api" \
+            --set api.image.tag="${{ github.sha }}" \
+            --set web.image.repository="${ECR_REGISTRY}/autoreparos-web" \
+            --set web.image.tag="${{ github.sha }}" \
+            --set api.config.seedUserEmail="${{ env.SEED_USER_EMAIL }}" \
+            --set api.config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
+            --set api.config.sendGridFromName="$SENDGRID_FROM_NAME"
+
+      - name: Configure URL Display
+        run: |
+          echo "Application is deployed. You can retrieve the load balancer URL using:"
+          echo "kubectl get ingress"
