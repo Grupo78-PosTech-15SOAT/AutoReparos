@@ -662,3 +662,75 @@ Todos os documentos foram formalizados e publicados em [`docs/architecture/`](./
 - 👩‍💻 **Júlia Santos** - rm370364
 - 👨‍💻 **Lucas Bastos** - rm370749
 - 👨‍💻 **Mateus Lecchi** - rm371085
+
+---
+
+## Provisionamento AWS centralizado
+
+O pai coordena CI, bootstrap e alterações da conta AWS. O workflow automático antigo de `push` para `main` foi removido. Os workflows `Provision AWS`, `Deploy application` e `Teardown AWS` são manuais e usam o Environment `production`; `Bootstrap AWS Terraform backend` usa `aws-bootstrap`. Jobs de infraestrutura compartilham `aws-infrastructure-<região>-production` com `cancel-in-progress: false` e usam o lock do Terraform.
+
+### Estados e ordem
+
+| Ordem | State/key | Responsável | Entrega |
+|---:|---|---|---|
+| 1 | `bootstrap/terraform.tfstate` | Bootstrap | Bucket S3 versionado e tabela DynamoDB de lock; state migra para si próprio |
+| 2 | `network/production/terraform.tfstate` | Infra.K8s | VPC/subnets, SGs compartilhados, EKS, ECR API e Web |
+| 3 | `platform/production/terraform.tfstate` | Infra.K8s | EBS CSI/storage class, Metrics Server e AWS Load Balancer Controller |
+| 4 | `database/terraform.tfstate` | Infra.Database | RDS privado, regras de entrada a partir dos SGs EKS/Lambda, segredo no Secrets Manager |
+| 5 | `lambda-auth/terraform.tfstate` | AuthLambda | ZIP .NET 10, função e role; recebe rede e conexão do Secrets Manager |
+| 6 | Helm/Kubernetes | App e Infra.K8s | Imagens imutáveis, namespace, secrets e migration Job antes do rollout |
+| 7 | `gateway/production/terraform.tfstate` | Infra.K8s | API Gateway, VPC Link, Lambda e rotas API/health/Web com ARN do listener ALB interno |
+
+O fluxo passa apenas IDs/ARNs/URLs não sensíveis entre jobs. A senha RDS é consultada em tempo de execução no Secrets Manager; JWT, senha seed, token de aprovação, SendGrid e Grafana são Environment secrets. States remotos podem conter valores sensíveis e devem ter acesso restrito. Os planos ficam somente no runner e não são artifacts.
+
+### Preparação no GitHub
+
+Em **Settings → Environments**, criar:
+
+- `aws-bootstrap`: limitar deployment branch a `main`; cadastrar reviewers para aprovação antes do bootstrap.
+- `production`: limitar a `main`; exigir reviewers para provisionamento, deploy e teardown. Habilitar prevenção de autoaprovação quando disponível.
+
+No nível do repositório, em **Settings → Secrets and variables → Actions → Variables**, cadastrar:
+
+| Variable | Conteúdo |
+|---|---|
+| `AWS_ACCOUNT_ID` | ID de 12 dígitos da conta alvo, confirmado por um administrador |
+| `AWS_REGION` | Região aprovada para os recursos, por exemplo `us-east-1` |
+| `TF_STATE_BUCKET` | Nome do bucket existente/planejado, globalmente único; para uma conta já usada, deve ser o bucket real dos states atuais |
+| `TF_LOCK_TABLE` | Nome real da tabela DynamoDB de lock atual; não criar uma segunda tabela para a mesma transição |
+
+No Environment `aws-bootstrap`, cadastrar o secret `AWS_ROLE_ARN` com a ARN da role de bootstrap. Em `production`, cadastrar o secret `AWS_ROLE_ARN` com a role de deploy e as variables `EKS_CLUSTER_NAME`, `K8S_NAMESPACE`, `SEED_USER_EMAIL`, `SENDGRID_FROM_EMAIL` e `SENDGRID_FROM_NAME`. Usar `autoreparos-cluster`, `autoreparos` e valores aprovados pela operação para os demais. E-mail SendGrid pode ficar vazio para desabilitar envio; `NotificacaoService` ignora envio quando incompleto.
+
+Secrets obrigatórios no Environment `production`:
+
+| Secret | Uso |
+|---|---|
+| `AWS_ROLE_ARN` | Role OIDC de provisionamento/deploy |
+| `JWT_SECRET` | Chave forte da API e Lambda; usar o mesmo valor em ambas |
+| `SEED_USER_PASSWORD` | Senha escolhida pelo administrador para o usuário seed |
+| `APROVACAO_TOKEN_SECRET` | Chave forte para tokens de aprovação |
+| `GRAFANA_ADMIN_PASSWORD` | Senha de administrador Grafana |
+| `SENDGRID_API_KEY` | Opcional; vazio desabilita envio de e-mails |
+
+Não cole valores de produção em arquivos do repositório, outputs ou artifacts. A migration Job usa a connection string lida do Secrets Manager e o processo de arranque da API pula migrations para impedir concorrência entre réplicas.
+
+Se os submódulos forem privados, cadastrar a variable de repositório `SUBMODULES_APP_ID` e o secret `SUBMODULES_APP_PRIVATE_KEY` para uma GitHub App com permissão somente de leitura de conteúdo nos cinco repositórios AutoReparos. Se forem públicos, deixar ambos ausentes.
+
+### Identidade AWS OIDC
+
+Criar/reutilizar o provider IAM `https://token.actions.githubusercontent.com`, audience `sts.amazonaws.com`. Criar duas roles, `AutoReparosGitHubBootstrapRole` e `AutoReparosGitHubDeployRole`. Para cada role, a trust policy deve exigir `aud=sts.amazonaws.com` e o `sub` específico do Environment:
+
+- Bootstrap: `repo:Grupo78-PosTech-15SOAT/AutoReparos:environment:aws-bootstrap`
+- Deploy: `repo:Grupo78-PosTech-15SOAT/AutoReparos:environment:production`
+
+O nome `main` é restringido pelo Environment do GitHub. Se a organização/repositório usar subject imutável, substituir o `sub` pelo formato `repo:OWNER@OWNER_ID/REPO@REPO_ID:environment:ENVIRONMENT`, consultando os IDs em **Settings → Actions → OIDC**; não aceitar `repo:*` nem wildcard. A role bootstrap precisa somente administrar o bucket S3 de state e a tabela DynamoDB configurados. A role deploy precisa das operações dos providers AWS/Terraform para EC2/VPC, EKS, ECR, RDS, Lambda, API Gateway v2, ELBv2, Secrets Manager, SSM, CloudWatch, KMS, IAM e backend S3/DynamoDB. Restringir recursos a nomes/tags AutoReparos sempre que a API permitir e `iam:PassRole` às roles de cluster, node group, Lambda, EBS CSI e Load Balancer Controller do projeto. O executor também precisa atualizar kubeconfig e ter acesso Kubernetes correspondente no EKS Access Entry/RBAC.
+
+### Execução, recuperação e teardown
+
+1. Revisar e preencher [o inventário/mapeamento de states](docs/specs/fase3/cloud-iac/migracao-states-aws.md) usando a conta real. O workflow lista recursos antes de alterar qualquer coisa e bloqueia se encontrar recursos existentes sem state de destino ou recursos no state misto legado.
+2. Em **Actions → Bootstrap AWS Terraform backend → Run workflow**, branch `main`, digitar `CONFIRMAR-BOOTSTRAP` e confirmar revisão do bucket/tabela existentes. O bootstrap importa configuração parcial já existente, reconcilia e migra seu próprio state para `bootstrap/terraform.tfstate`.
+3. Após o state transferir e os planos de cada camada serem revisados, executar **Provision AWS** em `main`, digitar `CONFIRMAR-PROVISIONAMENTO` e atestar `inventory_reviewed`. Jobs fazem a ordem da tabela e param na primeira falha, preservando states/recursos para retomada.
+4. Para mudança de código sem mudança de infraestrutura, executar **Deploy application** em `main` e digitar `DEPLOY-PRODUCTION`. Isso também atualiza a Lambda no state proprietário.
+5. **Teardown AWS** é separado. Por padrão remove Gateway, aplicação, Lambda e add-ons, mas retém RDS, EKS, VPC, ECR e backend. Para apagar o RDS é exigida a confirmação adicional `DELETE-RDS-DATA` e solicitado snapshot final; segredo fica com janela de recuperação de 7 dias. Para apagar EKS/VPC/ECR também, usar `delete_network` e confirmação `DELETE-NETWORK`. O backend e o histórico S3 são sempre preservados.
+
+Versões de referência foram conferidas em 04/11/2026: EKS 1.35 e RDS PostgreSQL 16.15 estão selecionados no código; verificar disponibilidade regional no plano antes de provisionar. O locking DynamoDB foi preservado para compatibilidade com os states atuais. Ver [plano](docs/specs/fase3/cloud-iac/plano_provisionamento_aws_centralizado.md) e [estratégia de migração](docs/specs/fase3/cloud-iac/migracao-states-aws.md).

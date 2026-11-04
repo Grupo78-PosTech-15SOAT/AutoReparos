@@ -1,0 +1,413 @@
+name: Provision AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type CONFIRMAR-PROVISIONAMENTO after reviewing the inventory and plan
+        required: true
+        type: string
+      inventory_reviewed:
+        description: Confirm that existing AWS resources, Terraform states, and import/migration plan were reviewed
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-infrastructure-${{ vars.AWS_REGION || 'us-east-1' }}-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+  TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+  TF_IN_AUTOMATION: 'true'
+  TF_INPUT: 'false'
+
+jobs:
+  base-platform:
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-PROVISIONAMENTO' && inputs.inventory_reviewed
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      vpc_id: ${{ steps.outputs.outputs.vpc_id }}
+      private_subnet_ids: ${{ steps.outputs.outputs.private_subnet_ids }}
+      cluster_name: ${{ steps.outputs.outputs.cluster_name }}
+      eks_security_group_id: ${{ steps.outputs.outputs.eks_security_group_id }}
+      lambda_security_group_id: ${{ steps.outputs.outputs.lambda_security_group_id }}
+      ecr_api_repository_url: ${{ steps.outputs.outputs.ecr_api_repository_url }}
+      ecr_web_repository_url: ${{ steps.outputs.outputs.ecr_web_repository_url }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536c5c3a # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.10.5
+      - name: Verify identity and record existing resource inventory
+        env:
+          EXPECTED_ACCOUNT: ${{ vars.AWS_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          actual="$(aws sts get-caller-identity --query Account --output text)"
+          test "$actual" = "$EXPECTED_ACCOUNT" || { echo '::error::Authenticated account does not match AWS_ACCOUNT_ID'; exit 1; }
+          {
+            echo '### Existing AWS resource inventory (read only)'
+            echo 'Resources in the configured account/region before this run:'
+            echo '```text'
+            aws ec2 describe-vpcs --region "$AWS_REGION" --filters 'Name=tag:Project,Values=AutoReparos' --query 'Vpcs[].{Vpc:VpcId,Cidr:CidrBlock,Tags:Tags}' --output table
+            aws ec2 describe-security-groups --region "$AWS_REGION" --filters 'Name=tag:Project,Values=AutoReparos' --query 'SecurityGroups[].{Id:GroupId,Name:GroupName,Vpc:VpcId}' --output table
+            aws eks list-clusters --region "$AWS_REGION" --query 'clusters[]' --output text
+            aws ecr describe-repositories --region "$AWS_REGION" --query 'repositories[?starts_with(repositoryName, `autoreparos-`)].{Name:repositoryName,Arn:repositoryArn}' --output table
+            aws rds describe-db-instances --region "$AWS_REGION" --query 'DBInstances[].{Id:DBInstanceIdentifier,Arn:DBInstanceArn,Status:DBInstanceStatus}' --output table
+            aws lambda list-functions --region "$AWS_REGION" --query 'Functions[?starts_with(FunctionName, `autoreparos-`)].{Name:FunctionName,Arn:FunctionArn}' --output table
+            aws apigatewayv2 get-apis --region "$AWS_REGION" --query 'Items[?starts_with(Name, `autoreparos-`)].{Name:Name,Id:ApiId,Protocol:ProtocolType}' --output table
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Ensure the legacy mixed state has been migrated before provisioning
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform
+        run: |
+          set -euo pipefail
+          if aws s3api head-object --bucket "$TF_STATE_BUCKET" --key k8s/terraform.tfstate >/dev/null 2>&1; then
+            terraform init -reconfigure -input=false -no-color \
+              -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=k8s/terraform.tfstate' \
+              -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+            remaining="$(terraform state list | wc -l | tr -d ' ')"
+            if [ "$remaining" -ne 0 ]; then
+              echo '::error::The legacy mixed Terraform state still owns resources. Finish the reviewed state transfer before provisioning.'
+              exit 1
+            fi
+          fi
+          if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key network/production/terraform.tfstate >/dev/null 2>&1; then
+            vpc="$(aws ec2 describe-vpcs --region "$AWS_REGION" --filters 'Name=tag:Name,Values=production-vpc' --query 'Vpcs[0].VpcId' --output text)"
+            cluster="$(aws eks describe-cluster --name '${{ vars.EKS_CLUSTER_NAME }}' --region "$AWS_REGION" --query 'cluster.name' --output text 2>/dev/null || true)"
+            ecr="$(aws ecr describe-repositories --region "$AWS_REGION" --query 'repositories[?starts_with(repositoryName, `autoreparos-`)].repositoryName | [0]' --output text)"
+            if { [ -n "$vpc" ] && [ "$vpc" != None ]; } || { [ -n "$cluster" ] && [ "$cluster" != None ]; } || { [ -n "$ecr" ] && [ "$ecr" != None ]; }; then
+              echo '::error::Matching AWS network/EKS/ECR resources exist without the new network state. Import or transfer their state before provisioning.'
+              exit 1
+            fi
+          fi
+      - name: Apply network, EKS and ECR base layer
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/base
+        run: |
+          set -euo pipefail
+          terraform init -reconfigure -input=false -no-color \
+            -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=k8s/terraform.tfstate' \
+            -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          terraform plan -input=false -no-color -out="$RUNNER_TEMP/base.tfplan" \
+            -var="aws_region=$AWS_REGION" -var="cluster_name=${{ vars.EKS_CLUSTER_NAME }}" -var='kubernetes_version=1.35' -var='environment=production'
+          terraform apply -input=false -auto-approve "$RUNNER_TEMP/base.tfplan"
+          rm -f "$RUNNER_TEMP/base.tfplan"
+      - id: outputs
+        name: Export non-sensitive infrastructure identifiers
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/base
+        run: |
+          set -euo pipefail
+          echo "vpc_id=$(terraform output -raw vpc_id)" >> "$GITHUB_OUTPUT"
+          echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -c .)" >> "$GITHUB_OUTPUT"
+          echo "cluster_name=$(terraform output -raw cluster_name)" >> "$GITHUB_OUTPUT"
+          echo "eks_security_group_id=$(terraform output -raw cluster_security_group_id)" >> "$GITHUB_OUTPUT"
+          echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> "$GITHUB_OUTPUT"
+          echo "oidc_provider_arn=$(terraform output -raw oidc_provider_arn)" >> "$GITHUB_OUTPUT"
+          echo "oidc_provider_url=$(terraform output -raw oidc_provider_url)" >> "$GITHUB_OUTPUT"
+          echo "ecr_api_repository_url=$(terraform output -raw ecr_api_repository_url)" >> "$GITHUB_OUTPUT"
+          echo "ecr_web_repository_url=$(terraform output -raw ecr_web_repository_url)" >> "$GITHUB_OUTPUT"
+      - name: Install EKS platform add-ons and AWS Load Balancer Controller
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/platform
+        env:
+          TF_VAR_cluster_name: ${{ steps.outputs.outputs.cluster_name }}
+          TF_VAR_kubernetes_version: '1.35'
+          TF_VAR_vpc_id: ${{ steps.outputs.outputs.vpc_id }}
+          TF_VAR_oidc_provider_arn: ${{ steps.outputs.outputs.oidc_provider_arn }}
+          TF_VAR_oidc_provider_url: ${{ steps.outputs.outputs.oidc_provider_url }}
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name "$TF_VAR_cluster_name" --region "$AWS_REGION"
+          if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key platform/production/terraform.tfstate >/dev/null 2>&1; then
+            addon="$(aws eks describe-addon --cluster-name "$TF_VAR_cluster_name" --addon-name aws-ebs-csi-driver --region "$AWS_REGION" --query 'addon.addonName' --output text 2>/dev/null || true)"
+            release="$(helm list -n kube-system -q | grep -E '^(metrics-server|aws-load-balancer-controller)$' || true)"
+            if { [ -n "$addon" ] && [ "$addon" != None ]; } || [ -n "$release" ]; then
+              echo '::error::Platform add-ons exist without platform state. Import them or complete the state transfer first.'
+              exit 1
+            fi
+          fi
+          terraform init -reconfigure -input=false -no-color \
+            -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=platform/production/terraform.tfstate' \
+            -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          terraform plan -input=false -no-color -out="$RUNNER_TEMP/platform.tfplan" -var="aws_region=$AWS_REGION"
+          terraform apply -input=false -auto-approve "$RUNNER_TEMP/platform.tfplan"
+          rm -f "$RUNNER_TEMP/platform.tfplan"
+
+  database:
+    needs: base-platform
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      db_secret_arn: ${{ steps.outputs.outputs.db_secret_arn }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536c5c3a # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.10.5
+      - name: Apply RDS and database access rules
+        working-directory: submodules/AutoReparos.Infra.Database/terraform
+        env:
+          TF_VAR_vpc_id: ${{ needs.base-platform.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ needs.base-platform.outputs.private_subnet_ids }}
+        run: |
+          set -euo pipefail
+          if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key database/terraform.tfstate >/dev/null 2>&1; then
+            existing="$(aws rds describe-db-instances --region "$AWS_REGION" --query 'DBInstances[?DBInstanceIdentifier==`autoreparos-rds-production`].DBInstanceIdentifier | [0]' --output text)"
+            if [ -n "$existing" ] && [ "$existing" != None ]; then echo '::error::RDS exists without the database state; import it before provisioning.'; exit 1; fi
+          fi
+          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ needs.base-platform.outputs.eks_security_group_id }}' --arg lambda '${{ needs.base-platform.outputs.lambda_security_group_id }}' '[$eks,$lambda]')"
+          terraform init -reconfigure -input=false -no-color \
+            -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=database/terraform.tfstate' \
+            -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          terraform plan -input=false -no-color -out="$RUNNER_TEMP/database.tfplan" -var="aws_region=$AWS_REGION" -var='environment=production'
+          terraform apply -input=false -auto-approve "$RUNNER_TEMP/database.tfplan"
+          rm -f "$RUNNER_TEMP/database.tfplan"
+      - id: outputs
+        working-directory: submodules/AutoReparos.Infra.Database/terraform
+        run: echo "db_secret_arn=$(terraform output -raw db_secret_arn)" >> "$GITHUB_OUTPUT"
+
+  lambda:
+    needs: [base-platform, database]
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      lambda_arn: ${{ steps.outputs.outputs.lambda_arn }}
+      lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5 # v4.3.1
+        with:
+          dotnet-version: 10.0.x
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536c5c3a # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.10.5
+      - name: Build Lambda package
+        working-directory: submodules/AutoReparos.AuthLambda/src
+        run: |
+          dotnet publish AutoReparos.AuthLambda.csproj -c Release -r linux-x64 --self-contained false -o "$RUNNER_TEMP/lambda-publish"
+          (cd "$RUNNER_TEMP/lambda-publish" && zip -q -r "$RUNNER_TEMP/auth-lambda.zip" .)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: auth-lambda-package
+          path: ${{ runner.temp }}/auth-lambda.zip
+          retention-days: 1
+      - name: Provision Lambda in the shared VPC
+        working-directory: submodules/AutoReparos.AuthLambda/infra
+        env:
+          TF_VAR_vpc_id: ${{ needs.base-platform.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ needs.base-platform.outputs.private_subnet_ids }}
+          TF_VAR_lambda_security_group_id: ${{ needs.base-platform.outputs.lambda_security_group_id }}
+          TF_VAR_api_gateway_execution_arn: ''
+          TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+          LAMBDA_ZIP: ${{ runner.temp }}/auth-lambda.zip
+          DB_SECRET_ARN: ${{ needs.database.outputs.db_secret_arn }}
+        run: |
+          set -euo pipefail
+          if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key lambda-auth/terraform.tfstate >/dev/null 2>&1; then
+            existing="$(aws lambda get-function --function-name autoreparos-auth-lambda-production --region "$AWS_REGION" --query 'Configuration.FunctionName' --output text 2>/dev/null || true)"
+            if [ -n "$existing" ] && [ "$existing" != None ]; then echo '::error::The Lambda exists without its owner state; import it before provisioning.'; exit 1; fi
+          fi
+          echo "::add-mask::$TF_VAR_jwt_secret"
+          DB_SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ARN" --query SecretString --output text)"
+          DB_CONNECTION="$(jq -r '.connectionString' <<< "$DB_SECRET_JSON")"
+          echo '::add-mask::'"$DB_CONNECTION"
+          export TF_VAR_db_connection_string="$DB_CONNECTION"
+          terraform init -reconfigure -input=false -no-color \
+            -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=lambda-auth/terraform.tfstate' \
+            -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          if terraform state list | grep -q '^aws_security_group\.lambda_sg'; then
+            echo '::error::The legacy Lambda state still owns its security group. Transfer aws_security_group.lambda_sg[0] to the network state as aws_security_group.lambda before provisioning.'
+            exit 1
+          fi
+          terraform plan -input=false -no-color -out="$RUNNER_TEMP/lambda.tfplan" \
+            -var="aws_region=$AWS_REGION" -var='environment=production' -var="lambda_zip_path=$LAMBDA_ZIP"
+          terraform apply -input=false -auto-approve "$RUNNER_TEMP/lambda.tfplan"
+          rm -f "$RUNNER_TEMP/lambda.tfplan" "$LAMBDA_ZIP"
+          unset DB_SECRET_JSON DB_CONNECTION TF_VAR_db_connection_string TF_VAR_jwt_secret
+      - id: outputs
+        working-directory: submodules/AutoReparos.AuthLambda/infra
+        run: |
+          echo "lambda_arn=$(terraform output -raw lambda_arn)" >> "$GITHUB_OUTPUT"
+          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
+
+  application:
+    needs: [base-platform, database, lambda]
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      listener_arn: ${{ steps.listener.outputs.listener_arn }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536c5c3a # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: azure/setup-helm@fe7b1b4506d7105c267c2c78d0c8f18f8c4c0484 # v4.2.0
+        with:
+          version: v3.16.4
+      - name: Build and push API and Web images
+        env:
+          ECR_API: ${{ needs.base-platform.outputs.ecr_api_repository_url }}
+          ECR_WEB: ${{ needs.base-platform.outputs.ecr_web_repository_url }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          registry="${ECR_API%%/*}"
+          aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$registry"
+          docker build -t "$ECR_API:$IMAGE_TAG" -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
+          docker build -t "$ECR_WEB:$IMAGE_TAG" -f submodules/AutoReparos.App/AutoReparos.Web/Dockerfile submodules/AutoReparos.App/AutoReparos.Web
+          docker push "$ECR_API:$IMAGE_TAG"
+          docker push "$ECR_WEB:$IMAGE_TAG"
+      - name: Connect to EKS and create runtime secrets
+        env:
+          DB_SECRET_ARN: ${{ needs.database.outputs.db_secret_arn }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
+          APROVACAO_TOKEN_SECRET: ${{ secrets.APROVACAO_TOKEN_SECRET }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for value in "$JWT_SECRET" "$SEED_USER_PASSWORD" "$APROVACAO_TOKEN_SECRET" "$GRAFANA_ADMIN_PASSWORD"; do test -n "$value" || { echo '::error::A required production secret is empty'; exit 1; }; echo "::add-mask::$value"; done
+          db="$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ARN" --query SecretString --output text | jq -r '.connectionString')"
+          echo "::add-mask::$db"
+          aws eks update-kubeconfig --name '${{ needs.base-platform.outputs.cluster_name }}' --region "$AWS_REGION"
+          kubectl create namespace '${{ vars.K8S_NAMESPACE }}' --dry-run=client -o yaml | kubectl apply -f -
+          jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg db "$db" --arg jwt "$JWT_SECRET" --arg seed "$SEED_USER_PASSWORD" --arg approval "$APROVACAO_TOKEN_SECRET" --arg sendgrid "$SENDGRID_API_KEY" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-api-secrets",namespace:$namespace},type:"Opaque",stringData:{"ConnectionStrings__DbConnection":$db,"Jwt__Secret":$jwt,"SeedUser__Password":$seed,"AprovacaoToken__Secret":$approval,"SendGrid__ApiKey":$sendgrid}}' | kubectl apply -f -
+          jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg password "$GRAFANA_ADMIN_PASSWORD" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-grafana-admin",namespace:$namespace},type:"Opaque",stringData:{"admin-password":$password}}' | kubectl apply -f -
+          unset db JWT_SECRET SEED_USER_PASSWORD APROVACAO_TOKEN_SECRET SENDGRID_API_KEY GRAFANA_ADMIN_PASSWORD
+      - name: Run migrations as a one-off EKS Job
+        env:
+          API_IMAGE: ${{ needs.base-platform.outputs.ecr_api_repository_url }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          namespace='${{ vars.K8S_NAMESPACE }}'
+          job="migrate-${GITHUB_RUN_ID}"
+          jq -n --arg namespace "$namespace" --arg name "$job" --arg image "$API_IMAGE" '{apiVersion:"batch/v1",kind:"Job",metadata:{name:$name,namespace:$namespace},spec:{backoffLimit:0,activeDeadlineSeconds:600,template:{spec:{restartPolicy:"Never",containers:[{name:"migrations",image:$image,env:[{name:"Database__RunMigrations",value:"true"},{name:"ConnectionStrings__DbConnection",valueFrom:{secretKeyRef:{name:"autoreparos-api-secrets",key:"ConnectionStrings__DbConnection"}}}]}]}}}}' | kubectl apply -f -
+          kubectl wait --for=condition=complete "job/$job" -n "$namespace" --timeout=10m
+          kubectl delete "job/$job" -n "$namespace" --wait=true
+      - name: Deploy API, Web and observability with Helm
+        env:
+          ECR_API: ${{ needs.base-platform.outputs.ecr_api_repository_url }}
+          ECR_WEB: ${{ needs.base-platform.outputs.ecr_web_repository_url }}
+          SENDGRID_FROM_EMAIL: ${{ vars.SENDGRID_FROM_EMAIL }}
+          SENDGRID_FROM_NAME: ${{ vars.SENDGRID_FROM_NAME }}
+        run: |
+          set -euo pipefail
+          helm upgrade --install autoreparos submodules/AutoReparos.Infra.K8s/k8s \
+            --namespace '${{ vars.K8S_NAMESPACE }}' --create-namespace \
+            -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml \
+            -f submodules/AutoReparos.Infra.K8s/k8s/values-production.yaml \
+            --set-string api.image.repository="$ECR_API" --set-string api.image.tag='${{ github.sha }}' \
+            --set-string web.image.repository="$ECR_WEB" --set-string web.image.tag='${{ github.sha }}' \
+            --set-string api.config.seedUserEmail='${{ vars.SEED_USER_EMAIL }}' \
+            --set-string api.config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
+            --set-string api.config.sendGridFromName="$SENDGRID_FROM_NAME" \
+            --wait --timeout 10m
+          kubectl rollout status deployment/autoreparos-api -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
+          kubectl rollout status deployment/autoreparos-web -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
+          for _ in $(seq 1 60); do
+            dns="$(kubectl get ingress autoreparos-api-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+            test -n "$dns" && break
+            sleep 10
+          done
+          test -n "$dns" || { echo '::error::Timed out waiting for internal ALB'; exit 1; }
+      - id: listener
+        name: Resolve internal ALB listener ARN
+        run: |
+          set -euo pipefail
+          dns="$(kubectl get ingress autoreparos-api-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+          test -n "$dns" || { echo '::error::The API ingress has no ALB DNS name'; exit 1; }
+          alb_arn="$(aws elbv2 describe-load-balancers --region "$AWS_REGION" --query "LoadBalancers[?DNSName=='$dns'].LoadBalancerArn | [0]" --output text)"
+          listener_arn="$(aws elbv2 describe-listeners --load-balancer-arn "$alb_arn" --region "$AWS_REGION" --query 'Listeners[?Port==`80`].ListenerArn | [0]' --output text)"
+          test "$listener_arn" != None && test -n "$listener_arn" || { echo '::error::Could not resolve ALB listener ARN'; exit 1; }
+          echo "listener_arn=$listener_arn" >> "$GITHUB_OUTPUT"
+          echo "Internal ALB listener resolved for Gateway integration; ALB DNS: $dns" >> "$GITHUB_STEP_SUMMARY"
+
+  gateway:
+    needs: [base-platform, lambda, application]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536c5c3a # v4.2.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.10.5
+      - name: Add Lambda and private ALB integrations to API Gateway
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/gateway
+        env:
+          TF_VAR_lambda_function_arn: ${{ needs.lambda.outputs.lambda_arn }}
+          TF_VAR_lambda_function_name: ${{ needs.lambda.outputs.lambda_function_name }}
+          TF_VAR_alb_listener_arn: ${{ needs.application.outputs.listener_arn }}
+          TF_VAR_vpc_id: ${{ needs.base-platform.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ needs.base-platform.outputs.private_subnet_ids }}
+        run: |
+          set -euo pipefail
+          if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key gateway/production/terraform.tfstate >/dev/null 2>&1; then
+            existing="$(aws apigatewayv2 get-apis --region "$AWS_REGION" --query 'Items[?Name==`autoreparos-http-api-production`].ApiId | [0]' --output text)"
+            if [ -n "$existing" ] && [ "$existing" != None ]; then echo '::error::The API Gateway exists without gateway state; transfer/import it before provisioning.'; exit 1; fi
+          fi
+          terraform init -reconfigure -input=false -no-color \
+            -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=gateway/production/terraform.tfstate' \
+            -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          terraform plan -input=false -no-color -out="$RUNNER_TEMP/gateway.tfplan" -var="aws_region=$AWS_REGION" -var='environment=production'
+          terraform apply -input=false -auto-approve "$RUNNER_TEMP/gateway.tfplan"
+          rm -f "$RUNNER_TEMP/gateway.tfplan"
+          echo "API base URL: $(terraform output -raw api_gateway_endpoint)" >> "$GITHUB_STEP_SUMMARY"
