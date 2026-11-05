@@ -131,8 +131,38 @@ jobs:
           set -euo pipefail
           namespace='${{ vars.K8S_NAMESPACE }}'
           job="migrate-${GITHUB_RUN_ID}"
-          jq -n --arg namespace "$namespace" --arg name "$job" --arg image "$API_IMAGE" '{apiVersion:"batch/v1",kind:"Job",metadata:{name:$name,namespace:$namespace},spec:{backoffLimit:0,activeDeadlineSeconds:600,template:{spec:{restartPolicy:"Never",containers:[{name:"migrations",image:$image,env:[{name:"Database__RunMigrations",value:"true"},{name:"ConnectionStrings__DbConnection",valueFrom:{secretKeyRef:{name:"autoreparos-api-secrets",key:"ConnectionStrings__DbConnection"}}}]}]}}}}' | kubectl apply -f -
-          kubectl wait --for=condition=complete "job/$job" -n "$namespace" --timeout=10m
+          jq -n --arg namespace "$namespace" --arg name "$job" --arg image "$API_IMAGE" '
+            def api_secret($key):
+              {name: $key, valueFrom: {secretKeyRef: {name: "autoreparos-api-secrets", key: $key}}};
+            {
+              apiVersion: "batch/v1",
+              kind: "Job",
+              metadata: {name: $name, namespace: $namespace},
+              spec: {
+                backoffLimit: 0,
+                activeDeadlineSeconds: 600,
+                template: {
+                  spec: {
+                    restartPolicy: "Never",
+                    containers: [{
+                      name: "migrations",
+                      image: $image,
+                      env: [
+                        {name: "Database__RunMigrations", value: "true"},
+                        api_secret("ConnectionStrings__DbConnection"),
+                        api_secret("Jwt__Secret")
+                      ]
+                    }]
+                  }
+                }
+              }
+            }' | kubectl apply -f -
+          if ! kubectl wait --for=condition=complete "job/$job" -n "$namespace" --timeout=10m; then
+            kubectl describe job "$job" -n "$namespace" || true
+            kubectl describe pods -n "$namespace" -l "job-name=$job" || true
+            kubectl logs "job/$job" -n "$namespace" -c migrations --tail=100 --pod-running-timeout=5s || true
+            exit 1
+          fi
           kubectl delete "job/$job" -n "$namespace" --wait=true
       - name: Deploy chart and verify API/Web
         env:
