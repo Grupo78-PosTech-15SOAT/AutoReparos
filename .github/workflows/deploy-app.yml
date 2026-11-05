@@ -23,7 +23,7 @@ env:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY-PRODUCTION'
+    if: contains(fromJSON('["refs/heads/main","refs/heads/feature/provisionamento-aws-centralizado"]'), github.ref) && inputs.confirmation == 'DEPLOY-PRODUCTION'
     runs-on: ubuntu-latest
     environment: production
     steps:

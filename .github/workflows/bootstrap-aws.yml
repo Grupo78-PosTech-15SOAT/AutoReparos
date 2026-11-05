@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   bootstrap:
-    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-BOOTSTRAP' && inputs.existing_resources_reviewed
+    if: contains(fromJSON('["refs/heads/main","refs/heads/feature/provisionamento-aws-centralizado"]'), github.ref) && inputs.confirmation == 'CONFIRMAR-BOOTSTRAP' && inputs.existing_resources_reviewed
     runs-on: ubuntu-latest
     environment: aws-bootstrap
     steps:
