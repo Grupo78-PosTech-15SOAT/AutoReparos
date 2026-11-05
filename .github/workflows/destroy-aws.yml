@@ -200,7 +200,7 @@ jobs:
           TF_VAR_api_gateway_execution_arn: ''
         run: |
           set -euo pipefail
-          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" -var='environment=production'
+          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" -var='environment=production' -var='lambda_zip_path=main.tf'
       - name: Remove platform add-ons
         if: ${{ steps.ids.outputs.has_platform == 'true' }}
         working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/platform
