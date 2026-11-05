@@ -48,7 +48,7 @@ jobs:
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -167,7 +167,7 @@ jobs:
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -215,7 +215,7 @@ jobs:
       - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5 # v4.3.1
         with:
           dotnet-version: 10.0.x
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -286,7 +286,7 @@ jobs:
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -385,7 +385,7 @@ jobs:
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
