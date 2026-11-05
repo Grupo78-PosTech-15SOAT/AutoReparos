@@ -57,6 +57,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          source_dir="$PWD"
+          tf_dir="$source_dir"
           backend_args=(
             "-backend-config=bucket=$TF_STATE_BUCKET"
             "-backend-config=key=bootstrap/terraform.tfstate"
@@ -66,29 +68,53 @@ jobs:
           )
           if aws s3api head-object --bucket "$TF_STATE_BUCKET" --key bootstrap/terraform.tfstate >/dev/null 2>&1; then
             using_remote=1
-            terraform init -input=false -no-color "${backend_args[@]}"
+            terraform -chdir="$tf_dir" init -input=false -no-color "${backend_args[@]}"
           else
             using_remote=0
-            terraform init -backend=false -input=false
+            # The S3 backend cannot initialize until its bucket exists. Work on a
+            # runner-local copy without the backend block, then restore it and migrate.
+            tf_dir="$RUNNER_TEMP/bootstrap-local"
+            mkdir -p "$tf_dir"
+            cp -a "$source_dir/." "$tf_dir/"
+            rm -rf "$tf_dir/.terraform"
+            python3 - "$tf_dir/main.tf" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path(sys.argv[1])
+          content = path.read_text()
+          content, count = re.subn(
+              r"(?ms)^  # Partial backend configuration:.*?^  }\n",
+              "",
+              content,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Could not remove the S3 backend block from the temporary bootstrap copy")
+          path.write_text(content)
+          PY
+            terraform -chdir="$tf_dir" init -backend=false -input=false -no-color
             # Rebuild local tracking for partially created backend resources.
             # Imports only adopt objects in the configured account and exact configured names.
             if aws s3api head-bucket --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then
-              terraform import -input=false aws_s3_bucket.terraform_state "$TF_STATE_BUCKET"
-              if aws s3api get-bucket-versioning --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" 2>/dev/null | jq -e '.Status != null' >/dev/null; then terraform import -input=false aws_s3_bucket_versioning.terraform_state_versioning "$TF_STATE_BUCKET"; fi
-              if aws s3api get-bucket-encryption --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform import -input=false aws_s3_bucket_server_side_encryption_configuration.terraform_state_crypto "$TF_STATE_BUCKET"; fi
-              if aws s3api get-public-access-block --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform import -input=false aws_s3_bucket_public_access_block.terraform_state_pab "$TF_STATE_BUCKET"; fi
-              if aws s3api get-bucket-ownership-controls --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform import -input=false aws_s3_bucket_ownership_controls.terraform_state_ownership "$TF_STATE_BUCKET"; fi
-              if aws s3api get-bucket-policy --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform import -input=false aws_s3_bucket_policy.enforce_tls "$TF_STATE_BUCKET"; fi
+              terraform -chdir="$tf_dir" import -input=false aws_s3_bucket.terraform_state "$TF_STATE_BUCKET"
+              if aws s3api get-bucket-versioning --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" 2>/dev/null | jq -e '.Status != null' >/dev/null; then terraform -chdir="$tf_dir" import -input=false aws_s3_bucket_versioning.terraform_state_versioning "$TF_STATE_BUCKET"; fi
+              if aws s3api get-bucket-encryption --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform -chdir="$tf_dir" import -input=false aws_s3_bucket_server_side_encryption_configuration.terraform_state_crypto "$TF_STATE_BUCKET"; fi
+              if aws s3api get-public-access-block --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform -chdir="$tf_dir" import -input=false aws_s3_bucket_public_access_block.terraform_state_pab "$TF_STATE_BUCKET"; fi
+              if aws s3api get-bucket-ownership-controls --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform -chdir="$tf_dir" import -input=false aws_s3_bucket_ownership_controls.terraform_state_ownership "$TF_STATE_BUCKET"; fi
+              if aws s3api get-bucket-policy --bucket "$TF_STATE_BUCKET" --expected-bucket-owner "$AWS_ACCOUNT_ID" >/dev/null 2>&1; then terraform -chdir="$tf_dir" import -input=false aws_s3_bucket_policy.enforce_tls "$TF_STATE_BUCKET"; fi
             fi
-            if aws dynamodb describe-table --table-name "$TF_LOCK_TABLE" --region "$AWS_REGION" >/dev/null 2>&1; then terraform import -input=false aws_dynamodb_table.terraform_locks "$TF_LOCK_TABLE"; fi
+            if aws dynamodb describe-table --table-name "$TF_LOCK_TABLE" --region "$AWS_REGION" >/dev/null 2>&1; then terraform -chdir="$tf_dir" import -input=false aws_dynamodb_table.terraform_locks "$TF_LOCK_TABLE"; fi
           fi
-          terraform plan -input=false -no-color \
+          terraform -chdir="$tf_dir" plan -input=false -no-color \
             -var="aws_region=$AWS_REGION" \
             -var="state_bucket_name=$TF_STATE_BUCKET" \
             -var="lock_table_name=$TF_LOCK_TABLE" \
             -out=bootstrap.tfplan
-          terraform apply -input=false -auto-approve bootstrap.tfplan
+          terraform -chdir="$tf_dir" apply -input=false -auto-approve bootstrap.tfplan
           if [ "$using_remote" -eq 0 ]; then
-            terraform init -input=false -migrate-state -force-copy -no-color "${backend_args[@]}"
+            cp "$source_dir/main.tf" "$tf_dir/main.tf"
+            terraform -chdir="$tf_dir" init -input=false -migrate-state -force-copy -no-color "${backend_args[@]}"
           fi
-          rm -f bootstrap.tfplan
+          rm -f "$tf_dir/bootstrap.tfplan"
