@@ -254,7 +254,7 @@ jobs:
           DB_CONNECTION="$(jq -r '.connectionString' <<< "$DB_SECRET_JSON")"
           echo '::add-mask::'"$DB_CONNECTION"
           export TF_VAR_db_connection_string="$DB_CONNECTION"
-          terraform init -reconfigure -input=false -no-color \
+          terraform init -upgrade -reconfigure -input=false -no-color \
             -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=lambda-auth/terraform.tfstate' \
             -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
           if terraform state list | grep -q '^aws_security_group\.lambda_sg'; then
