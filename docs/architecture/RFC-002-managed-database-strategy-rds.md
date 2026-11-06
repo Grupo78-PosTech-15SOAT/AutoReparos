@@ -41,7 +41,7 @@ A tabela matricial abaixo contrasta rigorosamente as duas abordagens sob as pers
 | **Disponibilidade & SLA** | ~99.0% (dependente da integridade dos nós EC2 do EKS e reanexação de EBS). | **99.95%** (SLA formal AWS em arquitetura Multi-AZ gerenciada). | Alta disponibilidade real para recepção de clientes e faturamento da oficina. |
 | **Recuperação de Desastres (RPO)** | **RPO de 24 horas** (baseado na frequência do último `pg_dump` diário). | **RPO < 5 minutos** (gravação contínua de transações nos logs WAL no S3). | Quase zero perda de ordens de serviço ou movimentações de estoque em caso de desastre. |
 | **Tempo de Recuperação (RTO)** | **RTO de 2 a 4 horas** (tempo para subir novo pod, reidratar volume e restaurar dump). | **RTO < 15 minutos** (restauração automatizada ou failover automático em segundos). | Redução drástica de tempo de inatividade da oficina. |
-| **Point-in-Time Recovery (PITR)** | Inexistente (restaura apenas o estado do dump fechado). | **Suporte Nativo a PITR até o segundo exato** nos últimos 7 dias. | Permite reverter falhas humanas ou erros de aplicação para um timestamp específico. |
+| **Point-in-Time Recovery (PITR)** | Inexistente (restaura apenas o estado do dump fechado). | **Suporte Nativo a PITR até o segundo exato** no período configurado (1 dia no AWS Free Plan). | Permite reverter falhas humanas ou erros de aplicação para um timestamp específico. |
 | **Segurança e Segredos** | Credenciais em `Secret` Kubernetes codificadas em base64 no etcd. | **AWS Secrets Manager nativo com KMS** e geração de senha forte via Terraform. | Conformidade com normas de segurança e proteção contra vazamento em logs ou repositórios. |
 | **Criptografia em Repouso** | Dependente de StorageClass com KMS configurado manualmente no PVC. | **Criptografia nativa AES-256 via KMS** em discos gp3 e em todos os snapshots. | Proteção integral dos dados cadastrais de clientes (CPF/CNPJ e contatos). |
 | **Patches e Manutenção** | Manual: equipe precisa rebuildar imagens Docker e aplicar rolling restarts. | **Janelas de Manutenção Automatizadas** pela AWS com aplicação de patches críticos. | Manutenção preventiva transparente sem indisponibilidade no horário comercial. |
@@ -60,7 +60,7 @@ instance_class        = "db.t4g.micro"   # Elegível no Free Tier AWS (Graviton2
 allocated_storage     = 20               # 20 GiB de armazenamento gp3 (dentro da cota de 20GB grátis)
 max_allocated_storage = 20               # Trava de segurança: impede autoscaling de disco não intencional
 multi_az              = false            # Single-AZ para dev/avaliação (toggle rápido para true em prod real)
-backup_retention_period = 7              # 7 dias de retenção de snapshots automatizados
+backup_retention_period = 1              # 1 dia no AWS Free Plan; ampliar conforme necessidade e plano da conta
 storage_encrypted     = true             # Criptografia habilitada sem custo adicional de licença
 deletion_protection   = false            # Facilita limpeza do ambiente ao término da avaliação
 skip_final_snapshot   = true             # Permite 'terraform destroy' limpo sem cobrança de snapshot órfão
@@ -105,5 +105,5 @@ Host=${address};Port=5432;Database=autoreparos_db;Username=autoreparos_admin;Pas
 
 A transição para o **AWS RDS PostgreSQL 16** representa um salto qualitativo indispensável para a governança da oficina mecânica AutoReparos:
 - **Garantia de Negócio:** Eliminação de riscos de perda transacional em ordens de serviço e controle de insumos.
-- **Restauração Cirúrgica (PITR):** Capacidade de recuperar o banco para qualquer segundo dos últimos 7 dias.
+- **Restauração Cirúrgica (PITR):** Capacidade de recuperar o banco para qualquer segundo do período configurado (1 dia neste deploy Free Plan).
 - **Eficiência Financeira:** Operação configurada dentro do **AWS Free Tier**, viabilizando custos zero durante todo o ciclo avaliativo do Tech Challenge.

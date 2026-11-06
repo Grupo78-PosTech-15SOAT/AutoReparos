@@ -137,7 +137,7 @@ Para garantir zero fricção entre o Track A e o Track B, os seguintes contratos
    - Conferir se [`terraform/main.tf`](../../../../submodules/AutoReparos.Infra.Database/terraform/main.tf) cobre:
      - `aws_db_subnet_group.rds` referenciando pelo menos 2 subnets privadas em AZs distintas.
      - `aws_security_group.rds` com regra de entrada TCP 5432 restrita estritamente ao `security_groups = [var.eks_nodes_security_group_id, var.lambda_security_group_id]` e blocos CIDR autorizados.
-     - `aws_db_instance.postgres` configurado com `engine = "postgres"`, `engine_version = "16.3"`, `instance_class = "db.t4g.micro"`, `allocated_storage = 20`, `storage_encrypted = true`, `backup_retention_period = 7`, `skip_final_snapshot = false` (com snapshot para produção).
+     - `aws_db_instance.postgres` configurado com `engine = "postgres"`, `engine_version = "16.3"`, `instance_class = "db.t4g.micro"`, `allocated_storage = 20`, `storage_encrypted = true`, `backup_retention_period = 1`, `skip_final_snapshot = false` (com snapshot para produção).
      - `aws_secretsmanager_secret` e `aws_secretsmanager_secret_version` persistindo a connection string completa em formato JSON e plain text para consumo da Lambda e do EKS.
 2. **Definir Outputs Obrigatórios ([`terraform/outputs.tf`](../../../../submodules/AutoReparos.Infra.Database/terraform/outputs.tf)):**
    - `db_endpoint`: Host e porta do RDS (ex: `autoreparos-db.xxx.us-east-1.rds.amazonaws.com:5432`).

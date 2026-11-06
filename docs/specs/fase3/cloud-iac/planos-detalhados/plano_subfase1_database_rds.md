@@ -57,7 +57,7 @@ flowchart TD
 | `aws_db_subnet_group.rds` | Rede | Agrupa 2 subnets privadas em AZs distintas para failover seguro. |
 | `aws_security_group.rds` | Segurança | Bloqueia tráfego na porta 5432, liberando estritamente os Security Groups dos nós EKS e da Lambda. |
 | `aws_db_parameter_group.pg16` | Tuning | Otimiza parâmetros do PostgreSQL 16 (`log_min_duration_statement = 1000`, `log_connections = 1`). |
-| `aws_db_instance.postgres` | Banco | PostgreSQL 16.3, `db.t4g.micro`, storage gp3 de 20 GiB, KMS habilitado, backup de 7 dias. |
+| `aws_db_instance.postgres` | Banco | PostgreSQL 16.3, `db.t4g.micro`, storage gp3 de 20 GiB, KMS habilitado, backup de 1 dia no AWS Free Plan. |
 | `aws_secretsmanager_secret` | Segredos | Persiste a connection string completa e credenciais em JSON seguro. |
 | `aws_ssm_parameter` (novos) | Desacoplamento | Expõe `endpoint`, `address`, `name` e `secret_arn` no Parameter Store para consumo desacoplado. |
 | `random_password.master_password` | Segurança | Gera senha randômica com 24 caracteres caso não seja informada via `var.db_password`. |
@@ -262,7 +262,7 @@ terraform validate
 
 | Risco Identificado | Severidade | Probabilidade | Mitigação Arquitetural | Procedimento de Rollback |
 |:---|:---:|:---:|:---|:---|
-| Exclusão acidental da base em ambiente de produção | Alta | Baixa | Snapshot automático diário (`backup_retention_period = 7`) e tags de proteção. | Restaurar a partir do snapshot point-in-time mais recente via console/CLI. |
+| Exclusão acidental da base em ambiente de produção | Alta | Baixa | Snapshot automático diário (`backup_retention_period = 1`) e tags de proteção. | Restaurar a partir do snapshot point-in-time mais recente via console/CLI. |
 | Vazamento de credenciais do banco em logs de CI | Crítica | Baixa | Utilização de `random_password`, anotação `sensitive = true` em todas as variáveis/outputs de senha e persistência exclusiva no Secrets Manager. | Rotacionar imediatamente a secret no AWS Secrets Manager e reiniciar os pods da API. |
 | Incompatibilidade de AZs no Subnet Group | Média | Baixa | Forçar mínimo de 2 subnets em zonas distintas (`us-east-1a`, `us-east-1b`). | Ajustar `private_subnet_ids` no `terraform.tfvars`. |
 | Custo residual após avaliação | Alta | Média | Definir `skip_final_snapshot = true` em dev/laboratório para permitir `terraform destroy` limpo sem cobrança de armazenamento órfão. | Executar `terraform destroy -auto-approve` ao término dos testes. |

@@ -61,6 +61,8 @@ O projeto foi concebido e evoluído ao longo das três fases do **Tech Challenge
 9. [Documentação Técnica e Especificações da Fase 3](#9-documentação-técnica-e-especificações-da-fase-3)
 10. [Entregáveis Oficiais e Links](#10-entregáveis-oficiais-e-links)
 11. [Integrantes do Grupo](#11-integrantes-do-grupo)
+12. [Provisionamento AWS centralizado](#provisionamento-aws-centralizado)
+    - [Configuração completa do GitHub Actions e AWS](#configuração-completa-do-github-actions-e-aws)
 
 ---
 
@@ -683,38 +685,58 @@ O pai coordena CI, bootstrap e alterações da conta AWS. O workflow automático
 
 O fluxo passa apenas IDs/ARNs/URLs não sensíveis entre jobs. A senha RDS é consultada em tempo de execução no Secrets Manager; JWT, senha seed, token de aprovação, SendGrid e Grafana são Environment secrets. States remotos podem conter valores sensíveis e devem ter acesso restrito. Os planos ficam somente no runner e não são artifacts.
 
-### Preparação no GitHub
+### Configuração completa do GitHub Actions e AWS
 
-Em **Settings → Environments**, criar:
+Tudo nesta seção é cadastrado no **repositório pai [Grupo78-PosTech-15SOAT/AutoReparos](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos)**. Os submódulos são baixados pelos workflows, mas não recebem estas variables ou secrets. É preciso ter permissão para editar Settings no repositório e criar roles no IAM da conta AWS.
 
-- `aws-bootstrap`: limitar deployment branch a `main`; cadastrar reviewers para aprovação antes do bootstrap.
-- `production`: limitar a `main`; exigir reviewers para provisionamento, deploy e teardown. Habilitar prevenção de autoaprovação quando disponível.
+**Passo 1 — escolher os quatro valores compartilhados.** Anote o ID de 12 dígitos da conta AWS, a região, o nome do bucket S3 do Terraform e o nome da tabela DynamoDB de lock. Use a mesma região e os mesmos nomes em todos os workflows. Em uma conta já provisionada, descubra os nomes dos recursos e states existentes antes de mudar qualquer valor. O bucket S3 tem nome global: `autoreparos-terraform-state-backend` pode estar ocupado por outra conta. Para uma conta nova, prefira `autoreparos-tfstate-<ID_DA_CONTA>-<REGIAO>` e confira a disponibilidade. Se o bootstrap falhar após criar a tabela, mantenha o nome da tabela ao repetir a execução; o workflow importa a tabela existente.
 
-No nível do repositório, em **Settings → Secrets and variables → Actions → Variables**, cadastrar:
+**Passo 2 — criar os Environments.** Acesse **Settings → Environments → New environment** e crie, com grafia exata, `aws-bootstrap` e `production`. Em **Deployment branches and tags**, autorize `main` e, enquanto esta implementação estiver em teste, `feature/provisionamento-aws-centralizado`. Os workflows atuais só executam nessas duas branches. Configure **Required reviewers** para aprovação de bootstrap, provisionamento, deploy e teardown, se o plano do GitHub oferecer esse controle. Restrinja as branches no Environment porque o subject OIDC identifica o Environment, não a branch.
 
-| Variable | Conteúdo |
+**Passo 3 — cadastrar as repository variables.** Acesse **Settings → Secrets and variables → Actions → Variables → New repository variable**. Cadastre cada linha abaixo no **repositório**, não em um Environment; bootstrap e production precisam enxergar os mesmos valores.
+
+| Nome exato | Valor / exemplo | Para que serve |
+|---|---|---|
+| `AWS_ACCOUNT_ID` | `123456789012` (substituir pelo ID real) | O bootstrap e o provisionamento conferem se a role assumida aponta para a conta correta. |
+| `AWS_REGION` | `us-east-1` | Região do backend e dos recursos AWS; também compõe o grupo de concorrência dos workflows. |
+| `TF_STATE_BUCKET` | `autoreparos-tfstate-123456789012-us-east-1` (exemplo) | Bucket S3 globalmente único para os states. Deve ser o mesmo em todas as execuções. |
+| `TF_LOCK_TABLE` | `autoreparos-terraform-locks` | Tabela DynamoDB de lock do Terraform. Reutilize a já criada se houver. |
+| `SUBMODULES_APP_ID` | ID numérico da GitHub App, **somente se os submódulos forem privados** | Permite gerar token temporário de leitura dos cinco repositórios. |
+
+**Passo 4 — cadastrar o repository secret condicional.** Em **Settings → Secrets and variables → Actions → Secrets → New repository secret**, cadastre `SUBMODULES_APP_PRIVATE_KEY` com o conteúdo completo da chave PEM da GitHub App **somente se houver submódulos privados**. A App deve estar instalada no pai e nos quatro submódulos, com **Contents: Read-only**. `SUBMODULES_APP_ID` e `SUBMODULES_APP_PRIVATE_KEY` devem ser configurados juntos. Se todos forem públicos, deixe os dois ausentes; o checkout usa `GITHUB_TOKEN`. Esses valores ficam no repositório porque o workflow `CI` não usa Environment.
+
+**Passo 5 — cadastrar o Environment `aws-bootstrap`.** Abra **Settings → Environments → aws-bootstrap → Environment secrets → Add secret** e crie:
+
+| Nome exato | Valor |
 |---|---|
-| `AWS_ACCOUNT_ID` | ID de 12 dígitos da conta alvo, confirmado por um administrador |
-| `AWS_REGION` | Região aprovada para os recursos, por exemplo `us-east-1` |
-| `TF_STATE_BUCKET` | Nome do bucket existente/planejado, globalmente único; para uma conta já usada, deve ser o bucket real dos states atuais |
-| `TF_LOCK_TABLE` | Nome real da tabela DynamoDB de lock atual; não criar uma segunda tabela para a mesma transição |
+| `AWS_ROLE_ARN` | ARN da role OIDC de bootstrap, por exemplo `arn:aws:iam::123456789012:role/AutoReparosGitHubBootstrapRole`. |
 
-No Environment `aws-bootstrap`, cadastrar o secret `AWS_ROLE_ARN` com a ARN da role de bootstrap. Em `production`, cadastrar o secret `AWS_ROLE_ARN` com a role de deploy e as variables `EKS_CLUSTER_NAME`, `K8S_NAMESPACE`, `SEED_USER_EMAIL`, `SENDGRID_FROM_EMAIL` e `SENDGRID_FROM_NAME`. Usar `autoreparos-cluster`, `autoreparos` e valores aprovados pela operação para os demais. E-mail SendGrid pode ficar vazio para desabilitar envio; `NotificacaoService` ignora envio quando incompleto.
+Esse Environment não precisa de variables próprias: lê `AWS_ACCOUNT_ID`, `AWS_REGION`, `TF_STATE_BUCKET` e `TF_LOCK_TABLE` do repositório.
 
-Secrets obrigatórios no Environment `production`:
+**Passo 6 — cadastrar as variables do Environment `production`.** Abra **Settings → Environments → production → Environment variables → Add variable** e crie:
 
-| Secret | Uso |
+| Nome exato | Valor / exemplo | Para que serve |
+|---|---|---|
+| `EKS_CLUSTER_NAME` | `autoreparos-cluster` | Nome do cluster usado no provisionamento e na checagem de recursos existentes. |
+| `K8S_NAMESPACE` | `autoreparos` | Namespace do Helm, da aplicação e dos secrets Kubernetes. |
+| `SEED_USER_EMAIL` | E-mail do administrador inicial | Usuário criado pela aplicação. |
+| `SENDGRID_FROM_EMAIL` | Remetente verificado no SendGrid | Endereço de envio de e-mail; pode ficar vazio quando envio estiver desabilitado. |
+| `SENDGRID_FROM_NAME` | `AutoReparos` | Nome exibido no remetente. |
+
+**Passo 7 — cadastrar os secrets do Environment `production`.** Em **Settings → Environments → production → Environment secrets → Add secret**, crie:
+
+| Nome exato | Valor / finalidade |
 |---|---|
-| `AWS_ROLE_ARN` | Role OIDC de provisionamento/deploy |
-| `JWT_SECRET` | Chave forte da API e Lambda; usar o mesmo valor em ambas |
-| `SEED_USER_PASSWORD` | Senha escolhida pelo administrador para o usuário seed |
-| `APROVACAO_TOKEN_SECRET` | Chave forte para tokens de aprovação |
-| `GRAFANA_ADMIN_PASSWORD` | Senha de administrador Grafana |
-| `SENDGRID_API_KEY` | Opcional; vazio desabilita envio de e-mails |
+| `AWS_ROLE_ARN` | ARN da role OIDC de provisionamento/deploy, por exemplo `arn:aws:iam::123456789012:role/AutoReparosGitHubDeployRole`. |
+| `JWT_SECRET` | Chave aleatória forte; o mesmo valor alimenta a API e a Lambda. |
+| `SEED_USER_PASSWORD` | Senha forte do administrador inicial. |
+| `APROVACAO_TOKEN_SECRET` | Outra chave aleatória forte para os tokens de aprovação. |
+| `GRAFANA_ADMIN_PASSWORD` | Senha forte de administrador do Grafana. |
+| `SENDGRID_API_KEY` | Chave do SendGrid quando envio estiver habilitado; pode ficar ausente para desabilitar envio. |
 
-Não cole valores de produção em arquivos do repositório, outputs ou artifacts. A migration Job usa a connection string lida do Secrets Manager e o processo de arranque da API pula migrations para impedir concorrência entre réplicas.
+`AWS_ROLE_ARN` existe **duas vezes**, com valores diferentes: uma role em `aws-bootstrap` e outra em `production`. Não cadastre um único `AWS_ROLE_ARN` como repository secret. Os nomes de variables e secrets são sensíveis à grafia; use maiúsculas e `_` exatamente como nas tabelas. Não coloque senhas em repository variables, `.env` versionado, outputs ou artifacts. A conexão do RDS e sua senha são geradas pelo Terraform e lidas do AWS Secrets Manager em tempo de execução; não cadastre `CONNECTION_STRING`, `AWS_ACCESS_KEY_ID` ou `AWS_SECRET_ACCESS_KEY` no GitHub. O migration Job usa essa conexão e a API evita migrations concorrentes entre réplicas.
 
-Se os submódulos forem privados, cadastrar a variable de repositório `SUBMODULES_APP_ID` e o secret `SUBMODULES_APP_PRIVATE_KEY` para uma GitHub App com permissão somente de leitura de conteúdo nos cinco repositórios AutoReparos. Se forem públicos, deixar ambos ausentes.
+**Passo 8 — conferir antes de executar.** Em **Actions**, confirme que o workflow aparece na branch escolhida; `workflow_dispatch` pode exigir que o arquivo já exista na branch padrão para exibir **Run workflow**. Verifique os dois Environments e as quatro repository variables obrigatórias. Depois siga a ordem em [Execução, recuperação e teardown](#execução-recuperação-e-teardown). A configuração do provedor e das duas roles está logo abaixo, em [Identidade AWS OIDC](#identidade-aws-oidc).
 
 ### Identidade AWS OIDC
 
@@ -723,14 +745,16 @@ Criar/reutilizar o provider IAM `https://token.actions.githubusercontent.com`, a
 - Bootstrap: `repo:Grupo78-PosTech-15SOAT/AutoReparos:environment:aws-bootstrap`
 - Deploy: `repo:Grupo78-PosTech-15SOAT/AutoReparos:environment:production`
 
-O nome `main` é restringido pelo Environment do GitHub. Se a organização/repositório usar subject imutável, substituir o `sub` pelo formato `repo:OWNER@OWNER_ID/REPO@REPO_ID:environment:ENVIRONMENT`, consultando os IDs em **Settings → Actions → OIDC**; não aceitar `repo:*` nem wildcard. A role bootstrap precisa somente administrar o bucket S3 de state e a tabela DynamoDB configurados. A role deploy precisa das operações dos providers AWS/Terraform para EC2/VPC, EKS, ECR, RDS, Lambda, API Gateway v2, ELBv2, Secrets Manager, SSM, CloudWatch, KMS, IAM e backend S3/DynamoDB. Restringir recursos a nomes/tags AutoReparos sempre que a API permitir e `iam:PassRole` às roles de cluster, node group, Lambda, EBS CSI e Load Balancer Controller do projeto. O executor também precisa atualizar kubeconfig e ter acesso Kubernetes correspondente no EKS Access Entry/RBAC.
+As branches permitidas são restringidas pelos Environments do GitHub. Se a organização/repositório usar subject imutável, substituir o `sub` pelo formato `repo:OWNER@OWNER_ID/REPO@REPO_ID:environment:ENVIRONMENT`, verificando o formato emitido pela configuração OIDC do repositório; não aceitar `repo:*` nem wildcard. A role bootstrap precisa somente administrar o bucket S3 de state e a tabela DynamoDB configurados. A role deploy precisa das operações dos providers AWS/Terraform para EC2/VPC, EKS, ECR, RDS, Lambda, API Gateway v2, ELBv2, Secrets Manager, SSM, CloudWatch, KMS, IAM e backend S3/DynamoDB. Restringir recursos a nomes/tags AutoReparos sempre que a API permitir e `iam:PassRole` às roles de cluster, node group, Lambda, EBS CSI e Load Balancer Controller do projeto. O executor também precisa atualizar kubeconfig e ter acesso Kubernetes correspondente no EKS Access Entry/RBAC.
+
+A retenção automática do RDS é de **1 dia** no AWS Free Plan usado neste provisionamento. O valor fica no submódulo `AutoReparos.Infra.Database` (`backup_retention_period`); retenções maiores exigem revisão do plano da conta e do risco operacional. Isso é diferente da janela de recuperação de 7 dias do segredo no Secrets Manager durante o teardown.
 
 ### Execução, recuperação e teardown
 
 1. Revisar e preencher [o inventário/mapeamento de states](docs/specs/fase3/cloud-iac/migracao-states-aws.md) usando a conta real. O workflow lista recursos antes de alterar qualquer coisa e bloqueia se encontrar recursos existentes sem state de destino ou recursos no state misto legado.
-2. Em **Actions → Bootstrap AWS Terraform backend → Run workflow**, branch `main`, digitar `CONFIRMAR-BOOTSTRAP` e confirmar revisão do bucket/tabela existentes. O bootstrap importa configuração parcial já existente, reconcilia e migra seu próprio state para `bootstrap/terraform.tfstate`.
-3. Após o state transferir e os planos de cada camada serem revisados, executar **Provision AWS** em `main`, digitar `CONFIRMAR-PROVISIONAMENTO` e atestar `inventory_reviewed`. Jobs fazem a ordem da tabela e param na primeira falha, preservando states/recursos para retomada.
-4. Para mudança de código sem mudança de infraestrutura, executar **Deploy application** em `main` e digitar `DEPLOY-PRODUCTION`. Isso também atualiza a Lambda no state proprietário.
+2. Em **Actions → Bootstrap AWS Terraform backend → Run workflow**, selecionar `main` ou `feature/provisionamento-aws-centralizado`, digitar `CONFIRMAR-BOOTSTRAP` e marcar `existing_resources_reviewed` após revisar bucket/tabela existentes. O bootstrap importa configuração parcial já existente, reconcilia e migra seu próprio state para `bootstrap/terraform.tfstate`.
+3. Após revisar os states e o plano de migração, executar **Provision AWS** na mesma branch, digitar `CONFIRMAR-PROVISIONAMENTO` e marcar `inventory_reviewed`. Jobs fazem a ordem da tabela e param na primeira falha, preservando states/recursos para retomada. O workflow aplica seus planos automaticamente na mesma execução; revise o impacto antes de confirmar.
+4. Para mudança de código sem mudança de infraestrutura, executar **Deploy application** na mesma branch e digitar `DEPLOY-PRODUCTION`. Isso também atualiza a Lambda no state proprietário.
 5. **Teardown AWS** é separado. Por padrão remove Gateway, aplicação, Lambda e add-ons, mas retém RDS, EKS, VPC, ECR e backend. Para apagar o RDS é exigida a confirmação adicional `DELETE-RDS-DATA` e solicitado snapshot final; segredo fica com janela de recuperação de 7 dias. Para apagar EKS/VPC/ECR também, usar `delete_network` e confirmação `DELETE-NETWORK`. O backend e o histórico S3 são sempre preservados.
 
 Versões de referência foram conferidas em 04/11/2026: EKS 1.35 e RDS PostgreSQL 16.15 estão selecionados no código; verificar disponibilidade regional no plano antes de provisionar. O locking DynamoDB foi preservado para compatibilidade com os states atuais. Ver [plano](docs/specs/fase3/cloud-iac/plano_provisionamento_aws_centralizado.md) e [estratégia de migração](docs/specs/fase3/cloud-iac/migracao-states-aws.md).
