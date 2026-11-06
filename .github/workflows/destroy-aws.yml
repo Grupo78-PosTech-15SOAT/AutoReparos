@@ -42,7 +42,7 @@ env:
 jobs:
   teardown:
     if: >-
-      contains(fromJSON('["refs/heads/main","refs/heads/feature/provisionamento-aws-centralizado"]'), github.ref) && inputs.confirmation == 'CONFIRMAR-DESTRUICAO' &&
+      github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-DESTRUICAO' &&
       (!inputs.delete_database || inputs.database_confirmation == 'DELETE-RDS-DATA') &&
       (!inputs.delete_network || (inputs.delete_database && inputs.network_confirmation == 'DELETE-NETWORK'))
     runs-on: ubuntu-latest
