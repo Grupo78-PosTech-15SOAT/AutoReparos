@@ -42,25 +42,25 @@ env:
 jobs:
   teardown:
     if: >-
-      contains(fromJSON('["refs/heads/main","refs/heads/feature/provisionamento-aws-centralizado"]'), github.ref) && inputs.confirmation == 'CONFIRMAR-DESTRUICAO' &&
+      github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-DESTRUICAO' &&
       (!inputs.delete_database || inputs.database_confirmation == 'DELETE-RDS-DATA') &&
       (!inputs.delete_network || (inputs.delete_database && inputs.network_confirmation == 'DELETE-NETWORK'))
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v3.1.2
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
           terraform_wrapper: false

@@ -14,7 +14,7 @@ runs:
   steps:
     - id: app-token
       if: inputs.app-id != ''
-      uses: actions/create-github-app-token@v1.11.0
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       with:
         app-id: ${{ inputs.app-id }}
         private-key: ${{ inputs.private-key }}
@@ -25,7 +25,7 @@ runs:
           AutoReparos.AuthLambda
           AutoReparos.Infra.Database
           AutoReparos.Infra.K8s
-    - uses: actions/checkout@v4.2.2
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         submodules: recursive
         token: ${{ steps.app-token.outputs.token || github.token }}
