@@ -1,0 +1,269 @@
+name: Teardown AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type CONFIRMAR-DESTRUICAO to remove application infrastructure
+        required: true
+        type: string
+      delete_database:
+        description: Delete RDS after taking a final snapshot (irreversible after snapshot expiry)
+        required: true
+        type: boolean
+        default: false
+      database_confirmation:
+        description: Type DELETE-RDS-DATA only when delete_database is true
+        required: false
+        type: string
+      delete_network:
+        description: Also remove EKS/VPC/ECR after deleting RDS
+        required: true
+        type: boolean
+        default: false
+      network_confirmation:
+        description: Type DELETE-NETWORK only when delete_network is true
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-infrastructure-${{ vars.AWS_REGION || 'us-east-1' }}-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+  TF_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+
+jobs:
+  teardown:
+    if: >-
+      github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-DESTRUICAO' &&
+      (!inputs.delete_database || inputs.database_confirmation == 'DELETE-RDS-DATA') &&
+      (!inputs.delete_network || (inputs.delete_database && inputs.network_confirmation == 'DELETE-NETWORK'))
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: false
+      - uses: ./.github/actions/checkout-submodules
+        with:
+          app-id: ${{ vars.SUBMODULES_APP_ID }}
+          private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
+      - uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.16.4
+      - name: Read state outputs required for ordered teardown
+        id: ids
+        env:
+          DELETE_DATABASE: ${{ inputs.delete_database }}
+          DELETE_NETWORK: ${{ inputs.delete_network }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          init_state() {
+            local dir="$1" key="$2"
+            terraform -chdir="$dir" init -reconfigure -input=false -no-color \
+              -backend-config="bucket=$TF_STATE_BUCKET" -backend-config="key=$key" \
+              -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+          }
+          inspect_state() {
+            local dir="$1" key="$2"
+            init_state "$dir" "$key" >&2 || return
+            terraform -chdir="$dir" state pull | jq -cs '
+              if length == 0 then {managed: false, has_rds_instance: false, outputs: {}}
+              else .[0] | {
+                managed: any(.resources[]?; .mode == "managed" and (.instances | length > 0)),
+                has_rds_instance: any(.resources[]?;
+                  .mode == "managed" and .type == "aws_db_instance" and (.instances | length > 0)),
+                outputs: (.outputs // {})
+              } end'
+          }
+          has_resources() {
+            jq -r '.managed' <<< "$1"
+          }
+          export_output() {
+            local state="$1" key="$2" name="${3:-$2}" value
+            if ! value="$(jq -cer --arg key "$key" '
+              .outputs[$key].value |
+              select(if type == "string" then length > 0 and (test("[\r\n]") | not)
+                     elif type == "array" then length > 0
+                     else false end)
+            ' <<< "$state")"; then
+              echo "::error::Required Terraform output $key is missing or invalid. Check the state before continuing."
+              exit 1
+            fi
+            printf '%s=%s\n' "$name" "$value" >> "$GITHUB_OUTPUT"
+          }
+
+          stacks='submodules/AutoReparos.Infra.K8s/terraform/stacks'
+          network="$(inspect_state "$stacks/base" network/production/terraform.tfstate)"
+          platform="$(inspect_state "$stacks/platform" platform/production/terraform.tfstate)"
+          lambda="$(inspect_state submodules/AutoReparos.AuthLambda/infra lambda-auth/terraform.tfstate)"
+          gateway="$(inspect_state "$stacks/gateway" gateway/production/terraform.tfstate)"
+          database='{"managed":false}'
+          if [ "$DELETE_DATABASE" = true ]; then
+            database="$(inspect_state submodules/AutoReparos.Infra.Database/terraform database/terraform.tfstate)"
+          fi
+
+          has_network="$(has_resources "$network")"
+          has_platform="$(has_resources "$platform")"
+          has_lambda="$(has_resources "$lambda")"
+          has_gateway="$(has_resources "$gateway")"
+          has_database="$(has_resources "$database")"
+          if [ "$has_network" = true ]; then
+            export_output "$network" vpc_id
+            export_output "$network" cluster_name
+          elif [[ "$DELETE_NETWORK $has_platform $has_lambda $has_gateway $has_database" == *true* ]]; then
+            echo '::error::The network state has no managed resources. Check the S3 key and any legacy state before attempting teardown.'
+            exit 1
+          fi
+          if [ "$has_lambda" = true ] || [ "$has_gateway" = true ] || [ "$has_database" = true ]; then
+            export_output "$network" private_subnet_ids
+          fi
+          if [ "$has_lambda" = true ] || [ "$has_database" = true ]; then
+            export_output "$network" lambda_security_group_id lambda_sg
+          fi
+          if [ "$has_gateway" = true ]; then
+            export_output "$gateway" alb_listener_arn listener_arn
+            export_output "$lambda" lambda_arn
+            export_output "$lambda" lambda_function_name lambda_name
+          fi
+          if [ "$has_platform" = true ]; then
+            export_output "$network" oidc_provider_arn oidc_arn
+            export_output "$network" oidc_provider_url oidc_url
+          fi
+          if [ "$has_database" = true ]; then
+            export_output "$network" cluster_security_group_id cluster_sg
+            printf 'has_rds_instance=%s\n' "$(jq -r '.has_rds_instance' <<< "$database")" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$DELETE_NETWORK" = true ]; then
+            export_output "$network" ecr_api_repository_url ecr_api
+            export_output "$network" ecr_web_repository_url ecr_web
+          fi
+
+          for stack in network platform lambda gateway database; do
+            flag="has_$stack"
+            printf '%s=%s\n' "$flag" "${!flag}" >> "$GITHUB_OUTPUT"
+            if [ "${!flag}" = false ] && { [ "$stack" != database ] || [ "$DELETE_DATABASE" = true ]; }; then
+              echo "$stack: no managed resources in the configured Terraform state." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+      - name: Remove API Gateway and its VPC Link
+        if: ${{ steps.ids.outputs.has_gateway == 'true' }}
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/gateway
+        env:
+          TF_VAR_vpc_id: ${{ steps.ids.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ steps.ids.outputs.private_subnet_ids }}
+          TF_VAR_lambda_function_arn: ${{ steps.ids.outputs.lambda_arn }}
+          TF_VAR_lambda_function_name: ${{ steps.ids.outputs.lambda_name }}
+          TF_VAR_alb_listener_arn: ${{ steps.ids.outputs.listener_arn }}
+        run: |
+          set -euo pipefail
+          terraform destroy -auto-approve -input=false -no-color \
+            -var="aws_region=$AWS_REGION" -var='environment=production'
+      - name: Remove application and internal ALB
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name '${{ steps.ids.outputs.cluster_name }}' --region "$AWS_REGION"
+          helm uninstall autoreparos --namespace '${{ vars.K8S_NAMESPACE }}' --wait --timeout 10m || true
+          kubectl delete namespace '${{ vars.K8S_NAMESPACE }}' --wait=true --timeout=10m || true
+          for _ in $(seq 1 60); do
+            lbs="$(aws elbv2 describe-load-balancers --region "$AWS_REGION" --query "LoadBalancers[?VpcId=='${{ steps.ids.outputs.vpc_id }}'].LoadBalancerArn" --output text)"
+            [ -z "$lbs" ] && break
+            sleep 10
+          done
+          test -z "${lbs:-}" || { echo '::error::Load balancers remain; refusing to remove the AWS Load Balancer Controller'; exit 1; }
+          echo 'Application secrets were deleted with the namespace; RDS secret/state are retained unless separately selected.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove Lambda
+        if: ${{ steps.ids.outputs.has_lambda == 'true' }}
+        working-directory: submodules/AutoReparos.AuthLambda/infra
+        env:
+          TF_VAR_vpc_id: ${{ steps.ids.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ steps.ids.outputs.private_subnet_ids }}
+          TF_VAR_lambda_security_group_id: ${{ steps.ids.outputs.lambda_sg }}
+          TF_VAR_api_gateway_execution_arn: ''
+        run: |
+          set -euo pipefail
+          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" -var='environment=production' -var='lambda_zip_path=main.tf'
+      - name: Remove platform add-ons
+        if: ${{ steps.ids.outputs.has_platform == 'true' }}
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/platform
+        env:
+          TF_VAR_cluster_name: ${{ steps.ids.outputs.cluster_name }}
+          TF_VAR_kubernetes_version: '1.35'
+          TF_VAR_vpc_id: ${{ steps.ids.outputs.vpc_id }}
+          TF_VAR_oidc_provider_arn: ${{ steps.ids.outputs.oidc_arn }}
+          TF_VAR_oidc_provider_url: ${{ steps.ids.outputs.oidc_url }}
+        run: |
+          set -euo pipefail
+          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION"
+      - name: Delete RDS, final snapshot and secret recovery retention
+        if: ${{ inputs.delete_database && steps.ids.outputs.has_database == 'true' }}
+        working-directory: submodules/AutoReparos.Infra.Database/terraform
+        env:
+          TF_VAR_vpc_id: ${{ steps.ids.outputs.vpc_id }}
+          TF_VAR_private_subnet_ids: ${{ steps.ids.outputs.private_subnet_ids }}
+          HAS_RDS_INSTANCE: ${{ steps.ids.outputs.has_rds_instance }}
+        run: |
+          set -euo pipefail
+          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ steps.ids.outputs.cluster_sg }}' --arg lambda '${{ steps.ids.outputs.lambda_sg }}' '[$eks,$lambda]')"
+          snapshot="autoreparos-production-${GITHUB_RUN_ID}-final"
+          if [ "$HAS_RDS_INSTANCE" = true ]; then
+            plan="$(mktemp "$RUNNER_TEMP/rds-teardown.XXXXXX")"
+            trap 'rm -f "$plan"' EXIT
+            terraform plan -input=false -no-color -out="$plan" -var="aws_region=$AWS_REGION" -var='environment=production' \
+              -var='deletion_protection=false' -var='skip_final_snapshot=false' -var="final_snapshot_identifier=$snapshot"
+            if ! terraform show -json "$plan" | jq -e '
+              all(.resource_changes[]?; all(.change.actions[]; . == "no-op" or . == "read" or . == "update"))
+            ' >/dev/null; then
+              echo '::error::The RDS preparation plan must only read or update existing resources. Review the plan before continuing.'
+              exit 1
+            fi
+            terraform apply -input=false -no-color "$plan"
+          fi
+          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" -var='environment=production' \
+            -var='deletion_protection=false' -var='skip_final_snapshot=false' -var="final_snapshot_identifier=$snapshot"
+          if [ "$HAS_RDS_INSTANCE" = true ]; then
+            echo "RDS final snapshot requested: $snapshot." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Remove EKS/VPC/ECR after RDS deletion
+        if: ${{ inputs.delete_network }}
+        working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/base
+        run: |
+          set -euo pipefail
+          aws eks update-kubeconfig --name '${{ steps.ids.outputs.cluster_name }}' --region "$AWS_REGION" 2>/dev/null || true
+          for repository in '${{ steps.ids.outputs.ecr_api }}' '${{ steps.ids.outputs.ecr_web }}'; do
+            arn="$(aws ecr describe-repositories --repository-names "${repository##*/}" --region "$AWS_REGION" --query 'repositories[0].repositoryArn' --output text 2>/dev/null || true)"
+            if [ -n "$arn" ] && [ "$arn" != None ]; then
+              while true; do
+                ids="$(aws ecr list-images --repository-name "${repository##*/}" --region "$AWS_REGION" --query 'imageIds[0:100]' --output json)"
+                [ "$ids" = '[]' ] && break
+                aws ecr batch-delete-image --repository-name "${repository##*/}" --region "$AWS_REGION" --image-ids "$ids" >/dev/null
+              done
+            fi
+          done
+          terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" \
+            -var="cluster_name=${{ steps.ids.outputs.cluster_name }}" -var='environment=production'
+      - name: Report retained data and state
+        if: success()
+        run: |
+          echo 'The S3 backend and its state history were retained.' >> "$GITHUB_STEP_SUMMARY"
+          if [ '${{ inputs.delete_database }}' = 'false' ]; then
+            echo 'RDS, its Secrets Manager record, VPC, EKS and Terraform backend were retained. EKS/VPC are retained because RDS uses their subnets.' >> "$GITHUB_STEP_SUMMARY"
+          fi

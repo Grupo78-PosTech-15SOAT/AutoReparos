@@ -1,0 +1,31 @@
+name: Checkout AutoReparos repositories
+description: Checkout the parent and pinned recursive submodule commits, optionally using a GitHub App token
+inputs:
+  app-id:
+    description: GitHub App ID; empty when all submodules are public
+    required: false
+    default: ''
+  private-key:
+    description: GitHub App private key; empty when all submodules are public
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - id: app-token
+      if: inputs.app-id != ''
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+        owner: Grupo78-PosTech-15SOAT
+        repositories: |
+          AutoReparos
+          AutoReparos.App
+          AutoReparos.AuthLambda
+          AutoReparos.Infra.Database
+          AutoReparos.Infra.K8s
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        submodules: recursive
+        token: ${{ steps.app-token.outputs.token || github.token }}
