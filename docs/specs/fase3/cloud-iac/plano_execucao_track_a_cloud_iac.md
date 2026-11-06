@@ -33,7 +33,7 @@ A tabela a seguir sintetiza as decisões consolidadas na sessão de refinamento:
 | **4** | **Divisão de Responsabilidade IaC vs Helm** | **Infraestrutura no Terraform & Aplicação no Helm** | Terraform provisiona a base (VPC, EKS, API Gateway, VPC Link e Ingress Nginx com NLB interno). As cargas de trabalho da API (.NET 10) e HPA (2 a 10 réplicas) são gerenciadas pelo Helm em `k8s/charts/api`. |
 | **5** | **Esteira CI/CD (GitHub Actions)** | **Pipeline Completa com Execução Condicional** | `fmt -check`, `validate` obrigatórios em qualquer PR; `plan` (com saída no PR) e `apply` (na `main`) ativados condicionalmente se as credenciais AWS estiverem presentes. |
 | **6** | **Governança Git** | **Proteção de Branch na `main` (Sem Convite)** | Automação via script (`scripts/infra/setup-github-governance.sh`) para ativar PR obrigatório, bloqueio de force push e status check verde na `main` dos 4 repositórios. Convite a `soat-architecture` dispensado. |
-| **7** | **Dimensionamento & Custos (RDS)** | **Padrão Free Tier / Custo Zero** | PostgreSQL 16 em `db.t4g.micro`, 20 GiB gp3, Single-AZ por padrão, retenção de backup de 7 dias e criptografia KMS ativa. |
+| **7** | **Dimensionamento & Custos (RDS)** | **Padrão Free Tier / Custo Zero** | PostgreSQL 16 em `db.t4g.micro`, 20 GiB gp3, Single-AZ por padrão, retenção de backup de 1 dia no AWS Free Plan e criptografia KMS ativa. |
 
 ---
 
