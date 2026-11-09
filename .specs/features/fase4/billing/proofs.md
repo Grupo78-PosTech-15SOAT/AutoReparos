@@ -1,7 +1,7 @@
 # fase4/billing proofs
 
-**HEAD**: 5f95178
-**Tree**: dirty - submodules/AutoReparos.Billing
+**HEAD**: 13eec18
+**Tree**: clean
 **Result**: 11 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
