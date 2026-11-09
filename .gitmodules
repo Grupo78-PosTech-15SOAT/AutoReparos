@@ -10,3 +10,6 @@
 [submodule "submodules/AutoReparos.Infra.K8s"]
 	path = submodules/AutoReparos.Infra.K8s
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s.git
+[submodule "submodules/AutoReparos.OS"]
+	path = submodules/AutoReparos.OS
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS.git
