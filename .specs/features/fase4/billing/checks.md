@@ -62,7 +62,7 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 ## Handoff
 
 - **Settled mid-build:** bounded retries, backoff, DLQ/alert, never repeat captured charge - user: "Adote limites padrão por dependência, backoff exponencial com jitter e DLQ/alerta ao esgotar; nunca repetir cobrança capturada." Repository remains local with no remote URL - user: "Criar somente local por enquanto".
-- **Dispatched:** billing_verifier - fresh independent verifier at HEAD 1fb5768; billing_verifier_r2 - fresh independent verifier (2026-11-09), Billing repo 26ebb6d
+- **Dispatched:** billing_verifier - fresh independent verifier at HEAD 1fb5768; billing_verifier_r2 - fresh independent verifier (2026-11-09), Billing repo 26ebb6d; billing_verifier_r3 - segunda rodada independente (2026-11-09), root HEAD ff71be7
 - **Boundary:** C1-C8 implemented in `submodules/AutoReparos.Billing`; PostgreSQL schema/migration, authenticated Minimal APIs, Mercado Pago Checkout Pro/Webhooks, SQS results, retry/DLQ alerts, Dockerfile and CI included. No production resources or remote repository were created. `proofs.md` records the first green run at 1fb5768.
 - **Abandoned:** none
 - **Walked:** none - backend behavior proven through API and service tests; no screen capture
