@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.Billing/AutoReparos.Billing.slnx -m:1`; `dotnet format submodules/AutoReparos.Billing/AutoReparos.Billing.slnx --verify-no-changes --no-restore`
 Plan: `.specs/features/fase4/billing/plan.md`
 
-8 checks · 1 slice · 3 one-way doors · 0 open questions, 0 blocking
+9 checks · 1 slice · 3 one-way doors · 0 open questions, 0 blocking
 
 ## Checks
 
@@ -34,6 +34,9 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 **C8** - Transient dependency failures use bounded retry with exponential backoff and jitter, then DLQ/alert on exhaustion (AC 8)
 Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~DependencyRetryExhaustion`
 
+**C9** - Billing API exports traces, metrics and logs via OTLP tagged with `service.name` and `deployment.environment.name`, and still answers requests when the OTLP collector is unreachable (AC 9)
+Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~TelemetryExports`
+
 ## Coverage
 
 | Set (size) | Member -> proof | Unproven |
@@ -41,6 +44,7 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 | Billing routes/status (20) | budget POST 201 C1 · 401 C1 · 403 C1 · 422 C1 · approval POST 200 C1 · 401 C1 · 403 C1 · 404 C1 · 409 C1 · checkout POST 200 C3 · 401 C5 · 403 C5 · 404 C3 · 409 C2 · refund POST 201 C7 · 401 C7 · 403 C7 · 404 C7 · 409 C7 · 422 C7 | - |
 | payment lifecycle examples (7) | no approval C2 · no completion C2 · eligible checkout C3 · duplicate delivery C4 · pending C5 · terminal retry C5 · captured recovery C6 | - |
 | Webhook input classes (2) | valid signature C4 · invalid signature C4 | - |
+| Telemetry signals (3) | traces C9 · metrics C9 · logs C9 | - |
 
 ## Swept
 
@@ -52,7 +56,8 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 - data lifecycle: C1, C7
 - dependency failure: C4, C6, C8
 - state transitions: C2-C7
-- observability: C6, C8
+- observability: C6, C8, C9
+- collector outage: C9
 
 ## Handoff
 

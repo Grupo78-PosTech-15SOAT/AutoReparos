@@ -1,6 +1,7 @@
 # Fase 4 - Billing, orçamento e Mercado Pago
 
 **Approved**: 2026-11-06 - user: "Pode seguir"
+**Expanded**: 2026-11-09 - user: "pode seguir com o OTel neste ciclo" (AC 9 incluído)
 
 ## Problem
 
@@ -77,6 +78,7 @@ New: Orcamento, Pagamento e Reembolso no banco próprio do Billing.
 6. IF pagamento estiver capturado THEN Billing SHALL nunca repetir a cobrança automaticamente; falha de sincronização SHALL reconciliar para frente e alertar a equipe.
 7. WHEN responsável autorizar reembolso total ou parcial THEN Billing SHALL registrar aprovador, valor e referência auditável do reembolso.
 8. IF dependência tiver falha transitória THEN Billing SHALL usar limite padrão por dependência, backoff exponencial com jitter e encaminhar falha esgotada à DLQ/alerta.
+9. WHEN a API do Billing atender requisições ou registrar logs THEN Billing SHALL exportar traces, métricas e logs via OTLP identificados pelo nome do serviço e pelo ambiente; IF o coletor OTLP estiver indisponível THEN Billing SHALL continuar respondendo às requisições.
 
 ## Out of scope
 
