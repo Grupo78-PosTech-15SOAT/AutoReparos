@@ -26,7 +26,7 @@
 
 ## Open items after the fix pass
 
-- **Falha de publicacao no SQS durante o webhook** sai como excecao dentro do bloco que captura `InvalidOperationException`: com o `Publisher` falso o webhook devolve 422 e nao 5xx, e o provedor pode nao reenviar. A reentrega funciona (testada), mas o codigo HTTP nao e ideal (AC 6). Corrigir exige alterar o teste de `CapturedPaymentForwardRecovery`.
+- ~~Falha de publicacao no SQS durante o webhook devolvia 422~~ - fechado em Billing `7c05751`: a falha vira `PublicacaoResultadoException` e o webhook responde 503 `resultado_nao_publicado` (o provedor reenvia); `CapturedPaymentForwardRecovery` e `WebhookSignatureValidationRedeliveryAfterPublishFailureRepublishes` ajustados.
 - **Checkout concorrente** chama o Mercado Pago duas vezes antes de salvar (mesma chave de idempotencia); o banco garante uma unica tentativa ativa e o segundo pedido recebe 409.
 - **Chave de idempotencia do checkout** e o `pagamentoId`; num retry manual apos estado terminal ela repete a da tentativa anterior e o provedor pode devolver a preferencia antiga. Ja existia antes desta rodada.
 - **Docker** e necessario para os 3 testes de concorrencia (Testcontainers com `postgres:16-alpine`).
