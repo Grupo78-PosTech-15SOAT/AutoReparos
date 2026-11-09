@@ -1,7 +1,7 @@
 # fase4/os-service proofs
 
-**HEAD**: 73f4cec
-**Tree**: dirty - submodules/AutoReparos.Billing, submodules/AutoReparos.OS
+**HEAD**: 972e294
+**Tree**: clean
 **Result**: 7 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
