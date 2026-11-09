@@ -8,8 +8,8 @@
   },
   {
     "file": ".agents/AGENTS.md",
-    "old": "## tlc-spec-lean\nmutations: 3",
-    "new": "## tlc-spec-lean\nmutations: 2",
+    "old": "mutations: 3",
+    "new": "mutations: 2",
     "proof": "python .specs/tlc-spec-lean/scripts/validate_project_config.py tlc-spec-lean-bootstrap",
     "label": "project mutation count mismatch must fail config validation"
   },

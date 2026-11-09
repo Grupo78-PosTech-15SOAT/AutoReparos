@@ -9,7 +9,7 @@
 
 | Finding | Evidence | Fix | Closed |
 | --- | --- | --- | --- |
-| O inventário exigido pelo validador ainda omite dependências do pacote | `validate_project_config.py` agora exige os gates principais, mas não exige `scripts/lean_config.py` (importado pelos validadores), `scripts/runners.py` (importado por `check_proofs.py`), `scripts/fixtures/` (usado por `selftest.py`) nem as referências ligadas por `SKILL.md`. Remover esses arquivos ainda pode deixar C2 verde e quebrar o fluxo. | Completar o inventário de dependências e referências, ou adicionar uma verificação automatizada de integridade dos links e imports do pacote. | |
+| O inventário exigido pelo validador ainda omite dependências do pacote | A lista obrigatória foi ampliada para incluir `lean_config.py`, `runners.py`, fixtures e referências de `SKILL.md`; validação de configuração passou e mutação 3 foi morta. | Completar o inventário de dependências e referências. | `30c4a7c` |
 
 ## Resolved findings from earlier rounds
 
@@ -23,3 +23,4 @@
 ## Gate results and limitations
 
 `validate_project_config.py` passou: `TLC config valid for tlc-spec-lean-bootstrap: mutations=3`. `validate_plan.py` passou com 0 erros e 3 avisos sobre nomes de nós do diagrama; `validate_checks.py` passou com 0 erros e 3 avisos sobre ausência de seletores nos proofs de comando. Não rodei `check_proofs.py` nem mutações, conforme solicitado. O estado da árvore continua dirty fora de `.specs/` e os submódulos também estão alterados, então o gate completo precisa aguardar uma árvore válida para essa execução.
+
