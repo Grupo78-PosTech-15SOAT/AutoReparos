@@ -76,6 +76,7 @@ Data: OrdemServico e HistoricoOS; não se migram registros existentes nesta entr
 | Aprovação de orçamento e cobrança | Responsabilidade da feature Billing. |
 | Diagnóstico, fila e execução física | Responsabilidade da feature Execução. |
 | Implementar Saga completa | Responsabilidade da feature Saga e mensageria. |
+| Transições de status e registros de histórico além da criação da OS | Dependem da finalização vinda de Execução e da Saga; ficam com as features `execucao` e `saga-mensageria`. Declarado fora de escopo pelo usuário em 2026-11-09 ("Declarar fora de escopo"). |
 
 ## Assumptions
 
