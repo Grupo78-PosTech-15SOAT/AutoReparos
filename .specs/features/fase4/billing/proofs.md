@@ -1,6 +1,6 @@
 # fase4/billing proofs
 
-**HEAD**: 972e294
+**HEAD**: dc57f84
 **Tree**: clean
 **Result**: 11 pass, 0 fail; mutations 3 killed, 0 not
 
@@ -22,6 +22,6 @@
 
 | Mutation | Location | Killed |
 | --- | --- | --- |
-| checkout do cliente deixa de validar o vinculo com o dono do orcamento (porta 4) | `submodules\AutoReparos.Billing\AutoReparos.Billing.Application\Contratos.cs:50` | yes |
+| checkout do cliente deixa de validar o vinculo com o dono do orcamento (porta 4) | `submodules\AutoReparos.Billing\AutoReparos.Billing.Application\Contratos.cs:51` | yes |
 | reembolso deixa de somar o ja reembolsado (limite cumulativo) | `submodules\AutoReparos.Billing\AutoReparos.Billing.Domain\Pagamento.cs:48` | yes |
 | status approved do Mercado Pago mapeado para Rejeitado em vez de Capturado | `submodules\AutoReparos.Billing\AutoReparos.Billing.Infrastructure\Integracoes.cs:57` | yes |
