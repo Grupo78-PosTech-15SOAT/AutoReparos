@@ -10,7 +10,7 @@ Plan: `.specs/features/fase4/billing/plan.md`
 
 ### S1 - Billing lifecycle
 
-**C1** - `POST /api/v1/orcamentos` persists an OS budget that can be presented for customer approval (AC 1)
+**C1** - `POST /api/v1/orcamentos` persists an OS budget and its owner can approve it through `POST /api/v1/orcamentos/{id}/aprovacao` (AC 1)
 Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~CreatesBudgetForOrder`
 
 **C2** - Billing does not start a charge before budget approval and service completion (AC 2)
@@ -38,7 +38,7 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 
 | Set (size) | Member -> proof | Unproven |
 | --- | --- | --- |
-| Billing routes/status (15) | budget POST 201 C1 · 401 C1 · 403 C1 · 422 C1 · checkout POST 200 C3 · 401 C5 · 403 C5 · 404 C3 · 409 C3 · refund POST 201 C7 · 401 C7 · 403 C7 · 404 C7 · 409 C7 · 422 C7 | - |
+| Billing routes/status (20) | budget POST 201 C1 · 401 C1 · 403 C1 · 422 C1 · approval POST 200 C1 · 401 C1 · 403 C1 · 404 C1 · 409 C1 · checkout POST 200 C3 · 401 C5 · 403 C5 · 404 C3 · 409 C2 · refund POST 201 C7 · 401 C7 · 403 C7 · 404 C7 · 409 C7 · 422 C7 | - |
 | payment lifecycle examples (7) | no approval C2 · no completion C2 · eligible checkout C3 · duplicate delivery C4 · pending C5 · terminal retry C5 · captured recovery C6 | - |
 | Webhook input classes (2) | valid signature C4 · invalid signature C4 | - |
 
@@ -56,8 +56,8 @@ Proof: `dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --n
 
 ## Handoff
 
-- **Settled mid-build:** bounded retries, backoff, DLQ/alert, never repeat captured charge - user: "Adote limites padrão por dependência, backoff exponencial com jitter e DLQ/alerta ao esgotar; nunca repetir cobrança capturada."
-- **Dispatched:** none
-- **Boundary:** checks derived from approved plan; build has not started
+- **Settled mid-build:** bounded retries, backoff, DLQ/alert, never repeat captured charge - user: "Adote limites padrão por dependência, backoff exponencial com jitter e DLQ/alerta ao esgotar; nunca repetir cobrança capturada." Repository remains local with no remote URL - user: "Criar somente local por enquanto".
+- **Dispatched:** billing_verifier - fresh independent verifier at HEAD 1fb5768
+- **Boundary:** C1-C8 implemented in `submodules/AutoReparos.Billing`; PostgreSQL schema/migration, authenticated Minimal APIs, Mercado Pago Checkout Pro/Webhooks, SQS results, retry/DLQ alerts, Dockerfile and CI included. No production resources or remote repository were created. `proofs.md` records the first green run at 1fb5768.
 - **Abandoned:** none
-- **Walked:** none - backend behavior, no screen capture
+- **Walked:** none - backend behavior proven through API and service tests; no screen capture

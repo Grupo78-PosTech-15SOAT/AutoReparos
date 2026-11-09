@@ -49,7 +49,8 @@ New: Orcamento, Pagamento e Reembolso no banco próprio do Billing.
 | Route | Request -> response | Who | Status |
 | --- | --- | --- | --- |
 | `POST /api/v1/orcamentos` | OS -> orçamento | OS Service autenticado | 201, 401, 403, 422 |
-| `POST /api/v1/pagamentos/{id}/checkout` | pagamento -> URL Checkout Pro | usuário autorizado | 200, 401, 403, 404, 409 |
+| `POST /api/v1/orcamentos/{id}/aprovacao` | confirmação -> orçamento aprovado e pagamento | cliente autenticado dono da OS | 200, 401, 403, 404, 409 |
+| `POST /api/v1/pagamentos/{id}/checkout` | pagamento -> URL Checkout Pro | cliente dono do pagamento ou usuário autorizado | 200, 401, 403, 404, 409 |
 | `POST /api/v1/pagamentos/{id}/reembolsos` | valor/aprovação -> reembolso | responsável autorizado | 201, 401, 403, 404, 409, 422 |
 | `POST /api/v1/webhooks/mercado-pago` | evento -> aceite/rejeição | Mercado Pago com assinatura válida | 202, 401, 422 |
 
@@ -60,6 +61,7 @@ New: Orcamento, Pagamento e Reembolso no banco próprio do Billing.
 | 1 | Billing Service separado com API e pipeline próprios | Manter cobrança no OS Service acopla ciclo operacional ao provedor financeiro. |
 | 2 | PostgreSQL/database e usuário exclusivos do Billing | Compartilhar tabelas permitiria escrita cruzada entre serviços. |
 | 3 | Checkout Pro + Webhooks validados do Mercado Pago | Polling exclusivo não atende atualização assíncrona do estado de pagamento. |
+| 4 | Aprovação do orçamento exige JWT com role `Cliente` e claim `clienteId` igual ao cliente do orçamento; checkout do cliente valida o mesmo vínculo | Link público sem identidade permitiria aprovar o orçamento de outra pessoa. |
 
 ## Criteria
 
