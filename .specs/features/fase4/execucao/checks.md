@@ -50,7 +50,7 @@ Proof: `dotnet test submodules/AutoReparos.Execution/AutoReparos.Execution.Tests
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
+- **Dispatched:** execucao_verifier - fresh independent verifier (2026-11-09), root HEAD da5a92f, Execution repo 82d3b8e
 - **Boundary:** build concluded in `submodules/AutoReparos.Execution` (new local git repo, branch `feature/execution-service`, no remote and not registered as submodule); C1-C6 proofs green locally; `check_proofs.py` gate and independent Verifier (`mutations.json`, `verification.md`) still pending
 - **Abandoned:** none
 - **Walked:** none - backend behavior, no screen capture
