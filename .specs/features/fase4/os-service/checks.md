@@ -47,7 +47,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.IntegrationTests --
 ## Handoff
 
 - **Settled mid-build:** user: "OS não seria melhor em upper-case por ser sigla?"; repositório local `submodules/AutoReparos.OS`.
-- **Dispatched:** none
+- **Dispatched:** os_verifier - fresh independent verifier (2026-11-09), root HEAD 73f4cec, OS repo d9f9cd8
 - **Boundary:** endpoints, migrações PostgreSQL, autorização por perfil e publicador SQS com outbox, retentativas e DLQ implementados. C5 verifica privilégios efetivos e acesso por tokens, mas falhou sem `OS_PROOF_DB_CONNECTION`; exige ambiente provisionado conforme README do serviço. `check_proofs.py` registrou 6 pass e 1 fail (C5), com árvore suja e contagens desconhecidas; verificação independente e commits permanecem pendentes.
 - **Abandoned:** none
 - **Walked:** none - backend behavior, no screen capture

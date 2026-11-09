@@ -1,23 +1,23 @@
 [
   {
     "file": "submodules/AutoReparos.Billing/AutoReparos.Billing.Application/Contratos.cs",
-    "old": "if (orcamento.Status != StatusOrcamento.Aprovado || !await readiness.ServicoConcluidoAsync(orcamento.OrdemServicoId, ct))",
-    "new": "if (false)",
-    "proof": "dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-restore --filter FullyQualifiedName~ChargeRequiresApprovalAndCompletion",
-    "label": "checkout sem aprovação ou conclusão"
+    "old": "if (clienteId is not null && orcamento.ClienteId != clienteId)",
+    "new": "if (clienteId is not null && orcamento.ClienteId == clienteId)",
+    "proof": "dotnet build submodules/AutoReparos.Billing/AutoReparos.Billing.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~ManualRetryAfterTerminalState",
+    "label": "checkout do cliente deixa de validar o vinculo com o dono do orcamento (porta 4)"
   },
   {
     "file": "submodules/AutoReparos.Billing/AutoReparos.Billing.Domain/Pagamento.cs",
-    "old": "valor + jaReembolsado > Valor",
-    "new": "valor + jaReembolsado > Valor * 2",
-    "proof": "dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-restore --filter FullyQualifiedName~ApprovedRefundAudit",
-    "label": "reembolso acima do total pago"
+    "old": "valor + jaReembolsado > Valor ||",
+    "new": "valor > Valor ||",
+    "proof": "dotnet build submodules/AutoReparos.Billing/AutoReparos.Billing.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~ApprovedRefundAudit",
+    "label": "reembolso deixa de somar o ja reembolsado (limite cumulativo)"
   },
   {
     "file": "submodules/AutoReparos.Billing/AutoReparos.Billing.Infrastructure/Integracoes.cs",
-    "old": "CryptographicOperations.FixedTimeEquals(Convert.FromHexString(v1), Convert.FromHexString(expected))",
-    "new": "true",
-    "proof": "dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-restore --filter FullyQualifiedName~WebhookSignatureValidation",
-    "label": "assinatura de webhook não validada"
+    "old": "\"approved\" => AutoReparos.Billing.Domain.StatusPagamento.Capturado,",
+    "new": "\"approved\" => AutoReparos.Billing.Domain.StatusPagamento.Rejeitado,",
+    "proof": "dotnet build submodules/AutoReparos.Billing/AutoReparos.Billing.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Billing/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~WebhookSignatureValidation",
+    "label": "status approved do Mercado Pago mapeado para Rejeitado em vez de Capturado"
   }
 ]

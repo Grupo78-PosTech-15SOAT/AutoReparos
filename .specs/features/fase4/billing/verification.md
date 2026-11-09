@@ -1,27 +1,32 @@
-# fase4/billing verification
+# Billing verification
 
-**Verdict**: PASS (auto-verificação nesta rodada; verificador independente pendente)
-**Mutations**: 3 em `mutations.json` - todas mortas; 2 probes extras de C9 - mortas
-**Proofs**: `proofs.md` at `b739b91` (C1–C9, build e format passando)
-**Verifier**: não despachado nesta rodada. As regras do projeto pedem Verifier independente (`author != verifier`), mas o agente não foi acionado automaticamente. Antes de fechar a feature, pedir revisão independente.
+**Verdict**: FAIL
+**Mutations**: 3 - probed M1 (vinculo cliente-dono no checkout, `Contratos.cs:44`), M2 (limite cumulativo de reembolso, `Pagamento.cs:39`), M3 (mapa `approved` -> Capturado, `Integracoes.cs:57`); M1 and M3 are expected to survive by reading (no test reaches them), M2 is expected to be killed by `ApprovedRefundAudit` (175.01 case); the builder confirms with `check_proofs.py --mutations`
+**Proofs**: `proofs.md` at b739b91 (billing repo HEAD under review: 26ebb6d)
+**Verifier**: independent sub-agent (author != verifier)
 
 ## Findings
 
 | Finding | Evidence | Fix | Closed |
 | --- | --- | --- | --- |
-| Mutation probes were undetermined | The first attempt used `--no-build`, leaving the compiled test assembly unchanged during injection | Mutation proof commands now rebuild; all 3 mutants were killed | `cd98e9e` |
-| C1 did not prove budget approval | Approval route was not exercised | C1 proves approval URL, anonymous/wrong-owner/owner cases, success, repeat conflict and not-found | `a0d4015` |
-| C3 did not prove checkout URL or unknown ID | Response body and 404 were not asserted | C3 asserts the exact checkout URL and unknown payment 404; 401/403 are proven in C5 and 409 in C2 | `a0d4015` |
-| C4 did not prove invalid HMAC leaves state unchanged | Only malformed signature was rejected | C4 submits a validly shaped wrong digest and asserts 401, unchanged Capturado state and no duplicate publish | `a0d4015` |
-| C5 authorization coverage was overstated | Missing pending checkout authorization and not-found coverage | C5 proves 401 and 403 for pending checkout and authorized terminal retry | `a0d4015` |
-| C7 did not prove full/cumulative refund boundaries | Only one partial refund was asserted | C7 proves duplicate reference has no second provider call, cumulative cap, exact completion and full refund | `cd98e9e` |
-| C8 did not prove retry policy or queue exhaustion | Generic retry count omitted backoff and SQS behavior | C8 proves deterministic exponential+jitter delay/cap and five main sends, DLQ send and alert | `cd98e9e` |
-| Duplicate refund reference could reach provider twice | Duplicate guard was absent from domain aggregate | `Pagamento.Reembolsar` rejects duplicate reference before provider invocation | `1fb5768` |
-| Over-refund boundary was not tested | Upper bound was implemented but lacked boundary proof | C7 now rejects cumulative amount above 250 and allows exact 250 total | `cd98e9e` |
-| OTel sem check nem teste (AC 9 adicionado em 2026-11-09) | Telemetria estava no `Program.cs` sem prova | C9 `TelemetryExports` prova service.name/deployment.environment.name no resource, spans de servidor, métrica `http.server.request.duration` e log via exportador in-memory; coletor inacessível (127.0.0.1:1) não impede resposta 401 | `fa1902d`, `b739b91` |
+| Checkout por `Cliente` nunca testado com `clienteId` valido: a porta 4 ("checkout do cliente valida o mesmo vinculo") nao tem teste; mutacao M1 (`!=` -> `==`) sobrevive | `Contratos.cs:44`; `BillingLifecycleTests.cs:166-178` so envia `Cliente` sem claim `clienteId` (Forbid no Program.cs:~88, antes do servico) | adicionar em C5/C3 um checkout com role `Cliente` e `clienteId` do dono (200) e de outro cliente (403) | Billing `f534900` |
+| Mapeamento status Mercado Pago -> `StatusPagamento` (approved/rejected/cancelled/refunded/pending) e retry transitorio (5xx/429/408) do `MercadoPagoClient` sem nenhum teste; M3 (`approved` -> Rejeitado) sobrevive. C4 usa `Provider` falso (`WebhookResult`) | `Integracoes.cs:55-63, 78-80`; `BillingLifecycleTests.cs:44-52` | testar `MercadoPagoClient` com `HttpMessageHandler` falso: um caso por status, 500 retentado ate esgotar + alerta, 400 nao retentado | Billing `f534900`, `5c7dbdb` |
+| C8/AC 8 so cobre `DependencyRetry` generico e SQS; chamadas ao OS Service (`OsReadinessClient`) e `MercadoPagoClient` nao tem teste de retry, e `OsReadinessClient` nao usa `DependencyRetry` (falha transitoria vira 500 no checkout) | `Integracoes.cs:165-177` (sem retry); `Contratos.cs:47`; `BillingLifecycleTests.cs:226-242` | aplicar `DependencyRetry` ao OS readiness e testar retry+alerta por dependencia; mapear falha esgotada para 503, nao 500 | Billing `5c7dbdb`, `f534900` |
+| Valor de reembolso com mais de 2 casas (ex.: 10.005) retorna 409, nao 422: a validacao de Surface (422) so cobre `<= 0` e referencia vazia; o orcamento rejeita casas excedentes com 422 (`Program.cs:~70`) | `Program.cs:97` vs domain `Pagamento.cs:39` (lanca `InvalidOperationException` -> 409 no catch) ; exemplo proprio, nao citado em plan/checks | validar `decimal.Round(valor,2) != valor` e aprovador vazio no endpoint (422) e assertar em C7 | Billing `5c7dbdb`, `f534900` |
+| Regressao de estado terminal para Pendente permitida: `AplicarEstado(Pendente)` sobre `Rejeitado/Cancelado/Expirado` nao lanca; um webhook fora de ordem reabre o pagamento sem nova tentativa e `AbrirCheckoutAsync` passa a devolver a URL antiga (AC 5: terminal exige nova tentativa por pessoa autorizada). Exemplo proprio, sem teste | `Pagamento.cs:20-32` (nenhuma regra para destino `Pendente`); `Contratos.cs:45` (retorna pagamento existente se Pendente) | rejeitar transicao terminal -> Pendente em `AplicarEstado` e testar em C5 | Billing `5c7dbdb`, `f534900` |
+| `## Swept` lista concorrencia (C3, C5) e idempotencia sem teste concorrente: nao ha token de concorrencia em `Pagamento`/`Orcamento`; dois checkouts simultaneos ou dois reembolsos simultaneos (soma acima do total) passam pelo mesmo estado lido; so ha indice unico em (PagamentoId, Referencia) | `BillingDbContext.cs:14-23`; `Contratos.cs:40-51, 62-69`; testes sao sequenciais (`BillingLifecycleTests.cs:120-125, 214-216`) | adicionar `RowVersion`/xmin ou lock otimista e um teste com duas chamadas paralelas por regra; ou retirar concorrencia do Swept | Billing `5c7dbdb`, `f534900` |
+| C9 prova o resource em `TelemetriaBilling.Configurar` isolado, mas nao que `Program.cs` o aplica: remover/alterar `.ConfigureResource(...)` (`Program.cs:16`) mantem `TelemetryExports` verde (os spans/metricas/logs capturados em memoria nao sao comparados com `service.name`/`deployment.environment.name`). Tambem o "coletor indisponivel" so e exercido com uma requisicao 401 (`BillingLifecycleTests.cs:254`), sem rota de sucesso | `Program.cs:16`; `BillingLifecycleTests.cs:247-261, 290` | assertar `service.name`/`deployment.environment.name` no resource do `TracerProvider` do host (`factory.Services`) e uma requisicao 2xx com coletor inalcancavel | Billing `f534900` |
+| Webhook duplicado deduplicado so por estado (`ResultadoPublicado`), nao por `x-request-id`; um segundo evento valido de mesmo estado apos falha de publicacao reenvia o resultado (aceitavel), mas a idempotencia AC 4 so e provada com um valor (`Capturado`) | `Contratos.cs:55-61`; `BillingLifecycleTests.cs:144-147` | cobrir tambem `Rejeitado`/`Cancelado` duplicados e a reentrega apos falha de publicacao via HTTP | Billing `f534900` |
+| Aviso de vulnerabilidade NU1902 ainda existente: `OpenTelemetry.Exporter.OpenTelemetryProtocol` 1.11.2 (Moderate, GHSA-4625-4j76-fww9) confirmado por `dotnet list package --vulnerable`; item aberto, nao tratado nesta entrega | `AutoReparos.Billing.Api.csproj:6` | subir OTLP exporter (e `Extensions.Hosting`, mantendo versoes compativeis) para versao corrigida e reexecutar C9 | Billing `91968a6` |
 
-## Open items
+## Notes
 
-- **Vulnerabilidade moderada (NU1902)** nos pacotes `OpenTelemetry.Api` 1.11.2 (GHSA-g94r-2vxg-569j) e `OpenTelemetry.Exporter.OpenTelemetryProtocol` 1.11.2 (GHSA-4625-4j76-fww9). Build passa, mas o aviso precisa ser avaliado e a versão atualizada quando houver patch.
-- **Verifier independente** não executado nesta rodada (ver cabeçalho).
-- **Escopo do OTel:** o processo de exportação não foi testado contra um coletor real; a prova cobre o pipeline in-memory e a tolerância a coletor indisponível.
+- Own examples (sem teste descartavel executado; verificacao por leitura): reembolso cumulativo com 249.99 + 0.01 mantem a regra (soma exata dispara `Reembolsado`, `Pagamento.cs:39,43`); 10.005 quebra a regra de status (finding 4). Pendente versus terminal: `Rejeitado` -> `Pendente` via webhook quebra (finding 5); `SemTentativa` -> `Rejeitado` e corretamente recusado.
+- Asserções fracas: C1 prova autorizacao so com `Cliente` de outro `clienteId`; C7 assere `aprovador == "test-user"` (valor do handler de teste, bem fixado); C2 usa `Readiness(false)` em ambas as chamadas (`BillingLifecycleTests.cs:105-109`): nunca testa "servico concluido mas orcamento nao aprovado", entao remover a checagem `orcamento.Status != Aprovado` em `Contratos.cs:47` tende a sobreviver (finding adicional; correcao: caso com `Readiness(true)` e orcamento pendente espera 409 e 0 checkouts).
+
+## Open items after the fix pass
+
+- **Falha de publicacao no SQS durante o webhook** sai como excecao dentro do bloco que captura `InvalidOperationException`: com o `Publisher` falso o webhook devolve 422 e nao 5xx, e o provedor pode nao reenviar. A reentrega funciona (testada), mas o codigo HTTP nao e ideal (AC 6). Corrigir exige alterar o teste de `CapturedPaymentForwardRecovery`.
+- **Checkout concorrente** chama o Mercado Pago duas vezes antes de salvar (mesma chave de idempotencia); o banco garante uma unica tentativa ativa e o segundo pedido recebe 409.
+- **Chave de idempotencia do checkout** e o `pagamentoId`; num retry manual apos estado terminal ela repete a da tentativa anterior e o provedor pode devolver a preferencia antiga. Ja existia antes desta rodada.
+- **Docker** e necessario para os 3 testes de concorrencia (Testcontainers com `postgres:16-alpine`).
