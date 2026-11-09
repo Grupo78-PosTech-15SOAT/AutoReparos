@@ -17,3 +17,7 @@
 	path = submodules/AutoReparos.Billing
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Billing.git
 	branch = feature/os-service-contracts
+[submodule "submodules/AutoReparos.Execution"]
+	path = submodules/AutoReparos.Execution
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execution.git
+	branch = feature/execution-service
