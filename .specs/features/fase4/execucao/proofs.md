@@ -1,8 +1,8 @@
 # fase4/execucao proofs
 
-**HEAD**: da5a92f
+**HEAD**: 2cec295
 **Tree**: clean
-**Result**: 8 pass, 0 fail; mutations 0 killed, 0 not
+**Result**: 8 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -14,3 +14,11 @@
 | C6 | `dotnet test submodules/AutoReparos.Execution/AutoReparos.Execution.Tests --filter FullyQualifiedName~Dependenc` | count unknown | - | pass |
 | Build | `dotnet build submodules/AutoReparos.Execution/AutoReparos.Execution.slnx` | - | - | pass |
 | Build | `dotnet format submodules/AutoReparos.Execution/AutoReparos.Execution.slnx --verify-no-changes` | - | - | pass |
+
+## Mutations
+
+| Mutation | Location | Killed |
+| --- | --- | --- |
+| OS ja na fila deixa de impedir uma segunda entrada (condicao de deduplicacao por OS) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:67` | yes |
+| reexecucao passa a ser aceita fora do estado Falhou (regra de estado da reexecucao) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Domain\OrdemExecucao.cs:57` | yes |
+| conclusao deixa de ser publicada para o Billing (so OS Service) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:105` | yes |
