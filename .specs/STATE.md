@@ -13,6 +13,7 @@
 | AD-007 | Billing: reembolso reserva um registro `Pendente` (conta no limite), confirma após o provedor aceitar e só desfaz em falha definitiva 4xx; desfecho incerto mantém `Pendente` e retoma pela mesma referência | User: "Corrigir os 3" achados N1 a N3 da rodada 2. Evita reembolso em dobro | active | 2026-11-09 |
 | AD-008 | Execution Service: papéis `Mecanico`/`Administrador` operam fila, etapas, conclusão e falha; só `Administrador` reexecuta; entrada pelo evento SQS `ordem-servico.liberada.v1` (deduplicação por `eventId` e por OS); saída `execucao.concluida.v1` (OS Service e Billing) e `execucao.falhou.v1` (OS Service) via outbox. Endpoints extras `.../conclusao` e `.../falha` | Decisões do builder, não confirmadas ponto a ponto pelo usuário; documentadas no README do serviço. Revisar na feature `saga-mensageria` | active | 2026-11-09 |
 | AD-009 | `Authentication:RequireHttpsMetadata` configurável no OS Service (padrão `true`); só a execução de prova local usa `false` | Necessário para o emissor JWT local de teste da prova C5. Escolha do usuário: "Adicionar toggle de config" | active | 2026-11-09 |
+| AD-010 | Saga orquestrada no OS Service com estado em DynamoDB (`autoreparos-os-saga`); nasce em `orcamento.aprovado.v1` (evita escrita dupla); transição e comandos pendentes gravados na mesma transação antes de publicar; compensações em ordem inversa só para orçamento aprovado e execução liberada; execução concluída e pagamento capturado só têm recuperação para frente; cancelamento entra por `ordem-servico.cancelar.v1` (sem rota REST nova, Surface vazia). Contrato em `saga-mensageria/contracts.md` | Decisões de projeto da autora para fechar o contrato entre OS, Billing e Execução; o plano aprovado não foi alterado. User: "pode seguir com o saga-mensageria". Revisar se discordar | active | 2026-11-10 |
 
 ## Handoff (retomada em outro computador) - 2026-11-09
 
@@ -25,7 +26,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 | `os-service` | **PASS** (3ª rodada de Verifier). Provas 7/7, 3 mutações mortas | `os-service/verification.md`, `proofs.md` |
 | `billing` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `billing/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
-| `saga-mensageria` | só `plan.md` e `checks.md`; build não iniciado | **próxima da fila** |
+| `saga-mensageria` | contrato definido (`contracts.md`); build em andamento nos repositórios OS, Billing e Execution; sem verificação ainda | **em andamento** |
 | `infra-ci-observabilidade` | só `plan.md` e `checks.md`; build não iniciado | depende dos serviços |
 | `pacote-entrega` | só `plan.md` e `checks.md`; build não iniciado | inclui vídeo e PDF final, que o agente não produz sozinho |
 
