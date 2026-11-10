@@ -1,6 +1,6 @@
 # fase4/execucao proofs
 
-**HEAD**: 2cec295
+**HEAD**: 15bad23
 **Tree**: clean
 **Result**: 8 pass, 0 fail; mutations 3 killed, 0 not
 
@@ -19,6 +19,6 @@
 
 | Mutation | Location | Killed |
 | --- | --- | --- |
-| OS ja na fila deixa de impedir uma segunda entrada (condicao de deduplicacao por OS) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:67` | yes |
-| reexecucao passa a ser aceita fora do estado Falhou (regra de estado da reexecucao) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Domain\OrdemExecucao.cs:57` | yes |
-| conclusao deixa de ser publicada para o Billing (so OS Service) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:105` | yes |
+| OS ja na fila deixa de impedir uma segunda entrada (condicao de deduplicacao por OS; ajustada apos a refatoracao da Saga) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:99` | yes |
+| reexecucao passa a ser aceita fora do estado Falhou (regra de estado da reexecucao) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Domain\OrdemExecucao.cs:61` | yes |
+| conclusao deixa de ser publicada para o Billing (so OS Service) | `submodules\AutoReparos.Execution\AutoReparos.Execution.Application\Contratos.cs:165` | yes |
