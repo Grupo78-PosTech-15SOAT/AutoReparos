@@ -62,12 +62,12 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 | Submódulo | Branch | Remoto |
 | --- | --- | --- |
 | `AutoReparos.OS` | `feature/os-service-contracts` | `Grupo78-PosTech-15SOAT/AutoReparos.OS` |
-| `AutoReparos.Billing` | `feature/os-service-contracts` | `.../AutoReparos.Billing` |
-| `AutoReparos.Execution` | `feature/execution-service` | `.../AutoReparos.Execution` |
+| `AutoReparos.Cobranca` (antes Billing) | `feature/os-service-contracts` | `.../AutoReparos.Cobranca` |
+| `AutoReparos.Execucao` (antes Execution) | `feature/execution-service` | `.../AutoReparos.Execucao` |
 | `AutoReparos.Infra.K8s` | `feature/os-service-contracts` (telemetria OTLP no chart) | `.../AutoReparos.Infra.K8s` |
-| `AutoReparos.App`, `AuthLambda`, `Infra.Database` | `develop` (sem mudanças nossas) | `.../AutoReparos.App` etc. |
+| `AutoReparos.Cadastros` (antes App), `AuthLambda`, `Infra.Database` | `develop` (sem mudanças nossas) | `.../AutoReparos.Cadastros` etc. |
 
-- Os remotos de OS, Billing e Execution só têm a branch de feature, **sem `main`**. Antes do primeiro PR é preciso criar a `main` ou definir outra base. Nenhum PR foi aberto.
+- Estado dos remotos em 2026-11-10: Cobranca e Execucao já têm `main` e `develop` e contêm os commits fixados. OS tem `main` e `develop` em `a1bece8`; a feature está 1 commit à frente (`d8e8503`), avanço direto. Infra.K8s tem `main` (`5cc1c03`, 3 merges que a feature não tem) e `develop` (`5b4b199`, ancestral da feature); a feature tem 2 commits que a `main` não tem e junta sem conflito. Falta mergear OS e Infra.K8s nessas bases e atualizar os ponteiros do principal para os commits mergeados. Nenhum PR foi aberto nos submódulos.
 - O Billing deixou de ser pasta rastreada no principal e virou submódulo (histórico extraído com `git subtree split`).
 - Branches e commits foram reescritos duas vezes com `--force-with-lease` para remover o trailer do Claude (AD-002). Se algum clone antigo existir, refaça-o.
 
