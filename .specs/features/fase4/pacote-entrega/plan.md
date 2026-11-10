@@ -80,5 +80,5 @@ None - este plano preserva os entregáveis acadêmicos do PDF binding.
 
 - `.specs/features/fase4/plan.md` - critérios acadêmicos confirmados no plano pai.
 - `.specs/features/fase4/checks.md` - AC 15-17.
-- `docs/specs/fase4/entregaveis/` - matriz de entregáveis, modelo de README, roteiro do vídeo e modelo do PDF.
-- `docs/specs/fase4/index.md` § 5 - feedback da Fase 3.
+- `.specs/features/fase4/especificacao/entregaveis/` - matriz de entregáveis, modelo de README, roteiro do vídeo e modelo do PDF.
+- `.specs/features/fase4/especificacao/index.md` § 5 - feedback da Fase 3.

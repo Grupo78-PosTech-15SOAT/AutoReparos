@@ -146,7 +146,7 @@ Consequência: **o deploy da aplicação acontece pelo repositório pai**, não 
 | App, AuthLambda, Infra.Database, Infra.K8s | PR + 1 aprovação, `strict`, vale para admins | **Nenhum** (`contexts: []`) | sem proteção |
 | AutoReparos (pai) | PR sem aprovação mínima, não vale para admins | **Nenhum** | sem proteção |
 
-O script [`scripts/infra/setup-github-governance.sh`](../../../../scripts/infra/setup-github-governance.sh) aplica `contexts: []`. Assim, a "checagem automática obrigatória" não é exigida de fato, embora o README da Fase 3 diga o contrário.
+O script [`scripts/infra/setup-github-governance.sh`](../../../../../scripts/infra/setup-github-governance.sh) aplica `contexts: []`. Assim, a "checagem automática obrigatória" não é exigida de fato, embora o README da Fase 3 diga o contrário.
 
 ---
 
@@ -172,9 +172,9 @@ O script [`scripts/infra/setup-github-governance.sh`](../../../../scripts/infra/
 | Item | Estado |
 |---|---|
 | Swagger | Swashbuckle habilitado em todos os ambientes (`/swagger`) |
-| Postman | [`Postman/AutoReparos.postman_collection.json`](../../../../Postman/AutoReparos.postman_collection.json), atualizada em 22/07/2026. Faltam `/auth/cliente`, `minhas-os`, `meus-veiculos`, `dashboard/*` e `kanban` |
-| RFCs e ADRs | [`docs/architecture/`](../../../architecture/) (RFC-001 a 003, ADR-001 a 003, modelo de dados) |
-| Pacote de entrega da Fase 3 | [`docs/entrega/`](../../../entrega/) (template do portal e roteiro do vídeo) e [`docs/reports/fase3/`](../../../reports/fase3/) (LaTeX e PDF) |
+| Postman | [`Postman/AutoReparos.postman_collection.json`](../../../../../Postman/AutoReparos.postman_collection.json), atualizada em 22/07/2026. Faltam `/auth/cliente`, `minhas-os`, `meus-veiculos`, `dashboard/*` e `kanban` |
+| RFCs e ADRs | [`docs/architecture/`](../../../../../docs/architecture) (RFC-001 a 003, ADR-001 a 003, modelo de dados) |
+| Pacote de entrega da Fase 3 | [`docs/entrega/`](../../../../../docs/entrega) (template do portal e roteiro do vídeo) e [`docs/reports/fase3/`](../../../../../docs/reports/fase3) (LaTeX e PDF) |
 | Divergências na documentação | `docs/architecture/README.md` diz que o CI do App faz análise SonarQube e gera imagem para o ECR (não faz). A regra de fixar actions por SHA (`.agents/rules/submodules-ci-and-docs-integrity.md`) não é seguida: os workflows usam `@v4`. |
 
 ---
@@ -211,7 +211,7 @@ O que em 04/11 era a branch `feature/provisionamento-aws-centralizado` agora est
 
 ## 10. Trabalho do Enrico em `feature/os-service-contracts` (09/11)
 
-Em 09/11 o Enrico publicou a branch `feature/os-service-contracts` no pai (partindo da `develop` atual) com a especificação no fluxo **TLC Spec Lean** e três repositórios novos registrados como submódulos. Nenhum PR foi aberto e os repositórios novos não têm `main`. A branch foi mesclada localmente na `docs/fase4-especificacao-inicial` em 09/11 para unificar a documentação (ver [índice § 3.1](../index.md#31-relação-com-specs-fluxo-tlc-spec-lean-do-enrico)).
+Em 09/11 o Enrico publicou a branch `feature/os-service-contracts` no pai (partindo da `develop` atual) com a especificação no fluxo **TLC Spec Lean** e três repositórios novos registrados como submódulos. Nenhum PR foi aberto e os repositórios novos não têm `main`. A branch foi mesclada na `docs/fase4-especificacao-inicial` em 09/11 para unificar a documentação; em 10/11 a nossa especificação saiu de `docs/specs/fase4/` e passou a morar em `.specs/features/fase4/especificacao/`, ao lado dos planos TLC (ver [índice § 3.1](../index.md#31-papéis-de-cada-parte)).
 
 ### 10.1 O que entrou no pai
 

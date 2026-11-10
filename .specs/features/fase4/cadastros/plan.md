@@ -1,6 +1,6 @@
 # Fase 4 - App reduzido a Cadastros
 
-**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-11, D-17, D-21, D-23 de `docs/specs/fase4/index.md` (AD-013).
+**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-11, D-17, D-21, D-23 de `.specs/features/fase4/especificacao/index.md` (AD-013).
 
 ## Problem
 
@@ -82,7 +82,7 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 | AuthLambda | Endpoint interno do Cadastros (D-11 opção A) | Mais simples que manter projeção própria. | n |
 | JWT | Chave assimétrica com JWKS (D-21) | Os serviços novos já validam por `Authority`. | n |
 
-**Open questions:** none - as duas suposições não confirmadas acima são recomendações registradas em `docs/specs/fase4/index.md` § 6.3.
+**Open questions:** none - as duas suposições não confirmadas acima são recomendações registradas em `.specs/features/fase4/especificacao/index.md` § 6.3.
 
 ## Differences from the source
 
@@ -90,6 +90,6 @@ None - este plano não altera elementos do PDF binding.
 
 ## Sources
 
-- `docs/specs/fase4/microsservicos/fase4_spec_separacao_microsservicos.md` § 5 - Etapas 2 e 4.
-- `docs/specs/fase4/microsservicos/fase4_spec_bancos_de_dados.md` § 4.3 - AuthLambda.
+- `.specs/features/fase4/especificacao/microsservicos/fase4_spec_separacao_microsservicos.md` § 5 - Etapas 2 e 4.
+- `.specs/features/fase4/especificacao/microsservicos/fase4_spec_bancos_de_dados.md` § 4.3 - AuthLambda.
 - `submodules/AutoReparos.App` - código atual.

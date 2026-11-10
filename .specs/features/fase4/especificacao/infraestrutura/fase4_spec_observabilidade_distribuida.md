@@ -25,8 +25,8 @@
 | SDK | OpenTelemetry no App: traces (ASP.NET Core, HttpClient, EF Core, Npgsql), métricas (runtime, processo, ASP.NET Core, `AutoReparosMetrics`) e logs, exportando OTLP |
 | `service.name` | `OpenTelemetry:ServiceName`, padrão `autoreparos-api`; versão fixa `1.0.0` |
 | Collector | OTel Collector → Jaeger (traces), Prometheus (métricas), Loki (logs); exportação opcional para New Relic (`otlp/vendor`) |
-| Visualização | Grafana com 3 dashboards ([`docs/observability/dashboards/`](../../../observability/dashboards/)): volume diário, tempo médio por status, erros de integrações |
-| Alertas | [`docs/observability/alerts/`](../../../observability/alerts/) (regras Prometheus e políticas) |
+| Visualização | Grafana com 3 dashboards ([`docs/observability/dashboards/`](../../../../../docs/observability/dashboards)): volume diário, tempo médio por status, erros de integrações |
+| Alertas | [`docs/observability/alerts/`](../../../../../docs/observability/alerts) (regras Prometheus e políticas) |
 | Correlação | Logs JSON com `TraceId`/`SpanId`; `CorrelationIdMiddleware` (`X-Correlation-Id`) |
 | Métricas de negócio | OS criadas, transições de status, tempos de diagnóstico, execução e permanência, falhas de notificação |
 | Onde roda | Chart `observability` no Infra.K8s e `docker-compose.yml` do pai |

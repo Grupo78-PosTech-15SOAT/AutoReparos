@@ -33,7 +33,7 @@
 | Evidência de cobertura no README | ❌ | Nenhum badge ou print |
 | Documentação da arquitetura do serviço | 🟡 | Concentrada no README do pai e em `docs/architecture/` |
 | Swagger | ✅ Swashbuckle em todos os ambientes | — |
-| Postman | 🟡 [`Postman/AutoReparos.postman_collection.json`](../../../../Postman/AutoReparos.postman_collection.json) no pai, de 22/07/2026 | Faltam `/auth/cliente`, `minhas-os`, `meus-veiculos`, `dashboard/*`, `kanban` |
+| Postman | 🟡 [`Postman/AutoReparos.postman_collection.json`](../../../../../Postman/AutoReparos.postman_collection.json) no pai, de 22/07/2026 | Faltam `/auth/cliente`, `minhas-os`, `meus-veiculos`, `dashboard/*`, `kanban` |
 | README com escolha da Saga | ❌ | Não há Saga |
 
 ---

@@ -2,10 +2,11 @@
 
 > **Projeto:** AutoReparos - Sistema Integrado de Oficina Mecânica  
 > **Fase:** Tech Challenge FIAP SOAT - Fase 4 (15SOAT) — Grupo 78  
-> **Documento-fonte:** [`15SOAT - Fase 4 - Tech challenge.pdf`](../../tech-challenge/15SOAT%20-%20Fase%204%20-%20Tech%20challenge.pdf)  
+> **Documento-fonte:** [`15SOAT - Fase 4 - Tech challenge.pdf`](../../../../docs/tech-challenge/15SOAT%20-%20Fase%204%20-%20Tech%20challenge.pdf)  
 > **Base analisada:** `origin/develop` do pai e de cada submódulo (04/11/2026, revisada em 09/11/2026) **mais** a branch `feature/os-service-contracts` do Enrico (OS, Billing e Execution, mesclada localmente em 09/11/2026)  
 > **Entrega:** 17/11/2026 (terça-feira)  
-> **Status:** Especificação unificada com `.specs/` (§ 3.1). Decisões de arquitetura fechadas em 09 e 10/11/2026; pendências no § 6.3
+> **Local:** `.specs/features/fase4/especificacao/` — parte "o quê e por quê" da especificação da Fase 4 (§ 3.1); protocolo de preenchimento no § 8 e no `AGENTS.md` da raiz  
+> **Status:** Especificação unificada com os planos TLC da fase. Decisões de arquitetura fechadas em 09 e 10/11/2026; pendências no § 6.3
 
 ---
 
@@ -28,29 +29,40 @@ O levantamento completo está em [`diagnostico/fase4_diagnostico_estado_atual.md
 
 ## 3. Mapa das specs
 
+Toda a especificação da Fase 4 (a nossa e a do Enrico) mora em `.specs/features/fase4/`:
+
 ```text
-docs/specs/fase4/                                   ← visão geral: PDF, estado atual, decisões, desenho transversal
-├── index.md                                        ← este arquivo (registro único de decisões)
-├── diagnostico/
-│   └── fase4_diagnostico_estado_atual.md           ← base comum (branches, código, testes, CI, infra)
-├── microsservicos/
-│   ├── fase4_spec_separacao_microsservicos.md      ← 3 serviços + Cadastros, repositórios
-│   ├── fase4_spec_bancos_de_dados.md               ← banco por serviço, SQL + NoSQL
-│   └── fase4_spec_integracao_mercado_pago.md       ← pagamentos na Cobrança
-├── comunicacao/
-│   └── fase4_spec_comunicacao_microsservicos.md    ← REST, SQS/SNS, catálogo de eventos
-├── saga/
-│   └── fase4_spec_saga_pattern.md                  ← orquestração, compensações, reserva, travas, prazos
-├── testes-qualidade/
-│   └── fase4_spec_testes_e_qualidade.md            ← unitários, BDD, 80%, Sonar
-├── cicd/
-│   └── fase4_spec_cicd_e_protecao_de_branches.md   ← pipeline por serviço, branch protection
-├── infraestrutura/
-│   ├── fase4_spec_infraestrutura_k8s_e_mensageria.md  ← K8s por serviço, filas
-│   └── fase4_spec_observabilidade_distribuida.md      ← stack da Fase 3 + tracing distribuído
-└── entregaveis/
-    ├── fase4_spec_entregaveis_repositorios.md      ← README, Swagger/Postman, evidências
-    └── fase4_spec_video_e_documento_portal.md      ← vídeo (≤ 15 min) e PDF do portal
+.specs/
+├── STATE.md                                        ← decisões AD-xxx (espelho do § 6) e handoff
+└── features/fase4/
+    ├── plan.md · checks.md                         ← plano TLC da iniciativa (critérios AC 1–17)
+    ├── FEATURES.md                                 ← mapa das features TLC
+    ├── especificacao/                              ← o quê e por quê (esta pasta)
+    │   ├── index.md                                ← este arquivo (registro único de decisões)
+    │   ├── diagnostico/
+    │   │   └── fase4_diagnostico_estado_atual.md   ← base comum (branches, código, testes, CI, infra)
+    │   ├── microsservicos/
+    │   │   ├── fase4_spec_separacao_microsservicos.md   ← 3 serviços + Cadastros, repositórios
+    │   │   ├── fase4_spec_bancos_de_dados.md            ← banco por serviço, SQL + NoSQL
+    │   │   └── fase4_spec_integracao_mercado_pago.md    ← pagamentos na Cobrança
+    │   ├── comunicacao/
+    │   │   └── fase4_spec_comunicacao_microsservicos.md ← REST, SQS/SNS, catálogo de eventos
+    │   ├── saga/
+    │   │   └── fase4_spec_saga_pattern.md               ← orquestração, compensações, reserva, travas, prazos
+    │   ├── testes-qualidade/
+    │   │   └── fase4_spec_testes_e_qualidade.md         ← unitários, BDD, 80%, Sonar
+    │   ├── cicd/
+    │   │   └── fase4_spec_cicd_e_protecao_de_branches.md ← pipeline por serviço, branch protection
+    │   ├── infraestrutura/
+    │   │   ├── fase4_spec_infraestrutura_k8s_e_mensageria.md ← K8s por serviço, filas
+    │   │   └── fase4_spec_observabilidade_distribuida.md     ← stack da Fase 3 + tracing distribuído
+    │   └── entregaveis/
+    │       ├── fase4_spec_entregaveis_repositorios.md   ← README, Swagger/Postman, evidências
+    │       └── fase4_spec_video_e_documento_portal.md   ← vídeo (≤ 15 min) e PDF do portal
+    └── <feature>/                                  ← como, verificável (uma pasta por feature TLC)
+        ├── plan.md                                 ← critérios EARS; aprovado pelo usuário
+        ├── checks.md                               ← derivado do plano aprovado e congelado
+        └── proofs.md · mutations.json · verification.md   ← provas e veredito do Verifier
 ```
 
 | Seção do PDF | Spec |
@@ -64,31 +76,30 @@ docs/specs/fase4/                                   ← visão geral: PDF, estad
 | Entregáveis — Repositórios | [Entregáveis dos repositórios](./entregaveis/fase4_spec_entregaveis_repositorios.md) |
 | Entregáveis — Vídeo e PDF | [Vídeo e documento do portal](./entregaveis/fase4_spec_video_e_documento_portal.md) |
 
-### 3.1 Relação com `.specs/` (fluxo TLC Spec Lean do Enrico)
+### 3.1 Papéis de cada parte
 
-As duas pastas formam uma única especificação, com papéis diferentes e sem repetir conteúdo:
-
-| Pasta | Papel | Quem lê |
+| Parte | Papel | Quem lê |
 |---|---|---|
-| `docs/specs/fase4/` (esta) | **O quê e por quê:** requisitos do PDF, estado atual, decisões (registro único no § 6), desenho transversal (Saga, contratos, bancos, CI/CD, entregáveis) | Grupo, banca, autor do PDF final |
-| `.specs/features/fase4/` | **Como, verificável:** um `plan.md` por feature com critérios EARS, `checks.md` congelado, provas (`proofs.md`), mutações e veredito do Verifier | Quem implementa (pessoa ou agente) |
-| `.specs/STATE.md` | Decisões em formato `AD-xxx` lidas pelos agentes | Agentes de IA |
+| `especificacao/` (esta pasta) | **O quê e por quê:** requisitos do PDF, estado atual, decisões (registro único no § 6), desenho transversal (Saga, contratos, bancos, CI/CD, entregáveis), cronograma | Grupo, banca, autor do PDF final, agentes antes de planejar |
+| `<feature>/` | **Como, verificável:** `plan.md` com critérios EARS, `checks.md` congelado, provas, mutações e veredito do Verifier | Quem implementa (pessoa ou agente) |
+| `plan.md`, `checks.md`, `FEATURES.md` da fase | Aceite da iniciativa e mapa das features | Todos |
+| `.specs/STATE.md` | Decisões em formato `AD-xxx`, cada uma ligada a um `D-xx` deste índice, e handoff | Agentes de IA |
 
-Regras de sincronização:
+Regras de sincronização (detalhadas no § 8):
 
 1. Uma decisão nova entra **primeiro no § 6 deste índice** e, se afetar a implementação, vira um `AD-xxx` no `.specs/STATE.md` com a referência `D-xx`.
-2. Um `plan.md` aprovado do `.specs` não é reescrito por esta pasta. Quando uma decisão daqui muda um plano, o plano é revisado e volta para aprovação (gate do TLC).
-3. Desenho detalhado (máquina de estados, contratos) mora aqui; o `plan.md` da feature referencia a seção.
+2. Um `plan.md` aprovado não é reescrito por esta pasta. Quando uma decisão daqui muda um plano, o plano é revisado e volta para aprovação (gate do TLC).
+3. Desenho detalhado (máquina de estados, contratos) mora aqui; o `plan.md` da feature referencia a seção em vez de copiar.
 
-| Feature em `.specs/features/fase4/` | Estado (09/11) | Specs desta pasta |
+| Feature (`../<feature>/plan.md`) | Estado (10/11) | Specs desta pasta |
 |---|---|---|
-| `os-service` | ✅ PASS (abertura, consulta, histórico de criação) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md), [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
-| `billing` | ✅ PASS (orçamento, Checkout Pro, webhook, reembolso) | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
-| `execucao` | ✅ PASS (fila, etapas, conclusão, falha, reexecução) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
-| `saga-mensageria` | 📝 Plano revisado em 10/11, aguarda aprovação | [Saga](./saga/fase4_spec_saga_pattern.md), [Comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md) |
-| `cadastros` e `insumos` | 📝 Plano novo em 10/11, aguarda aprovação | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#5-passos-para-a-mudança) |
-| `infra-ci-observabilidade` | 📝 Plano revisado em 10/11, aguarda aprovação | [CI/CD](./cicd/fase4_spec_cicd_e_protecao_de_branches.md), [Infraestrutura](./infraestrutura/fase4_spec_infraestrutura_k8s_e_mensageria.md), [Observabilidade](./infraestrutura/fase4_spec_observabilidade_distribuida.md), [Testes](./testes-qualidade/fase4_spec_testes_e_qualidade.md) |
-| `pacote-entrega` | 📝 Plano revisado em 10/11, aguarda aprovação | [Entregáveis](./entregaveis/fase4_spec_entregaveis_repositorios.md), [Vídeo e PDF](./entregaveis/fase4_spec_video_e_documento_portal.md) |
+| [`os-service`](../os-service/plan.md) | ✅ PASS (abertura, consulta, histórico de criação) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md), [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
+| [`billing`](../billing/plan.md) | ✅ PASS (orçamento, Checkout Pro, webhook, reembolso) | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
+| [`execucao`](../execucao/plan.md) | ✅ PASS (fila, etapas, conclusão, falha, reexecução) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
+| [`saga-mensageria`](../saga-mensageria/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [Saga](./saga/fase4_spec_saga_pattern.md), [Comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md) |
+| [`cadastros`](../cadastros/plan.md) e [`insumos`](../insumos/plan.md) | 📝 Plano novo em 10/11, aguarda aprovação | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#5-passos-para-a-mudança) |
+| [`infra-ci-observabilidade`](../infra-ci-observabilidade/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [CI/CD](./cicd/fase4_spec_cicd_e_protecao_de_branches.md), [Infraestrutura](./infraestrutura/fase4_spec_infraestrutura_k8s_e_mensageria.md), [Observabilidade](./infraestrutura/fase4_spec_observabilidade_distribuida.md), [Testes](./testes-qualidade/fase4_spec_testes_e_qualidade.md) |
+| [`pacote-entrega`](../pacote-entrega/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [Entregáveis](./entregaveis/fase4_spec_entregaveis_repositorios.md), [Vídeo e PDF](./entregaveis/fase4_spec_video_e_documento_portal.md) |
 
 ---
 
@@ -315,8 +326,44 @@ Sugestão de trilhas paralelas para os 5 integrantes (a combinar):
 
 ---
 
-## 8. Convenções
+## 8. Protocolo de preenchimento
 
-- Specs em português, com caminhos relativos (como na Fase 3).
-- Arquivos referenciados de submódulos aparecem como caminho em código (`submodules/...`), porque links para dentro de submódulos não funcionam no GitHub.
-- Ao fechar uma decisão do § 6.3: mover para o § 6.1, atualizar a spec correspondente e registrar o `AD-xxx` no `.specs/STATE.md` (§ 3.1).
+Vale para pessoas e agentes de IA. O mesmo protocolo, resumido, está no `AGENTS.md` da raiz.
+
+### 8.1 Onde cada coisa vai
+
+| Conteúdo | Lugar |
+|---|---|
+| Requisito do PDF, estado atual, lacunas, desenho transversal | Spec em `especificacao/<tema>/fase4_spec_<assunto>.md` |
+| Levantamento do código, branches, CI e infraestrutura | `especificacao/diagnostico/` |
+| Decisão do grupo | § 6 deste índice (e `AD-xxx` no `.specs/STATE.md`) |
+| Plano implementável de uma capacidade | `../<feature>/plan.md` (fluxo TLC Spec Lean) |
+| Provas, mutações e veredito | `../<feature>/` (gerados pelos scripts do TLC) |
+| Specs das Fases 1 a 3 | Continuam em `docs/specs/fase<N>/`, sem migração |
+
+### 8.2 Decisões
+
+1. Nova decisão: linha no § 6.1 com `D-xx` sequencial, data e as palavras de quem decidiu; decisão ainda aberta vai para o § 6.3 com recomendação e o que ela bloqueia.
+2. Se mudar uma decisão anterior: atualizar a linha e registrar a mudança no § 6.4.
+3. Se afetar a implementação: criar `AD-xxx` no `.specs/STATE.md` citando o `D-xx` e a frase do usuário.
+4. Atualizar a spec transversal afetada e, se houver, revisar o `plan.md` da feature: trocar `**Approved**` por `**Revisão pendente de aprovação**`. A linha `**Approved**: <data> - user: "<palavras>"` só é escrita com as palavras do usuário, e o `checks.md` é derivado de novo depois.
+
+### 8.3 Nova spec transversal
+
+Usar as seções das specs existentes: cabeçalho (Projeto, Fase, Critério do PDF, Requisitos `R-xx`, Repositórios afetados, Feature `.specs`, Base, Índice, Status); 1. Critério (texto do PDF); 2. Estado atual; 3. Lacunas; 4. Desenho (ou Proposta, se houver escolha a fazer); 5. Passos para a mudança; 6. Critérios de aceite. Registrar no mapa (§ 3) e na matriz (§ 4).
+
+### 8.4 Nova feature
+
+Criar `../<feature>/plan.md` no formato do TLC Spec Lean (`.specs/tlc-spec-lean/`), com as decisões de origem (`D-xx`/`AD-xxx`) no topo e a seção da spec transversal em "Sources"; adicionar a feature no `FEATURES.md` e na tabela do § 3.1; aguardar a aprovação do usuário antes de derivar os checks.
+
+### 8.5 Antes de commitar
+
+- `python3 scripts/specs/verificar_links.py` sem problemas (links relativos e âncoras desta pasta).
+- `python3 .specs/tlc-spec-lean/scripts/validate_plan.py fase4/<feature>` sem erros para cada plano alterado.
+- Diagramas Mermaid validados (ex.: mermaid-cli ou mermaid.live).
+
+### 8.6 Convenções
+
+- Português, com caminhos relativos; nomes de serviços, filas e eventos em português (L-02).
+- Arquivos de submódulos aparecem como caminho em código (`submodules/...`), porque links para dentro de submódulos não funcionam no GitHub.
+- Sem código de produção, segredos ou dados pessoais nas specs.

@@ -36,9 +36,9 @@
 
 | Item | Situação |
 |---|---|
-| Roteiro de vídeo | [`docs/entrega/roteiro_video_demonstracao_15min.md`](../../../entrega/roteiro_video_demonstracao_15min.md) (Fase 3), com checklist pré-gravação e gerador de tráfego para os dashboards |
-| Template do portal | [`docs/entrega/template_entrega_portal_fiap.md`](../../../entrega/template_entrega_portal_fiap.md) (Fase 3), com capa, integrantes (5 nomes e RMs), repositórios e resumo |
-| Relatório LaTeX/PDF | [`docs/reports/fase3/`](../../../reports/fase3/) e guia em [`docs/reports/REPORT_GUIDE.md`](../../../reports/REPORT_GUIDE.md) |
+| Roteiro de vídeo | [`docs/entrega/roteiro_video_demonstracao_15min.md`](../../../../../docs/entrega/roteiro_video_demonstracao_15min.md) (Fase 3), com checklist pré-gravação e gerador de tráfego para os dashboards |
+| Template do portal | [`docs/entrega/template_entrega_portal_fiap.md`](../../../../../docs/entrega/template_entrega_portal_fiap.md) (Fase 3), com capa, integrantes (5 nomes e RMs), repositórios e resumo |
+| Relatório LaTeX/PDF | [`docs/reports/fase3/`](../../../../../docs/reports/fase3) e guia em [`docs/reports/REPORT_GUIDE.md`](../../../../../docs/reports/REPORT_GUIDE.md) |
 | Diagramas | Mermaid no README do pai e em `docs/architecture/` (arquitetura da Fase 3) |
 
 ### 2.1 Feedback da Fase 3 sobre o vídeo

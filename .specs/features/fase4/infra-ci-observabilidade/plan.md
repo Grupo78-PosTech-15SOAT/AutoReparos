@@ -1,6 +1,6 @@
 # Fase 4 - Infraestrutura, CI/CD e observabilidade
 
-**Revisão pendente de aprovação** (10/11/2026): inclui Cadastros e Web, SNS/SQS e DynamoDB por IaC, proteção com status checks obrigatórios e evidências pedidas no feedback da Fase 3 (D-13, D-19, D-22 de `docs/specs/fase4/index.md`). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
+**Revisão pendente de aprovação** (10/11/2026): inclui Cadastros e Web, SNS/SQS e DynamoDB por IaC, proteção com status checks obrigatórios e evidências pedidas no feedback da Fase 3 (D-13, D-19, D-22 de `.specs/features/fase4/especificacao/index.md`). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
 
 ## Problem
 
@@ -74,7 +74,7 @@ None - nothing consumed outside as a public route; pipelines e recursos EKS/AWS 
 | --- | --- | --- | --- |
 | Alvos | Desenvolvimento local, staging namespace compartilhado, produção EKS após release, `us-east-1` | Confirmado no plano pai. | y - user: "Sim, adotar esses alvos" |
 | Infra compartilhada | Serviços mantêm IaC exclusiva; Infra.K8s mantém cluster e observabilidade | Confirmado no plano pai. | y - user: "Adotar essa divisão" |
-| Deploy | Cada repositório implanta o próprio serviço; o pai provisiona só a plataforma (D-13) | Mesmo sentido da door 1; registrado em `docs/specs/fase4/index.md`. | y - José: aceitou a convergência em 10/11 |
+| Deploy | Cada repositório implanta o próprio serviço; o pai provisiona só a plataforma (D-13) | Mesmo sentido da door 1; registrado em `.specs/features/fase4/especificacao/index.md`. | y - José: aceitou a convergência em 10/11 |
 | Mensageria | SNS por produtor + SQS por consumidor (D-19) | AD-014. | y - José: "Recomendado" |
 
 **Open questions:** none
@@ -88,4 +88,4 @@ None - este plano não altera elementos do PDF binding.
 - `.specs/features/fase4/plan.md` - alvos, cobertura, CI e observabilidade confirmados.
 - `.specs/features/fase4/checks.md` - AC 9, 11-15.
 - `submodules/AutoReparos.Infra.K8s` - infraestrutura compartilhada existente.
-- `docs/specs/fase4/cicd/fase4_spec_cicd_e_protecao_de_branches.md`, `docs/specs/fase4/infraestrutura/` e `docs/specs/fase4/testes-qualidade/` - desenho detalhado.
+- `.specs/features/fase4/especificacao/cicd/fase4_spec_cicd_e_protecao_de_branches.md`, `.specs/features/fase4/especificacao/infraestrutura/` e `.specs/features/fase4/especificacao/testes-qualidade/` - desenho detalhado.

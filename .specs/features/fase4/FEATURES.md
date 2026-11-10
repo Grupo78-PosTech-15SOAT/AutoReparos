@@ -1,6 +1,6 @@
 # Fase 4 - Mapa de features
 
-Esta pasta é a iniciativa e mantém os requisitos globais e decisões aprovadas. O registro único de decisões e o desenho transversal (Saga, contratos, bancos) ficam em `docs/specs/fase4/index.md` (§ 3.1 explica a divisão de papéis). A implementação e os checks detalhados serão conduzidos em features TLC independentes, sem replicar os critérios completos neste mapa.
+Esta pasta é a iniciativa e mantém os requisitos globais e decisões aprovadas. O registro único de decisões e o desenho transversal (Saga, contratos, bancos) ficam na subpasta [`especificacao/`](especificacao/index.md), que não é uma feature TLC (§ 3.1 do índice explica a divisão de papéis e o § 8 o protocolo de preenchimento). A implementação e os checks detalhados serão conduzidos em features TLC independentes, sem replicar os critérios completos neste mapa.
 
 ## Features dedicadas
 

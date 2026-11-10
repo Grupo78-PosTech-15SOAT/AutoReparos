@@ -1,6 +1,6 @@
 # Fase 4 - Saga e mensageria
 
-**Revisão pendente de aprovação** (10/11/2026): incorpora D-01, D-04, D-09, D-18, D-19, D-20 e a regra L-01 (opção C) de `docs/specs/fase4/index.md` § 6 e AD-010 a AD-015 do `.specs/STATE.md`. A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
+**Revisão pendente de aprovação** (10/11/2026): incorpora D-01, D-04, D-09, D-18, D-19, D-20 e a regra L-01 (opção C) de `.specs/features/fase4/especificacao/index.md` § 6 e AD-010 a AD-015 do `.specs/STATE.md`. A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
 
 ## Problem
 
@@ -8,7 +8,7 @@ O ciclo da OS atravessa serviços com bancos isolados e pode falhar depois de et
 
 ## Shape
 
-Esta entrega conecta OS Service, Cobrança e Execução já existentes. Desenho detalhado (estados, compensações, prazos, modelo da tabela) em `docs/specs/fase4/saga/fase4_spec_saga_pattern.md`.
+Esta entrega conecta OS Service, Cobrança e Execução já existentes. Desenho detalhado (estados, compensações, prazos, modelo da tabela) em `.specs/features/fase4/especificacao/saga/fase4_spec_saga_pattern.md`.
 
 1. OS Service grava o estado da Saga em tabela DynamoDB própria (door 1); cada handler grava em um único banco (regra L-01): eventos dos participantes no DynamoDB (Inbox + transição + Outbox num `TransactWriteItems`), status e histórico da OS no PostgreSQL ao consumir `saga.avancou.v1`.
 2. Orquestrador envia comandos pela SQS (door 2) à Cobrança e à Execução e recebe eventos pelos tópicos SNS de cada produtor; a Outbox do DynamoDB é publicada por DynamoDB Streams.
@@ -53,7 +53,7 @@ New: SagaOS, PassoSaga, Inbox e Outbox na tabela DynamoDB do OS Service; Reserva
 | `POST /api/v1/admin/sagas/{ordemServicoId}/cancelar` | motivo -> cancelamento iniciado | Administrador ou atendente | 202, 401, 403, 404, 409 |
 | `POST /api/v1/admin/dlq/reprocessar` (em cada serviço) | fila -> mensagens devolvidas | Administrador | 202, 401, 403 |
 
-Mensagens internas versionadas: catálogo em `docs/specs/fase4/comunicacao/fase4_spec_comunicacao_microsservicos.md` § 4.5.
+Mensagens internas versionadas: catálogo em `.specs/features/fase4/especificacao/comunicacao/fase4_spec_comunicacao_microsservicos.md` § 4.5.
 
 ## Landing
 
@@ -121,6 +121,6 @@ None - este plano não altera elementos do PDF binding.
 ## Sources
 
 - `.specs/features/fase4/plan.md` - Saga e regras de falha aprovadas.
-- `docs/specs/fase4/saga/fase4_spec_saga_pattern.md` - desenho detalhado da Saga.
-- `docs/specs/fase4/comunicacao/fase4_spec_comunicacao_microsservicos.md` - catálogo de mensagens.
+- `.specs/features/fase4/especificacao/saga/fase4_spec_saga_pattern.md` - desenho detalhado da Saga.
+- `.specs/features/fase4/especificacao/comunicacao/fase4_spec_comunicacao_microsservicos.md` - catálogo de mensagens.
 - `.specs/STATE.md` - AD-001, AD-010 a AD-015.

@@ -1,6 +1,6 @@
 # Fase 4 - Catálogo e insumos com reserva em duas fases
 
-**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-18a, D-20 de `docs/specs/fase4/index.md` (AD-011, AD-013, AD-015).
+**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-18a, D-20 de `.specs/features/fase4/especificacao/index.md` (AD-011, AD-013, AD-015).
 
 ## Problem
 
@@ -94,6 +94,6 @@ None - este plano não altera elementos do PDF binding.
 
 ## Sources
 
-- `docs/specs/fase4/saga/fase4_spec_saga_pattern.md` § 4.5 - reserva em duas fases.
-- `docs/specs/fase4/microsservicos/fase4_spec_separacao_microsservicos.md` § 5 - Etapa 1.
+- `.specs/features/fase4/especificacao/saga/fase4_spec_saga_pattern.md` § 4.5 - reserva em duas fases.
+- `.specs/features/fase4/especificacao/microsservicos/fase4_spec_separacao_microsservicos.md` § 5 - Etapa 1.
 - `.specs/features/fase4/execucao/plan.md` - serviço existente.

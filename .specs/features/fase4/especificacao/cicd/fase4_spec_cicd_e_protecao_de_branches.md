@@ -100,7 +100,7 @@ Regras:
 
 ### 4.3 Proteção de branches
 
-Atualizar [`scripts/infra/setup-github-governance.sh`](../../../../scripts/infra/setup-github-governance.sh):
+Atualizar [`scripts/infra/setup-github-governance.sh`](../../../../../scripts/infra/setup-github-governance.sh):
 
 1. Incluir os repositórios novos com os nomes em português (OS, Cobranca, Execucao, Cadastros, Web e, se houver, Notificacao).
 2. Preencher `required_status_checks.contexts` por repositório com os nomes dos jobs (por exemplo, `build`, `test`, `quality`) em vez de `[]`.
