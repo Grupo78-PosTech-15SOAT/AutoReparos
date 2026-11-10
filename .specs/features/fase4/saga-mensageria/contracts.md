@@ -1,7 +1,7 @@
 # Contrato de mensagens da Saga (v1)
 
 Documento de projeto da feature `saga-mensageria`. Fonte única para OS Service (orquestrador), Billing e Execution.
-Decisões de projeto desta rodada (ver AD-010 no `STATE.md`); o `plan.md` aprovado não foi alterado.
+Decisões de projeto desta rodada (ver AD-019 no `STATE.md`); o `plan.md` aprovado não foi alterado.
 
 ## Princípios
 
