@@ -25,7 +25,7 @@
 
 ## Unificação da especificação da Fase 4 - 2026-11-09 (atualizada em 10/11)
 
-- **Entrega do trabalho: 17/11/2026.** Cronograma em `.specs/features/fase4/especificacao/index.md` § 7.1.
+- **Entrega do trabalho: 17/11/2026.** Divisão em 5 tarefas e cronograma em `.specs/features/fase4/especificacao/index.md` § 7.1 e § 7.2.
 - Planos aguardando aprovação do usuário (todos sem `**Approved**`; os `checks.md` antigos de `saga-mensageria`, `infra-ci-observabilidade` e `pacote-entrega` devem ser derivados de novo): `saga-mensageria`, `infra-ci-observabilidade`, `pacote-entrega` (revisados) e `insumos`, `cadastros` (novos).
 - Em 10/11 a especificação do José saiu de `docs/specs/fase4/` e passou a morar em `.specs/features/fase4/especificacao/` (o quê e por quê), ao lado das pastas TLC de cada feature (como, verificável). O `index.md` dessa pasta é o registro único de decisões (D-xx); cada `AD-xxx` daqui cita o seu D-xx. Papéis no § 3.1 e protocolo de preenchimento no § 8 do índice e no `AGENTS.md` da raiz.
 - Na mesclagem local de `feature/os-service-contracts` em `docs/fase4-especificacao-inicial`, os ponteiros de App, AuthLambda, Infra.Database e Infra.K8s ficaram na `develop` atual. A branch `feature/os-service-contracts` do Infra.K8s partiu de `607f1de`, sem o provisionamento centralizado: rebasear na `develop` antes do PR.

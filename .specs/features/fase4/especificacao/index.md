@@ -299,28 +299,39 @@ flowchart TD
     E5 --> E6
 ```
 
-Sugestão de trilhas paralelas para os 5 integrantes (a combinar):
+### 7.1 Divisão em 5 tarefas (uma por integrante)
 
-| Trilha | Escopo | Feature `.specs` |
-|---|---|---|
-| A — Plataforma e CI/CD | Filas/tópicos, DynamoDB, ECR/IRSA, charts por serviço, pipelines, governança de branches | `infra-ci-observabilidade` |
-| B — OS e Saga | Orquestrador, DynamoDB, publicador da Outbox, travas, prazos, console de administração | `saga-mensageria` |
-| C — Cobrança | Consumidores de comandos da Saga, sandbox do Mercado Pago, itens abertos do Verifier | `billing` |
-| D — Execução, insumos e Cadastros | Catálogo e insumos com reserva em duas fases; App reduzido a Cadastros; AuthLambda | `insumos`, `cadastros` |
-| E — Qualidade e entrega | BDD ponta a ponta, SonarCloud, observabilidade distribuída, documentação, vídeo | `pacote-entrega` |
+Responsáveis **sugeridos** a partir de quem trabalhou em cada área nas fases anteriores; o time confirma ou troca.
 
-### 7.1 Cronograma até a entrega (17/11/2026)
+| Tarefa | Responsável sugerido | Escopo | Feature `.specs` | Depende de |
+|---|---|---|---|---|
+| **T1 — Plataforma e CI/CD** | Mateus | Renomear repositórios (L-02) e criar `main`; Terraform por serviço (ECR, IRSA, filas, tópicos SNS, DLQs, tabela DynamoDB, VPC endpoint); Job de bootstrap das databases; charts Helm por serviço; pipeline padrão `ci-cd.yml` (build, testes, cobertura, Sonar, imagem, deploy staging/produção); status checks obrigatórios; rebase da branch do Infra.K8s | `infra-ci-observabilidade` | — (começa no dia 1) |
+| **T2 — OS e Saga** | Enrico | Orquestrador no DynamoDB (estados, compensações, escrita condicional), publicador da Outbox por Streams, handler `saga.avancou.v1`, travas (409), job de prazos e lembretes, console de administração das Sagas, validação de cliente/veículo no Cadastros, histórico de todas as transições | `saga-mensageria` | Catálogo de mensagens congelado (qua 11/11) |
+| **T3 — Cobrança, Mercado Pago e frontend** | José | Itens no orçamento; eventos `orcamento.*` e `pagamento.*` no tópico SNS; consumidores `cobranca.cancelar-orcamento.v1` e `execucao.concluida.v1`; `external_reference` por tentativa e varredura de reembolsos; sandbox e rota do webhook; frontend com os novos paths, telas de orçamento, pagamento, fila e console de Sagas | `billing` | Catálogo de mensagens; T1 para a rota do webhook |
+| **T4 — Execução, insumos e Cadastros** | Lucas | Catálogo e insumos na Execução com reserva em duas fases; consumidores `reservar-insumos` e `cancelar-reserva`; eventos `execucao.enfileirada.v1` e `reexecutada.v1`; publicação no tópico SNS; App reduzido a Cadastros (REST de cliente e veículo, JWKS, endpoint interno da AuthLambda, notificações por eventos) | `insumos`, `cadastros` | Catálogo de mensagens |
+| **T5 — Qualidade, observabilidade e entrega** | Júlia | Catálogo de mensagens e envelope (`contratos-mensagens.md`); `docker-compose.yml` com LocalStack e os 4 serviços; BDD ponta a ponta (Reqnroll); cobertura ≥ 80% e SonarCloud por repositório; propagação de trace nas mensagens e dashboard da Saga; READMEs, Postman, roteiro do vídeo e PDF do portal | `pacote-entrega` (+ observabilidade de `infra-ci-observabilidade`) | Serviços de T2–T4 para o BDD |
 
-| Data | Marco | Trilhas |
-|---|---|---|
-| Ter 10/11 | Specs e planos unificados; aprovação dos planos `saga-mensageria`, `insumos`, `cadastros`, `infra-ci-observabilidade` e `pacote-entrega`; PRs do Enrico e `main` nos repositórios novos | Todas |
-| Qua 11/11 | Renomeação dos repositórios (L-02); contratos e envelope; tabela DynamoDB, filas e tópicos no LocalStack; reserva em duas fases | A, B, D |
-| Qui 12/11 | Orquestrador com estados, compensações e travas; consumidores na Cobrança e na Execução; Cadastros com REST, JWKS e endpoint da Lambda | B, C, D |
-| Sex 13/11 | Prazos técnicos, console de Sagas e reprocessamento de DLQ; fluxo ponta a ponta no `docker compose`; pipelines por repositório | A, B |
-| Sáb 14/11 | BDD ponta a ponta; cobertura ≥ 80% e SonarCloud em cada repositório; status checks obrigatórios | E, todas |
-| Dom 15/11 | Deploy no EKS por pipeline; observabilidade distribuída e dashboard da Saga; sandbox do Mercado Pago | A, C, E |
-| Seg 16/11 | **Congelamento de código.** READMEs, Postman, ensaio e gravação do vídeo | E, todas |
-| Ter 17/11 | Edição final, PDF do portal e submissão | E |
+Endpoint de reprocessamento da DLQ: cada responsável implementa no próprio serviço (T2 no OS, T3 na Cobrança, T4 na Execução e no Cadastros).
+
+### 7.2 Cronograma até a entrega (17/11/2026)
+
+| Data | T1 Plataforma | T2 OS e Saga | T3 Cobrança e frontend | T4 Execução e Cadastros | T5 Qualidade e entrega |
+|---|---|---|---|---|---|
+| **Ter 10/11** | Aprovar os planos; mesclar o PR da unificação; criar `main` nos repositórios novos; Billing público | idem | idem | idem | idem |
+| **Qua 11/11** | Renomear repositórios; LocalStack (SQS, SNS, DynamoDB) no compose | Tabela da Saga e máquina de estados | Itens no orçamento | Catálogo e insumos (migrations, seed, REST) | **Catálogo de mensagens congelado** (meio-dia) |
+| **Qui 12/11** | Terraform por serviço; charts Helm | Compensações, `saga.avancou.v1`, publicador por Streams | Eventos e consumidores da Saga | Reserva em duas fases e consumidores | Esqueleto do BDD; cobertura atual de cada repositório |
+| **Sex 13/11** | Pipeline `ci-cd.yml` em todos os repositórios | Travas, prazos e console | Webhook no gateway; telas de orçamento e pagamento | Cadastros: REST, JWKS, Lambda, notificações | **Fluxo ponta a ponta no compose** (todos) |
+| **Sáb 14/11** | SonarCloud e status checks obrigatórios | Testes da Saga (unitários e LocalStack) | Testes da Cobrança; telas de fila e console | Testes de Execução e Cadastros | BDD verde; trace nas mensagens |
+| **Dom 15/11** | Deploy staging e produção no EKS | Ajustes do ponta a ponta na AWS | Sandbox do Mercado Pago na AWS | Ajustes do ponta a ponta na AWS | Dashboard da Saga; cobertura ≥ 80% em todos |
+| **Seg 16/11** | **Congelamento de código.** Cada um grava o seu bloco do vídeo e fecha o README do seu repositório | idem | idem | idem | Postman, ensaio e montagem do vídeo |
+| **Ter 17/11** | Revisão final | Revisão final | Revisão final | Revisão final | Edição, PDF do portal e submissão |
+
+### 7.3 Combinados do time
+
+- **Contratos primeiro:** o catálogo de mensagens (§ 4.5 da [comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md#45-catálogo-de-mensagens)) congela na quarta ao meio-dia; mudança depois disso só aditiva e avisada no grupo.
+- **Integração diária:** 15 minutos por dia (o que fiz, o que farei, o que bloqueia); cada tarefa mescla na `develop` do seu repositório pelo menos uma vez por dia.
+- **PR pequeno e revisado:** cada PR com um revisor de outra tarefa; nenhum merge com CI vermelho.
+- **Decisão nova:** segue o protocolo do § 8 (índice primeiro, depois `STATE.md`).
 
 **O que cortar se o prazo apertar**, nesta ordem: extração do Web (D-03), extração de Notificações (D-17), dashboards além do da Saga, renomeação do repositório do App (D-23 continua valendo no código e na documentação). Não cortar: Saga com compensações, BDD, cobertura e Sonar, deploy por pipeline, vídeo.
 
