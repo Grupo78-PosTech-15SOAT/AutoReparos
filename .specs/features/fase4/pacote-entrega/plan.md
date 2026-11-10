@@ -1,6 +1,6 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Approved**: 2026-11-06 - user: "Pode seguir"
+**Revisão pendente de aprovação** (10/11/2026): inclui os 4 serviços e o Web e as correções pedidas no feedback da Fase 3 (vídeo curto, implementação, dashboards e proteção de branches não mostrados). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
 
 ## Problem
 
@@ -10,8 +10,8 @@ A conclusão da Fase 4 exige evidências técnicas e acadêmicas em cada reposit
 
 Esta entrega reúne evidências produzidas pelos serviços e infraestrutura; não duplica código nem altera artefatos-fonte dos repositórios.
 
-1. Coletar README, documentação, API, cobertura e manifests dos três repositórios (exists).
-2. Preparar roteiro e vídeo público/não listado de até 15 minutos com demonstração de fluxo, falhas, deploy e observabilidade.
+1. Coletar README, documentação, API, cobertura e manifests dos repositórios OS, Cobranca, Execucao, Cadastros e Web (exists).
+2. Preparar roteiro cronometrado (alvo de 13 a 14 minutos) e vídeo público/não listado com demonstração de fluxo, falhas, código, deploy, proteção de branches e observabilidade (roteiro na spec de vídeo, exists).
 3. Preparar PDF com participantes, links, diagrama e justificativas e submetê-lo ao portal após revisão/autorização (door 1).
 
 ```mermaid
@@ -52,9 +52,10 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 1. WHEN repositório de microsserviço for entregue THEN SHALL conter código, Dockerfile, manifests Kubernetes, CI/CD, evidência de cobertura no README, arquitetura e Swagger ou Postman atualizado.
 2. WHEN vídeo for entregue THEN SHALL durar no máximo 15 minutos e estar público ou não listado no YouTube ou Vimeo.
 3. WHEN vídeo demonstrar o sistema THEN SHALL incluir fluxo completo de OS, Saga e tratamento de falha, deploy automatizado de ao menos um serviço com validação dos testes, monitoramento e tracing.
-4. WHEN PDF final for preparado THEN SHALL conter participantes, links dos repositórios e vídeo, diagrama de serviços/bancos/comunicação, estratégia e justificativa da Saga e justificativas da divisão/tecnologias.
-5. IF participantes ou URLs finais estiverem ausentes THEN o pacote SHALL identificar cada entrada pendente e não submeter versão incompleta.
-6. IF for submetido conteúdo externamente THEN a equipe SHALL revisar e autorizar explicitamente a submissão.
+4. WHEN vídeo for gravado THEN SHALL mostrar o código do orquestrador, de uma compensação e da idempotência, os dashboards com tráfego real e a proteção de branches bloqueando um PR (feedback da Fase 3).
+5. WHEN PDF final for preparado THEN SHALL conter participantes, links dos repositórios e vídeo, diagrama de serviços/bancos/comunicação, estratégia e justificativa da Saga e justificativas da divisão/tecnologias.
+6. IF participantes ou URLs finais estiverem ausentes THEN o pacote SHALL identificar cada entrada pendente e não submeter versão incompleta.
+7. IF for submetido conteúdo externamente THEN a equipe SHALL revisar e autorizar explicitamente a submissão.
 
 ## Out of scope
 
@@ -79,3 +80,5 @@ None - este plano preserva os entregáveis acadêmicos do PDF binding.
 
 - `.specs/features/fase4/plan.md` - critérios acadêmicos confirmados no plano pai.
 - `.specs/features/fase4/checks.md` - AC 15-17.
+- `docs/specs/fase4/entregaveis/` - matriz de entregáveis, modelo de README, roteiro do vídeo e modelo do PDF.
+- `docs/specs/fase4/index.md` § 5 - feedback da Fase 3.

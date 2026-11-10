@@ -15,6 +15,8 @@ mutations: 3
 
 Use Python 3.8+ e os scripts portáveis em `.specs/tlc-spec-lean/scripts/`. Não migre especificações históricas em `docs/specs/` salvo solicitação específica.
 
+Fase 4: o registro único de decisões e o desenho transversal ficam em `docs/specs/fase4/index.md`; leia-o junto com `.specs/STATE.md` antes de planejar uma feature da fase.
+
 ## Monitoramento de Contexto e Handoff
 - **Alerta de Contexto (60%)**: O assistente deve monitorar ativamente a densidade da conversa (volume de tokens consumidos, saídas de comandos e leituras extensas acumuladas).
 - Sempre que a conversa se aproximar de ~60% da janela útil de contexto (ou após a conclusão de uma fase/feature extensa do SDD), o assistente **DEVE** exibir um aviso em destaque no rodapé da resposta:
