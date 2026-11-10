@@ -562,7 +562,7 @@ A solução conta com **354 testes automatizados** (100% passando):
 dotnet test AutoReparos.slnx
 
 # Executar testes da aplicação principal (submódulo):
-dotnet test submodules/AutoReparos.App/AutoReparos.App.slnx
+dotnet test submodules/AutoReparos.Cadastros/AutoReparos.App.slnx
 
 # Executar testes da Lambda Serverless (submódulo):
 dotnet test submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj

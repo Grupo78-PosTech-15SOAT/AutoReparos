@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: submodules/AutoReparos.App/AutoReparos.Web
+        working-directory: submodules/AutoReparos.Cadastros/AutoReparos.Web
     steps:
       - uses: actions/checkout@v6.0.2
         with:
@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: 22
           cache: yarn
-          cache-dependency-path: submodules/AutoReparos.App/AutoReparos.Web/yarn.lock
+          cache-dependency-path: submodules/AutoReparos.Cadastros/AutoReparos.Web/yarn.lock
       - run: corepack enable && yarn install --frozen-lockfile
       - run: yarn build
 

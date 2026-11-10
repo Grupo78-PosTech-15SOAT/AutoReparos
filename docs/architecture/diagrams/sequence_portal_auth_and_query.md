@@ -181,7 +181,7 @@ Para exercitar o fluxo sem AWS, com o stack de observabilidade completo:
 cp .env.example .env            # preencher as senhas
 docker compose up -d postgres otel-collector prometheus jaeger loki
 dotnet build AutoReparos.slnx
-dotnet run --project submodules/AutoReparos.App/AutoReparos.API
+dotnet run --project submodules/AutoReparos.Cadastros/AutoReparos.API
 ```
 
 Pontos que costumam custar tempo:

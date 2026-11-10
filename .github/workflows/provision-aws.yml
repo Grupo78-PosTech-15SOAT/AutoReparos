@@ -303,8 +303,8 @@ jobs:
           set -euo pipefail
           registry="${ECR_API%%/*}"
           aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$registry"
-          docker build -t "$ECR_API:$IMAGE_TAG" -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
-          docker build -t "$ECR_WEB:$IMAGE_TAG" -f submodules/AutoReparos.App/AutoReparos.Web/Dockerfile submodules/AutoReparos.App/AutoReparos.Web
+          docker build -t "$ECR_API:$IMAGE_TAG" -f submodules/AutoReparos.Cadastros/AutoReparos.API/Dockerfile submodules/AutoReparos.Cadastros
+          docker build -t "$ECR_WEB:$IMAGE_TAG" -f submodules/AutoReparos.Cadastros/AutoReparos.Web/Dockerfile submodules/AutoReparos.Cadastros/AutoReparos.Web
           docker push "$ECR_API:$IMAGE_TAG"
           docker push "$ECR_WEB:$IMAGE_TAG"
       - name: Connect to EKS and create runtime secrets

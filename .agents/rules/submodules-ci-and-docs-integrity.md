@@ -19,22 +19,22 @@
 ### 1.2 Resolução de Caminhos de Submódulos em Scripts e Testes
 - Pipelines de CI/CD, comandos `dotnet test`, e scripts nunca devem apontar para caminhos legados da raiz do repositório pai.
 - Sempre aponte para o caminho canônico do submódulo:
-  - Backend: `submodules/AutoReparos.App/AutoReparos.Domain.Tests/...`
+  - Backend: `submodules/AutoReparos.Cadastros/AutoReparos.Domain.Tests/...`
   - Lambda: `submodules/AutoReparos.AuthLambda/tests/...`
 - Ao usar `--no-build`, certifique-se de que a etapa anterior de compilação compilou a solução agregada (`AutoReparos.slnx`) contendo todos os projetos que serão executados.
 
 ### 1.3 Contexto de Build do Docker para Submódulos
 - Quando o `Dockerfile` residir em um submódulo, execute `docker build` especificando explicitamente o arquivo `-f` e a pasta do submódulo como contexto:
   ```bash
-  docker build -f submodules/AutoReparos.App/AutoReparos.API/Dockerfile submodules/AutoReparos.App
+  docker build -f submodules/AutoReparos.Cadastros/AutoReparos.API/Dockerfile submodules/AutoReparos.Cadastros
   ```
 - **Proibido:** Apontar o contexto do Docker para a raiz caso o `Dockerfile` espere o layout de pastas relativo do submódulo.
 
 ### 1.4 Protocolo HTTPS Obrigatório no `.gitmodules`
 - As URLs no arquivo `.gitmodules` devem usar sempre o protocolo **HTTPS** público:
   ```ini
-  [submodule "submodules/AutoReparos.App"]
-      path = submodules/AutoReparos.App
+  [submodule "submodules/AutoReparos.Cadastros"]
+      path = submodules/AutoReparos.Cadastros
       url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App.git
   ```
 - **Proibido:** Utilizar URLs SSH (`git@github.com:...`) no repositório pai, pois exigem chaves SSH privadas pré-configuradas e quebram runners de CI/CD e clones de desenvolvedores sem chave cadastrada.
@@ -132,7 +132,7 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
 
 ### 3.5 Proibição Estrita de Caminhos Absolutos (Uso Obrigatório de Caminhos Relativos)
 - **NUNCA USE CAMINHOS ABSOLUTOS** para arquivos como documentações (`docs/`), especificações técnicas, planos de entrega ou arquivos de harness de IA em `.agents/`.
-- **Todos os caminhos e links devem ser estritamente relativos** (ex: `./`, `../`, `docs/specs/...`, `submodules/AutoReparos.App/...`, `.agents/rules/...`).
+- **Todos os caminhos e links devem ser estritamente relativos** (ex: `./`, `../`, `docs/specs/...`, `submodules/AutoReparos.Cadastros/...`, `.agents/rules/...`).
 - **Proibições expressas:**
   - Caminhos absolutos do sistema operacional (`/home/...`, `C:\...`, `/mnt/...`, `/Users/...`).
   - URIs com schema `file:///home/...` ou `file:///mnt/...`.
