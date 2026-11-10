@@ -16,7 +16,7 @@
 - C3 chama `validate_checks.py`, que verifica a aprovação explícita.
 - C2 compara a configuração `mutations: 3` com o valor de `checks.md` e agora requer os principais scripts de fase.
 - C4 compara com `HEAD`, incluindo alterações staged.
-- `.specs/LESSONS.md` aponta para `.specs/tlc-spec-lean/scripts/lessons.py`.
+- `.specs/LESSONS.md` aponta para `.agents/skills/tlc-spec-lean/scripts/lessons.py`.
 - O plano identifica `.agents/AGENTS.md` como instrução TLC e `AGENTS.md` como ponte.
 - A seção TLC duplicada em `.agents/AGENTS.md` foi removida.
 

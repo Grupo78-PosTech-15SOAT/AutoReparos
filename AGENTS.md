@@ -13,7 +13,7 @@ Configuração do projeto:
 mutations: 3
 ```
 
-Use Python 3.8+ e os scripts portáveis em `.specs/tlc-spec-lean/scripts/`. Não migre especificações históricas em `docs/specs/` salvo solicitação específica.
+Use Python 3.8+ e os scripts portáveis em `.agents/skills/tlc-spec-lean/scripts/`. Não migre especificações históricas em `docs/specs/` salvo solicitação específica.
 
 ## Monitoramento de Contexto e Handoff
 - **Alerta de Contexto (60%)**: O assistente deve monitorar ativamente a densidade da conversa (volume de tokens consumidos, saídas de comandos e leituras extensas acumuladas).

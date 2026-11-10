@@ -57,14 +57,14 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 
 1. **`CLAUDE.md` é ignorado pelo `.gitignore` (linha 406).** Crie na raiz um arquivo com uma única linha: `@AGENTS.md`.
 2. **Preferências da memória do Claude não sincronizam.** As regras de commit estão em AD-002; repita-as ao Claude.
-3. **Skill `tlc-spec-lean`:** instalada em `~/.claude/skills/tlc-spec-lean/` neste computador; no outro, copie de `.specs/tlc-spec-lean/` (SKILL.md e `references/`). Os scripts do gate ficam em `.specs/tlc-spec-lean/scripts/` e rodam com Python 3.8+.
+3. **Skill `tlc-spec-lean`:** instalada no repositório em `.agents/skills/tlc-spec-lean/` (SKILL.md, `references/` e `scripts/`) para descoberta automática no Antigravity e Claude Code. Os scripts do gate ficam em `.agents/skills/tlc-spec-lean/scripts/` e rodam com Python 3.8+.
 4. **Ferramentas:** Git Bash, Docker (imagem `postgres:16-alpine`; os testes de Billing e Execution usam Testcontainers), .NET 10 SDK com acesso ao NuGet, `dotnet-ef` (`dotnet tool install --global dotnet-ef`), Python com `pip install pyjwt cryptography`.
 5. **Ambiente de prova do os-service (C5):** agora versionado em `.specs/features/fase4/os-service/proof-env/` (`harness.sh`, `run_proofs.sh`, `mock_issuer.py`, `README.md`). Comando: `bash .specs/features/fase4/os-service/proof-env/run_proofs.sh --mutations .specs/features/fase4/os-service/mutations.json`. Os containers e processos locais (`os-proof-pg`, emissor na porta 8099, API na 5083) não migram.
 
 ### Como rodar o gate de uma feature
 
 1. Árvore git **limpa** (o `check_proofs.py` registra `Tree: dirty` e sai com 1 caso contrário).
-2. `python .specs/tlc-spec-lean/scripts/check_proofs.py fase4/<feature> --mutations .specs/features/fase4/<feature>/mutations.json` (OS precisa do `run_proofs.sh` acima; Billing e Execution rodam direto).
+2. `python .agents/skills/tlc-spec-lean/scripts/check_proofs.py fase4/<feature> --mutations .specs/features/fase4/<feature>/mutations.json` (OS precisa do `run_proofs.sh` acima; Billing e Execution rodam direto).
 3. O Verifier independente propõe as 3 mutações em `mutations.json`; o comando `proof` de cada uma deve começar com `dotnet build ... --no-restore -v q &&`, senão o binário antigo sobrevive e a mutação parece não morta.
 4. Não rode dois `check_proofs.py` ao mesmo tempo (mutações do mesmo arquivo colidem) e não edite código enquanto uma mutação roda.
 5. Limitação conhecida: `validate_verification.py` exige que `proofs.md` esteja no `HEAD` exato, e commitar o próprio `proofs.md` move o `HEAD`. O erro "proofs.md was written at X and HEAD is Y" reaparece depois de cada commit; não é defeito do código.
@@ -77,7 +77,7 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - **HEADs verificados**: OS `d8e8503` (orçamento aprovado após cancelamento compensa sem reativar a OS), Billing `a0f4870`, Execution `fb56593`. Gate no HEAD `75b086b` do principal, árvore limpa: saga 9/9, os-service 7/7, billing 11/11, execucao 8/8, **3 mutações mortas em cada**.
 - **Riscos abertos (BAIXA)**: corrida de milissegundos entre `orcamento.aprovado.v1` e a rota de cancelamento (N-1); literais de contrato duplicados entre OS e Billing (N-2); `Registros` da Saga sem limite; Billing sem `correlacaoId` em `pagamento.resultado.v1`; alertas só em log; mensagens fora de ordem rejeitadas nunca reavaliadas.
 - **Atenção ao rodar o gate no Windows**: o `mutate.py` da skill quebra com `AttributeError: signal.SIGHUP` e o `check_proofs.py` ainda sai com 0 mostrando `mutations 0 killed, 0 not` (mutações NÃO rodaram). Confira sempre que a linha `Result` mostre `mutations 3 killed`. Contorno usado: `PYTHONPATH` apontando para uma pasta com `sitecustomize.py` que define `signal.SIGHUP = signal.SIGTERM`. Corrigir na skill é pendência.
-- **Alterações locais não commitadas que NÃO são desta feature** (migração da skill para `.agents/skills/tlc-spec-lean/`): ficaram no stash `wip-user-agents-paths-2` (AGENTS.md, `.agents/AGENTS.md` e a pasta `.agents/skills/tlc-spec-lean/`) e no `wip-user-agents-paths`; o resto (`.specs/tlc-spec-lean/` apagado, `LESSONS.md`, `run_proofs.sh`, bootstrap) segue no working tree. Decida o que fazer com elas.
+- **Alterações locais não commitadas que NÃO são desta feature** (migração da skill para `.agents/skills/tlc-spec-lean/`): ficaram no stash `wip-user-agents-paths-2` (AGENTS.md, `.agents/AGENTS.md` e a pasta `.agents/skills/tlc-spec-lean/`) e no `wip-user-agents-paths`; o resto (`.agents/skills/tlc-spec-lean/` apagado, `LESSONS.md`, `run_proofs.sh`, bootstrap) segue no working tree. Decida o que fazer com elas.
 
 ### Próximos passos
 

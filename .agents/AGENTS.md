@@ -184,11 +184,11 @@ When executing tasks on this repository:
 
 ## Spec-driven development (TLC Spec Lean)
 
-New features in this repository follow the TLC Spec Lean workflow in `.specs/tlc-spec-lean/SKILL.md`. Use `.specs/STATE.md` and confirmed lessons as context; create `.specs/features/<feature>/plan.md` with EARS criteria and wait for explicit user approval. Derive and validate `checks.md` before implementation, implement against frozen checks, and run proof and verification gates before completion. For changes under roughly three files with no one-way door, use only `checks.md` with an `## Intent` section as allowed by the skill.
+New features in this repository follow the TLC Spec Lean workflow in `.agents/skills/tlc-spec-lean/SKILL.md`. Use `.specs/STATE.md` and confirmed lessons as context; create `.specs/features/<feature>/plan.md` with EARS criteria and wait for explicit user approval. Derive and validate `checks.md` before implementation, implement against frozen checks, and run proof and verification gates before completion. For changes under roughly three files with no one-way door, use only `checks.md` with an `## Intent` section as allowed by the skill.
 
-Configuration (.specs/tlc-spec-lean/scripts/lean_config.py):
+Configuration (.agents/skills/tlc-spec-lean/scripts/lean_config.py):
 
 ## tlc-spec-lean
 mutations: 3
 
-Use Python 3.8+ and the scripts in `.specs/tlc-spec-lean/scripts/`. Do not migrate historical specifications in `docs/specs/` unless specifically requested.
+Use Python 3.8+ and the scripts in `.agents/skills/tlc-spec-lean/scripts/`. Do not migrate historical specifications in `docs/specs/` unless specifically requested.
