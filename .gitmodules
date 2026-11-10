@@ -10,3 +10,14 @@
 [submodule "submodules/AutoReparos.Infra.K8s"]
 	path = submodules/AutoReparos.Infra.K8s
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s.git
+[submodule "submodules/AutoReparos.OS"]
+	path = submodules/AutoReparos.OS
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS.git
+[submodule "submodules/AutoReparos.Billing"]
+	path = submodules/AutoReparos.Billing
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Billing.git
+	branch = feature/os-service-contracts
+[submodule "submodules/AutoReparos.Execution"]
+	path = submodules/AutoReparos.Execution
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execution.git
+	branch = feature/execution-service

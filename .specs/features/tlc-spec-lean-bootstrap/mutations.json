@@ -1,0 +1,23 @@
+[
+  {
+    "file": ".specs/features/tlc-spec-lean-bootstrap/plan.md",
+    "old": "**Approved**: 2026-11-06 - user: \"aprovado\"",
+    "new": "**Approval removed**: 2026-11-06 - user: \"aprovado\"",
+    "proof": "python .specs/tlc-spec-lean/scripts/validate_checks.py tlc-spec-lean-bootstrap --root .",
+    "label": "remove approval; checks validator must reject plan"
+  },
+  {
+    "file": ".agents/AGENTS.md",
+    "old": "mutations: 3",
+    "new": "mutations: 2",
+    "proof": "python .specs/tlc-spec-lean/scripts/validate_project_config.py tlc-spec-lean-bootstrap",
+    "label": "project mutation count mismatch must fail config validation"
+  },
+  {
+    "file": ".specs/tlc-spec-lean/scripts/validate_project_config.py",
+    "old": "scripts/check_proofs.py",
+    "new": "scripts/check_proofs_MISSING.py",
+    "proof": "python .specs/tlc-spec-lean/scripts/validate_project_config.py tlc-spec-lean-bootstrap",
+    "label": "a required proof gate script is absent; project config proof must reject the package"
+  }
+]
