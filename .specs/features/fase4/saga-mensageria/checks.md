@@ -1,7 +1,7 @@
 # Saga and messaging checks
 
 Mutations: 3
-Build: `dotnet build AutoReparos.Os.slnx`; `dotnet format AutoReparos.Os.slnx --verify-no-changes`
+Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet format submodules/AutoReparos.OS/AutoReparos.OS.slnx --verify-no-changes`
 Plan: `.specs/features/fase4/saga-mensageria/plan.md`
 
 7 checks · 1 slice · 2 one-way doors · 0 open questions, 0 blocking
@@ -11,25 +11,25 @@ Plan: `.specs/features/fase4/saga-mensageria/plan.md`
 ### S1 - Durable orchestration
 
 **C1** - Saga state and correlation id are persisted before the first command is published (AC 1)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~SagaPersistsBeforePublish`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~SagaPersistsBeforePublish`
 
 **C2** - Restart resumes a non-terminal Saga from its last persisted state without losing completed stages (AC 2)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~SagaResumeAfterRestart`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~SagaResumeAfterRestart`
 
 **C3** - Duplicate event id is deduplicated and causes no repeated business effect (AC 3)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~SagaDuplicateEvent`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~SagaDuplicateEvent`
 
 **C4** - Each compensable stage failure executes its declared compensation and records outcome/error (AC 4)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~CompensatesEachFailedStage`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CompensatesEachFailedStage`
 
 **C5** - Captured payment sync failure retries forward and alerts without automatic refund (AC 5)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~CapturedPaymentForwardRecovery`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CapturedPaymentForwardRecovery`
 
 **C6** - Exhausted bounded retry with exponential backoff and jitter routes the message to DLQ and emits an alert (AC 6)
-Proof: `dotnet test AutoReparos.Os.Tests --filter FullyQualifiedName~RetryExhaustionDeadLetter`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~RetryExhaustionDeadLetter`
 
 **C7** - README names persisted orchestration and justifies it against choreography (AC 7)
-Proof: `python scripts/assert_saga_readme.py --name saga-rationale --strategy orchestrated --state-store DynamoDB`
+Proof: `python submodules/AutoReparos.OS/scripts/assert_saga_readme.py --name saga-rationale --strategy orchestrated --state-store DynamoDB`
 
 ## Coverage
 
@@ -54,6 +54,6 @@ Proof: `python scripts/assert_saga_readme.py --name saga-rationale --strategy or
 
 - **Settled mid-build:** bounded retries, backoff, DLQ/alert, never repeat captured charge - user: "Adote limites padrão por dependência, backoff exponencial com jitter e DLQ/alerta ao esgotar; nunca repetir cobrança capturada."
 - **Dispatched:** none
-- **Boundary:** checks derived from approved plan; build has not started
+- **Boundary:** contrato de mensagens em `contracts.md`; build em andamento nos repositorios OS, Billing e Execution
 - **Abandoned:** none
 - **Walked:** none - backend behavior, no screen capture
