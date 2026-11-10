@@ -27,7 +27,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 | `os-service` | **PASS** (3ª rodada de Verifier). Provas 7/7, 3 mutações mortas | `os-service/verification.md`, `proofs.md` |
 | `billing` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `billing/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
-| `saga-mensageria` | **correções da 1ª verificação (FAIL) aplicadas e enviadas**; falta gate com mutações e 2ª rodada de Verifier. Provas 9/9 antes das correções | `saga-mensageria/verification.md` (rodada 1), `contracts.md` |
+| `saga-mensageria` | **PASS** (2ª rodada de Verifier). Provas 9/9, 3 mutações mortas; regressão no mesmo HEAD: os-service 7/7, billing 11/11, execucao 8/8, 3 mutações mortas cada | `saga-mensageria/verification.md`, `proofs.md` |
 | `infra-ci-observabilidade` | só `plan.md` e `checks.md`; build não iniciado | depende dos serviços |
 | `pacote-entrega` | só `plan.md` e `checks.md`; build não iniciado | inclui vídeo e PDF final, que o agente não produz sozinho |
 
@@ -71,25 +71,16 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 6. A célula de tabela do `verification.md` não pode conter `|` (nem `\|`): o validador conta como coluna.
 7. Cada achado fechado leva o hash do commit de correção na coluna `Closed`. Achados BAIXA ficam em `## Open items`, sem hash.
 
-### Saga-mensageria: situação exata (2026-11-10, ao fechar o chat)
+### Saga-mensageria: concluída (2026-11-10)
 
-- **Contrato e plano:** `saga-mensageria/contracts.md` (fonte única, já atualizado) e `plan.md` (Surface ampliada com a rota de cancelamento).
-- **Código pronto, testado e enviado** (HEADs): OS `a1bece8` (121 testes + 3 de API, script do C7 com 18 testes), Billing `a0f4870` (77 testes), Execution `fb56593` (131 + 2). Principal `d3f53c2`.
-- **1ª verificação (`saga_verifier`): FAIL** com 1 ALTA, 3 MÉDIA e 7 BAIXA. Todas foram tratadas nos commits acima (ALTA `Concluida`, MÉDIAS: rota de cancelamento, 7 status de pagamento, prazo `Saga:PrazoCompensacao`). O `verification.md` ainda descreve o código ANTES das correções e a coluna `Closed` está vazia.
-- **Mutações propostas pelo Verifier** estão em `saga-mensageria/mutations.json` (3, todas no OS; os trechos `old` continuam válidos). **Ainda não foram executadas.**
-- **Provas da Saga (`proofs.md`) estão desatualizadas** (9/9 mas anteriores às correções).
-
-**Passos exatos para concluir a `saga-mensageria` em um chat novo:**
-1. Antes de qualquer gate, **corrigir o risco apontado pelo próprio fixer**: um `orcamento.aprovado.v1` que chega depois de a OS sem Saga ter sido cancelada pela rota cria a Saga e o fluxo avança (OS cancelada reativada). Correção sugerida: ao criar a Saga, se a OS estiver `Cancelada`, tratar como `ordem-servico.cancelar.v1` imediato (enviar `billing.orcamento.cancelar.v1`) e alertar. Teste com Postgres e DynamoDB Local.
-2. Rodar o gate com a árvore limpa: `python .specs/tlc-spec-lean/scripts/check_proofs.py fase4/saga-mensageria --mutations .specs/features/fase4/saga-mensageria/mutations.json` (PATH precisa ter o Python real antes do atalho da loja: `export PATH="/c/Users/Mobile01/AppData/Local/Python/pythoncore-3.15-64:$PATH"`, senão o C7 falha com "'python' não é reconhecido"). Depois rodar a regressão: os-service (`bash .specs/features/fase4/os-service/proof-env/run_proofs.sh --mutations ...`), billing e execucao, cada um com `--mutations`. Commitar os `proofs.md`.
-3. Despachar a **2ª rodada de Verifier independente** da Saga (sub-agente novo) sobre OS, Billing e Execution, com o critério AD-003 (PASS só sem ALTA ou MÉDIA abertas). Registrar o despacho em `## Handoff` do `checks.md`.
-4. Fechar o `verification.md`: hash do commit de correção na coluna `Closed`; BAIXAS vão para `## Open items`; nenhuma célula com `|`.
-5. Enviar tudo (submódulos e principal) e atualizar este STATE.
-
-Riscos conhecidos e já documentados no README do OS: confirmação de `liberada` perdida pode deixar execução ativa após cancelamento; mensagens fora de ordem rejeitadas nunca são reavaliadas; alertas são só log (roteamento real é da `infra-ci-observabilidade`); documento de Saga ilegível alerta a cada ciclo.
+- **Veredito: PASS** na 2ª rodada de Verifier independente (AD-003): nenhum achado ALTA ou MÉDIA aberto; as 4 ALTA/MÉDIA da 1ª rodada e 6 BAIXAS estão fechadas com hash no `verification.md`; as BAIXAS restantes e os riscos conscientes estão em `## Open items`.
+- **HEADs verificados**: OS `d8e8503` (orçamento aprovado após cancelamento compensa sem reativar a OS), Billing `a0f4870`, Execution `fb56593`. Gate no HEAD `75b086b` do principal, árvore limpa: saga 9/9, os-service 7/7, billing 11/11, execucao 8/8, **3 mutações mortas em cada**.
+- **Riscos abertos (BAIXA)**: corrida de milissegundos entre `orcamento.aprovado.v1` e a rota de cancelamento (N-1); literais de contrato duplicados entre OS e Billing (N-2); `Registros` da Saga sem limite; Billing sem `correlacaoId` em `pagamento.resultado.v1`; alertas só em log; mensagens fora de ordem rejeitadas nunca reavaliadas.
+- **Atenção ao rodar o gate no Windows**: o `mutate.py` da skill quebra com `AttributeError: signal.SIGHUP` e o `check_proofs.py` ainda sai com 0 mostrando `mutations 0 killed, 0 not` (mutações NÃO rodaram). Confira sempre que a linha `Result` mostre `mutations 3 killed`. Contorno usado: `PYTHONPATH` apontando para uma pasta com `sitecustomize.py` que define `signal.SIGHUP = signal.SIGTERM`. Corrigir na skill é pendência.
+- **Alterações locais não commitadas que NÃO são desta feature** (migração da skill para `.agents/skills/tlc-spec-lean/`): ficaram no stash `wip-user-agents-paths-2` (AGENTS.md, `.agents/AGENTS.md` e a pasta `.agents/skills/tlc-spec-lean/`) e no `wip-user-agents-paths`; o resto (`.specs/tlc-spec-lean/` apagado, `LESSONS.md`, `run_proofs.sh`, bootstrap) segue no working tree. Decida o que fazer com elas.
 
 ### Próximos passos
 
-1. **Concluir `saga-mensageria`** com os passos da seção anterior. Depois revisar AD-008 (decisões do Execution Service não confirmadas pelo usuário).
+1. Revisar AD-008 (decisões do Execution Service não confirmadas pelo usuário).
 2. `infra-ci-observabilidade` (pipelines, IaC, telemetria distribuída) e `pacote-entrega` (repositórios, vídeo e PDF final; o vídeo exige ação humana).
 3. Decisões pendentes do usuário: criar a `main` dos remotos novos e abrir os PRs; se quer atualizar o texto de `AGENTS.md` ("minúsculas") para refletir AD-002; se prefere um job de reconciliação de reembolsos `Pendente` no Billing.

@@ -54,6 +54,7 @@ Proof: `python submodules/AutoReparos.OS/scripts/assert_saga_readme.py --name sa
 
 - **Settled mid-build:** bounded retries, backoff, DLQ/alert, never repeat captured charge - user: "Adote limites padrão por dependência, backoff exponencial com jitter e DLQ/alerta ao esgotar; nunca repetir cobrança capturada."
 - **Dispatched:** saga_verifier - fresh independent verifier (2026-11-10), root HEAD 4b424c5; OS 8cec14a, Billing 1b349c2, Execution edbdcd6
+- **Dispatched (2a rodada):** fresh independent verifier (2026-11-10), root HEAD 75b086b; OS d8e8503, Billing a0f4870, Execution fb56593 - veredito PASS (AD-003)
 - **Boundary:** contrato de mensagens em `contracts.md`; build em andamento nos repositorios OS, Billing e Execution
 - **Abandoned:** none
 - **Walked:** none - backend behavior, no screen capture
