@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/SagaOS.cs",
+    "old": "Etapas.OrderByDescending(e => e.Numero).FirstOrDefault(",
+    "new": "Etapas.OrderBy(e => e.Numero).FirstOrDefault(",
+    "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~CompensatesEachFailedStage",
+    "label": "compensacoes deixam de seguir a ordem inversa (etapa 1 antes da 2)"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.Os.Infrastructure/Saga/DynamoDbSagaRepositorio.cs",
+    "old": "\"versao = :esperada\"",
+    "new": "\"versao >= :esperada\"",
+    "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~SagaPersistsBeforePublish",
+    "label": "escrita condicional por versao aceita versao antiga (conflito otimista perdido)"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Application/Saga/OrquestradorSaga.cs",
+    "old": "if (tentativa < opcoes.MaxTentativas)",
+    "new": "if (tentativa <= opcoes.MaxTentativas)",
+    "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~RetryExhaustionDeadLetter",
+    "label": "comando so vai a DLQ uma tentativa depois do limite de 5 (limite deslocado em um)"
+  }
+]

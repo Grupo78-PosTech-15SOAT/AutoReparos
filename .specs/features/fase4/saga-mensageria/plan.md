@@ -41,7 +41,11 @@ New: SagaOS e EtapaSaga em tabela DynamoDB própria do OS Service.
 
 ## Surface
 
-None - nothing consumed outside as a public route; integrações são mensagens internas versionadas em SQS.
+**Expanded**: 2026-11-10 - user: "Adicionar rota de cancelamento" (decisão tomada após o Verifier apontar que a compensação não tinha gatilho de produção). Demais integrações continuam sendo mensagens internas versionadas em SQS.
+
+| Route | Request -> response | Who | Status |
+| --- | --- | --- | --- |
+| `POST /api/v1/ordens-servico/{id}/cancelamento` | motivo -> cancelamento aceito (Saga compensa de forma assíncrona) | Administrador ou Atendente | 202, 401, 403, 404, 409, 422 |
 
 ## Landing
 

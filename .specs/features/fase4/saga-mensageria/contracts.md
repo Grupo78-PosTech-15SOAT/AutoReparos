@@ -39,7 +39,7 @@ Demais campos dependem do `tipo`. `eventId` é gerado por quem publica e é est�
 | `Compensada` | todas as compensações confirmadas | sim |
 | `CompensacaoFalhou` | alguma compensação foi recusada ou esgotou; exige intervenção e gera alerta | sim |
 
-Estado da OS (Postgres) sincronizado a cada transição, com registro no histórico: `Recebida` → `OrcamentoAprovado` → `EmExecucao` → `ServicoConcluido` → `Paga`; desvios: `IntervencaoRequerida`, `Cancelada`. A sincronização é idempotente (mesmo estado não duplica histórico). Falha de sincronização usa recuperação para frente (retry com backoff, alerta, nova tentativa periódica), nunca desfaz pagamento.
+Estado da OS (Postgres) sincronizado a cada transição, com registro no histórico: `Recebida` → `OrcamentoAprovado` → `EmExecucao` → `Concluida` → `Paga`; desvios: `IntervencaoRequerida`, `Cancelada`. A sincronização é idempotente (mesmo estado não duplica histórico). Falha de sincronização usa recuperação para frente (retry com backoff, alerta, nova tentativa periódica), nunca desfaz pagamento.
 
 ## Etapas e compensações
 
@@ -52,6 +52,20 @@ Estado da OS (Postgres) sincronizado a cada transição, com registro no histór
 
 Falha de etapa compensável (`execucao.liberacao-recusada.v1`) ou cancelamento (`ordem-servico.cancelar.v1`) com etapas 1 ou 2 concluídas: compensar as etapas concluídas em ordem inversa, registrar resultado ou erro de cada compensação no estado da Saga. Etapas 3 e 4 concluídas tornam o cancelamento recusado e registrado (alerta), sem estorno.
 
+## Cancelamento (rota e gatilho)
+
+`POST /api/v1/ordens-servico/{id}/cancelamento` com `{ "motivo": "..." }` (Administrador ou Atendente; 401, 403, 404 OS inexistente, 409 `cancelamento_indisponivel` se a execução já concluiu ou o pagamento já foi capturado, 422 `ordem_servico_invalida` para motivo vazio, acima de 2000 caracteres, NUL ou corpo inválido). Resposta 202 com `ordemServicoId`, `correlacaoId` e `estado`. Idempotente: repetir devolve 202 sem novo efeito.
+- OS sem Saga (orçamento ainda não aprovado): marca a OS `Cancelada` diretamente (sincronização idempotente) e responde 202 com `estado: "Cancelada"`.
+- OS com Saga: aciona o mesmo caminho de `ordem-servico.cancelar.v1` (`eventId` determinístico por OS).
+- Um `liberada` ainda pendente (não enviado) é descartado em vez de compensado; o comando de cancelamento nunca ultrapassa um comando pendente em backoff.
+
+## Prazos e falhas sem resposta
+
+- `Compensando` sem confirmação no prazo `Saga:PrazoCompensacao` (padrão 15 minutos): alerta `saga.compensacao-sem-resposta` e estado `CompensacaoFalhou`.
+- Comando esgotado vai à DLQ com alerta (AC 6); não há reenvio automático depois disso (intervenção humana).
+- Uma exceção em uma Saga não aborta o ciclo do despachador para as demais.
+- `correlacaoId` e `orcamentoId`/`execucaoId` das confirmações devem coincidir com os da Saga; divergência é rejeitada e registrada com alerta.
+
 ## Mensagens
 
 ### Entrada do OS Service (fila `Sqs:SagaQueueUrl`, DLQ `Sqs:SagaDeadLetterQueueUrl`)
@@ -59,11 +73,11 @@ Falha de etapa compensável (`execucao.liberacao-recusada.v1`) ou cancelamento (
 | `tipo` | Origem | Campos extras | Efeito |
 | --- | --- | --- | --- |
 | `orcamento.aprovado.v1` | Billing | `orcamentoId`, `clienteId` | cria a Saga (`ordemServicoId` único), vai a `OrcamentoAprovado`, sincroniza a OS, avança para `ExecucaoLiberada` publicando `ordem-servico.liberada.v1` |
-| `execucao.concluida.v1` | Execution | `execucaoId` | `ExecucaoConcluida`; OS `ServicoConcluido` |
+| `execucao.concluida.v1` | Execution | `execucaoId` | `ExecucaoConcluida`; OS `Concluida` (o Billing só libera a cobrança com `status == "Concluida"` no `GET` da OS) |
 | `execucao.falhou.v1` | Execution | `execucaoId`, `motivo` | `IntervencaoRequerida`; OS `IntervencaoRequerida`; nenhuma compensação (decisão da fase 4) |
 | `execucao.liberacao-recusada.v1` | Execution | `motivo` | falha da etapa 2: compensa a etapa 1 |
-| `pagamento.resultado.v1` | Billing | `pagamentoId`, `status` (`Capturado`, `Rejeitado`, `Cancelado`, `Expirado`, `Reembolsado`), `referencia` | `Capturado`: `PagamentoCapturado` e OS `Paga`; demais: registra no histórico sem mudar a etapa |
-| `ordem-servico.cancelar.v1` | interna | `motivo` | compensa etapas concluídas em ordem inversa; recusado se a etapa 3 ou 4 já ocorreu |
+| `pagamento.resultado.v1` | Billing | `pagamentoId`, `status` (todos os valores do Billing: `SemTentativa`, `Pendente`, `Capturado`, `Rejeitado`, `Cancelado`, `Expirado`, `Reembolsado`; valor desconhecido vai à DLQ), `referencia` | `Capturado`: `PagamentoCapturado` e OS `Paga`; demais (inclui `Pendente`): registra sem mudar a etapa |
+| `ordem-servico.cancelar.v1` | interna (gerada pela rota `POST /api/v1/ordens-servico/{id}/cancelamento`) | `motivo` (obrigatório, até 2000 caracteres) | compensa etapas concluídas em ordem inversa; recusado se a etapa 3 ou 4 já ocorreu |
 | `orcamento.cancelado.v1` | Billing | `orcamentoId` | confirma a compensação 1 |
 | `orcamento.cancelamento-recusado.v1` | Billing | `orcamentoId`, `motivo` | `CompensacaoFalhou` e alerta |
 | `execucao.cancelada.v1` | Execution | `execucaoId` | confirma a compensação 2 |
@@ -85,7 +99,7 @@ Falha de etapa compensável (`execucao.liberacao-recusada.v1`) ou cancelamento (
 
 ### Execution (mudanças)
 
-- A fila `Sqs:LiberadasQueueUrl` passa a aceitar, além de `ordem-servico.liberada.v1`, o comando `execucao.cancelar.v1`: cancela a entrada se `Fila` ou `EmExecucao` (novo estado `Cancelada`); recusa se `Concluida`. Responde `execucao.cancelada.v1` ou `execucao.cancelamento-recusado.v1` para a fila de entrada da Saga do OS (`Sqs:OsServiceQueueUrl`).
+- A fila `Sqs:LiberadasQueueUrl` passa a aceitar, além de `ordem-servico.liberada.v1`, o comando `execucao.cancelar.v1`: cancela a entrada se `Fila`, `EmExecucao` ou `Falhou` (novo estado `Cancelada`); recusa se `Concluida`. Responde `execucao.cancelada.v1` ou `execucao.cancelamento-recusado.v1` para a fila de entrada da Saga do OS (`Sqs:OsServiceQueueUrl`).
 - `execucao.concluida.v1` e `execucao.falhou.v1` ganham `correlacaoId` e `ordemServicoId` quando conhecidos; mantêm o contrato atual (`execucaoId`, `motivo`).
 - Quando uma mensagem `ordem-servico.liberada.v1` válida em estrutura é recusada por regra de negócio, publica `execucao.liberacao-recusada.v1` além do tratamento atual de DLQ para mensagens inválidas.
 
@@ -95,6 +109,21 @@ O README do OS Service ganha a seção `## Saga` com: estratégia **orquestrada*
 
 ## Fora de escopo desta rodada
 
-- Rota REST pública de cancelamento (o plano declara Surface vazia; o cancelamento entra por `ordem-servico.cancelar.v1`).
 - Job de reconciliação de reservas de reembolso `Pendente` no Billing.
 - Provisionamento real de DynamoDB e SQS na AWS (feature `infra-ci-observabilidade`); os testes usam DynamoDB Local e SQS falso.
+
+## Payloads de referência (testes de contrato entre repositórios)
+
+`GET /api/v1/ordens-servico/{id}` do OS, quando a execução concluiu (o Billing lê só `status`):
+
+```json
+{ "id": "11111111-1111-1111-1111-111111111111", "clienteId": "22222222-2222-2222-2222-222222222222", "veiculoId": "33333333-3333-3333-3333-333333333333", "observacao": null, "status": "Concluida", "historico": [] }
+```
+
+`pagamento.resultado.v1` do Billing:
+
+```json
+{ "eventId": "44444444-4444-4444-4444-444444444444", "tipo": "pagamento.resultado.v1", "ordemServicoId": "11111111-1111-1111-1111-111111111111", "ocorreuEm": "2026-11-10T12:00:00Z", "pagamentoId": "55555555-5555-5555-5555-555555555555", "status": "Capturado", "referencia": "mp-1" }
+```
+
+Cada repositório deve ter um teste que usa estes literais (OS: aceita o resultado e responde o `GET` com `Concluida`; Billing: o cliente de readiness aceita o `GET` acima e o publicador emite exatamente o `pagamento.resultado.v1` acima).
