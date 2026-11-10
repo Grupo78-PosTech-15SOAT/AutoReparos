@@ -120,14 +120,17 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
   - Nunca declare números arbitrários ou desatualizados que contradigam o resultado real de `dotnet test`.
 
 ### 3.3 Organização das Especificações Técnicas e Planos de Entrega
-- Todas as especificações técnicas (`spec_*.md`) e planos de execução (`plano_*.md`) devem ser organizados em subdiretórios sob `docs/specs/fase<N>/<entregavel>/`:
-  - Exemplo: `docs/specs/fase3/submodulos-multirepo/`, `docs/specs/fase3/auth-lambda-portal/`, `docs/specs/fase3/cloud-iac/`, `docs/specs/fase3/observabilidade/`, `docs/specs/fase3/gap-analysis/`.
-  - Specs e planos da mesma entrega/task devem residir juntos na mesma subpasta.
-- Documentos normativos e padrões de conduta da IA pertencem a `.agents/rules/` e `.agents/knowledge/`, não a `docs/specs/`.
+- **A partir da Fase 4**, toda especificação de fase fica em `.specs/features/fase<N>/`:
+  - `especificacao/` — requisitos do PDF, estado atual, registro único de decisões e desenho transversal, organizados por tema (`especificacao/<tema>/fase<N>_spec_<assunto>.md`), começando pelo `index.md`.
+  - `<feature>/` — planos TLC Spec Lean (`plan.md`, `checks.md`, provas e verificação).
+  - Protocolo de preenchimento: `AGENTS.md` da raiz e § 8 de `.specs/features/fase4/especificacao/index.md`.
+- **Fases 1 a 3 (histórico):** especificações (`spec_*.md`) e planos (`plano_*.md`) permanecem em `docs/specs/fase<N>/<entregavel>/` (ex.: `docs/specs/fase3/cloud-iac/`). Não criar arquivos novos nessa árvore nem migrá-los sem pedido explícito.
+- Specs e planos da mesma entrega/task devem residir juntos na mesma subpasta.
+- Documentos normativos e padrões de conduta da IA pertencem a `.agents/rules/` e `.agents/knowledge/`, não a `docs/specs/` nem a `.specs/features/`.
 
 ### 3.4 Prevenção de Links Quebrados e Diretórios Fantasmas
 - Antes de commitar documentação que referencie arquivos de arquitetura (RFCs, ADRs, especificações):
-  - Inspecione a árvore de diretórios do repositório para certificar-se de que o arquivo ou diretório citado existe fisicamente (ex: referenciar `docs/specs/fase3/...` em vez de caminhos planos ou pastas inexistentes).
+  - Inspecione a árvore de diretórios do repositório para certificar-se de que o arquivo ou diretório citado existe fisicamente (ex: referenciar `docs/specs/fase3/...` ou `.specs/features/fase4/especificacao/...` em vez de caminhos planos ou pastas inexistentes). Para as specs em `.specs/features/`, rode `python3 scripts/specs/verificar_links.py`.
   - Nunca crie referências a caminhos fictícios.
 
 ### 3.5 Proibição Estrita de Caminhos Absolutos (Uso Obrigatório de Caminhos Relativos)

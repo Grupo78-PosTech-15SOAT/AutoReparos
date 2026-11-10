@@ -192,3 +192,5 @@ Configuration (.specs/tlc-spec-lean/scripts/lean_config.py):
 mutations: 3
 
 Use Python 3.8+ and the scripts in `.specs/tlc-spec-lean/scripts/`. Do not migrate historical specifications in `docs/specs/` unless specifically requested.
+
+Specification location: from Phase 4 on, every phase specification lives in `.specs/features/fase<N>/` — the "what and why" part (PDF requirements, current state, decision register, cross-cutting design) in `especificacao/` starting at `index.md`, and one TLC folder per feature. Phases 1-3 stay in `docs/specs/fase<N>/` as history; never add new files there. The filling protocol is in the root `AGENTS.md` (section "Onde ficam as especificações e como preenchê-las").
