@@ -5,7 +5,7 @@
 > **Critério do PDF:** Requisitos obrigatórios → *Implementação do Saga Pattern*  
 > **Requisitos cobertos (índice):** R14, R15, R16, R17  
 > **Repositórios afetados:** `AutoReparos.OS` (orquestrador), `AutoReparos.Cobranca`, `AutoReparos.Execucao`, `AutoReparos` (README)  
-> **Feature `.specs`:** `.specs/features/fase4/saga-mensageria/plan.md` (revisão pendente de aprovação)  
+> **Feature `.specs`:** `.specs/features/fase4/saga-compensacoes/plan.md` (revisão pendente de aprovação); base entregue em `.specs/features/fase4/saga-mensageria/plan.md` (PASS)  
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
 > **Status:** Desenho decidido em 09 e 10/11/2026 (D-07, D-09, D-18, D-19, D-20, L-01 opção C)
 

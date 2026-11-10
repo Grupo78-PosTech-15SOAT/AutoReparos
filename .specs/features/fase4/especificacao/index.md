@@ -96,7 +96,8 @@ Regras de sincronização (detalhadas no § 8):
 | [`os-service`](../os-service/plan.md) | ✅ PASS (abertura, consulta, histórico de criação) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md), [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
 | [`billing`](../billing/plan.md) | ✅ PASS (orçamento, Checkout Pro, webhook, reembolso) | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
 | [`execucao`](../execucao/plan.md) | ✅ PASS (fila, etapas, conclusão, falha, reexecução) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
-| [`saga-mensageria`](../saga-mensageria/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [Saga](./saga/fase4_spec_saga_pattern.md), [Comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md) |
+| [`saga-mensageria`](../saga-mensageria/plan.md) | ✅ PASS (orquestração, compensações de orçamento e execução, cancelamento) | [Saga](./saga/fase4_spec_saga_pattern.md), [Comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md) |
+| [`saga-compensacoes`](../saga-compensacoes/plan.md) | 📝 Plano novo em 10/11 (D-18, AD-021), aguarda aprovação | [Saga](./saga/fase4_spec_saga_pattern.md) |
 | [`cadastros`](../cadastros/plan.md) e [`insumos`](../insumos/plan.md) | 📝 Plano novo em 10/11, aguarda aprovação | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#5-passos-para-a-mudança) |
 | [`infra-ci-observabilidade`](../infra-ci-observabilidade/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [CI/CD](./cicd/fase4_spec_cicd_e_protecao_de_branches.md), [Infraestrutura](./infraestrutura/fase4_spec_infraestrutura_k8s_e_mensageria.md), [Observabilidade](./infraestrutura/fase4_spec_observabilidade_distribuida.md), [Testes](./testes-qualidade/fase4_spec_testes_e_qualidade.md) |
 | [`pacote-entrega`](../pacote-entrega/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [Entregáveis](./entregaveis/fase4_spec_entregaveis_repositorios.md), [Vídeo e PDF](./entregaveis/fase4_spec_video_e_documento_portal.md) |
@@ -134,7 +135,7 @@ Legenda: ✅ atende · 🟡 parcial · ❌ não atende. Estado em 09/11/2026, co
 
 | ID | Requisito do PDF | Estado atual | Spec |
 |---|---|---|---|
-| R14 | Saga coordenando o fluxo transacional da OS | ❌ Feature `saga-mensageria` não iniciada | [Saga](./saga/fase4_spec_saga_pattern.md) |
+| R14 | Saga coordenando o fluxo transacional da OS | ✅ `saga-mensageria` (PASS); D-18 em `saga-compensacoes` | [Saga](./saga/fase4_spec_saga_pattern.md) |
 | R15 | Rollback e compensação em qualquer etapa | ❌ | [Saga](./saga/fase4_spec_saga_pattern.md) |
 | R16 | Orquestrado ou coreografado | ✅ Decidido: orquestrado (D-07) | [Saga](./saga/fase4_spec_saga_pattern.md) |
 | R17 | Escolha documentada e justificada no README | ❌ | [Saga](./saga/fase4_spec_saga_pattern.md) · [Entregáveis](./entregaveis/fase4_spec_entregaveis_repositorios.md) |
