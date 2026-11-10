@@ -14,6 +14,7 @@
 | AD-008 | Execution Service: papéis `Mecanico`/`Administrador` operam fila, etapas, conclusão e falha; só `Administrador` reexecuta; entrada pelo evento SQS `ordem-servico.liberada.v1` (deduplicação por `eventId` e por OS); saída `execucao.concluida.v1` (OS Service e Billing) e `execucao.falhou.v1` (OS Service) via outbox. Endpoints extras `.../conclusao` e `.../falha` | Decisões do builder, não confirmadas ponto a ponto pelo usuário; documentadas no README do serviço. Revisar na feature `saga-mensageria` | active | 2026-11-09 |
 | AD-009 | `Authentication:RequireHttpsMetadata` configurável no OS Service (padrão `true`); só a execução de prova local usa `false` | Necessário para o emissor JWT local de teste da prova C5. Escolha do usuário: "Adicionar toggle de config" | active | 2026-11-09 |
 | AD-010 | Saga orquestrada no OS Service com estado em DynamoDB (`autoreparos-os-saga`); nasce em `orcamento.aprovado.v1` (evita escrita dupla); transição e comandos pendentes gravados na mesma transação antes de publicar; compensações em ordem inversa só para orçamento aprovado e execução liberada; execução concluída e pagamento capturado só têm recuperação para frente; cancelamento entra por `ordem-servico.cancelar.v1` (sem rota REST nova, Surface vazia). Contrato em `saga-mensageria/contracts.md` | Decisões de projeto da autora para fechar o contrato entre OS, Billing e Execução; o plano aprovado não foi alterado. User: "pode seguir com o saga-mensageria". Revisar se discordar | active | 2026-11-10 |
+| AD-011 | Surface da Saga ampliada com `POST /api/v1/ordens-servico/{id}/cancelamento` (Administrador ou Atendente; 202, 401, 403, 404, 409, 422) como gatilho de produção da compensação; status da OS após a execução é `Concluida` (o Billing só libera a cobrança com esse valor); Execution cancela também em `Falhou` | User: "Adicionar rota de cancelamento" (2026-11-10) após o Verifier apontar compensação sem gatilho. O nome `Concluida` corrige erro do contrato inicial (ALTA do Verifier). Registrado em `plan.md` (Surface) e `contracts.md` | active | 2026-11-10 |
 
 ## Handoff (retomada em outro computador) - 2026-11-09
 
@@ -26,7 +27,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 | `os-service` | **PASS** (3ª rodada de Verifier). Provas 7/7, 3 mutações mortas | `os-service/verification.md`, `proofs.md` |
 | `billing` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `billing/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
-| `saga-mensageria` | contrato definido (`contracts.md`); build em andamento nos repositórios OS, Billing e Execution; sem verificação ainda | **em andamento** |
+| `saga-mensageria` | **correções da 1ª verificação (FAIL) aplicadas e enviadas**; falta gate com mutações e 2ª rodada de Verifier. Provas 9/9 antes das correções | `saga-mensageria/verification.md` (rodada 1), `contracts.md` |
 | `infra-ci-observabilidade` | só `plan.md` e `checks.md`; build não iniciado | depende dos serviços |
 | `pacote-entrega` | só `plan.md` e `checks.md`; build não iniciado | inclui vídeo e PDF final, que o agente não produz sozinho |
 
@@ -70,8 +71,25 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 6. A célula de tabela do `verification.md` não pode conter `|` (nem `\|`): o validador conta como coluna.
 7. Cada achado fechado leva o hash do commit de correção na coluna `Closed`. Achados BAIXA ficam em `## Open items`, sem hash.
 
+### Saga-mensageria: situação exata (2026-11-10, ao fechar o chat)
+
+- **Contrato e plano:** `saga-mensageria/contracts.md` (fonte única, já atualizado) e `plan.md` (Surface ampliada com a rota de cancelamento).
+- **Código pronto, testado e enviado** (HEADs): OS `a1bece8` (121 testes + 3 de API, script do C7 com 18 testes), Billing `a0f4870` (77 testes), Execution `fb56593` (131 + 2). Principal `d3f53c2`.
+- **1ª verificação (`saga_verifier`): FAIL** com 1 ALTA, 3 MÉDIA e 7 BAIXA. Todas foram tratadas nos commits acima (ALTA `Concluida`, MÉDIAS: rota de cancelamento, 7 status de pagamento, prazo `Saga:PrazoCompensacao`). O `verification.md` ainda descreve o código ANTES das correções e a coluna `Closed` está vazia.
+- **Mutações propostas pelo Verifier** estão em `saga-mensageria/mutations.json` (3, todas no OS; os trechos `old` continuam válidos). **Ainda não foram executadas.**
+- **Provas da Saga (`proofs.md`) estão desatualizadas** (9/9 mas anteriores às correções).
+
+**Passos exatos para concluir a `saga-mensageria` em um chat novo:**
+1. Antes de qualquer gate, **corrigir o risco apontado pelo próprio fixer**: um `orcamento.aprovado.v1` que chega depois de a OS sem Saga ter sido cancelada pela rota cria a Saga e o fluxo avança (OS cancelada reativada). Correção sugerida: ao criar a Saga, se a OS estiver `Cancelada`, tratar como `ordem-servico.cancelar.v1` imediato (enviar `billing.orcamento.cancelar.v1`) e alertar. Teste com Postgres e DynamoDB Local.
+2. Rodar o gate com a árvore limpa: `python .specs/tlc-spec-lean/scripts/check_proofs.py fase4/saga-mensageria --mutations .specs/features/fase4/saga-mensageria/mutations.json` (PATH precisa ter o Python real antes do atalho da loja: `export PATH="/c/Users/Mobile01/AppData/Local/Python/pythoncore-3.15-64:$PATH"`, senão o C7 falha com "'python' não é reconhecido"). Depois rodar a regressão: os-service (`bash .specs/features/fase4/os-service/proof-env/run_proofs.sh --mutations ...`), billing e execucao, cada um com `--mutations`. Commitar os `proofs.md`.
+3. Despachar a **2ª rodada de Verifier independente** da Saga (sub-agente novo) sobre OS, Billing e Execution, com o critério AD-003 (PASS só sem ALTA ou MÉDIA abertas). Registrar o despacho em `## Handoff` do `checks.md`.
+4. Fechar o `verification.md`: hash do commit de correção na coluna `Closed`; BAIXAS vão para `## Open items`; nenhuma célula com `|`.
+5. Enviar tudo (submódulos e principal) e atualizar este STATE.
+
+Riscos conhecidos e já documentados no README do OS: confirmação de `liberada` perdida pode deixar execução ativa após cancelamento; mensagens fora de ordem rejeitadas nunca são reavaliadas; alertas são só log (roteamento real é da `infra-ci-observabilidade`); documento de Saga ilegível alerta a cada ciclo.
+
 ### Próximos passos
 
-1. **Implementar `saga-mensageria`** (depende só de OS, Billing e Execução, todos prontos): contratos REST e eventos SQS, estado da Saga em DynamoDB, compensações. Primeiro resolver o contrato de eventos aberto acima (OS publicar `ordem-servico.liberada.v1`, OS e Billing consumirem `execucao.concluida.v1` e `execucao.falhou.v1`) e revisar AD-008.
+1. **Concluir `saga-mensageria`** com os passos da seção anterior. Depois revisar AD-008 (decisões do Execution Service não confirmadas pelo usuário).
 2. `infra-ci-observabilidade` (pipelines, IaC, telemetria distribuída) e `pacote-entrega` (repositórios, vídeo e PDF final; o vídeo exige ação humana).
 3. Decisões pendentes do usuário: criar a `main` dos remotos novos e abrir os PRs; se quer atualizar o texto de `AGENTS.md` ("minúsculas") para refletir AD-002; se prefere um job de reconciliação de reembolsos `Pendente` no Billing.
