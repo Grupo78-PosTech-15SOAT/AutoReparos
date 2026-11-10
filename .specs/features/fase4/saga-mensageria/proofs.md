@@ -1,8 +1,8 @@
 # fase4/saga-mensageria proofs
 
-**HEAD**: 15bad23
+**HEAD**: 279d2dd
 **Tree**: clean
-**Result**: 9 pass, 0 fail; mutations 0 killed, 0 not
+**Result**: 9 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -15,3 +15,11 @@
 | C7 | `python submodules/AutoReparos.OS/scripts/assert_saga_readme.py --name saga-rationale --strategy orchestrated -` | count unknown | - | pass |
 | Build | `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx` | - | - | pass |
 | Build | `dotnet format submodules/AutoReparos.OS/AutoReparos.OS.slnx --verify-no-changes` | - | - | pass |
+
+## Mutations
+
+| Mutation | Location | Killed |
+| --- | --- | --- |
+| compensacoes deixam de seguir a ordem inversa (etapa 1 antes da 2) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:365` | yes |
+| escrita condicional por versao aceita versao antiga (conflito otimista perdido) | `submodules\AutoReparos.OS\AutoReparos.OS.Infrastructure\Saga\DynamoDbSagaRepositorio.cs:61` | yes |
+| comando so vai a DLQ uma tentativa depois do limite de 5 (limite deslocado em um) | `submodules\AutoReparos.OS\AutoReparos.OS.Application\Saga\OrquestradorSaga.cs:193` | yes |
