@@ -216,7 +216,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | ID | Decisão | `.specs` | Spec |
 |---|---|---|---|
 | D-01 | **3 serviços de negócio + Cadastros** (09/11): `OS` (ciclo de vida da OS, histórico, orquestrador da Saga), `Cobranca` (orçamento, aprovação, pagamento, reembolso), `Execucao` (fila, etapas, **catálogo de serviços e insumos com reserva**). O App atual vira o serviço de **Cadastros** (clientes, veículos, usuários, emissão do JWT e notificações). Substitui a opção B de 06/11 (Estoque separado) | Plano fase4 "Fronteiras" | [Separação § 4](./microsservicos/fase4_spec_separacao_microsservicos.md#4-divisão-escolhida-3-serviços-de-negócio--cadastros-d-01) |
-| D-02 | **Nomes em português** (regra L-02): `AutoReparos.OS`, `AutoReparos.Cobranca` (confirmado em 10/11), `AutoReparos.Execucao`. Renomeia os repositórios `Billing` e `Execution`. O nome do App reduzido (`AutoReparos.Cadastros`) está em D-23 | AD-010, AD-016 | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
+| D-02 | **Nomes em português** (regra L-02): `AutoReparos.OS`, `AutoReparos.Cobranca` (confirmado em 10/11), `AutoReparos.Execucao`. Renomeia os repositórios `Billing` e `Execution`. O App reduzido vira `AutoReparos.Cadastros` (D-23) | AD-010, AD-016 | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-03 | Frontend extraído para `AutoReparos.Web` (pipeline e Sonar próprios). Corte possível se faltar tempo: continua no Cadastros | — | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-04 | **NoSQL = DynamoDB para o estado da Saga no OS Service** (09/11). Substitui "DynamoDB no Estoque" | Plano fase4 "Mensageria e NoSQL", "Orquestrador" | [Bancos § 4.1](./microsservicos/fase4_spec_bancos_de_dados.md#41-d-04--dynamodb-no-estado-da-saga) |
 | D-05 | Uma instância RDS PostgreSQL compartilhada, com database e usuário próprios por serviço; cada repositório mantém a IaC dos seus recursos exclusivos | Plano fase4 "Bancos relacionais e IaC" | [Bancos § 4.2](./microsservicos/fase4_spec_bancos_de_dados.md#42-d-05--instância-rds-compartilhada) |
@@ -230,6 +230,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-19 | **Fan-out por SNS** (10/11): um tópico SNS por serviço produtor (`os-eventos`, `cobranca-eventos`, `execucao-eventos`) e uma fila SQS por consumidor assinando o tópico, com filtro por `tipo`. Comandos seguem direto para a fila do participante. Substitui a "uma linha de Outbox por destino" do Execution | AD-014 | [Comunicação § 4.3](./comunicacao/fase4_spec_comunicacao_microsservicos.md#43-d-06--mensageria) |
 | D-20 | **Falta de saldo na reserva** (10/11): nada é reservado; a OS fica em `AguardandoInsumos` com alerta diário; a recepção repõe e manda retentar, ou cancela | AD-015 | [Saga § 4.4](./saga/fase4_spec_saga_pattern.md#44-passos-compensações-e-pivô) |
 | D-22 | **Ambientes:** desenvolvimento local; push na `develop` implanta em staging (namespace compartilhado no EKS); push na `main` implanta em produção no EKS (`us-east-1`) com aprovação no Environment `production` | Plano fase4 "Alvos de infraestrutura" | [CI/CD § 4.1](./cicd/fase4_spec_cicd_e_protecao_de_branches.md#41-pipeline-padrão-de-cada-serviço-githubworkflowsci-cdyml) |
+| D-23 | **App renomeado para `AutoReparos.Cadastros`** (10/11). O nome `OrdemServico` (D-02 de 09/11) deixou de servir: a OS mora no repositório novo `AutoReparos.OS`, e o App fica só com clientes, veículos, usuários e notificações | AD-017 | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-18 | **Saga além do mínimo** (09/11): (a) reserva de insumos em duas fases — reservar, confirmar, cancelar; (c) travas de estado enquanto um passo da Saga está em andamento; (d) prazos técnicos por passo, lembretes de negócio, console de administração das Sagas e reprocessamento de DLQ. A pré-autorização do pagamento (b) fica fora, porque exigiria trocar o Checkout Pro | AD-011 | [Saga § 4.5–4.7](./saga/fase4_spec_saga_pattern.md#45-reserva-de-insumos-em-duas-fases-d-18a) |
 
 ### 6.2 Regras obrigatórias do grupo
@@ -243,7 +244,6 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 
 | ID | Decisão | Recomendação | Bloqueia | Spec |
 |---|---|---|---|---|
-| D-23 | Nome do App reduzido a cadastros | `AutoReparos.Cadastros`. O nome `OrdemServico` (D-02 de 09/11) deixou de servir: a OS agora mora no repositório novo `AutoReparos.OS`, e o App fica só com clientes, veículos, usuários e notificações | Renomeação (Etapa 0) | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-11 | AuthLambda × banco de clientes | Chamada HTTP a endpoint interno do Cadastros | `cadastros` | [Bancos § 4.3](./microsservicos/fase4_spec_bancos_de_dados.md#43-como-garantir-nenhum-acesso-ao-banco-de-outro-serviço) |
 | D-21 | Emissor do JWT para os serviços novos (que validam por `Authority`/OIDC) | Cadastros publica discovery OIDC + JWKS com chave assimétrica | `cadastros` | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#etapa-4--autenticação-entre-serviços) |
 | D-12 | Compartilhamento de contratos de mensagens | Contratos duplicados em cada serviço + catálogo único documentado (AsyncAPI ou tabela) | — | [Comunicação § 4.6](./comunicacao/fase4_spec_comunicacao_microsservicos.md#46-garantias) |
@@ -261,7 +261,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | 09/11/2026 | D-04: DynamoDB do Estoque para o estado da Saga | Sem serviço de Estoque; alinhado ao plano aprovado do Enrico |
 | 09/11/2026 | D-09: de "pagar antes da execução" para "pagar depois da conclusão" | Modelo real de oficina e Billing já implementado assim; compensações reforçadas por D-18 |
 | 10/11/2026 | D-19: de "uma linha de Outbox por destino" para SNS por produtor | Cadastros (notificações) passa a consumir eventos de vários serviços; o produtor não deve conhecer os consumidores |
-| 10/11/2026 | D-02/D-23: App deixa de virar `OrdemServico` e passa a `Cadastros` (proposta) | A OS foi implementada em repositório novo (`AutoReparos.OS`) |
+| 10/11/2026 | D-02/D-23: App deixa de virar `OrdemServico` e passa a `Cadastros` | A OS foi implementada em repositório novo (`AutoReparos.OS`) |
 
 ---
 
@@ -311,7 +311,7 @@ Sugestão de trilhas paralelas para os 5 integrantes (a combinar):
 | Seg 16/11 | **Congelamento de código.** READMEs, Postman, ensaio e gravação do vídeo | E, todas |
 | Ter 17/11 | Edição final, PDF do portal e submissão | E |
 
-**O que cortar se o prazo apertar**, nesta ordem: extração do Web (D-03), extração de Notificações (D-17), dashboards além do da Saga, renomeação do App para Cadastros (D-23; o código pode ficar no repositório `App`). Não cortar: Saga com compensações, BDD, cobertura e Sonar, deploy por pipeline, vídeo.
+**O que cortar se o prazo apertar**, nesta ordem: extração do Web (D-03), extração de Notificações (D-17), dashboards além do da Saga, renomeação do repositório do App (D-23 continua valendo no código e na documentação). Não cortar: Saga com compensações, BDD, cobertura e Sonar, deploy por pipeline, vídeo.
 
 ---
 

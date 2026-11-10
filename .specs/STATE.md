@@ -19,7 +19,8 @@
 | AD-013 | Fronteiras (D-01): 3 serviços de negócio (OS, Cobrança, Execução) + Cadastros. Catálogo de serviços e insumos com reserva ficam na Execução; o App vira Cadastros (clientes, veículos, usuários, emissão de JWT/JWKS, notificações por eventos); o DynamoDB é o estado da Saga (D-04); não há serviço de Estoque | José aceitou a recomendação de 09/11 (só discordou dos nomes e da atomicidade, tratados em AD-010 e AD-012). Ver `docs/specs/fase4/microsservicos/fase4_spec_separacao_microsservicos.md` | active | 2026-11-09 |
 | AD-014 | Fan-out por SNS (D-19): um tópico SNS por serviço produtor e uma fila SQS por consumidor assinando o tópico, com filtro por `tipo`; comandos seguem direto para a fila do participante. Substitui a "uma linha de Outbox por destino" do Execution | José: "Recomendado" (10/11) | active | 2026-11-10 |
 | AD-015 | Falta de saldo na reserva (D-20): nada é reservado; a Saga vai para `AguardandoInsumos` com alerta diário; retentar ou cancelar por pessoa | José: "Ok, pode ser" (10/11) | active | 2026-11-10 |
-| AD-016 | Nome `AutoReparos.Cobranca` confirmado para o Billing (D-02). Deploy de cada serviço pelo próprio repositório, pai só com a plataforma (D-13); ambientes local, staging na `develop` e produção na `main` com aprovação (D-22). O nome `AutoReparos.Cadastros` para o App segue como proposta (D-23) | José: "Cobrança" (10/11); D-13 e D-22 convergem com `infra-ci-observabilidade` e com o plano pai | active | 2026-11-10 |
+| AD-016 | Nome `AutoReparos.Cobranca` confirmado para o Billing (D-02). Deploy de cada serviço pelo próprio repositório, pai só com a plataforma (D-13); ambientes local, staging na `develop` e produção na `main` com aprovação (D-22). O nome do App foi decidido em AD-017 | José: "Cobrança" (10/11); D-13 e D-22 convergem com `infra-ci-observabilidade` e com o plano pai | active | 2026-11-10 |
+| AD-017 | O App reduzido passa a se chamar `AutoReparos.Cadastros` (D-23) | José: "Pode manter: AutoReparos.Cadastros" (10/11) | active | 2026-11-10 |
 
 ## Unificação com `docs/specs/fase4` - 2026-11-09 (atualizada em 10/11)
 
@@ -27,7 +28,7 @@
 - Planos aguardando aprovação do usuário (todos sem `**Approved**`; os `checks.md` antigos de `saga-mensageria`, `infra-ci-observabilidade` e `pacote-entrega` devem ser derivados de novo): `saga-mensageria`, `infra-ci-observabilidade`, `pacote-entrega` (revisados) e `insumos`, `cadastros` (novos).
 - `docs/specs/fase4/index.md` § 6 é o registro único de decisões da Fase 4 (D-xx), com a coluna que aponta o `AD-xxx` equivalente. `.specs/` continua a fonte da implementação (planos EARS, checks, provas). Papéis e regras de sincronização no § 3.1 do índice.
 - Na mesclagem local de `feature/os-service-contracts` em `docs/fase4-especificacao-inicial`, os ponteiros de App, AuthLambda, Infra.Database e Infra.K8s ficaram na `develop` atual. A branch `feature/os-service-contracts` do Infra.K8s partiu de `607f1de`, sem o provisionamento centralizado: rebasear na `develop` antes do PR.
-- Decisões em aberto (nenhuma bloqueia `saga-mensageria`): D-23, D-11, D-21, D-12, D-14b, D-15, D-16, D-17.
+- Decisões em aberto (nenhuma bloqueia `saga-mensageria`): D-11, D-21, D-12, D-14b, D-15, D-16, D-17.
 
 ## Handoff (retomada em outro computador) - 2026-11-09
 

@@ -7,7 +7,7 @@
 > **Repositórios afetados:** `AutoReparos.OS`, `AutoReparos.Billing` → `Cobranca`, `AutoReparos.Execution` → `Execucao`, `AutoReparos.App` → `Cadastros`, `AutoReparos.Web`, `AutoReparos` (pai)  
 > **Features `.specs`:** `os-service`, `billing`, `execucao` (prontas); `cadastros` e `insumos` (a criar)  
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
-> **Status:** Divisão decidida em 09/11/2026 (D-01, D-02); substitui a opção B de 06/11
+> **Status:** Divisão decidida em 09/11/2026 (D-01, D-02) e nome do Cadastros em 10/11 (D-23); substitui a opção B de 06/11
 
 ---
 

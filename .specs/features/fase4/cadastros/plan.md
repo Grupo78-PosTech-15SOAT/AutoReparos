@@ -78,11 +78,11 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 
 | Assumption | Chosen default | Rationale | Confirmed? |
 | --- | --- | --- | --- |
-| Nome do repositório | `AutoReparos.Cadastros` | D-23; a OS mora no repositório novo `AutoReparos.OS`. | n |
+| Nome do repositório | `AutoReparos.Cadastros` | D-23 / AD-017; a OS mora no repositório novo `AutoReparos.OS`. | y - José: "Pode manter: AutoReparos.Cadastros" |
 | AuthLambda | Endpoint interno do Cadastros (D-11 opção A) | Mais simples que manter projeção própria. | n |
 | JWT | Chave assimétrica com JWKS (D-21) | Os serviços novos já validam por `Authority`. | n |
 
-**Open questions:** none - as três suposições acima são recomendações registradas em `docs/specs/fase4/index.md` § 6.3.
+**Open questions:** none - as duas suposições não confirmadas acima são recomendações registradas em `docs/specs/fase4/index.md` § 6.3.
 
 ## Differences from the source
 
