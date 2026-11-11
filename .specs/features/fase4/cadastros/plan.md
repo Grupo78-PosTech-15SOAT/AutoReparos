@@ -1,6 +1,6 @@
 # Fase 4 - App reduzido a Cadastros
 
-**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-11, D-17, D-21, D-23 de `.specs/features/fase4/especificacao/index.md` (AD-013).
+**Approved**: 2026-11-11 - user: "Aprovo os dois" Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
 
 ## Problem
 
@@ -42,17 +42,18 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 
 | Route | Request -> response | Who | Status |
 | --- | --- | --- | --- |
-| `GET /api/v1/clientes/{id}` | id -> cliente | usuário ou serviço autorizado | 200, 401, 403, 404 |
-| `GET /api/v1/veiculos/{id}` | id -> veículo com dono | usuário ou serviço autorizado | 200, 401, 403, 404 |
+| `GET /api/v1/clientes/{id}` | id -> cliente | usuário autenticado (o OS repassa o JWT de quem abre a OS); sem usuário, chave interna | 200, 401, 403, 404 |
+| `GET /api/v1/veiculos/{id}` | id -> veículo com dono | usuário autenticado (o OS repassa o JWT de quem abre a OS); sem usuário, chave interna | 200, 401, 403, 404 |
+| CRUD de clientes, veículos e usuários (`/api/v1/clientes`, `/api/v1/veiculos`, `/api/v1/usuarios`) | contratos atuais do App, mantidos sem mudança | papéis atuais do App | 200, 201, 204, 401, 403, 404, 422 |
 | `GET /.well-known/openid-configuration` e `/.well-known/jwks.json` | - -> metadados e chaves públicas | qualquer cliente (público por definição do OIDC) | 200, 404 para caminho inexistente |
-| `POST /internal/clientes/autenticar` | CPF -> cliente | AuthLambda (rede interna) | 200, 401, 404 |
+| `POST /internal/clientes/autenticar` | CPF -> cliente | AuthLambda (NetworkPolicy e cabeçalho `X-Chave-Interna`) | 200, 401, 404 |
 
 ## Landing
 
 | Door | Literal shape | Alternative rejected and why |
 | --- | --- | --- |
 | 1 | Repositório `AutoReparos.Cadastros` (renomeado do App) com database `cadastros_db` | Cadastros dentro do OS reescreveria código testado num serviço já verificado |
-| 2 | JWT assinado com chave assimétrica e JWKS público | Chave simétrica compartilhada exigiria distribuir o segredo de assinatura a todos os serviços |
+| 2 | JWT RS256 com chave privada em Secret do K8s (uma chave ativa, `kid` no token, rotação manual documentada) e JWKS público com cache de 10 minutos nos serviços | Chave simétrica compartilhada exigiria distribuir o segredo de assinatura a todos os serviços |
 
 ## Criteria
 
@@ -65,24 +66,30 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 3. WHEN um serviço validar um JWT emitido pelo Cadastros THEN SHALL obter a chave pública pelo JWKS, sem segredo compartilhado.
 4. WHEN a AuthLambda autenticar um cliente THEN SHALL usar o endpoint interno, sem acesso ao banco, e o SG do RDS SHALL deixar de liberar a Lambda.
 5. WHEN um evento de orçamento, conclusão, pagamento ou lembrete chegar THEN Cadastros SHALL enviar a notificação ao cliente uma única vez por `eventId`.
-6. IF o endpoint interno for chamado de fora da rede do cluster THEN a chamada SHALL ser recusada.
+6. IF o endpoint interno for chamado de fora do cluster, ou sem o cabeçalho `X-Chave-Interna` válido (segredo no K8s) THEN a chamada SHALL ser recusada (NetworkPolicy e chave interna).
+7. WHEN o OS consultar cliente ou veículo THEN SHALL repassar o JWT do usuário que abre a OS; WHEN não houver usuário (origem em evento) THEN SHALL usar a chave interna.
+8. WHEN o Cadastros publicar o JWKS THEN o token SHALL levar `kid` da chave ativa.
+9. IF o envio do e-mail falhar THEN Cadastros SHALL repetir com backoff exponencial e, ao esgotar, enviar a mensagem para a DLQ própria; o `eventId` só é registrado como notificado após o envio.
 
 ## Out of scope
 
 | Excluded | Why |
 | --- | --- |
 | Extrair notificações para repositório próprio | Opcional (D-17), só se sobrar tempo. |
-| Extrair o frontend | Feature própria (D-03). |
+| Extrair o frontend e adaptar os paths antigos | Depende da feature `web`, ainda sem plano (D-03). |
+| Rotação automática de chaves | Manual e documentada; suficiente para o prazo. |
 
 ## Assumptions
 
 | Assumption | Chosen default | Rationale | Confirmed? |
 | --- | --- | --- | --- |
 | Nome do repositório | `AutoReparos.Cadastros` | D-23 / AD-017; a OS mora no repositório novo `AutoReparos.OS`. | y - José: "Pode manter: AutoReparos.Cadastros" |
-| AuthLambda | Endpoint interno do Cadastros (D-11 opção A) | Mais simples que manter projeção própria. | n |
-| JWT | Chave assimétrica com JWKS (D-21) | Os serviços novos já validam por `Authority`. | n |
+| AuthLambda | Endpoint interno do Cadastros (D-11 opção A) | Mais simples que manter projeção própria. | y - User: "confirmo d-11 a d-21" |
+| JWT | Chave assimétrica com JWKS (D-21) | Os serviços novos já validam por `Authority`. | y - User: "confirmo d-11 a d-21" |
+| Notificações | Consumidor dentro do Cadastros (D-17); SMTP já usado no App; filas assinando os tópicos de orçamento, conclusão, pagamento e lembrete | Dono do e-mail do cliente. | y - User: "Intervalo inteiro" |
+| Tokens do monólito | Troca imediata, sem convivência; sessões ativas são invalidadas | Não há produção real. | y - User: "Sim, todas" |
 
-**Open questions:** none - as duas suposições não confirmadas acima são recomendações registradas em `.specs/features/fase4/especificacao/index.md` § 6.3.
+**Open questions:** none.
 
 ## Differences from the source
 

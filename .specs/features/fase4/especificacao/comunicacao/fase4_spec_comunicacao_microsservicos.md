@@ -101,7 +101,7 @@ Nomes em português (L-02), no formato `<contexto>.<fato-ou-ação>.v<versão>`.
 | `ordem-servico.atualizada.v1` | Evento | OS | — | ✅ existe |
 | `saga.avancou.v1` | Evento interno | OS (Saga, DynamoDB) | OS (status e histórico, PostgreSQL) | Novo (L-01) |
 | `orcamento.gerado.v1` / `orcamento.aprovado.v1` (com itens) / `orcamento.recusado.v1` | Evento | Cobrança | OS; Cadastros (notificação) | Novo |
-| `execucao.reservar-insumos.v1` | Comando | OS | Execução | Novo |
+| `execucao.reservar-insumos.v1` (corpo: `ordemServicoId` e itens `{insumoId, quantidade}`) | Comando | OS | Execução | Novo |
 | `insumos.reservados.v1` / `insumos.reserva-falhou.v1` | Evento | Execução | OS | Novo |
 | `ordem-servico.liberada.v1` | Comando | OS | Execução | ✅ consumidor existe; publicação nova |
 | `execucao.enfileirada.v1` | Evento | Execução | OS | Novo (prazo técnico da liberação) |

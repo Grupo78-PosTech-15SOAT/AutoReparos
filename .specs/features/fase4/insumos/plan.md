@@ -1,6 +1,6 @@
 # Fase 4 - Catálogo e insumos com reserva em duas fases
 
-**Pendente de aprovação** (10/11/2026). Decisões de origem: D-01, D-18a, D-20 de `.specs/features/fase4/especificacao/index.md` (AD-011, AD-013, AD-015).
+**Approved**: 2026-11-11 - user: "Aprovo os dois" Ajustes de 11/11 (AD-023): ajustada com preço, papel `Atendente` e itens no comando de reserva (AD-023). Decisões de origem: D-01, D-18a, D-20 de `.specs/features/fase4/especificacao/index.md` (AD-011, AD-013, AD-015).
 
 ## Problem
 
@@ -42,10 +42,10 @@ New: Insumo com `QuantidadeDisponivel` e `QuantidadeReservada`, ReservaInsumo ú
 | Route | Request -> response | Who | Status |
 | --- | --- | --- | --- |
 | `GET /api/v1/servicos` | filtros -> catálogo | usuário autenticado | 200, 401 |
-| `POST /api/v1/servicos` | serviço -> criado | Administrador | 201, 401, 403, 422 |
+| `POST /api/v1/servicos` | serviço com `PrecoUnitario` -> criado | Administrador | 201, 401, 403, 422 |
 | `GET /api/v1/insumos` | filtros -> insumos com saldos | usuário autenticado | 200, 401 |
-| `POST /api/v1/insumos` | insumo -> criado | Administrador | 201, 401, 403, 422 |
-| `POST /api/v1/insumos/{id}/entradas` | quantidade -> saldo | Administrador ou recepcionista | 200, 401, 403, 404, 422 |
+| `POST /api/v1/insumos` | insumo com `PrecoUnitario` -> criado | Administrador | 201, 401, 403, 422 |
+| `POST /api/v1/insumos/{id}/entradas` | quantidade -> saldo | Administrador ou Atendente | 200, 401, 403, 404, 422 |
 
 ## Landing
 
@@ -59,7 +59,7 @@ New: Insumo com `QuantidadeDisponivel` e `QuantidadeReservada`, ReservaInsumo ú
 
 **Acceptance Criteria**
 
-1. WHEN `execucao.reservar-insumos.v1` for consumido THEN Execução SHALL reservar todos os itens numa única transação com a Inbox e a Outbox `insumos.reservados.v1`.
+1. WHEN `execucao.reservar-insumos.v1` (com `ordemServicoId` e a lista `{insumoId, quantidade}`) for consumido THEN Execução SHALL reservar todos os itens numa única transação com a Inbox e a Outbox `insumos.reservados.v1`, sem consultar o OS.
 2. IF algum item não tiver saldo THEN Execução SHALL não gravar nenhuma reserva e SHALL publicar `insumos.reserva-falhou.v1` com os itens em falta.
 3. IF o mesmo comando ou outro comando de reserva da mesma OS chegar de novo THEN Execução SHALL não reservar o dobro.
 4. WHEN a execução for concluída THEN Execução SHALL confirmar as reservas na mesma transação da conclusão.
@@ -68,7 +68,8 @@ New: Insumo com `QuantidadeDisponivel` e `QuantidadeReservada`, ReservaInsumo ú
 
 ### Catalog (P2)
 
-7. WHEN um usuário autenticado consultar catálogo ou insumos THEN Execução SHALL devolver valores e saldos disponível e reservado.
+7. WHEN um usuário autenticado consultar catálogo ou insumos THEN Execução SHALL devolver `PrecoUnitario` e saldos disponível e reservado.
+9. WHEN a Cobrança montar o orçamento THEN SHALL gravar o snapshot do `PrecoUnitario` lido da Execução; reajustes posteriores SHALL não alterar orçamentos já aprovados.
 8. WHEN um administrador registrar entrada de insumo THEN Execução SHALL aumentar o saldo disponível e registrar a movimentação.
 
 ## Out of scope
@@ -84,7 +85,9 @@ New: Insumo com `QuantidadeDisponivel` e `QuantidadeReservada`, ReservaInsumo ú
 | --- | --- | --- | --- |
 | Dono dos insumos | Execução (sem serviço de Estoque) | D-01 / AD-013. | y - José aceitou a recomendação de 09/11 |
 | Falta de saldo | Nada reservado; a Saga vai para `AguardandoInsumos` | D-20 / AD-015. | y - José: "Ok, pode ser" |
-| Dados iniciais | Seed próprio, sem migrar dados do App | Não há dados reais em produção. | n |
+| Dados iniciais | Seed próprio, sem migrar dados do App | Não há dados reais em produção. | y - User: "Sim, todas" |
+| Fluxo completo | Os consumidores são testáveis com mensagens injetadas; o fluxo ponta a ponta só fecha com `saga-compensacoes`, que depende desta feature | O OS ainda não emite `reservar-insumos`. | y - User: "Sim, todas" |
+| Papel de entrada de estoque | `Atendente` (mesmo nome de `saga-mensageria`) | Unificação de papéis. | y - User: "Sim, todas" |
 
 **Open questions:** none
 
