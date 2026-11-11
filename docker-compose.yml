@@ -19,7 +19,7 @@ services:
     image: autoreparos-api
     build:
       context: ./submodules/AutoReparos.Cadastros
-      dockerfile: AutoReparos.API/Dockerfile
+      dockerfile: AutoReparos.Cadastros.Api/Dockerfile
     container_name: autoreparos-api
     restart: always
     environment:

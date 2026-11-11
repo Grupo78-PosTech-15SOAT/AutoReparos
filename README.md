@@ -134,14 +134,14 @@ AutoReparos/                                         # Repositório Pai / Orques
     │   └── README.md
     │
     ├── AutoReparos.App/                             # Submódulo 4: Aplicação Principal
-    │   ├── AutoReparos.API/                         # Endpoints REST & Controllers
-    │   ├── AutoReparos.Application/                 # Casos de Uso & DTOs
-    │   ├── AutoReparos.Domain/                      # Entidades DDD & Value Objects
-    │   ├── AutoReparos.Infra/                       # EF Core 10 & PostgreSQL
+    │   ├── AutoReparos.Cadastros.Api/                         # Endpoints REST & Controllers
+    │   ├── AutoReparos.Cadastros.Application/                 # Casos de Uso & DTOs
+    │   ├── AutoReparos.Cadastros.Domain/                      # Entidades DDD & Value Objects
+    │   ├── AutoReparos.Cadastros.Infrastructure/                       # EF Core 10 & PostgreSQL
     │   ├── AutoReparos.Web/                         # Frontend Angular 19 (Signals)
-    │   ├── AutoReparos.Domain.Tests/                # 113 testes unitários
-    │   ├── AutoReparos.Application.Tests/           # 123 testes unitários
-    │   ├── AutoReparos.IntegrationTests/            # 67 testes com Testcontainers
+    │   ├── AutoReparos.Cadastros.Domain.Tests/                # 113 testes unitários
+    │   ├── AutoReparos.Cadastros.Application.Tests/           # 123 testes unitários
+    │   ├── AutoReparos.Cadastros.IntegrationTests/            # 67 testes com Testcontainers
     │   ├── AutoReparos.App.slnx                     # Solution autônoma
     │   ├── .github/workflows/ci.yml                 # CI/CD (Testes + Docker)
     │   └── README.md
@@ -187,7 +187,7 @@ graph TB
         RouteCore --> Ingress
         
         subgraph Pods["Deployments & Pods Escaláveis"]
-            APIService["AutoReparos.API (.NET 10)"]
+            APIService["AutoReparos.Cadastros.Api (.NET 10)"]
             HPA["Horizontal Pod Autoscaler (HPA)"]
             HPA -.->|CPU/RAM > 80%| APIService
         end
@@ -221,26 +221,26 @@ graph TB
 A aplicação principal (`AutoReparos.App`) implementa estritamente os preceitos de **Clean Architecture** e **DDD**, garantindo inversão de dependências e isolamento completo do domínio:
 
 ```
-AutoReparos.API (Controllers / Minimal APIs)
+AutoReparos.Cadastros.Api (Controllers / Minimal APIs)
        ↓
-AutoReparos.Application (Casos de Uso / DTOs / Validação)
+AutoReparos.Cadastros.Application (Casos de Uso / DTOs / Validação)
        ↓
-AutoReparos.Domain (Entidades Ricas / Value Objects / Interfaces)
+AutoReparos.Cadastros.Domain (Entidades Ricas / Value Objects / Interfaces)
        ↑
-AutoReparos.Infra (EF Core / Repositórios PostgreSQL / Identity / SendGrid)
+AutoReparos.Cadastros.Infrastructure (EF Core / Repositórios PostgreSQL / Identity / SendGrid)
 ```
 
-- **`AutoReparos.Domain` (Zero Dependências Externas):**
+- **`AutoReparos.Cadastros.Domain` (Zero Dependências Externas):**
   - Entidades ricas com encapsulamento de invariantes (`OrdemServico`, `Cliente`, `Veiculo`, `Insumo`, `Servico`, `Usuario`).
   - Value Objects imutáveis com validação embutida (`Documento` com validação de algoritmo Módulo 11 de CPF e CNPJ, `Placa` com suporte a padrão convencional e Mercosul, `Email`).
   - Exceções ricas de domínio (`DomainException`, `BusinessRuleException`).
-- **`AutoReparos.Application`:**
+- **`AutoReparos.Cadastros.Application`:**
   - Padrão **Vertical Slice** organizado por Bounded Contexts.
   - Orquestração de casos de uso com mapeamento estrito para DTOs de entrada e saída.
-- **`AutoReparos.Infra`:**
+- **`AutoReparos.Cadastros.Infrastructure`:**
   - Persistência via Entity Framework Core com mapeamentos Fluent API explícitos.
   - Repositórios com transações ACID consistentes.
-- **`AutoReparos.API`:**
+- **`AutoReparos.Cadastros.Api`:**
   - Dupla camada de adaptadores: **Endpoints** (ASP.NET Minimal APIs) e **Controllers** (Clean Architecture Adapters) para total desacoplamento do framework.
   - Middlewares globais de tratamento de exceções e mapeamento de Problem Details.
 
@@ -277,7 +277,7 @@ sequenceDiagram
     participant APIGW as AWS API Gateway
     participant Lambda as AutoReparos.AuthLambda
     participant RDS as PostgreSQL (RDS)
-    participant API as AutoReparos.API (EKS)
+    participant API as AutoReparos.Cadastros.Api (EKS)
 
     Note over Cliente,APIGW: 1. Autenticação Serverless (Sem Senha)
     Cliente->>APIGW: POST /auth/cliente { cpf: "976.321.800-44", email: "leandro.silva@email.com" }
@@ -291,7 +291,7 @@ sequenceDiagram
 
     Note over Cliente,API: 2. Consulta de Ordens de Serviço (Zero-Trust)
     Cliente->>APIGW: GET /api/ordem-servico/minhas-os (Header: Bearer eyJhbGci...)
-    APIGW->>API: Proxy para AutoReparos.API
+    APIGW->>API: Proxy para AutoReparos.Cadastros.Api
     API->>API: Valida assinatura do JWT e checa Policy "ClientePolicy"
     API->>API: Extrai ID do Cliente da claim 'sub' (Isolamento de Dados)
     API->>RDS: Busca apenas OSs vinculadas ao ID do cliente autenticado
@@ -552,10 +552,10 @@ Endpoints disponíveis:
 ### Executando os Testes Automatizados
 
 A solução conta com **354 testes automatizados** (100% passando):
-- **Domínio (`AutoReparos.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
-- **Aplicação (`AutoReparos.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
+- **Domínio (`AutoReparos.Cadastros.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
+- **Aplicação (`AutoReparos.Cadastros.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
 - **Serverless (`AutoReparos.AuthLambda.Tests`):** 40 testes unitários (Módulo 11 CPF, geração de token).
-- **Integração (`AutoReparos.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
+- **Integração (`AutoReparos.Cadastros.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
 
 ```bash
 # Executar todos os testes da solução unificada:

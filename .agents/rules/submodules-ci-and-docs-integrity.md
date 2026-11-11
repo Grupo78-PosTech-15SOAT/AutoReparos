@@ -19,14 +19,14 @@
 ### 1.2 Resolução de Caminhos de Submódulos em Scripts e Testes
 - Pipelines de CI/CD, comandos `dotnet test`, e scripts nunca devem apontar para caminhos legados da raiz do repositório pai.
 - Sempre aponte para o caminho canônico do submódulo:
-  - Backend: `submodules/AutoReparos.Cadastros/AutoReparos.Domain.Tests/...`
+  - Backend: `submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Domain.Tests/...`
   - Lambda: `submodules/AutoReparos.AuthLambda/tests/...`
 - Ao usar `--no-build`, certifique-se de que a etapa anterior de compilação compilou a solução agregada (`AutoReparos.slnx`) contendo todos os projetos que serão executados.
 
 ### 1.3 Contexto de Build do Docker para Submódulos
 - Quando o `Dockerfile` residir em um submódulo, execute `docker build` especificando explicitamente o arquivo `-f` e a pasta do submódulo como contexto:
   ```bash
-  docker build -f submodules/AutoReparos.Cadastros/AutoReparos.API/Dockerfile submodules/AutoReparos.Cadastros
+  docker build -f submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/Dockerfile submodules/AutoReparos.Cadastros
   ```
 - **Proibido:** Apontar o contexto do Docker para a raiz caso o `Dockerfile` espere o layout de pastas relativo do submódulo.
 
@@ -35,7 +35,7 @@
   ```ini
   [submodule "submodules/AutoReparos.Cadastros"]
       path = submodules/AutoReparos.Cadastros
-      url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App.git
+      url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros.git
   ```
 - **Proibido:** Utilizar URLs SSH (`git@github.com:...`) no repositório pai, pois exigem chaves SSH privadas pré-configuradas e quebram runners de CI/CD e clones de desenvolvedores sem chave cadastrada.
 
@@ -97,7 +97,7 @@ Todos os arquivos de CI dos submódulos (`submodules/*/.github/workflows/ci.yml`
 
 ### 2.1 Eliminação Completa de Código Legado Duplicado
 - Ao migrar ou extrair código de pastas locais para submódulos git:
-  - Remova **completamente** os diretórios locais antigos da raiz do repositório pai (`AutoReparos.API`, `AutoReparos.Domain`, `k8s/`, `infra/`, etc.).
+  - Remova **completamente** os diretórios locais antigos da raiz do repositório pai (`AutoReparos.Cadastros.Api`, `AutoReparos.Cadastros.Domain`, `k8s/`, `infra/`, etc.).
   - Remova diretórios de build residuais (`bin/`, `obj/`) para evitar conflitos de compilação ou poluição do git status.
   - Remova suites de testes legadas da raiz que instanciem código migrado.
 - **Proibido:** Manter código duplicado em transição "parcial", o que induz desenvolvedores e pipelines a compilarem arquivos obsoletos.

@@ -6,8 +6,8 @@ This document defines mandatory guidelines and best practices for OpenTelemetry 
 
 ## 1. Relevant Architecture & Code References
 
-- **API OTel Registration**: [`AutoReparos.API/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.API/OpenTelemetryExtensions.cs)
-- **API Entrypoint**: [`AutoReparos.API/Program.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.API/Program.cs)
+- **API OTel Registration**: [`AutoReparos.Cadastros.Api/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/OpenTelemetryExtensions.cs)
+- **API Entrypoint**: [`AutoReparos.Cadastros.Api/Program.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/Program.cs)
 - **Container Infrastructure**: [`docker-compose.yml`](../../docker-compose.yml)
 - **OTel Collector Configuration**: [`docker/otel/otel-collector-config.yaml`](../../submodules/AutoReparos.Cadastros/docker/otel/otel-collector-config.yaml)
 - **Prometheus Scraper Config**: [`docker/otel/prometheus.yml`](../../submodules/AutoReparos.Cadastros/docker/otel/prometheus.yml)
@@ -20,7 +20,7 @@ This document defines mandatory guidelines and best practices for OpenTelemetry 
 ## 2. OpenTelemetry (OTel) Instrumentation in C# .NET 10
 
 ### 2.1 Core Registration & Configuration
-Instrumentation MUST be registered in [`AutoReparos.API/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.API/OpenTelemetryExtensions.cs) using standard OpenTelemetry SDK extensions for .NET 10.
+Instrumentation MUST be registered in [`AutoReparos.Cadastros.Api/OpenTelemetryExtensions.cs`](../../submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/OpenTelemetryExtensions.cs) using standard OpenTelemetry SDK extensions for .NET 10.
 
 - **Resource Builder**: Always set `service.name`, `service.version`, and `deployment.environment`.
 - **Automatic Instrumentation**:
@@ -37,7 +37,7 @@ public static IServiceCollection AddOpenTelemetryObservability(
     ILoggingBuilder loggingBuilder)
 {
     var otelEndpoint = configuration["OpenTelemetry:Endpoint"] ?? "http://localhost:4317";
-    var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "AutoReparos.API";
+    var serviceName = configuration["OpenTelemetry:ServiceName"] ?? "AutoReparos.Cadastros.Api";
 
     services.AddOpenTelemetry()
         .WithTracing(tracing =>
@@ -45,7 +45,7 @@ public static IServiceCollection AddOpenTelemetryObservability(
             tracing
                 .ConfigureResource(r => r.AddService(serviceName))
                 .AddSource(serviceName)
-                .AddSource("AutoReparos.Domain")
+                .AddSource("AutoReparos.Cadastros.Domain")
                 .AddAspNetCoreInstrumentation(options => options.RecordException = true)
                 .AddHttpClientInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
@@ -55,7 +55,7 @@ public static IServiceCollection AddOpenTelemetryObservability(
         {
             metrics
                 .ConfigureResource(r => r.AddService(serviceName))
-                .AddMeter("AutoReparos.API")
+                .AddMeter("AutoReparos.Cadastros.Api")
                 .AddAspNetCoreInstrumentation()
                 .AddHttpClientInstrumentation()
                 .AddRuntimeInstrumentation()
@@ -81,7 +81,7 @@ Use static `ActivitySource` instances for explicit custom tracing within Applica
 // GOOD: Creating custom spans for business operations
 public static class DiagnosticConfig
 {
-    public static readonly ActivitySource Source = new("AutoReparos.API", "1.0.0");
+    public static readonly ActivitySource Source = new("AutoReparos.Cadastros.Api", "1.0.0");
 }
 
 public class AprovarOrdemServicoUseCase(IOrdemServicoRepository repository)
@@ -115,7 +115,7 @@ Use `System.Diagnostics.Metrics.Meter` to measure domain counters, execution dur
 // GOOD: Creating custom metrics for domain operations
 public static class DiagnosticsMetrics
 {
-    public static readonly Meter Meter = new("AutoReparos.API", "1.0.0");
+    public static readonly Meter Meter = new("AutoReparos.Cadastros.Api", "1.0.0");
 
     public static readonly Counter<long> OrdensServicoCriadas = 
         Meter.CreateCounter<long>("autoreparos_ordens_servico_criadas_total", "count", "Total de OSs criadas");
@@ -148,7 +148,7 @@ using (logger.BeginScope(new Dictionary<string, object> { ["ClienteId"] = client
 - Configuration variables in [`docker-compose.yml`](../../docker-compose.yml):
   ```yaml
   OpenTelemetry__Endpoint=http://otel-collector:4317
-  OpenTelemetry__ServiceName=AutoReparos.API
+  OpenTelemetry__ServiceName=AutoReparos.Cadastros.Api
   ```
 
 ### 3.2 OTel Collector Configuration Guidelines
@@ -223,7 +223,7 @@ Follow OpenTelemetry Semantic Conventions for attribute keys:
 
 ### 4.3 Jaeger UI Inspection
 - Access Jaeger UI at `http://localhost:16686` as configured in [`docker-compose.yml`](../../docker-compose.yml).
-- Search traces by `service_name=AutoReparos.API` or operation name.
+- Search traces by `service_name=AutoReparos.Cadastros.Api` or operation name.
 
 ---
 
@@ -267,8 +267,8 @@ scrape_configs:
 - Logs pushed to Loki via OTel Collector (`http://loki:3100/loki/api/v1/push`) inherit trace context.
 
 ### 6.2 LogQL Querying & Trace Search in Grafana
-- Search logs by service label: `{exporter="OTLP"} |= "AutoReparos.API"`
-- Filter logs for specific trace ID: `{service_name="AutoReparos.API"} | json | trace_id = "4bf92f3577b34da6a3ce929d0e0e4736"`
+- Search logs by service label: `{exporter="OTLP"} |= "AutoReparos.Cadastros.Api"`
+- Filter logs for specific trace ID: `{service_name="AutoReparos.Cadastros.Api"} | json | trace_id = "4bf92f3577b34da6a3ce929d0e0e4736"`
 
 ---
 
