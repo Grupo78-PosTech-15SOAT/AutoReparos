@@ -116,13 +116,13 @@ Legenda: ✅ atende · 🟡 parcial · ❌ não atende. Estado em 09/11/2026, co
 | R01 | No mínimo 3 microsserviços independentes | 🟡 OS, Billing e Execution existem na branch de feature; o App ainda concentra cadastros e o fluxo antigo | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
 | R02 | Repositório próprio por microsserviço | 🟡 Repositórios novos criados, sem `main` e sem PR | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
 | R03 | Infraestrutura própria por microsserviço | ❌ Charts, ECR e banco centralizados em Infra.K8s/Infra.Database | [Infraestrutura](./infraestrutura/fase4_spec_infraestrutura_k8s_e_mensageria.md) |
-| R04 | Banco de dados próprio por microsserviço | 🟡 Cada serviço novo tem database própria; RDS ainda tem um só `autoreparos_db` | [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
+| R04 | Banco de dados próprio por microsserviço | 🟡 Código: cada serviço tem database e connection string próprias (11/11). AWS: o RDS tem um só `autoreparos_db`; databases e usuários por serviço ficam no C12 de `infra-ci-observabilidade` | [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
 | R05 | OS Service: abertura, atualização de status, consulta de status e histórico | 🟡 Abertura, consulta e histórico de criação; transições ficam para a Saga | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) · [Saga](./saga/fase4_spec_saga_pattern.md) |
 | R06 | Billing: gerar/enviar orçamento, registrar/verificar pagamento, atualizar a OS após pagamento | 🟡 Orçamento, aprovação e pagamento prontos; atualização da OS depende da Saga | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
 | R07 | Integração com o Mercado Pago | 🟡 Checkout Pro + webhook validado na branch de feature; falta teste no sandbox | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
 | R08 | Execução: fila, status no diagnóstico e reparos, comunicar finalização ao OS Service | 🟡 Pronto no Execution; ninguém consome `execucao.concluida.v1` ainda | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
 | R09 | Pelo menos um banco relacional (SQL) | ✅ PostgreSQL 16 | [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
-| R10 | Pelo menos um banco não relacional (NoSQL) | ❌ DynamoDB planejado para o estado da Saga | [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
+| R10 | Pelo menos um banco não relacional (NoSQL) | 🟡 Código: DynamoDB implementado e testado no estado da Saga do OS Service (`saga-mensageria`, PASS). AWS: tabela `autoreparos-os-saga` sem Terraform, coberta pelo C12 de `infra-ci-observabilidade` (11/11) | [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
 
 ### Comunicação entre Microsserviços
 
