@@ -40,6 +40,15 @@
 - Antes de aplicar a proteção da `main`: criar os projetos no SonarCloud e o segredo `SONAR_TOKEN` em cada repositório (variáveis opcionais `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY`; padrão `grupo78-postech-15soat` e `Grupo78-PosTech-15SOAT_AutoReparos.<Repo>`). Sem isso o job `quality` falha e a `main` protegida bloqueia todo merge. Com 1 aprovação e regra para admins, o autor não aprova o próprio PR.
 - Comandos: `bash scripts/infra/setup-github-governance.sh --repo AutoReparos.OS ...`; provas `python scripts/specs/assert_pipelines.py --check jobs` e `python scripts/specs/assert_branch_protection.py --check main`.
 
+## Estado antes do PR #46 - 2026-11-11
+
+- O PR #45 foi mesclado na `develop` do pai com merge commit (`d2add06`, Enrico, 16:27 UTC). A `develop` do pai foi mesclada de volta em `feature/os-service-contracts` (`726fc70`) sem conflito e sem mudar a árvore. A branch está 42 commits à frente e 0 atrás da `develop` (106 arquivos, +1761 / −417); é o conteúdo do PR #46.
+- Ponteiros do pai, todos iguais à `develop` do respectivo repositório: OS `c9e7d4a`, Cobranca `815ef6f`, Execucao `c29575c`, Cadastros `5d877ba`, Infra.K8s `f6f9789`, AuthLambda `d5d32e1`, Infra.Database `401d454` e Web `91a1aa1` (só tem `main`). As quatro `develop` de serviço avançaram em avanço direto, sem force.
+- CI do pai em `e8c1cc6`: verde. CI das `develop` dos serviços: `build` e `test` passam em OS, Cobranca, Execucao e Cadastros; `quality` falha nos quatro porque nenhum repositório tem o segredo `SONAR_TOKEN` (confirmado no log do OS; os repositórios não têm secrets nem variáveis; os da organização não pude listar, falta o escopo `admin:org` no `gh`).
+- Duas correções de CI feitas nesta rodada: o OS ganhou `AWS_REGION: us-east-1` no `env` do `ci-cd.yml` (o `AmazonSQSClient` do host de teste exige região e o runner não tem perfil AWS; 30 testes falhavam); o Cadastros teve 5 arquivos formatados pelo `dotnet format` (`5d877ba`), sem mudança de comportamento, pois o pipeline novo passou a verificar formato e o antigo não. As mesmas 55 infrações já existiam antes da renomeação.
+- Pendente para o usuário: criar os projetos no SonarCloud e o segredo `SONAR_TOKEN` (secret de organização com acesso aos repositórios, ou um secret por repositório) antes de proteger as `main` (AD-026), senão o `quality` bloqueia todo merge. Variáveis `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY` são opcionais (padrões no `ci-cd.yml`).
+- Atenção ao Cadastros: a renomeação mexeu em 365 arquivos direto na `develop`; quem tiver branch aberta nesse repositório precisa fazer rebase.
+
 ## Reexecução do gate após a renomeação - 2026-11-11
 
 - Provas reexecutadas no HEAD pós-renomeação (AD-025), todas verdes e com 3 mutações mortas: `cobranca` 11/11, `execucao` 8/8, `saga-mensageria` 9/9, `eventos-portugues` 13/13 e `os-service` 7/7. Commits `81815c0`, `f7f3374`, `6636e9a`, `ba95d75` e `331016f`. O Verifier independente não foi acionado de novo: a mudança é só de nomes, sem regra nova.
