@@ -59,7 +59,7 @@ Proof: `python scripts/specs/verificar_eventos_portugues.py`
 ## Handoff
 
 - **Settled mid-build:** user: "Pode seguir" (10/11/2026), aprovação do `plan.md`.
-- **Dispatched:** none
-- **Boundary:** implementação concluída nos repositórios OS e Cobrança, documentação e script verificador criados; pronto para rodar `check_proofs.py` e despachar o Verifier independente.
+- **Dispatched:** eventos-portugues_verifier - fresh independent verifier (2026-11-10), root HEAD e078c04; OS 45defd3, Cobrança 8e7bff7 - returned PASS (AD-003)
+- **Boundary:** feature concluída e verificada com PASS (13/13 provas, 3/3 mutações mortas).
 - **Abandoned:** none
 - **Walked:** none - mudança de contrato de backend, sem tela.

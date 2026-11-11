@@ -47,6 +47,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 | `billing` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `billing/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
 | `saga-mensageria` | **PASS** (2ª rodada de Verifier). Provas 9/9, 3 mutações mortas; regressão no mesmo HEAD: os-service 7/7, billing 11/11, execucao 8/8, 3 mutações mortas cada | `saga-mensageria/verification.md`, `proofs.md` |
+| `eventos-portugues` | **PASS** (1ª rodada de Verifier). Provas 13/13, 3 mutações mortas (OS `45defd3`, Cobrança `8e7bff7`, root `e078c04`) | `eventos-portugues/verification.md`, `proofs.md` |
 | `infra-ci-observabilidade` | só `plan.md` e `checks.md`; build não iniciado | depende dos serviços |
 | `pacote-entrega` | só `plan.md` e `checks.md`; build não iniciado | inclui vídeo e PDF final, que o agente não produz sozinho |
 
@@ -114,7 +115,7 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 
 ### Handoff: tipos de eventos em português (10/11/2026)
 
-- D-24/AD-022 registram a instrução do usuário. Inventário dos tipos implementados em OS, Cobrança e Execução: apenas `billing.orcamento.cancelar.v1` contém palavra inglesa; o catálogo transversal já prescreve `cobranca.cancelar-orcamento.v1`.
-- Plano novo em `fase4/eventos-portugues/plan.md` aguarda aprovação explícita; não derivar checks nem alterar produtores/consumidores antes disso. A Saga persiste o tipo antigo em `EtapaSaga.Compensacao`, `ComandoSaga.Tipo` e `ComandoSaga.Corpo`; normalizar ao publicar, manter `eventId` e aceitar mensagens antigas na Cobrança são requisitos propostos para a transição.
-- Gates do plano: `validate_plan.py fase4/eventos-portugues` com 0 erros e 0 avisos; `scripts/specs/verificar_links.py` com 46 arquivos, 196 links e 0 problemas. Código, checks e deploy ainda não foram alterados.
-- Plano aprovado em 10/11/2026 com as palavras do usuário "Pode seguir"; `checks.md` derivado para implementação e verificação. Após concluir, entregar também uma lista atualizada do que ainda falta na PR #45, conforme pedido do usuário.
+- D-24/AD-022 concluídos com **PASS** na 1ª rodada do Verifier independente (`author != verifier`, root `e078c04`, OS `45defd3`, Cobrança `8e7bff7`): 13/13 provas verdes e 3/3 mutações mortas (`validate_verification: 0 error(s), 0 warning(s) across [eventos-portugues]`).
+- `SagaOS` emite `cobranca.cancelar-orcamento.v1` em compensações novas, normaliza `EtapaSaga.Compensacao` legada sem duplicar etapas e `ComandoSaga.NormalizarTipo()` converte `Tipo` e `Corpo.tipo` de comandos pendentes legados preservando `eventId`, demais campos, backoff e ordem.
+- `CancelamentoOrcamentoService` na Cobrança aceita `cobranca.cancelar-orcamento.v1` e o alias legado `billing.orcamento.cancelar.v1`, deduplicando pelo mesmo `eventId` na Inbox (`eventos_processados`) em qualquer ordem de chegada.
+- `scripts/specs/verificar_eventos_portugues.py` valida os 4 artefatos de contrato; `scripts/specs/verificar_links.py`: 49 arquivos, 196 links, 0 problemas.
