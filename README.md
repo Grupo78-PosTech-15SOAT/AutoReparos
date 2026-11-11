@@ -594,6 +594,8 @@ O projeto adota padrões rigorosos de qualidade verificados via SonarQube e GitH
 
 A documentação técnica da Fase 3 se divide entre os **documentos formais de arquitetura** em [`docs/architecture/`](./docs/architecture/) e as **especificações de execução**, organizadas por entrega em [`docs/specs/fase3/`](./docs/specs/fase3/).
 
+> **Fase 4 em diante:** as especificações ficam em [`.specs/features/fase4/`](./.specs/features/fase4/). Requisitos, estado atual, decisões e desenho estão em [`especificacao/index.md`](./.specs/features/fase4/especificacao/index.md); os planos verificáveis de cada feature ficam nas pastas ao lado.
+
 ### Documentos Formais de Arquitetura (RFCs e ADRs)
 
 Todos os documentos foram formalizados e publicados em [`docs/architecture/`](./docs/architecture/):
