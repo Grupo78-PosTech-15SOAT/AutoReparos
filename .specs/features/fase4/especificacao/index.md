@@ -245,6 +245,13 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-22 | **Ambientes:** desenvolvimento local; push na `develop` implanta em staging (namespace compartilhado no EKS); push na `main` implanta em produção no EKS (`us-east-1`) com aprovação no Environment `production` | Plano fase4 "Alvos de infraestrutura" | [CI/CD § 4.1](./cicd/fase4_spec_cicd_e_protecao_de_branches.md#41-pipeline-padrão-de-cada-serviço-githubworkflowsci-cdyml) |
 | D-23 | **App renomeado para `AutoReparos.Cadastros`** (10/11). O nome `OrdemServico` (D-02 de 09/11) deixou de servir: a OS mora no repositório novo `AutoReparos.OS`, e o App fica só com clientes, veículos, usuários e notificações | AD-017 | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-18 | **Saga além do mínimo** (09/11): (a) reserva de insumos em duas fases — reservar, confirmar, cancelar; (c) travas de estado enquanto um passo da Saga está em andamento; (d) prazos técnicos por passo, lembretes de negócio, console de administração das Sagas e reprocessamento de DLQ. A pré-autorização do pagamento (b) fica fora, porque exigiria trocar o Checkout Pro | AD-011 | [Saga § 4.5–4.7](./saga/fase4_spec_saga_pattern.md#45-reserva-de-insumos-em-duas-fases-d-18a) |
+| D-11 | **AuthLambda chama endpoint interno do Cadastros** (11/11): `POST /internal/clientes/autenticar`, fora do API Gateway, sem acesso da Lambda ao banco de clientes | AD-023; Usuário: "confirmo d-11 a d-21" | [Bancos § 4.3](./microsservicos/fase4_spec_bancos_de_dados.md#43-como-garantir-nenhum-acesso-ao-banco-de-outro-serviço) |
+| D-21 | **Cadastros emite o JWT com chave assimétrica e publica discovery OIDC + JWKS** (11/11); OS, Cobrança e Execução validam por `Authority` | AD-023; Usuário: "confirmo d-11 a d-21" | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#etapa-4--autenticação-entre-serviços) |
+| D-12 | **Compartilhamento de contratos de mensagens:** Contratos duplicados em cada serviço + catálogo único documentado (AsyncAPI ou tabela) (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | [Comunicação § 4.6](./comunicacao/fase4_spec_comunicacao_microsservicos.md#46-garantias) |
+| D-14b | **Onde ficam os cenários BDD ponta a ponta:** No pai (`tests/AutoReparos.E2E.Bdd`), rodando contra o `docker compose` (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | [Testes § 4.2](./testes-qualidade/fase4_spec_testes_e_qualidade.md#42-d-14--onde-fica-o-bdd) |
+| D-15 | **Sonar:** SonarCloud por CI, um projeto por repositório (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | [Testes § 4.4](./testes-qualidade/fase4_spec_testes_e_qualidade.md#44-d-15--sonar-no-ci) |
+| D-16 | **Suporte a múltiplas filiais:** Fora do escopo (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | § 4 (contexto) |
+| D-17 | **Notificações como serviço próprio:** Consumidor de eventos dentro do Cadastros (dono do e-mail do cliente); extração só se sobrar tempo (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | [Separação § 4.1](./microsservicos/fase4_spec_separacao_microsservicos.md#41-dono-de-cada-contexto) |
 | D-24 | **Aplicar L-02 aos tipos de mensagem já implementados** (10/11): trocar o comando `billing.orcamento.cancelar.v1` por `cobranca.cancelar-orcamento.v1`, nome já previsto no catálogo; os demais tipos existentes já usam português e conservam sua semântica | AD-022; José: "Vamos trocar os eventos para português" | [Comunicação § 4.5](./comunicacao/fase4_spec_comunicacao_microsservicos.md#45-catálogo-de-mensagens) |
 
 ### 6.2 Regras obrigatórias do grupo
@@ -256,15 +263,10 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 
 ### 6.3 Em aberto
 
+Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 6.1. Novas decisões abertas entram na tabela abaixo.
+
 | ID | Decisão | Recomendação | Bloqueia | Spec |
 |---|---|---|---|---|
-| D-11 | AuthLambda × banco de clientes | Chamada HTTP a endpoint interno do Cadastros | `cadastros` | [Bancos § 4.3](./microsservicos/fase4_spec_bancos_de_dados.md#43-como-garantir-nenhum-acesso-ao-banco-de-outro-serviço) |
-| D-21 | Emissor do JWT para os serviços novos (que validam por `Authority`/OIDC) | Cadastros publica discovery OIDC + JWKS com chave assimétrica | `cadastros` | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#etapa-4--autenticação-entre-serviços) |
-| D-12 | Compartilhamento de contratos de mensagens | Contratos duplicados em cada serviço + catálogo único documentado (AsyncAPI ou tabela) | — | [Comunicação § 4.6](./comunicacao/fase4_spec_comunicacao_microsservicos.md#46-garantias) |
-| D-14b | Onde ficam os cenários BDD ponta a ponta | No pai (`tests/AutoReparos.E2E.Bdd`), rodando contra o `docker compose` | — | [Testes § 4.2](./testes-qualidade/fase4_spec_testes_e_qualidade.md#42-d-14--onde-fica-o-bdd) |
-| D-15 | Sonar | SonarCloud por CI, um projeto por repositório | — | [Testes § 4.4](./testes-qualidade/fase4_spec_testes_e_qualidade.md#44-d-15--sonar-no-ci) |
-| D-16 | Suporte a múltiplas filiais | Fora do escopo | — | § 4 (contexto) |
-| D-17 | Notificações como serviço próprio | Consumidor de eventos dentro do Cadastros (dono do e-mail do cliente); extração só se sobrar tempo | — | [Separação § 4.1](./microsservicos/fase4_spec_separacao_microsservicos.md#41-dono-de-cada-contexto) |
 
 ### 6.4 Histórico de mudanças de decisão
 
@@ -276,6 +278,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | 09/11/2026 | D-09: de "pagar antes da execução" para "pagar depois da conclusão" | Modelo real de oficina e Billing já implementado assim; compensações reforçadas por D-18 |
 | 10/11/2026 | D-19: de "uma linha de Outbox por destino" para SNS por produtor | Cadastros (notificações) passa a consumir eventos de vários serviços; o produtor não deve conhecer os consumidores |
 | 10/11/2026 | D-02/D-23: App deixa de virar `OrdemServico` e passa a `Cadastros` | A OS foi implementada em repositório novo (`AutoReparos.OS`) |
+| 11/11/2026 | D-19 e L-01: SNS por produtor e `saga.avancou.v1` com Streams adiados para depois da `saga-compensacoes`; SQS direto e sincronização por despacho seguem | Preservar o PASS de `saga-mensageria` (AD-021) e cumprir o prazo; a feature `infra-ci-observabilidade` assume o SNS (AD-024) |
 
 ---
 
