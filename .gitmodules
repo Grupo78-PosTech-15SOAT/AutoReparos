@@ -16,8 +16,8 @@
 [submodule "submodules/AutoReparos.Cobranca"]
 	path = submodules/AutoReparos.Cobranca
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca.git
-	branch = feature/os-service-contracts
+	branch = develop
 [submodule "submodules/AutoReparos.Execucao"]
 	path = submodules/AutoReparos.Execucao
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao.git
-	branch = feature/execution-service
+	branch = develop
