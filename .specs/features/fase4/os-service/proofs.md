@@ -1,6 +1,6 @@
 # fase4/os-service proofs
 
-**HEAD**: 75b086b
+**HEAD**: ba95d75
 **Tree**: clean
 **Result**: 7 pass, 0 fail; mutations 3 killed, 0 not
 
