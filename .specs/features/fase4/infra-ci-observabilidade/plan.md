@@ -1,6 +1,7 @@
 # Fase 4 - Infraestrutura, CI/CD e observabilidade
 
 **Approved**: 2026-11-11 - user: "Sim, aprovo e crio". Revisão de 10/11 com as decisões de 11/11: branch protegida só `main`; repositório Web criado nesta entrega.
+**Approved**: 2026-11-11 - user: "Pode seguir" - AC 5 sem DynamoDB Streams (D-26): a L-01 é cumprida pelo despacho com um banco por passo, e o Streams fica opcional para a Outbox da Saga.
 
 **Revisão pendente de aprovação** (10/11/2026): inclui Cadastros e Web, SNS/SQS e DynamoDB por IaC, proteção com status checks obrigatórios e evidências pedidas no feedback da Fase 3 (D-13, D-19, D-22 de `.specs/features/fase4/especificacao/index.md`). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
 
@@ -59,7 +60,7 @@ None - nothing consumed outside as a public route; pipelines e recursos EKS/AWS 
 2. WHEN alterações forem integradas pela branch protegida `main` THEN repositório SHALL exigir PR e os jobs de build, testes e qualidade como status checks obrigatórios.
 3. WHEN pipeline de staging passar THEN serviço SHALL ser implantado no namespace staging do EKS e expor resultado da implantação.
 4. IF produção for alvo THEN deploy SHALL exigir aprovação de release e usar EKS na região `us-east-1`.
-5. WHEN cada serviço processar uma OS THEN stack SHALL exibir logs, métricas e traces correlacionados entre serviços, atravessando SQS, SNS e DynamoDB Streams, e um dashboard da Saga com Sagas paradas, compensações e profundidade das DLQs.
+5. WHEN cada serviço processar uma OS THEN stack SHALL exibir logs, métricas e traces correlacionados entre serviços, atravessando SQS e SNS, e um dashboard da Saga com Sagas paradas, compensações e profundidade das DLQs.
 6. IF AWS, banco ou mensageria tiver falha transitória THEN pipeline/serviço SHALL aplicar limites padrão, backoff exponencial com jitter e DLQ/alerta ao esgotar onde houver mensagem.
 7. WHEN um serviço for implantado THEN seus recursos exclusivos (ECR, IRSA, filas, tópicos, DLQs, tabela DynamoDB, database e usuário) SHALL vir de IaC do próprio repositório, e a configuração de proteção de branches SHALL ter evidência registrada no README.
 

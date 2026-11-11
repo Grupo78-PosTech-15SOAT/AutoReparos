@@ -4,7 +4,7 @@ Mutations: 3
 Build: none - a feature cria workflows, charts e Terraform que ainda não existem nos repositórios de serviço; `terraform validate` e `helm lint` de cada repositório são provados por C13
 Plan: `.specs/features/fase4/infra-ci-observabilidade/plan.md`
 
-14 checks em 4 slices · 2 one-way doors · 2 open, of which 1 blocks
+14 checks em 4 slices · 2 one-way doors · 1 open, of which 0 block
 
 ## Checks
 
@@ -89,9 +89,8 @@ Proof: walk - criar e concluir uma OS em staging, abrir o trace pelo `traceId` d
 
 ## Handoff
 
-- **Settled mid-build:** 2026-11-11 - "Branch protegida: main"; "Repositório Web: Vamos criar"; "Sim, aprovo e crio" (AD-026)
+- **Settled mid-build:** 2026-11-11 - "Branch protegida: main"; "Repositório Web: Vamos criar"; "Sim, aprovo e crio" (AD-026); "Pode seguir" - AC 5 sem DynamoDB Streams (AD-027)
 - **Open (não bloqueia):** os repositórios de plataforma (AuthLambda, Infra.Database, Infra.K8s) e o pai já têm a `main` com PR e 1 aprovação, mas sem status checks; o plano cobre só os 5 serviços. Incluí-los com os jobs de validação deles é decisão do usuário
-- **Open (bloqueia C14):** o AC 5 do plano aprovado pede traces atravessando SQS, SNS **e DynamoDB Streams**, mas AD-024 adiou o `saga.avancou.v1` com Streams; hoje não há Streams para atravessar. Recomendação: tirar Streams do AC 5 (alinha com AD-024) e voltar o plano para revisão só nesse ponto. Alternativa: implementar Streams nesta feature
 - **Dispatched:** none
 - **Boundary:** checks derivados do plano aprovado em 2026-11-11; build não iniciado
 - **Abandoned:** checks de 06/11 (C1-C6, 3 repositórios e nomes antigos) substituídos por estes

@@ -254,6 +254,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-17 | **Notificações como serviço próprio:** Consumidor de eventos dentro do Cadastros (dono do e-mail do cliente); extração só se sobrar tempo (11/11) | AD-023; Usuário: "Intervalo inteiro" (confirmação de D-11 a D-21) | [Separação § 4.1](./microsservicos/fase4_spec_separacao_microsservicos.md#41-dono-de-cada-contexto) |
 | D-24 | **Aplicar L-02 aos tipos de mensagem já implementados** (10/11): trocar o comando `billing.orcamento.cancelar.v1` por `cobranca.cancelar-orcamento.v1`, nome já previsto no catálogo; os demais tipos existentes já usam português e conservam sua semântica | AD-022; José: "Vamos trocar os eventos para português" | [Comunicação § 4.5](./comunicacao/fase4_spec_comunicacao_microsservicos.md#45-catálogo-de-mensagens) |
 | D-25 | **Proteção obrigatória só na `main`** (11/11): `main` de OS, Cobrança, Execução, Cadastros e Web exige PR com 1 aprovação e os jobs `build`, `test` e `quality` como status checks; a `develop` não recebe proteção obrigatória. O repositório `AutoReparos.Web` foi criado (público) nesta data, confirmando D-03 | AD-026; Usuário: "Branch protegida: main" e "Repositório Web: Vamos criar" | [CI/CD § 4.3](./cicd/fase4_spec_cicd_e_protecao_de_branches.md#43-proteção-de-branches) |
+| D-26 | **L-01 não depende de DynamoDB Streams** (11/11): a regra exige um banco por passo, cumprida hoje pelo despacho da Saga (`saga-mensageria`, PASS). Streams é só um dos mecanismos de publicar a Outbox do DynamoDB (o outro é varredura por índice) e fica opcional; `infra-ci-observabilidade` traça SQS e SNS, sem Streams | AD-027; Usuário: "Pode seguir" (recomendação de tirar Streams do AC 5) | [Saga § 4.8](./saga/fase4_spec_saga_pattern.md#48-regra-l-01-no-os-service--opção-c) |
 
 ### 6.2 Regras obrigatórias do grupo
 
@@ -281,6 +282,7 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 10/11/2026 | D-02/D-23: App deixa de virar `OrdemServico` e passa a `Cadastros` | A OS foi implementada em repositório novo (`AutoReparos.OS`) |
 | 11/11/2026 | D-19 e L-01: SNS por produtor e `saga.avancou.v1` com Streams adiados para depois da `saga-compensacoes`; SQS direto e sincronização por despacho seguem | Preservar o PASS de `saga-mensageria` (AD-021) e cumprir o prazo; a feature `infra-ci-observabilidade` assume o SNS (AD-024) |
 | 11/11/2026 | D-25: CI/CD § 4.3 deixa de proteger a `develop`; só a `main` é obrigatória | Decisão do usuário ao aprovar `infra-ci-observabilidade` |
+| 11/11/2026 | D-26: AC 5 de `infra-ci-observabilidade` deixa de exigir traces por DynamoDB Streams; L-01 lida como "um banco por passo", sem mecanismo obrigatório de publicação | Streams adiado por AD-024 e fora do escopo de infra; prazo de 17/11 |
 
 ---
 

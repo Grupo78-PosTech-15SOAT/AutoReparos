@@ -197,7 +197,7 @@ Métricas e alertas: `saga_paradas{estado}`, `saga_compensacoes_total{passo}`, `
 | `saga.avancou.v1` | PostgreSQL | Inbox + status da OS + histórico |
 | Comandos REST do atendente que mexem na Saga (cancelar, entregar) | DynamoDB | Transição condicional + Outbox |
 
-Publicação da Outbox do DynamoDB: **DynamoDB Streams** acionando o publicador (ou varredura por índice como alternativa). O status da OS no PostgreSQL atualiza milissegundos depois da Saga; a consulta de status lê o PostgreSQL, e o console de administração lê a Saga.
+Publicação da Outbox do DynamoDB: **DynamoDB Streams** acionando o publicador (ou varredura por índice como alternativa). Por D-26 (11/11) o mecanismo é opcional: a L-01 exige um banco por passo, e o despacho entregue em `saga-mensageria` já cumpre isso. O status da OS no PostgreSQL atualiza milissegundos depois da Saga; a consulta de status lê o PostgreSQL, e o console de administração lê a Saga.
 
 Modelo da tabela `autoreparos-os-saga`:
 
