@@ -219,7 +219,7 @@ Em 09/11 o Enrico publicou a branch `feature/os-service-contracts` no pai (parti
 |---|---|
 | `AGENTS.md`, `.agents/AGENTS.md` | Regras para agentes: fluxo TLC, alerta de contexto, delegação a subagentes, padrão de commits |
 | `.specs/STATE.md` | Decisões `AD-001` a `AD-009` e handoff |
-| `.specs/features/fase4/` | `plan.md` e `checks.md` da iniciativa; `FEATURES.md`; uma pasta por feature (`os-service`, `billing`, `execucao`, `saga-mensageria`, `infra-ci-observabilidade`, `pacote-entrega`) |
+| `.specs/features/fase4/` | `plan.md` e `checks.md` da iniciativa; `FEATURES.md`; uma pasta por feature (`os-service`, `cobranca`, `execucao`, `saga-mensageria`, `infra-ci-observabilidade`, `pacote-entrega`) |
 | `.specs/tlc-spec-lean/` | Scripts de validação de plano, checks, provas, mutações e verificação (Python 3.8+) |
 | `.gitmodules` | `submodules/AutoReparos.OS`, `AutoReparos.Billing`, `AutoReparos.Execution` |
 

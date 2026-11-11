@@ -14,10 +14,10 @@
     "label": "ComandoSaga.NormalizarTipo atualiza apenas o registro Tipo e mantem o tipo legado no JSON Corpo enviado"
   },
   {
-    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Billing.Application/Mensageria.cs",
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Application/Mensageria.cs",
     "old": "tipo is CancelarOrcamento or CancelarOrcamentoLegado;",
     "new": "tipo is CancelarOrcamento;",
-    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Billing.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyAndPortugueseAliasesDeduplicateByEventId",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyAndPortugueseAliasesDeduplicateByEventId",
     "label": "EhCancelamentoOrcamento rejeita o alias legado billing.orcamento.cancelar.v1 em transito"
   }
 ]

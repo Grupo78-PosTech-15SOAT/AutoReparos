@@ -7,7 +7,7 @@
     "label": "compensacoes deixam de seguir a ordem inversa (etapa 1 antes da 2)"
   },
   {
-    "file": "submodules/AutoReparos.OS/AutoReparos.Os.Infrastructure/Saga/DynamoDbSagaRepositorio.cs",
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Infrastructure/Saga/DynamoDbSagaRepositorio.cs",
     "old": "\"versao = :esperada\"",
     "new": "\"versao >= :esperada\"",
     "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~SagaPersistsBeforePublish",

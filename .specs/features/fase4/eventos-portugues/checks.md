@@ -1,7 +1,7 @@
 # Tipos de mensagens em português - checks
 
 Mutations: 3
-Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Billing.slnx -m:1`; `dotnet format submodules/AutoReparos.OS/AutoReparos.OS.slnx --verify-no-changes --no-restore`; `dotnet format submodules/AutoReparos.Cobranca/AutoReparos.Billing.slnx --verify-no-changes --no-restore`
+Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1`; `dotnet format submodules/AutoReparos.OS/AutoReparos.OS.slnx --verify-no-changes --no-restore`; `dotnet format submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx --verify-no-changes --no-restore`
 Plan: `.specs/features/fase4/eventos-portugues/plan.md`
 
 7 checks · 1 slice · 1 one-way door · 0 open questions, 0 blocking
@@ -20,17 +20,17 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyPendingCancellationIsNormalizedWithoutChangingEventId`
 
 **C4** - Cobrança processa o tipo português com a regra atual e registra `eventId` na Inbox na transação do cancelamento (AC 4)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~PortugueseCancellationAppliesAndRecordsInbox`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~PortugueseCancellationAppliesAndRecordsInbox`
 
 **C5** - Tipo legado mantém o mesmo efeito; dois envelopes com o mesmo `eventId` e nomes diferentes geram um único cancelamento e uma única resposta de negócio (AC 5)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyAndPortugueseAliasesDeduplicateByEventId`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyAndPortugueseAliasesDeduplicateByEventId`
 
 **C6** - Tipo desconhecido `billing.orcamento.apagar.v1` permanece rejeitado com encaminhamento à DLQ (AC 6)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~UnknownCancellationTypeGoesToDeadLetter`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~UnknownCancellationTypeGoesToDeadLetter`
 
 **C7** - Testes de contrato de OS e Cobrança exigem o novo tipo na saída; catálogo e READMEs o nomeiam e marcam o tipo antigo apenas como entrada legada (AC 7)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~NewCancellationCommandUsesPortugueseTypeAndPreservesEnvelope`
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~PortugueseCancellationAppliesAndRecordsInbox`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~PortugueseCancellationAppliesAndRecordsInbox`
 Proof: `python scripts/specs/verificar_eventos_portugues.py`
 
 ## Coverage

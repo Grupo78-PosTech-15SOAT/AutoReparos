@@ -1,8 +1,8 @@
 # Billing checks
 
 Mutations: 3
-Build: `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Billing.slnx -m:1`; `dotnet format submodules/AutoReparos.Cobranca/AutoReparos.Billing.slnx --verify-no-changes --no-restore`
-Plan: `.specs/features/fase4/billing/plan.md`
+Build: `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1`; `dotnet format submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx --verify-no-changes --no-restore`
+Plan: `.specs/features/fase4/cobranca/plan.md`
 
 9 checks · 1 slice · 3 one-way doors · 0 open questions, 0 blocking
 
@@ -11,31 +11,31 @@ Plan: `.specs/features/fase4/billing/plan.md`
 ### S1 - Billing lifecycle
 
 **C1** - `POST /api/v1/orcamentos` persists an OS budget and its owner can approve it through `POST /api/v1/orcamentos/{id}/aprovacao` (AC 1)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~CreatesBudgetForOrder`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~CreatesBudgetForOrder`
 
 **C2** - Billing does not start a charge before budget approval and service completion (AC 2)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~ChargeRequiresApprovalAndCompletion`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~ChargeRequiresApprovalAndCompletion`
 
 **C3** - `POST /api/v1/pagamentos/{id}/checkout` creates exactly one active Checkout Pro attempt for eligible completed work (AC 3)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~CreatesSingleCheckoutAttempt`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~CreatesSingleCheckoutAttempt`
 
 **C4** - `POST /api/v1/webhooks/mercado-pago` updates persisted payment state and publishes a result for a valid signature; invalid signature is rejected (AC 4)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~WebhookSignatureValidation`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~WebhookSignatureValidation`
 
 **C5** - Pending payment creates no second attempt; terminal rejection/cancel/expiry permits retry only through an authorized person (AC 5)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~ManualRetryAfterTerminalState`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~ManualRetryAfterTerminalState`
 
 **C6** - Captured charge is never retried; failed OS synchronization reconciles forward and alerts without automatic refund (AC 6)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~CapturedPaymentForwardRecovery`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~CapturedPaymentForwardRecovery`
 
 **C7** - `POST /api/v1/pagamentos/{id}/reembolsos` records approver, amount and audit reference for an authorized total or partial refund (AC 7)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~ApprovedRefundAudit`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~ApprovedRefundAudit`
 
 **C8** - Transient dependency failures use bounded retry with exponential backoff and jitter, then DLQ/alert on exhaustion (AC 8)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~DependencyRetryExhaustion`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~DependencyRetryExhaustion`
 
 **C9** - Billing API exports traces, metrics and logs via OTLP tagged with `service.name` and `deployment.environment.name`, and still answers requests when the OTLP collector is unreachable (AC 9)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --no-build --no-restore --filter FullyQualifiedName~TelemetryExports`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~TelemetryExports`
 
 ## Coverage
 

@@ -49,8 +49,8 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter 
 
 **C12** - `POST /api/v1/admin/dlq/reprocessar` devolve à fila de origem até a quantidade pedida e registra a ação, em OS, Cobrança e Execução (AC 12)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ReprocessaDlqDoOs`
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Billing.Tests --filter FullyQualifiedName~ReprocessaDlqDaCobranca`
-Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execution.Tests --filter FullyQualifiedName~ReprocessaDlqDaExecucao`
+Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~ReprocessaDlqDaCobranca`
+Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --filter FullyQualifiedName~ReprocessaDlqDaExecucao`
 
 ## Coverage
 

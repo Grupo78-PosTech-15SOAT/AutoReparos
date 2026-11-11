@@ -1,23 +1,23 @@
 [
   {
-    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execution.Application/Contratos.cs",
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Application/Contratos.cs",
     "old": "else if (existente is null) store.Adicionar(new OrdemExecucao(",
     "new": "else if (true) store.Adicionar(new OrdemExecucao(",
-    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execution.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execution.Tests --no-build --no-restore --filter FullyQualifiedName~ReleasedOrderQueuedOnce",
+    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --no-build --no-restore --filter FullyQualifiedName~ReleasedOrderQueuedOnce",
     "label": "OS ja na fila deixa de impedir uma segunda entrada (condicao de deduplicacao por OS; ajustada apos a refatoracao da Saga)"
   },
   {
-    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execution.Domain/OrdemExecucao.cs",
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Domain/OrdemExecucao.cs",
     "old": "if (Estado != EstadoExecucao.Falhou) throw",
     "new": "if (Estado == EstadoExecucao.Concluida) throw",
-    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execution.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execution.Tests --no-build --no-restore --filter FullyQualifiedName~ManualReexecutionPreservesStages",
+    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --no-build --no-restore --filter FullyQualifiedName~ManualReexecutionPreservesStages",
     "label": "reexecucao passa a ser aceita fora do estado Falhou (regra de estado da reexecucao)"
   },
   {
-    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execution.Application/Contratos.cs",
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Application/Contratos.cs",
     "old": "foreach (var destino in new[] { DestinosEvento.OsService, DestinosEvento.Billing })",
     "new": "foreach (var destino in new[] { DestinosEvento.OsService })",
-    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execution.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execution.IntegrationTests --no-build --no-restore --filter FullyQualifiedName~CompletionPublishedToConsumers",
+    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.IntegrationTests --no-build --no-restore --filter FullyQualifiedName~CompletionPublishedToConsumers",
     "label": "conclusao deixa de ser publicada para o Billing (so OS Service)"
   }
 ]
