@@ -43,10 +43,11 @@
 ## Estado antes do PR #46 - 2026-11-11
 
 - O PR #45 foi mesclado na `develop` do pai com merge commit (`d2add06`, Enrico, 16:27 UTC). A `develop` do pai foi mesclada de volta em `feature/os-service-contracts` (`726fc70`) sem conflito e sem mudar a árvore. A branch está 42 commits à frente e 0 atrás da `develop` (106 arquivos, +1761 / −417); é o conteúdo do PR #46.
-- Ponteiros do pai, todos iguais à `develop` do respectivo repositório: OS `c9e7d4a`, Cobranca `815ef6f`, Execucao `c29575c`, Cadastros `5d877ba`, Infra.K8s `f6f9789`, AuthLambda `d5d32e1`, Infra.Database `401d454` e Web `91a1aa1` (só tem `main`). As quatro `develop` de serviço avançaram em avanço direto, sem force.
+- Ponteiros do pai, todos iguais à `develop` do respectivo repositório: OS `e1e2eef`, Cobranca `ab61119`, Execucao `fc24261`, Cadastros `3d71ba8`, Infra.K8s `f6f9789`, AuthLambda `d5d32e1`, Infra.Database `401d454` e Web `91a1aa1` (só tem `main`). As quatro `develop` de serviço avançaram em avanço direto, sem force.
 - CI do pai em `e8c1cc6`: verde. CI das `develop` dos serviços: `build` e `test` passam em OS, Cobranca, Execucao e Cadastros; `quality` falha nos quatro porque nenhum repositório tem o segredo `SONAR_TOKEN` (confirmado no log do OS; os repositórios não têm secrets nem variáveis; os da organização não pude listar, falta o escopo `admin:org` no `gh`).
 - Duas correções de CI feitas nesta rodada: o OS ganhou `AWS_REGION: us-east-1` no `env` do `ci-cd.yml` (o `AmazonSQSClient` do host de teste exige região e o runner não tem perfil AWS; 30 testes falhavam); o Cadastros teve 5 arquivos formatados pelo `dotnet format` (`5d877ba`), sem mudança de comportamento, pois o pipeline novo passou a verificar formato e o antigo não. As mesmas 55 infrações já existiam antes da renomeação.
 - Pendente para o usuário: criar os projetos no SonarCloud e o segredo `SONAR_TOKEN` (secret de organização com acesso aos repositórios, ou um secret por repositório) antes de proteger as `main` (AD-026), senão o `quality` bloqueia todo merge. Variáveis `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY` são opcionais (padrões no `ci-cd.yml`).
+- Os READMEs de OS, Cobranca, Execucao e Cadastros documentam o `SONAR_TOKEN` (secret) e as variáveis `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY` exigidos pelo `ci-cd.yml` (commits `e1e2eef`, `ab61119`, `fc24261` e `3d71ba8`).
 - Atenção ao Cadastros: a renomeação mexeu em 365 arquivos direto na `develop`; quem tiver branch aberta nesse repositório precisa fazer rebase.
 
 ## Reexecução do gate após a renomeação - 2026-11-11
