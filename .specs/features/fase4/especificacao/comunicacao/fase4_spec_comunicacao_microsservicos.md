@@ -110,11 +110,13 @@ Nomes em português (L-02), no formato `<contexto>.<fato-ou-ação>.v<versão>`.
 | `pagamento.aprovado.v1` / `pagamento.recusado.v1` | Evento | Cobrança | OS, Cadastros | Padronizar o evento atual |
 | `execucao.cancelar-reserva.v1` | Comando (compensação) | OS | Execução | Novo |
 | `insumos.reserva-cancelada.v1` | Evento (compensação) | Execução | OS | Novo |
-| `cobranca.cancelar-orcamento.v1` | Comando (compensação) | OS | Cobrança | Novo |
-| `orcamento.cancelado.v1` | Evento (compensação) | Cobrança | OS | Novo |
+| `cobranca.cancelar-orcamento.v1` | Comando (compensação) | OS | Cobrança | ✅ publicado e consumido (entrada legada `billing.orcamento.cancelar.v1` aceita pela Cobrança) |
+| `orcamento.cancelado.v1` | Evento (compensação) | Cobrança | OS | ✅ existe |
 | `saga.lembrete.v1` | Evento | OS | Cadastros (notificação) | Novo (D-18d) |
 
 **Envelope comum** (camelCase, mantendo o que já existe): `eventId`, `tipo`, `correlacaoId` (= id da OS), `causaId` (id da mensagem que originou), `ocorridoEm`, `traceparent`, `tracestate` e o `payload`.
+
+O comando de compensação de orçamento é publicado como `cobranca.cancelar-orcamento.v1` (D-24, feature [`eventos-portugues`](../../eventos-portugues/plan.md)); etapas e comandos pendentes legados com `billing.orcamento.cancelar.v1` são normalizados pelo OS Service antes da publicação, e a Cobrança continua aceitando `billing.orcamento.cancelar.v1` apenas como entrada legada deduplicada pelo mesmo `eventId`. Os demais tipos implementados já estão em português; as mensagens marcadas como novas acima pertencem às respectivas features futuras.
 
 ### 4.6 Garantias
 
