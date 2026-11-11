@@ -26,6 +26,7 @@
 | AD-019 | Saga orquestrada no OS Service com estado em DynamoDB (`autoreparos-os-saga`); nasce em `orcamento.aprovado.v1` (evita escrita dupla); transição e comandos pendentes gravados na mesma transação antes de publicar; compensações em ordem inversa só para orçamento aprovado e execução liberada; execução concluída e pagamento capturado só têm recuperação para frente; cancelamento entra por `ordem-servico.cancelar.v1` (sem rota REST nova, Surface vazia). Contrato em `saga-mensageria/contracts.md` | Decisões de projeto da autora para fechar o contrato entre OS, Billing e Execução; o plano aprovado não foi alterado. User: "pode seguir com o saga-mensageria". Revisar se discordar | active | 2026-11-10 |
 | AD-020 | Surface da Saga ampliada com `POST /api/v1/ordens-servico/{id}/cancelamento` (Administrador ou Atendente; 202, 401, 403, 404, 409, 422) como gatilho de produção da compensação; status da OS após a execução é `Concluida` (o Billing só libera a cobrança com esse valor); Execution cancela também em `Falhou` | User: "Adicionar rota de cancelamento" (2026-11-10) após o Verifier apontar compensação sem gatilho. O nome `Concluida` corrige erro do contrato inicial (ALTA do Verifier). Registrado em `plan.md` (Surface) e `contracts.md` | active | 2026-11-10 |
 | AD-021 | D-18 (reserva de insumos em duas fases, travas de estado, prazos, console admin e reprocessamento de DLQ) aceita como feature separada `saga-compensacoes`, com `insumos`; o plano e os checks de `saga-mensageria` (PASS) ficam congelados e a evolução não reabre esse veredito | User: "aceitar d-18 como recomendado" | active | 2026-11-10 |
+| AD-022 | D-24: aplicar L-02 aos tipos de mensagem já implementados na feature `eventos-portugues`: `billing.orcamento.cancelar.v1` passa a `cobranca.cancelar-orcamento.v1`; os demais tipos existentes permanecem. O plano aprovado e os checks de `saga-mensageria` continuam congelados (AD-021). A estratégia de compatibilidade é proposta no novo plano, ainda pendente de aprovação | User: "Vamos trocar os eventos para português" (10/11); o nome alvo já consta no catálogo da spec transversal | active | 2026-11-10 |
 ## Unificação da especificação da Fase 4 - 2026-11-09 (atualizada em 10/11)
 
 - **Entrega do trabalho: 17/11/2026.** Divisão em 5 tarefas e cronograma em `.specs/features/fase4/especificacao/index.md` § 7.1 e § 7.2.
@@ -46,6 +47,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 | `billing` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `billing/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
 | `saga-mensageria` | **PASS** (2ª rodada de Verifier). Provas 9/9, 3 mutações mortas; regressão no mesmo HEAD: os-service 7/7, billing 11/11, execucao 8/8, 3 mutações mortas cada | `saga-mensageria/verification.md`, `proofs.md` |
+| `eventos-portugues` | **PASS** (1ª rodada de Verifier). Provas 13/13, 3 mutações mortas (OS `45defd3`, Cobrança `8e7bff7`, root `e078c04`) | `eventos-portugues/verification.md`, `proofs.md` |
 | `infra-ci-observabilidade` | só `plan.md` e `checks.md`; build não iniciado | depende dos serviços |
 | `pacote-entrega` | só `plan.md` e `checks.md`; build não iniciado | inclui vídeo e PDF final, que o agente não produz sozinho |
 
@@ -102,3 +104,18 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 1. Revisar AD-008 (decisões do Execution Service não confirmadas pelo usuário).
 2. `infra-ci-observabilidade` (pipelines, IaC, telemetria distribuída) e `pacote-entrega` (repositórios, vídeo e PDF final; o vídeo exige ação humana).
 3. Decisões pendentes do usuário: criar a `main` dos remotos novos e abrir os PRs; se quer atualizar o texto de `AGENTS.md` ("minúsculas") para refletir AD-002; se prefere um job de reconciliação de reembolsos `Pendente` no Billing.
+
+### Auditoria da PR #45 (10/11/2026)
+
+- A PR `docs/fase4-especificacao-inicial` → `develop` permanece aberta no commit `5e20324`; a branch de trabalho `feature/os-service-contracts` incorporou esse commit no merge `7a2eeeb` e avançou até `036fefd`. A descrição e os três checks vermelhos da PR refletem a versão anterior; o CI parou no checkout do Billing quando o repositório ainda era privado. A URL antiga já redireciona, mas não houve nova execução do CI.
+- Os repositórios OS, Cobrança, Execução e Cadastros estão públicos e renomeados onde aplicável; os três serviços novos já têm `main`. Não há PRs nos três serviços nem na branch de Infra.K8s. A `main` de OS está um commit atrás da feature; as de Cobrança e Execução coincidem com as features e nenhuma das três está protegida. Infra.K8s `feature/os-service-contracts` está dois commits à frente de `develop`, sem commits atrás: o rebase pedido na PR já foi feito.
+- `saga-mensageria` está PASS, mas `saga-compensacoes`, `insumos`, `cadastros`, `infra-ci-observabilidade` e `pacote-entrega` ainda aguardam aprovação/implementação. Na checklist da PR, a aprovação de `saga-mensageria` já ocorreu; as outras quatro aprovações ainda faltam. A divisão de T1–T5 entre pessoas não foi confirmada no repositório.
+- Corrigir o retrato de estado em `especificacao/index.md` (Saga, DynamoDB, contrato, README e branches), a instrução antiga em `especificacao/saga/fase4_spec_saga_pattern.md` que manda reabrir `saga-mensageria` apesar de AD-021, e as referências pessoais a "spec do Enrico" que persistem na descrição da PR e em paráfrases das specs. Harmonizar L-02/D-19 com o contrato implementado `billing.orcamento.cancelar.v1` e o envio SQS por destino; tratar mudanças de contrato com versionamento/compatibilidade.
+- `python scripts/specs/verificar_links.py`: 45 arquivos, 189 links, 0 problemas. Esta auditoria não executou build, testes ou deploy.
+
+### Handoff: tipos de eventos em português (10/11/2026)
+
+- D-24/AD-022 concluídos com **PASS** na 1ª rodada do Verifier independente (`author != verifier`, root `e078c04`, OS `45defd3`, Cobrança `8e7bff7`): 13/13 provas verdes e 3/3 mutações mortas (`validate_verification: 0 error(s), 0 warning(s) across [eventos-portugues]`).
+- `SagaOS` emite `cobranca.cancelar-orcamento.v1` em compensações novas, normaliza `EtapaSaga.Compensacao` legada sem duplicar etapas e `ComandoSaga.NormalizarTipo()` converte `Tipo` e `Corpo.tipo` de comandos pendentes legados preservando `eventId`, demais campos, backoff e ordem.
+- `CancelamentoOrcamentoService` na Cobrança aceita `cobranca.cancelar-orcamento.v1` e o alias legado `billing.orcamento.cancelar.v1`, deduplicando pelo mesmo `eventId` na Inbox (`eventos_processados`) em qualquer ordem de chegada.
+- `scripts/specs/verificar_eventos_portugues.py` valida os 4 artefatos de contrato; `scripts/specs/verificar_links.py`: 49 arquivos, 196 links, 0 problemas.

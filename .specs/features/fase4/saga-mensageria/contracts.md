@@ -45,7 +45,7 @@ Estado da OS (Postgres) sincronizado a cada transição, com registro no histór
 
 | Etapa | Efeito | Compensação declarada |
 | --- | --- | --- |
-| 1. Orçamento aprovado | Billing aprovou o orçamento | `billing.orcamento.cancelar.v1` |
+| 1. Orçamento aprovado | Billing aprovou o orçamento | `cobranca.cancelar-orcamento.v1` (entrada legada `billing.orcamento.cancelar.v1` normalizada na publicação e aceita pela Cobrança) |
 | 2. Execução liberada | Execution recebeu a OS | `execucao.cancelar.v1` |
 | 3. Execução concluída | trabalho feito | nenhuma (só recuperação para frente) |
 | 4. Pagamento capturado | dinheiro recebido | nenhuma (nunca estornar automaticamente) |
@@ -89,13 +89,13 @@ Falha de etapa compensável (`execucao.liberacao-recusada.v1`) ou cancelamento (
 | --- | --- | --- |
 | `ordem-servico.liberada.v1` | `Sqs:ExecucaoQueueUrl` (= `Sqs:LiberadasQueueUrl` do Execution) | `clienteId`, `veiculoId`, `id` (= `ordemServicoId`, compatível com o contrato atual do Execution) |
 | `execucao.cancelar.v1` | `Sqs:ExecucaoQueueUrl` | `motivo` |
-| `billing.orcamento.cancelar.v1` | `Sqs:BillingQueueUrl` (= `Sqs:ComandosQueueUrl` do Billing) | `orcamentoId`, `motivo` |
+| `cobranca.cancelar-orcamento.v1` | `Sqs:BillingQueueUrl` (= `Sqs:ComandosQueueUrl` do Billing) | `orcamentoId`, `motivo` (etapas/comandos pendentes legados `billing.orcamento.cancelar.v1` são normalizados antes da publicação) |
 
 ### Billing (mudanças)
 
 - Publica `orcamento.aprovado.v1` na aprovação do orçamento (na mesma transação, via mecanismo de retry/DLQ já existente ou outbox) para a fila de entrada da Saga do OS (`Sqs:QueueUrl` existente).
 - Publica `pagamento.resultado.v1` com o envelope completo (hoje publica só `pagamentoId`, `status`, `referencia`).
-- Consome `billing.orcamento.cancelar.v1` (fila `Sqs:ComandosQueueUrl`, DLQ própria), deduplica por `eventId`: cancela o orçamento se `Pendente` ou `Aprovado` sem pagamento (novo estado `Cancelado`); se houver pagamento, recusa. Responde `orcamento.cancelado.v1` ou `orcamento.cancelamento-recusado.v1`.
+- Consome `cobranca.cancelar-orcamento.v1` e aceita o alias de entrada legada `billing.orcamento.cancelar.v1` (fila `Sqs:ComandosQueueUrl`, DLQ própria), deduplica por `eventId`: cancela o orçamento se `Pendente` ou `Aprovado` sem pagamento (novo estado `Cancelado`); se houver pagamento, recusa. Responde `orcamento.cancelado.v1` ou `orcamento.cancelamento-recusado.v1`.
 
 ### Execution (mudanças)
 
