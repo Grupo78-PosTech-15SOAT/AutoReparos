@@ -1,6 +1,6 @@
 # fase4/saga-mensageria proofs
 
-**HEAD**: 75b086b
+**HEAD**: f7f3374
 **Tree**: clean
 **Result**: 9 pass, 0 fail; mutations 3 killed, 0 not
 
@@ -20,6 +20,6 @@
 
 | Mutation | Location | Killed |
 | --- | --- | --- |
-| compensacoes deixam de seguir a ordem inversa (etapa 1 antes da 2) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:365` | yes |
+| compensacoes deixam de seguir a ordem inversa (etapa 1 antes da 2) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:370` | yes |
 | escrita condicional por versao aceita versao antiga (conflito otimista perdido) | `submodules\AutoReparos.OS\AutoReparos.OS.Infrastructure\Saga\DynamoDbSagaRepositorio.cs:61` | yes |
 | comando so vai a DLQ uma tentativa depois do limite de 5 (limite deslocado em um) | `submodules\AutoReparos.OS\AutoReparos.OS.Application\Saga\OrquestradorSaga.cs:193` | yes |
