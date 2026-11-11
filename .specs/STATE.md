@@ -33,6 +33,13 @@
 | AD-026 | D-25: proteção obrigatória só na `main` de OS, Cobrança, Execução, Cadastros e Web (PR com 1 aprovação, status checks `build`, `test`, `quality`, `strict`, vale para admins, sem force push nem exclusão); `develop` sem proteção. `AutoReparos.Web` criado público pelo usuário com `main` inicial (`91a1aa1`). Plano `infra-ci-observabilidade` aprovado | User: "Branch protegida: main", "Repositório Web: Vamos criar", "Sim, aprovo e crio" (11/11) | active | 2026-11-11 |
 | AD-027 | D-26: L-01 não depende de DynamoDB Streams; o AC 5 de `infra-ci-observabilidade` traça SQS e SNS. Streams e `saga.avancou.v1` seguem opcionais (AD-024) | User: "Pode seguir" (11/11), em resposta à recomendação de tirar Streams do AC 5 | active | 2026-11-11 |
 
+## Handoff: infra-ci-observabilidade - 2026-11-11
+
+- Plano aprovado (AD-026, AD-027) e `checks.md` com 14 checks validados. Build parcial; estado exato em `## Handoff` de `.specs/features/fase4/infra-ci-observabilidade/checks.md`.
+- `AutoReparos.Web` criado público com `main` (`91a1aa1`, só README) e registrado como submódulo do pai.
+- Antes de aplicar a proteção da `main`: criar os projetos no SonarCloud e o segredo `SONAR_TOKEN` em cada repositório (variáveis opcionais `SONAR_ORGANIZATION` e `SONAR_PROJECT_KEY`; padrão `grupo78-postech-15soat` e `Grupo78-PosTech-15SOAT_AutoReparos.<Repo>`). Sem isso o job `quality` falha e a `main` protegida bloqueia todo merge. Com 1 aprovação e regra para admins, o autor não aprova o próprio PR.
+- Comandos: `bash scripts/infra/setup-github-governance.sh --repo AutoReparos.OS ...`; provas `python scripts/specs/assert_pipelines.py --check jobs` e `python scripts/specs/assert_branch_protection.py --check main`.
+
 ## Reexecução do gate após a renomeação - 2026-11-11
 
 - Provas reexecutadas no HEAD pós-renomeação (AD-025), todas verdes e com 3 mutações mortas: `cobranca` 11/11, `execucao` 8/8, `saga-mensageria` 9/9, `eventos-portugues` 13/13 e `os-service` 7/7. Commits `81815c0`, `f7f3374`, `6636e9a`, `ba95d75` e `331016f`. O Verifier independente não foi acionado de novo: a mudança é só de nomes, sem regra nova.
