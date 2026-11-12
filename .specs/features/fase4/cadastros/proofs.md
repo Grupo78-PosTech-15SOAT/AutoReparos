@@ -1,7 +1,7 @@
 # fase4/cadastros proofs
 
-**HEAD**: 57fc7b5
-**Tree**: dirty - .claude/
+**HEAD**: 6ead739
+**Tree**: clean
 **Result**: 21 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
