@@ -257,6 +257,9 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-25 | **Proteção obrigatória só na `main`** (11/11): `main` de OS, Cobrança, Execução, Cadastros e Web exige PR com 1 aprovação e os jobs `build`, `test` e `quality` como status checks; a `develop` não recebe proteção obrigatória. O repositório `AutoReparos.Web` foi criado (público) nesta data, confirmando D-03 | AD-026; Usuário: "Branch protegida: main" e "Repositório Web: Vamos criar" | [CI/CD § 4.3](./cicd/fase4_spec_cicd_e_protecao_de_branches.md#43-proteção-de-branches) |
 | D-26 | **L-01 não depende de DynamoDB Streams** (11/11): a regra exige um banco por passo, cumprida hoje pelo despacho da Saga (`saga-mensageria`, PASS). Streams é só um dos mecanismos de publicar a Outbox do DynamoDB (o outro é varredura por índice) e fica opcional; `infra-ci-observabilidade` traça SQS e SNS, sem Streams | AD-027; Usuário: "Pode seguir" (recomendação de tirar Streams do AC 5) | [Saga § 4.8](./saga/fase4_spec_saga_pattern.md#48-regra-l-01-no-os-service--opção-c) |
 | D-27 | **Pasta TLC da OS renomeada para `servico-os`** (11/11): o nome da feature, seus links e comandos de prova acompanham a pasta; o repositório `AutoReparos.OS`, a branch `feature/os-service-contracts` e os registros históricos de provas conservam seus nomes | AD-029; usuário: "melhor \"servico-os\"" ao definir o nome alvo para a pasta `os-service` no PR #46 | [Plano da OS](../servico-os/plan.md) |
+| D-28 | **Cadastros expõe `/api/v1` e mantém o prefixo atual** (12/11): `clientes`, `veiculos` e `usuarios` ficam disponíveis em `/api/v1/...` (contrato do OS) e em `/api/...` (frontend e testes atuais), com os mesmos contratos | AD-030; Usuário: "Expor /api/v1 e manter o antigo (Recommended)" | [Plano do Cadastros](../cadastros/plan.md) |
+| D-29 | **Notificações reusam o SendGrid** (12/11): o consumidor de eventos do Cadastros usa o `NotificacaoService` (SendGrid, com retry) já existente; o plano dizia SMTP, mas o App nunca usou SMTP | AD-031; Usuário: "Reusar o SendGrid (Recommended)" | [Plano do Cadastros](../cadastros/plan.md) |
+| D-30 | **Cadastros emite o token do cliente** (12/11): `POST /internal/clientes/autenticar` recebe CPF e e-mail (como a AuthLambda já faz), devolve o cliente e o JWT RS256 com `kid`; a AuthLambda deixa de assinar token e de ter segredo | AD-032; Usuário: "Cadastros emite o token (Recommended)" | [Plano do Cadastros](../cadastros/plan.md) |
 
 ### 6.2 Regras obrigatórias do grupo
 
@@ -286,6 +289,8 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 11/11/2026 | D-25: CI/CD § 4.3 deixa de proteger a `develop`; só a `main` é obrigatória | Decisão do usuário ao aprovar `infra-ci-observabilidade` |
 | 11/11/2026 | D-26: AC 5 de `infra-ci-observabilidade` deixa de exigir traces por DynamoDB Streams; L-01 lida como "um banco por passo", sem mecanismo obrigatório de publicação | Streams adiado por AD-024 e fora do escopo de infra; prazo de 17/11 |
 | 11/11/2026 | D-03: extração do Web deixa de ser corte opcional e ganha plano próprio; rotas para as novas APIs e telas novas ficam para depois | Usuário pediu a `develop` do Web e a migração da camada Angular nesta etapa; escolheu "Extração e integração do repositório (recomendado)" |
+| 12/11/2026 | D-28: `/api/v1` passa a coexistir com o prefixo atual; D-17: e-mail por SendGrid em vez de SMTP (D-29) | O código do App usa `/api/...` e SendGrid; o plano supunha `/api/v1` e SMTP |
+| 12/11/2026 | D-11: o endpoint interno recebe CPF e e-mail e devolve também o JWT; D-21: o token do cliente passa a ser emitido pelo Cadastros (D-30) | A AuthLambda assinava o próprio HS256 e buscava por CPF e e-mail |
 
 ---
 

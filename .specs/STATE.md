@@ -34,6 +34,16 @@
 | AD-027 | D-26: L-01 não depende de DynamoDB Streams; o AC 5 de `infra-ci-observabilidade` traça SQS e SNS. Streams e `saga.avancou.v1` seguem opcionais (AD-024) | User: "Pode seguir" (11/11), em resposta à recomendação de tirar Streams do AC 5 | active | 2026-11-11 |
 | AD-028 | D-03: extrair agora toda a aplicação Angular do Cadastros para a `develop` do repositório `AutoReparos.Web`, com integração do build, CI e caminhos do pai; adaptar chamadas às novas APIs e criar telas novas fica para uma etapa posterior. A extração não é mais corte opcional | User: "vamos criar uma develop e passar toda a camada web para esse repositorio e nessa branch develop" e "Extração e integração do repositório (recomendado)" (11/11) | active | 2026-11-11 |
 | AD-029 | D-27: renomear a pasta da feature TLC `os-service` para `servico-os`, atualizando links, identificadores de feature e comandos de prova. O repositório `AutoReparos.OS`, a branch `feature/os-service-contracts` e evidências históricas de verificação mantêm seus nomes | User: "melhor \"servico-os\"" (11/11), corrigindo a escolha inicial de `ordens-servico` | active | 2026-11-11 |
+| AD-030 | D-28: Cadastros mapeia `/api/v1/{clientes,veiculos,usuarios}` e mantém `/api/...`, mesmos contratos; C2 e C9 cobrem os dois prefixos | User: "Expor /api/v1 e manter o antigo (Recommended)" (12/11) | active |
+| AD-031 | D-29: notificações do Cadastros reusam o `NotificacaoService` com SendGrid; plano corrigido de SMTP para SendGrid | User: "Reusar o SendGrid (Recommended)" (12/11) | active |
+| AD-032 | D-30: `POST /internal/clientes/autenticar` recebe CPF e e-mail e devolve cliente e JWT RS256 com `kid`; a AuthLambda deixa de assinar HS256 e de usar segredo de assinatura | User: "Cadastros emite o token (Recommended)" (12/11) | active |
+
+## Handoff: sincronização dos repositórios - 2026-11-12
+
+- `git fetch --all --prune` executado no pai e nos oito submódulos. A branch ativa `feature/os-service-contracts` está sincronizada com `origin/feature/os-service-contracts` e contém `origin/develop`; a branch local `develop` do pai foi avançada para `d2add06`.
+- Cadastros foi colocado em `develop` e avançado para `be0f199` (merge do PR #8). O ponteiro do submódulo no pai continua em `961b056`, portanto `git status` do pai mostra `M submodules/AutoReparos.Cadastros`; decidir se o ponteiro deve entrar em um commit da feature antes de publicar. Nenhum commit ou push foi feito nesta sincronização.
+- As branches `main` locais de AuthLambda, Cadastros, Infra.Database e Infra.K8s foram avançadas até seus respectivos `origin/main`. Os outros sete submódulos já estavam sincronizados com `origin/develop`; nenhum deles tem alteração de trabalho local.
+- Próximo passo: resolver as pendências externas listadas pelo usuário, após esta sincronização; não executar `setup-github-governance.sh` antes dos quality verdes.
 
 ## Handoff: plano da adaptação do Web - 2026-11-12
 
