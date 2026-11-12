@@ -8,8 +8,8 @@
   },
   {
     "file": "submodules/AutoReparos.Web/.github/workflows/ci-cd.yml",
-    "old": "pull_request:\n    branches: [main]",
-    "new": "pull_request:\n    branches: [develop]",
+    "old": "branches: [main]",
+    "new": "branches: [develop]",
     "proof": "python scripts/specs/assert_web_extraction.py --check web-ci",
     "label": "C7: CI do Web dispara PR na develop em vez da main"
   },
