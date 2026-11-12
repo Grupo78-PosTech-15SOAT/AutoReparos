@@ -193,3 +193,8 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - OS, Web, Cobrança e Execução tiveram PRs #1 abertos antes da correção do usuário; todos foram fechados sem merge. Nenhum PR foi aberto para Cadastros. Usuário: "pode passar direto, sem PR. não era pra essa branch codex existir, não crie mais" e "me consulte se precisar criar". Consultar antes de criar qualquer outra branch.
 - Verifier independente: PASS em `.specs/features/fase4/infra-ci-observabilidade/validation.md`, com os quatro cenários de evento e três mutações por workflow. `assert_pipelines.py --check jobs` passou nos cinco repositórios; `verificar_links.py`: 60 arquivos, 204 links, 0 problemas.
 - Pendente: observar execução remota em `main` quando ela receber a alteração. `assert_pipelines.py --check qualidade` tem falso positivo preexistente no Web porque procura `sonarcloud.io` textual, mas o workflow usa `SonarSource/sonarqube-scan-action`.
+
+## Handoff: cadastros - 2026-11-12
+
+- Branch `feature/cadastros` no pai (specs) e `feature/cadastros-reducao` no submódulo `AutoReparos.Cadastros` (código, 3 commits locais, sem push; o ponteiro do submódulo no pai não foi atualizado). Detalhes e pendências em `.specs/features/fase4/cadastros/checks.md` (Handoff).
+- Próximo: OS (C2), AuthLambda e Infra (SG do RDS, NetworkPolicy), depois Verifier da feature. Decidir 400 vs 422 no CRUD e o campo `clienteId` nos eventos.

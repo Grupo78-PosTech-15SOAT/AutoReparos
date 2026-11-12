@@ -70,6 +70,6 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 
 - **Settled mid-build:** 2026-11-12 - caminhos do Build e das provas atualizados para os nomes pós-AD-025 (`AutoReparos.Cadastros.slnx`, `AutoReparos.Cadastros.IntegrationTests`); nenhuma claim mudou
 - **Dispatched:** none
-- **Boundary:** checks derivados de novo em 2026-11-12 após a aprovação da revisão (D-28 a D-30); build não iniciado
+- **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. Faltam: C2 no OS (cliente HTTP que repassa o JWT ou usa a chave interna), AuthLambda chamando o endpoint interno sem acesso ao banco, SG do RDS e NetworkPolicy no `Infra.K8s`, Verifier e `proofs.md`. Divergências a decidir: C9/Coverage listam 422 para validação do CRUD, mas o contrato atual responde 400; os produtores precisam incluir `clienteId` nos eventos de notificação.
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
