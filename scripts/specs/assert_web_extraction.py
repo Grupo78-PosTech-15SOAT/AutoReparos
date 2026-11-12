@@ -2,6 +2,7 @@
 """Provas da extração do frontend para o submódulo Web (fase4/web)."""
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -120,6 +121,7 @@ def docker():
 
     docker_cmd = docker_build()
     with contextmanager(container)(docker_cmd) as cid:
+        bodies = {}
         for route in ("/", "/login"):
             for attempt in range(10):
                 try:
@@ -129,26 +131,43 @@ def docker():
                     if attempt == 9:
                         raise
                     time.sleep(1)
-            require(b"<html" in output.lower(), "HTML ausente em {}".format(route))
-    print("PASS docker: / e /login servem HTML 200")
+            bodies[route] = output
+        expected = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/index.html")
+        require(b"<html" in expected.lower(), "index.html gerado ausente na imagem")
+        asset = re.search(rb'<script\b[^>]*\bsrc="(main-[^"]+\.js)"', expected)
+        require(asset is not None, "index.html sem referência ao bundle Angular")
+        run(docker_cmd, "exec", cid, "test", "-f", "/usr/share/nginx/html/" + asset.group(1).decode("ascii"))
+        for route, output in bodies.items():
+            require(output == expected, "{} não serviu o index.html gerado".format(route))
+    print("PASS docker: / e /login servem o index.html Angular 200")
 
 
 def runtime_env():
     from contextlib import contextmanager
 
     docker_cmd = docker_build()
-    with contextmanager(container)(docker_cmd, "https://api.example.test") as cid:
-        expected = b"window.__env.apiUrl = 'https://api.example.test'"
+    api_url = "https://api.example.test/tenant/O'Reilly"
+    node = shutil.which("node") or shutil.which("node.exe")
+    require(node is not None, "Node não encontrado para avaliar env.js")
+    with contextmanager(container)(docker_cmd, api_url) as cid:
         content = b""
         for _ in range(20):
             try:
                 content = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/env.js")
             except AssertionError:
                 content = b""  # O entrypoint pode ainda estar iniciando.
-            if expected in content:
+            if b"window.__env.apiUrl" in content:
                 break
             time.sleep(0.5)
-        require(expected in content, "API_URL não foi injetada após iniciar o contêiner")
+        require(content, "env.js não foi gerado após iniciar o contêiner")
+        evaluation = subprocess.run(
+            [node, "-e", "const vm=require('node:vm');const fs=require('node:fs');const ctx={};"
+             "vm.runInNewContext(fs.readFileSync(0,'utf8'),ctx);"
+             "process.stdout.write(JSON.stringify(ctx.__env?.apiUrl));"],
+            input=content, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+        )
+        require(evaluation.returncode == 0, "env.js inválido: {}".format(evaluation.stderr.decode("utf-8", "replace")))
+        require(json.loads(evaluation.stdout) == api_url, "API_URL não foi exposta exatamente como configurada")
     with contextmanager(container)(docker_cmd) as cid:
         original = (WEB / "public/env.js").read_bytes()
         content = b""
@@ -168,9 +187,14 @@ def web_ci():
     workflows = list((WEB / ".github/workflows").glob("*.yml"))
     require(workflows, "Workflow Web ausente")
     content = "\n".join(path.read_text(encoding="utf-8") for path in workflows)
-    require("pull_request:" in content and "push:" in content, "Gatilhos PR/push ausentes")
-    for branch in ("main", "develop"):
-        require(branch in content, "Branch {} ausente no workflow".format(branch))
+    def trigger_branches(event):
+        pattern = r"(?m)^  {}:[ \t]*\n[ \t]{{4}}branches:[ \t]*\[([^\]\n]+)\]".format(re.escape(event))
+        match = re.search(pattern, content)
+        require(match is not None, "Gatilho {} sem branches".format(event))
+        return [branch.strip().strip("'\"") for branch in match.group(1).split(",")]
+
+    require(trigger_branches("pull_request") == ["main"], "PR do Web não aponta só para main")
+    require(trigger_branches("push") == ["develop", "main"], "Push do Web não cobre develop e main")
     for job in ("build", "test", "quality"):
         require(re.search(r"^  {}:\s*$".format(job), content, re.MULTILINE), "Job {} ausente".format(job))
     require("secrets.SONAR_TOKEN" in content, "SONAR_TOKEN não vem de secrets")

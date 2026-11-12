@@ -1,6 +1,6 @@
 # Extração da aplicação Web - checks
 
-Mutations: 3
+Mutations: 5
 Build: `npx --yes yarn@1.22.22 --cwd submodules/AutoReparos.Web build`; `dotnet build submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.slnx -m:1`
 Plan: `.specs/features/fase4/web/plan.md`
 
@@ -74,7 +74,7 @@ Proof: `python scripts/specs/assert_web_extraction.py --check readme`
 ## Handoff
 
 - **Settled mid-build:** user: "Aprovo o plano web" (11/11/2026); escopo: "Extração e integração do repositório (recomendado)".
-- **Dispatched:** `web_batch` (Web `develop`, C1/C4-C7/C10) e `cadastros_batch` (Cadastros `feature/web-extraction`, C2/C9) enviados em 11/11/2026; Verifier independente pendente.
-- **Boundary:** checks derivados, implementação ainda não iniciada.
+- **Dispatched:** `web_batch` (Web `develop`, C1/C4-C7/C10) e `cadastros_batch` (Cadastros `feature/web-extraction`, C2/C9) enviados em 11/11/2026; `web_verifier` independente despachado em 12/11/2026 no HEAD `38fab61` (12/12 provas, 3/3 mutações mortas).
+- **Boundary:** implementação em Web `5d1aeae`, Cadastros `961b056` e pai `38fab61`; gate mecânico inicial 12/12 e 3/3. O Verifier independente encontrou três achados (F1-C6 funcional, F2-C7 e F3-C5 de força das provas); correções e novo gate em andamento.
 - **Abandoned:** none
 - **Walked:** none - telas existentes não mudam nesta etapa.
