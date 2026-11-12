@@ -200,4 +200,5 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - Branch `feature/cadastros` no pai (specs) e `feature/cadastros-reducao` no submódulo `AutoReparos.Cadastros` (código, 3 commits locais, sem push; o ponteiro do submódulo no pai não foi atualizado). Detalhes e pendências em `.specs/features/fase4/cadastros/checks.md` (Handoff).
 - OS (C2) feito na branch local `feature/os-valida-cadastros` do submódulo `AutoReparos.OS` (sem push).
 - AuthLambda (C5) feita na branch local `feature/auth-lambda-cadastros` do submódulo `AutoReparos.AuthLambda` (sem push).
-- Próximo: Infra (SG do RDS, NetworkPolicy), depois Verifier da feature. Decidir 400 vs 422 no CRUD e o campo `clienteId` nos eventos.
+- Infra feita: `AutoReparos.Infra.Database` (`feature/rds-sem-lambda`), `AutoReparos.Infra.K8s` (`feature/cadastros-rede-e-segredos`) e arquivos do pai (workflows, `.env.example`, compose, scripts, README); nada aplicado na AWS.
+- Próximo: eventos com `clienteId` (OS e Cobrança), Verifier e `proofs.md` (SG do RDS, NetworkPolicy), depois Verifier da feature. Decidir 400 vs 422 no CRUD e o campo `clienteId` nos eventos.
