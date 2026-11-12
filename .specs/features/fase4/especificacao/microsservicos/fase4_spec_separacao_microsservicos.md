@@ -5,7 +5,7 @@
 > **Critério do PDF:** Requisitos obrigatórios → *Separação em Microsserviços* e Infraestrutura → *Cada microsserviço deve estar em seu próprio repositório*  
 > **Requisitos cobertos (índice):** R01, R02, R05, R06, R08, R27  
 > **Repositórios afetados:** `AutoReparos.OS`, `AutoReparos.Billing` → `Cobranca`, `AutoReparos.Execution` → `Execucao`, `AutoReparos.App` → `Cadastros`, `AutoReparos.Web`, `AutoReparos` (pai)  
-> **Features `.specs`:** `servico-os`, `cobranca`, `execucao` (prontas); `cadastros` e `insumos` (a criar)
+> **Features `.specs`:** `servico-os`, `cobranca`, `execucao` (prontas); `cadastros`, `insumos` e `web` (planos próprios)
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
 > **Status:** Divisão decidida em 09/11/2026 (D-01, D-02) e nome do Cadastros em 10/11 (D-23); substitui a opção B de 06/11
 
@@ -205,9 +205,9 @@ A lista final está na [spec da Saga § 4.3](../saga/fase4_spec_saga_pattern.md#
 
 ### Etapa 5 — Frontend (D-03)
 
-1. Mover `AutoReparos.Web` para o novo repositório, com pipeline próprio.
-2. Manter uma única URL base (API Gateway); o ingress roteia por path para cada serviço.
-3. Adicionar telas para orçamento, pagamento, fila de execução, histórico da OS e console de Sagas.
+1. Mover a aplicação Angular inteira de `AutoReparos.Cadastros/AutoReparos.Web` para a raiz de `AutoReparos.Web` na nova branch `develop`, com build e CI próprios (D-03, AD-028).
+2. Corrigir os caminhos do pai e do Cadastros para a nova origem; preservar a configuração existente de uma URL base em tempo de execução (`API_URL`). O roteamento por path entre serviços continua no desenho do API Gateway.
+3. Em etapa posterior, adaptar os paths antigos às APIs dos serviços e adicionar telas para orçamento, pagamento, fila de execução, histórico da OS e console de Sagas; esta extração não muda esses contratos nem essas telas.
 
 ### Etapa 6 — Repositório pai
 

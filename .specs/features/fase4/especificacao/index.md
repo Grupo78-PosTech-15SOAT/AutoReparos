@@ -100,6 +100,7 @@ Regras de sincronização (detalhadas no § 8):
 | [`saga-compensacoes`](../saga-compensacoes/plan.md) | 📝 Plano novo em 10/11 (D-18, AD-021), aguarda aprovação | [Saga](./saga/fase4_spec_saga_pattern.md) |
 | [`eventos-portugues`](../eventos-portugues/plan.md) | ✅ PASS (comando `cobranca.cancelar-orcamento.v1` + normalização e leitura legada) | [Comunicação § 4.5](./comunicacao/fase4_spec_comunicacao_microsservicos.md#45-catálogo-de-mensagens) |
 | [`cadastros`](../cadastros/plan.md) e [`insumos`](../insumos/plan.md) | 📝 Plano novo em 10/11, aguarda aprovação | [Separação § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#5-passos-para-a-mudança) |
+| [`web`](../web/plan.md) | ✅ Plano aprovado em 11/11; checks e implementação em andamento | [Separação § 4.2 e § 5](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | [`infra-ci-observabilidade`](../infra-ci-observabilidade/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [CI/CD](./cicd/fase4_spec_cicd_e_protecao_de_branches.md), [Infraestrutura](./infraestrutura/fase4_spec_infraestrutura_k8s_e_mensageria.md), [Observabilidade](./infraestrutura/fase4_spec_observabilidade_distribuida.md), [Testes](./testes-qualidade/fase4_spec_testes_e_qualidade.md) |
 | [`pacote-entrega`](../pacote-entrega/plan.md) | 📝 Plano revisado em 10/11, aguarda aprovação | [Entregáveis](./entregaveis/fase4_spec_entregaveis_repositorios.md), [Vídeo e PDF](./entregaveis/fase4_spec_video_e_documento_portal.md) |
 
@@ -230,7 +231,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 |---|---|---|---|
 | D-01 | **3 serviços de negócio + Cadastros** (09/11): `OS` (ciclo de vida da OS, histórico, orquestrador da Saga), `Cobranca` (orçamento, aprovação, pagamento, reembolso), `Execucao` (fila, etapas, **catálogo de serviços e insumos com reserva**). O App atual vira o serviço de **Cadastros** (clientes, veículos, usuários, emissão do JWT e notificações). Substitui a opção B de 06/11 (Estoque separado) | Plano fase4 "Fronteiras" | [Separação § 4](./microsservicos/fase4_spec_separacao_microsservicos.md#4-divisão-escolhida-3-serviços-de-negócio--cadastros-d-01) |
 | D-02 | **Nomes em português** (regra L-02): `AutoReparos.OS`, `AutoReparos.Cobranca` (confirmado em 10/11), `AutoReparos.Execucao`. Renomeia os repositórios `Billing` e `Execution`. O App reduzido vira `AutoReparos.Cadastros` (D-23) | AD-010, AD-016 | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
-| D-03 | Frontend extraído para `AutoReparos.Web` (pipeline e Sonar próprios). Corte possível se faltar tempo: continua no Cadastros | — | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
+| D-03 | **Extrair o frontend para `AutoReparos.Web` agora** (11/11): criar `develop` a partir da `main` que contém só README, mover toda a aplicação Angular que hoje está no Cadastros e integrar build, CI e referências no repositório pai. A adaptação às novas APIs e as telas novas ficam para etapa posterior; a extração deixa de ser corte opcional | AD-028; usuário: "vamos criar uma develop e passar toda a camada web para esse repositorio e nessa branch develop" e "Extração e integração do repositório (recomendado)" | [Separação § 4.2](./microsservicos/fase4_spec_separacao_microsservicos.md#42-repositórios) |
 | D-04 | **NoSQL = DynamoDB para o estado da Saga no OS Service** (09/11). Substitui "DynamoDB no Estoque" | Plano fase4 "Mensageria e NoSQL", "Orquestrador" | [Bancos § 4.1](./microsservicos/fase4_spec_bancos_de_dados.md#41-d-04--dynamodb-no-estado-da-saga) |
 | D-05 | Uma instância RDS PostgreSQL compartilhada, com database e usuário próprios por serviço; cada repositório mantém a IaC dos seus recursos exclusivos | Plano fase4 "Bancos relacionais e IaC" | [Bancos § 4.2](./microsservicos/fase4_spec_bancos_de_dados.md#42-d-05--instância-rds-compartilhada) |
 | D-06 | AWS SQS com DLQ, retry com backoff exponencial e jitter (fan-out por SNS em D-19) | AD-001 | [Comunicação § 4.3](./comunicacao/fase4_spec_comunicacao_microsservicos.md#43-d-06--mensageria) |
@@ -284,6 +285,7 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 11/11/2026 | D-19 e L-01: SNS por produtor e `saga.avancou.v1` com Streams adiados para depois da `saga-compensacoes`; SQS direto e sincronização por despacho seguem | Preservar o PASS de `saga-mensageria` (AD-021) e cumprir o prazo; a feature `infra-ci-observabilidade` assume o SNS (AD-024) |
 | 11/11/2026 | D-25: CI/CD § 4.3 deixa de proteger a `develop`; só a `main` é obrigatória | Decisão do usuário ao aprovar `infra-ci-observabilidade` |
 | 11/11/2026 | D-26: AC 5 de `infra-ci-observabilidade` deixa de exigir traces por DynamoDB Streams; L-01 lida como "um banco por passo", sem mecanismo obrigatório de publicação | Streams adiado por AD-024 e fora do escopo de infra; prazo de 17/11 |
+| 11/11/2026 | D-03: extração do Web deixa de ser corte opcional e ganha plano próprio; rotas para as novas APIs e telas novas ficam para depois | Usuário pediu a `develop` do Web e a migração da camada Angular nesta etapa; escolheu "Extração e integração do repositório (recomendado)" |
 
 ---
 
@@ -346,7 +348,7 @@ Seis dias de construção (10 a 16/11) e o último dia (17/11) só para revisão
 - **PR pequeno e revisado:** cada PR com um revisor de outra tarefa; nenhum merge com CI vermelho.
 - **Decisão nova:** segue o protocolo do § 8 (índice primeiro, depois `STATE.md`).
 
-**O que cortar se o prazo apertar**, nesta ordem: extração do Web (D-03), extração de Notificações (D-17), dashboards além do da Saga, renomeação do repositório do App (D-23 continua valendo no código e na documentação). Não cortar: Saga com compensações, BDD, cobertura e Sonar, deploy por pipeline, vídeo.
+**O que cortar se o prazo apertar**, nesta ordem: telas novas do Web depois da extração (D-03), extração de Notificações (D-17), dashboards além do da Saga, renomeação do repositório do App (D-23 continua valendo no código e na documentação). Não cortar: extração do Web, Saga com compensações, BDD, cobertura e Sonar, deploy por pipeline, vídeo.
 
 ---
 

@@ -14,6 +14,7 @@ Esta pasta é a iniciativa e mantém os requisitos globais e decisões aprovadas
 | `eventos-portugues` | Padronização dos tipos de mensagem já implementados; comando de cancelamento da Cobrança em português com leitura de mensagens legadas | AC 5; D-24, L-02 | `saga-mensageria`; OS e Cobrança |
 | `insumos` | Catálogo de serviços e insumos na Execução; reserva em duas fases (reservar, confirmar, cancelar) | AC 3 (execução), AC 7; AD-011, AD-013 | `execucao`, `saga-mensageria` |
 | `cadastros` | App reduzido a Cadastros: clientes, veículos, usuários, emissão de JWT/JWKS, endpoint interno para a AuthLambda, notificações por eventos | AC 1-2; AD-013 | `servico-os` |
+| `web` | Extrair o Angular existente do Cadastros para a `develop` de `AutoReparos.Web`, com build, CI e referências do pai; novas APIs e telas em etapa posterior | D-03, AD-028 | `cadastros`, `infra-ci-observabilidade` |
 | `infra-ci-observabilidade` | Repositórios independentes, IaC, bancos isolados, ambientes AWS/EKS, pipelines, cobertura, qualidade e proteção de branches | AC 1, 4, 9, 11-13; decisões RDS PostgreSQL, AWS/EKS e divisão de IaC | Base para todas as features de serviço |
 | `pacote-entrega` | Pacote dos repositórios, vídeo e PDF final (a telemetria distribuída ficou em `infra-ci-observabilidade`) | AC 14-17; decisões de reutilização da observabilidade da Fase 3 | Serviços e `infra-ci-observabilidade` |
 
