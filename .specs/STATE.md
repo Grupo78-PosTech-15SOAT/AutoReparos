@@ -198,4 +198,5 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 ## Handoff: cadastros - 2026-11-12
 
 - Branch `feature/cadastros` no pai (specs) e `feature/cadastros-reducao` no submódulo `AutoReparos.Cadastros` (código, 3 commits locais, sem push; o ponteiro do submódulo no pai não foi atualizado). Detalhes e pendências em `.specs/features/fase4/cadastros/checks.md` (Handoff).
-- Próximo: OS (C2), AuthLambda e Infra (SG do RDS, NetworkPolicy), depois Verifier da feature. Decidir 400 vs 422 no CRUD e o campo `clienteId` nos eventos.
+- OS (C2) feito na branch local `feature/os-valida-cadastros` do submódulo `AutoReparos.OS` (sem push).
+- Próximo: AuthLambda e Infra (SG do RDS, NetworkPolicy), depois Verifier da feature. Decidir 400 vs 422 no CRUD e o campo `clienteId` nos eventos.
