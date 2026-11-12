@@ -186,7 +186,7 @@ jobs:
             existing="$(aws rds describe-db-instances --region "$AWS_REGION" --query 'DBInstances[?DBInstanceIdentifier==`autoreparos-rds-production`].DBInstanceIdentifier | [0]' --output text)"
             if [ -n "$existing" ] && [ "$existing" != None ]; then echo '::error::RDS exists without the database state; import it before provisioning.'; exit 1; fi
           fi
-          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ needs.base-platform.outputs.eks_security_group_id }}' --arg lambda '${{ needs.base-platform.outputs.lambda_security_group_id }}' '[$eks,$lambda]')"
+          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ needs.base-platform.outputs.eks_security_group_id }}' '[$eks]')"
           terraform init -reconfigure -input=false -no-color \
             -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=database/terraform.tfstate' \
             -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
@@ -240,20 +240,16 @@ jobs:
           TF_VAR_private_subnet_ids: ${{ needs.base-platform.outputs.private_subnet_ids }}
           TF_VAR_lambda_security_group_id: ${{ needs.base-platform.outputs.lambda_security_group_id }}
           TF_VAR_api_gateway_execution_arn: ''
-          TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+          TF_VAR_cadastros_base_url: ${{ vars.CADASTROS_INTERNAL_URL }}
+          TF_VAR_cadastros_chave_interna: ${{ secrets.CHAVE_INTERNA }}
           LAMBDA_ZIP: ${{ runner.temp }}/auth-lambda.zip
-          DB_SECRET_ARN: ${{ needs.database.outputs.db_secret_arn }}
         run: |
           set -euo pipefail
           if ! aws s3api head-object --bucket "$TF_STATE_BUCKET" --key lambda-auth/terraform.tfstate >/dev/null 2>&1; then
             existing="$(aws lambda get-function --function-name autoreparos-auth-lambda-production --region "$AWS_REGION" --query 'Configuration.FunctionName' --output text 2>/dev/null || true)"
             if [ -n "$existing" ] && [ "$existing" != None ]; then echo '::error::The Lambda exists without its owner state; import it before provisioning.'; exit 1; fi
           fi
-          echo "::add-mask::$TF_VAR_jwt_secret"
-          DB_SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ARN" --query SecretString --output text)"
-          DB_CONNECTION="$(jq -r '.connectionString' <<< "$DB_SECRET_JSON")"
-          echo '::add-mask::'"$DB_CONNECTION"
-          export TF_VAR_db_connection_string="$DB_CONNECTION"
+          echo "::add-mask::$TF_VAR_cadastros_chave_interna"
           terraform init -upgrade -reconfigure -input=false -no-color \
             -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=lambda-auth/terraform.tfstate' \
             -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
@@ -265,7 +261,7 @@ jobs:
             -var="aws_region=$AWS_REGION" -var='environment=production' -var="lambda_zip_path=$LAMBDA_ZIP"
           terraform apply -input=false -auto-approve "$RUNNER_TEMP/lambda.tfplan"
           rm -f "$RUNNER_TEMP/lambda.tfplan" "$LAMBDA_ZIP"
-          unset DB_SECRET_JSON DB_CONNECTION TF_VAR_db_connection_string TF_VAR_jwt_secret
+          unset TF_VAR_cadastros_chave_interna
       - id: outputs
         working-directory: submodules/AutoReparos.AuthLambda/infra
         run: |
@@ -310,21 +306,21 @@ jobs:
       - name: Connect to EKS and create runtime secrets
         env:
           DB_SECRET_ARN: ${{ needs.database.outputs.db_secret_arn }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_CHAVE_PRIVADA_PEM: ${{ secrets.JWT_CHAVE_PRIVADA_PEM }}
+          CHAVE_INTERNA: ${{ secrets.CHAVE_INTERNA }}
           SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
-          APROVACAO_TOKEN_SECRET: ${{ secrets.APROVACAO_TOKEN_SECRET }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
-          for value in "$JWT_SECRET" "$SEED_USER_PASSWORD" "$APROVACAO_TOKEN_SECRET" "$GRAFANA_ADMIN_PASSWORD"; do test -n "$value" || { echo '::error::A required production secret is empty'; exit 1; }; echo "::add-mask::$value"; done
+          for value in "$JWT_CHAVE_PRIVADA_PEM" "$CHAVE_INTERNA" "$SEED_USER_PASSWORD" "$GRAFANA_ADMIN_PASSWORD"; do test -n "$value" || { echo '::error::A required production secret is empty'; exit 1; }; echo "::add-mask::$value"; done
           db="$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ARN" --query SecretString --output text | jq -r '.connectionString')"
           echo "::add-mask::$db"
           aws eks update-kubeconfig --name '${{ needs.base-platform.outputs.cluster_name }}' --region "$AWS_REGION"
           kubectl create namespace '${{ vars.K8S_NAMESPACE }}' --dry-run=client -o yaml | kubectl apply -f -
-          jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg db "$db" --arg jwt "$JWT_SECRET" --arg seed "$SEED_USER_PASSWORD" --arg approval "$APROVACAO_TOKEN_SECRET" --arg sendgrid "$SENDGRID_API_KEY" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-api-secrets",namespace:$namespace},type:"Opaque",stringData:{"ConnectionStrings__DbConnection":$db,"Jwt__Secret":$jwt,"SeedUser__Password":$seed,"AprovacaoToken__Secret":$approval,"SendGrid__ApiKey":$sendgrid}}' | kubectl apply -f -
+          jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg db "$db" --arg jwt "$JWT_CHAVE_PRIVADA_PEM" --arg interna "$CHAVE_INTERNA" --arg seed "$SEED_USER_PASSWORD" --arg sendgrid "$SENDGRID_API_KEY" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-api-secrets",namespace:$namespace},type:"Opaque",stringData:{"ConnectionStrings__DbConnection":$db,"Jwt__ChavePrivadaPem":$jwt,"Interno__Chave":$interna,"SeedUser__Password":$seed,"SendGrid__ApiKey":$sendgrid}}' | kubectl apply -f -
           jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg password "$GRAFANA_ADMIN_PASSWORD" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-grafana-admin",namespace:$namespace},type:"Opaque",stringData:{"admin-password":$password}}' | kubectl apply -f -
-          unset db JWT_SECRET SEED_USER_PASSWORD APROVACAO_TOKEN_SECRET SENDGRID_API_KEY GRAFANA_ADMIN_PASSWORD
+          unset db JWT_CHAVE_PRIVADA_PEM CHAVE_INTERNA SEED_USER_PASSWORD SENDGRID_API_KEY GRAFANA_ADMIN_PASSWORD
       - name: Run migrations as a one-off EKS Job
         env:
           API_IMAGE: ${{ needs.base-platform.outputs.ecr_api_repository_url }}:${{ github.sha }}
@@ -350,8 +346,7 @@ jobs:
                       image: $image,
                       env: [
                         {name: "Database__RunMigrations", value: "true"},
-                        api_secret("ConnectionStrings__DbConnection"),
-                        api_secret("Jwt__Secret")
+                        api_secret("ConnectionStrings__DbConnection")
                       ]
                     }]
                   }
@@ -382,6 +377,10 @@ jobs:
             --set-string api.config.seedUserEmail='${{ vars.SEED_USER_EMAIL }}' \
             --set-string api.config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
             --set-string api.config.sendGridFromName="$SENDGRID_FROM_NAME" \
+            --set-string api.config.jwtIssuer='${{ vars.CADASTROS_ISSUER }}' \
+            --set-string api.config.notificacoesFilaUrl='${{ vars.CADASTROS_NOTIFICACOES_FILA_URL }}' \
+            --set-string api.config.notificacoesDlqUrl='${{ vars.CADASTROS_NOTIFICACOES_DLQ_URL }}' \
+            --set "api.networkPolicy.allowedCidrs={${{ vars.VPC_PRIVATE_CIDRS }}}" \
             --wait --timeout 10m
           kubectl rollout status deployment/autoreparos-api -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
           kubectl rollout status deployment/autoreparos-web -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
