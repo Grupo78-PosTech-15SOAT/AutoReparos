@@ -1,6 +1,6 @@
 # Fase 4 - App reduzido a Cadastros
 
-**Approved**: 2026-11-12 - user: "Aprovo" Revisada em 2026-11-12 por D-28, D-29 e D-30 (AD-030, AD-031, AD-032). Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
+**Revisão pendente de aprovação**: revisada em 2026-11-12 por D-28 a D-31 (AD-030 a AD-033); a aprovação de 2026-11-12 (user: "Aprovo") cobria D-28 a D-30. D-31 troca o status 422 do CRUD por 400. Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
 
 ## Problem
 
@@ -44,7 +44,7 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 | --- | --- | --- | --- |
 | `GET /api/v1/clientes/{id}` (e `/api/clientes/{id}`, D-28) | id -> cliente | usuário autenticado (o OS repassa o JWT de quem abre a OS); sem usuário, chave interna | 200, 401, 403, 404 |
 | `GET /api/v1/veiculos/{id}` (e `/api/veiculos/{id}`, D-28) | id -> veículo com dono | usuário autenticado (o OS repassa o JWT de quem abre a OS); sem usuário, chave interna | 200, 401, 403, 404 |
-| CRUD de clientes, veículos e usuários (`/api/v1/clientes`, `/api/v1/veiculos`, `/api/v1/usuarios`) | contratos atuais do App, mantidos sem mudança, em `/api/v1/...` e no prefixo atual `/api/...` (D-28) | papéis atuais do App | 200, 201, 204, 401, 403, 404, 422 |
+| CRUD de clientes, veículos e usuários (`/api/v1/clientes`, `/api/v1/veiculos`, `/api/v1/usuarios`) | contratos atuais do App, mantidos sem mudança, em `/api/v1/...` e no prefixo atual `/api/...` (D-28) | papéis atuais do App | 200, 201, 204, 400, 401, 403, 404 |
 | `GET /.well-known/openid-configuration` e `/.well-known/jwks.json` | - -> metadados e chaves públicas | qualquer cliente (público por definição do OIDC) | 200, 404 para caminho inexistente |
 | `POST /internal/clientes/autenticar` | CPF e e-mail -> cliente e JWT RS256 com `kid` (D-30) | AuthLambda (NetworkPolicy e cabeçalho `X-Chave-Interna`) | 200, 401, 404 |
 

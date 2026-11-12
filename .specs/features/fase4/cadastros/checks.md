@@ -48,7 +48,7 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 | `GET /api/v1/veiculos/{id}` statuses (4) | 200 C2 · 401 C2 · 403 C2 · 404 C2 | - |
 | discovery and JWKS statuses (2) | 200 C4 · 404 C4 | - |
 | `POST /internal/clientes/autenticar` statuses (3) | 200 C5 · 401 C6 · 404 C5 | - |
-| CRUD de clientes, veículos e usuários statuses (7) | 200 C9 · 201 C9 · 204 C9 · 401 C9 · 403 C9 · 404 C9 · 422 C9 | - |
+| CRUD de clientes, veículos e usuários statuses (7) | 200 C9 · 201 C9 · 204 C9 · 400 C9 · 401 C9 · 403 C9 · 404 C9 | - |
 | removed areas (5) | OS C1 · orçamento C1 · catálogo C1 · insumos C1 · dashboard C1 | - |
 | notification events (4) | orçamento C7 · conclusão C7 · pagamento C7 · lembrete C7 | - |
 | door 1: repositório `AutoReparos.Cadastros` com `cadastros_db` (1) | C1 | - |
@@ -68,8 +68,8 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 
 ## Handoff
 
-- **Settled mid-build:** 2026-11-12 - caminhos do Build e das provas atualizados para os nomes pós-AD-025 (`AutoReparos.Cadastros.slnx`, `AutoReparos.Cadastros.IntegrationTests`); nenhuma claim mudou
+- **Settled mid-build:** 2026-11-12 - D-31: 422 trocado por 400 em Surface e Coverage (claim de C9 inalterada); 2026-11-12 - caminhos do Build e das provas atualizados para os nomes pós-AD-025 (`AutoReparos.Cadastros.slnx`, `AutoReparos.Cadastros.IntegrationTests`); nenhuma claim mudou
 - **Dispatched:** none
-- **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. Faltam: C2 no OS (cliente HTTP que repassa o JWT ou usa a chave interna), AuthLambda chamando o endpoint interno sem acesso ao banco, SG do RDS e NetworkPolicy no `Infra.K8s`, Verifier e `proofs.md`. Divergências a decidir: C9/Coverage listam 422 para validação do CRUD, mas o contrato atual responde 400; os produtores precisam incluir `clienteId` nos eventos de notificação.
+- **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. Faltam: C2 no OS (cliente HTTP que repassa o JWT ou usa a chave interna), AuthLambda chamando o endpoint interno sem acesso ao banco, SG do RDS e NetworkPolicy no `Infra.K8s`, Verifier e `proofs.md`. Decidido (D-31): o CRUD responde 400, não 422. A decidir: os produtores precisam incluir `clienteId` nos eventos de notificação.
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela

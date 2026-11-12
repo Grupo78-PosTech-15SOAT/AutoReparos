@@ -37,6 +37,7 @@
 | AD-030 | D-28: Cadastros mapeia `/api/v1/{clientes,veiculos,usuarios}` e mantém `/api/...`, mesmos contratos; C2 e C9 cobrem os dois prefixos | User: "Expor /api/v1 e manter o antigo (Recommended)" (12/11) | active |
 | AD-031 | D-29: notificações do Cadastros reusam o `NotificacaoService` com SendGrid; plano corrigido de SMTP para SendGrid | User: "Reusar o SendGrid (Recommended)" (12/11) | active |
 | AD-032 | D-30: `POST /internal/clientes/autenticar` recebe CPF e e-mail e devolve cliente e JWT RS256 com `kid`; a AuthLambda deixa de assinar HS256 e de usar segredo de assinatura | User: "Cadastros emite o token (Recommended)" (12/11) | active |
+| AD-033 | D-31: o CRUD de clientes, veículos e usuários do Cadastros responde 400 à validação (contrato atual); plano e checks trocam 422 por 400 | User: "Manter 400, ajustar plano" (12/11) | active |
 
 ## Handoff: sincronização dos repositórios - 2026-11-12
 
