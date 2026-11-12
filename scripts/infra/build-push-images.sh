@@ -37,7 +37,7 @@ docker build -t "$API_IMAGE:$TAG" -t "$API_IMAGE:latest" -f submodules/AutoRepar
 # 2. Build do Frontend Web (Angular)
 echo ""
 echo "🏗️  2/4 Building Frontend Web image ($WEB_IMAGE:$TAG)..."
-docker build -t "$WEB_IMAGE:$TAG" -t "$WEB_IMAGE:latest" -f submodules/AutoReparos.Cadastros/AutoReparos.Web/Dockerfile submodules/AutoReparos.Cadastros/AutoReparos.Web
+docker build -t "$WEB_IMAGE:$TAG" -t "$WEB_IMAGE:latest" -f submodules/AutoReparos.Web/Dockerfile submodules/AutoReparos.Web
 
 # 3. Push da API
 echo ""

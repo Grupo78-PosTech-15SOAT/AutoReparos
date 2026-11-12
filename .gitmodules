@@ -24,3 +24,4 @@
 [submodule "submodules/AutoReparos.Web"]
 	path = submodules/AutoReparos.Web
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web.git
+	branch = develop
