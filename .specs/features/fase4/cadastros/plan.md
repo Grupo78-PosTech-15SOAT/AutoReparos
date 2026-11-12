@@ -46,7 +46,7 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 | `GET /api/v1/veiculos/{id}` (e `/api/veiculos/{id}`, D-28) | id -> veículo com dono | usuário autenticado (o OS repassa o JWT de quem abre a OS); sem usuário, chave interna | 200, 401, 403, 404 |
 | CRUD de clientes, veículos e usuários (`/api/v1/clientes`, `/api/v1/veiculos`, `/api/v1/usuarios`) | contratos atuais do App, mantidos sem mudança, em `/api/v1/...` e no prefixo atual `/api/...` (D-28) | papéis atuais do App | 200, 201, 204, 400, 401, 403, 404 |
 | `GET /.well-known/openid-configuration` e `/.well-known/jwks.json` | - -> metadados e chaves públicas | qualquer cliente (público por definição do OIDC) | 200, 404 para caminho inexistente |
-| `POST /internal/clientes/autenticar` | CPF e e-mail -> cliente e JWT RS256 com `kid` (D-30) | AuthLambda (NetworkPolicy e cabeçalho `X-Chave-Interna`) | 200, 401, 404 |
+| `POST /internal/clientes/autenticar` | CPF e e-mail -> cliente e JWT RS256 com `kid` (D-30) | AuthLambda (NetworkPolicy e cabeçalho `X-Chave-Interna`) | 200, 401, 403 (cliente inativo), 404 |
 
 ## Landing
 

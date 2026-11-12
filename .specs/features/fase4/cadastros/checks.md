@@ -25,6 +25,8 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 
 **C5** - `POST /internal/clientes/autenticar` recebe CPF e e-mail, devolve o cliente e o JWT RS256 com `kid` (D-30) e autentica sem acesso da AuthLambda ao banco, e o SG do RDS deixa de liberar a Lambda (AC 4)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~AutenticarClienteEndpointInterno`
+Proof: `dotnet test submodules/AutoReparos.AuthLambda/tests --filter FullyQualifiedName~ClienteAuthFunctionTests`
+Proof: `dotnet test submodules/AutoReparos.AuthLambda/tests --filter FullyQualifiedName~CadastrosClientTests`
 
 **C6** - O endpoint interno recusa chamada de fora do cluster ou sem `X-Chave-Interna` válido (AC 6)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~EndpointInternoRecusaSemChave`
@@ -47,7 +49,7 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 | `GET /api/v1/clientes/{id}` statuses (4) | 200 C2 · 401 C2 · 403 C2 · 404 C2 | - |
 | `GET /api/v1/veiculos/{id}` statuses (4) | 200 C2 · 401 C2 · 403 C2 · 404 C2 | - |
 | discovery and JWKS statuses (2) | 200 C4 · 404 C4 | - |
-| `POST /internal/clientes/autenticar` statuses (3) | 200 C5 · 401 C6 · 404 C5 | - |
+| `POST /internal/clientes/autenticar` statuses (4) | 200 C5 · 401 C6 · 403 C5 · 404 C5 | - |
 | CRUD de clientes, veículos e usuários statuses (7) | 200 C9 · 201 C9 · 204 C9 · 400 C9 · 401 C9 · 403 C9 · 404 C9 | - |
 | removed areas (5) | OS C1 · orçamento C1 · catálogo C1 · insumos C1 · dashboard C1 | - |
 | notification events (4) | orçamento C7 · conclusão C7 · pagamento C7 · lembrete C7 | - |
@@ -70,6 +72,6 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 
 - **Settled mid-build:** 2026-11-12 - D-31: 422 trocado por 400 em Surface e Coverage (claim de C9 inalterada); 2026-11-12 - caminhos do Build e das provas atualizados para os nomes pós-AD-025 (`AutoReparos.Cadastros.slnx`, `AutoReparos.Cadastros.IntegrationTests`); nenhuma claim mudou
 - **Dispatched:** none
-- **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. OS pronto (C2): branch local `feature/os-valida-cadastros` em `submodules/AutoReparos.OS` (1 commit, sem push; 9 testes da prova passam, suíte do OS verde exceto `ServiceDatabaseIsolationTests`, que depende de `OS_PROOF_DB_CONNECTION` e já falhava antes). Faltam: AuthLambda chamando o endpoint interno sem acesso ao banco, SG do RDS e NetworkPolicy no `Infra.K8s`, Verifier e `proofs.md`. Decidido (D-31): o CRUD responde 400, não 422. A decidir: os produtores precisam incluir `clienteId` nos eventos de notificação; o OS valida o `aud` do JWT (`Authentication:Audience`) e o Cadastros ainda não emite `aud`, então a configuração dos dois precisa ser alinhada na infra.
+- **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. OS pronto (C2): branch local `feature/os-valida-cadastros` em `submodules/AutoReparos.OS` (1 commit, sem push; 9 testes da prova passam, suíte do OS verde exceto `ServiceDatabaseIsolationTests`, que depende de `OS_PROOF_DB_CONNECTION` e já falhava antes). AuthLambda pronta (C5): branch local `feature/auth-lambda-cadastros` em `submodules/AutoReparos.AuthLambda` (1 commit, sem push; 49 testes verdes), sem driver de banco nem assinatura de token; o Cadastros passou a responder 403 a cliente inativo para a Lambda manter o contrato (Surface aditiva, commit `70b2479` na branch do Cadastros). Faltam: Terraform da Lambda precisa de `cadastros_base_url` apontando para um endereço alcançável de dentro da VPC, SG do RDS e NetworkPolicy no `Infra.K8s`, Verifier e `proofs.md`. Decidido (D-31): o CRUD responde 400, não 422. A decidir: os produtores precisam incluir `clienteId` nos eventos de notificação; o OS valida o `aud` do JWT (`Authentication:Audience`) e o Cadastros ainda não emite `aud`, então a configuração dos dois precisa ser alinhada na infra.
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
