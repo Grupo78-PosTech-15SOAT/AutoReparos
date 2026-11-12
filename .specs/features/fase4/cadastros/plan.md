@@ -1,6 +1,6 @@
 # Fase 4 - App reduzido a Cadastros
 
-**Revisão pendente de aprovação**: revisada em 2026-11-12 por D-34 a D-37 (AD-036 a AD-039); a aprovação de 2026-11-12 (user: "Aprovo") cobria D-28 a D-31. D-34 a D-37 ajustam database local, infraestrutura de notificações, AC 6 e provas estáticas após a verificação. Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
+**Approved**: 2026-11-12 - user: "Aprovo" Revisada em 2026-11-12 por D-34 a D-37 (AD-036 a AD-039): ajustes de database local, infraestrutura de notificações, AC 6 e provas estáticas após a verificação. Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
 
 ## Problem
 
