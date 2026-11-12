@@ -138,11 +138,28 @@ def runtime_env():
 
     docker_cmd = docker_build()
     with contextmanager(container)(docker_cmd, "https://api.example.test") as cid:
-        content = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/env.js")
-        require(b"window.__env.apiUrl = 'https://api.example.test'" in content, "API_URL não foi injetada")
+        expected = b"window.__env.apiUrl = 'https://api.example.test'"
+        content = b""
+        for _ in range(20):
+            try:
+                content = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/env.js")
+            except AssertionError:
+                content = b""  # O entrypoint pode ainda estar iniciando.
+            if expected in content:
+                break
+            time.sleep(0.5)
+        require(expected in content, "API_URL não foi injetada após iniciar o contêiner")
     with contextmanager(container)(docker_cmd) as cid:
-        content = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/env.js")
         original = (WEB / "public/env.js").read_bytes()
+        content = b""
+        for _ in range(20):
+            try:
+                content = run(docker_cmd, "exec", cid, "cat", "/usr/share/nginx/html/env.js")
+            except AssertionError:
+                content = b""
+            if content == original:
+                break
+            time.sleep(0.5)
         require(content == original, "env.js padrão mudou sem API_URL")
     print("PASS runtime-env: URL injetada e padrão preservado")
 
