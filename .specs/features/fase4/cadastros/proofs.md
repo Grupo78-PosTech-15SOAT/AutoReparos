@@ -1,6 +1,6 @@
 # fase4/cadastros proofs
 
-**HEAD**: c2a4019
+**HEAD**: 57fc7b5
 **Tree**: dirty - .claude/
 **Result**: 21 pass, 0 fail; mutations 3 killed, 0 not
 
