@@ -368,6 +368,9 @@ jobs:
           SENDGRID_FROM_NAME: ${{ vars.SENDGRID_FROM_NAME }}
         run: |
           set -euo pipefail
+          if [ -z '${{ vars.CADASTROS_NOTIFICACOES_FILA_URL }}' ]; then echo '::warning::CADASTROS_NOTIFICACOES_FILA_URL está vazia: o consumidor de notificações do Cadastros ficará desligado e nenhum e-mail de evento será enviado'; fi
+          if [ -z '${{ vars.CADASTROS_NOTIFICACOES_DLQ_URL }}' ]; then echo '::warning::CADASTROS_NOTIFICACOES_DLQ_URL está vazia: mensagens com falha de envio não terão para onde ir'; fi
+          if [ -z '${{ vars.CADASTROS_INTERNAL_URL }}' ]; then echo '::warning::CADASTROS_INTERNAL_URL está vazia: a AuthLambda não conseguirá autenticar clientes'; fi
           helm upgrade --install autoreparos submodules/AutoReparos.Infra.K8s/k8s \
             --namespace '${{ vars.K8S_NAMESPACE }}' --create-namespace \
             -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml \

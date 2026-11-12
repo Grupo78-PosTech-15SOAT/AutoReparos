@@ -34,14 +34,17 @@ Proof: `grep -q ">= 1" submodules/AutoReparos.Infra.Database/terraform/variables
 **C6** - O endpoint interno recusa chamada de fora do cluster ou sem `X-Chave-Interna` válido (AC 6)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~EndpointInternoRecusaSemChave`
 Proof: `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --show-only charts/api/templates/networkpolicy.yaml`
+Proof: `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --set ingress.enabled=true --show-only templates/ingress.yaml | grep -q "autoreparos-cadastros-interno"`
 
 ### S2 - Notificações e CRUD mantido
 
 **C7** - Evento de orçamento, conclusão, pagamento ou lembrete envia a notificação uma única vez por `eventId` (AC 5)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~NotificacaoUmaVezPorEventId`
+Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~ConsumidorNotificacoesWiring`
 
 **C8** - Falha no envio do e-mail repete com backoff exponencial, envia à DLQ ao esgotar e só registra o `eventId` após o envio (AC 9)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~FalhaDeEmailRepeteEVaiParaDlq`
+Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedName~SqsNotificacoesTests`
 
 **C9** - O CRUD de clientes, veículos e usuários continua com os contratos atuais do App, em `/api/v1/...` e `/api/...` (Surface, D-28)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~CrudMantidoSemMudanca`
@@ -75,7 +78,7 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 ## Handoff
 
 - **Settled mid-build:** 2026-11-12 - D-31: 422 trocado por 400 em Surface e Coverage (claim de C9 inalterada); 2026-11-12 - caminhos do Build e das provas atualizados para os nomes pós-AD-025 (`AutoReparos.Cadastros.slnx`, `AutoReparos.Cadastros.IntegrationTests`); nenhuma claim mudou
-- **Dispatched:** none
+- **Dispatched:** 2026-11-12 - Verifier independente (sub-agent novo, author != verifier) sobre o HEAD ce0bc13; relatório esperado em `.specs/features/fase4/cadastros/verification.md`
 - **Boundary:** 2026-11-12 - lado Cadastros pronto em `submodules/AutoReparos.Cadastros`, branch local `feature/cadastros-reducao` (3 commits, sem push; 186 testes e `dotnet format` verdes): C1, C3, C4, C5 (endpoint), C6 (chave interna), C7, C8, C9 e a parte Cadastros de C2. OS pronto (C2): branch local `feature/os-valida-cadastros` em `submodules/AutoReparos.OS` (1 commit, sem push; 9 testes da prova passam, suíte do OS verde exceto `ServiceDatabaseIsolationTests`, que depende de `OS_PROOF_DB_CONNECTION` e já falhava antes). AuthLambda pronta (C5): branch local `feature/auth-lambda-cadastros` em `submodules/AutoReparos.AuthLambda` (1 commit, sem push; 49 testes verdes), sem driver de banco nem assinatura de token; o Cadastros passou a responder 403 a cliente inativo para a Lambda manter o contrato (Surface aditiva, commit `70b2479` na branch do Cadastros). Infra pronta: `submodules/AutoReparos.Infra.Database` branch `feature/rds-sem-lambda` (RDS só libera o SG do EKS, `terraform validate` ok), `submodules/AutoReparos.Infra.K8s` branch `feature/cadastros-rede-e-segredos` (NetworkPolicy, chave RS256, chave interna e variáveis de notificação no chart; `helm lint` ok) e, no pai, workflows, `.env.example`, compose, scripts e README (SG do RDS sem a Lambda, segredos novos, Lambda sem banco). Nada foi aplicado na AWS. Pendências: criar no GitHub os secrets `JWT_CHAVE_PRIVADA_PEM` e `CHAVE_INTERNA` e as variables `CADASTROS_ISSUER`, `CADASTROS_INTERNAL_URL`, `CADASTROS_NOTIFICACOES_FILA_URL`, `CADASTROS_NOTIFICACOES_DLQ_URL` e `VPC_PRIVATE_CIDRS`; o NetworkPolicy exige CNI com suporte (VPC CNI com NetworkPolicy habilitado); o `/internal` ainda passa pelo ingress nginx (o API Gateway só expõe `/api`, `/health` e web); renomear `db_name` do RDS para `cadastros_db` recria a instância e não foi feito; Verifier e `proofs.md`. Decidido (D-31): o CRUD responde 400, não 422. A decidir: os produtores precisam incluir `clienteId` nos eventos de notificação; o OS valida o `aud` do JWT (`Authentication:Audience`) e o Cadastros ainda não emite `aud`, então a configuração dos dois precisa ser alinhada na infra.
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
