@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sobe o ambiente de prova local do os-service (C5 - ServiceDatabaseIsolation) e exporta OS_PROOF_*.
-# Uso: source .specs/features/fase4/os-service/proof-env/harness.sh
+# Uso: source .specs/features/fase4/servico-os/proof-env/harness.sh
 # Requisitos: Git Bash, Docker, .NET 10 SDK, dotnet-ef (dotnet tool install --global dotnet-ef),
 #             Python 3 com `pip install pyjwt cryptography`. Credenciais abaixo sao descartaveis (somente local).
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

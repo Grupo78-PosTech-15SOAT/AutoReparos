@@ -1,4 +1,4 @@
-# Ambiente de prova do os-service (C5)
+# Ambiente de prova do serviço OS (C5)
 
 A prova C5 (`ServiceDatabaseIsolation`) exige banco, API e identidades reais. Estes scripts montam tudo localmente:
 Postgres 16 em Docker (`os-proof-pg`, porta 55432), um emissor JWT de teste (`mock_issuer.py`, porta 8099) e a API
@@ -7,7 +7,7 @@ do OS publicada (porta 5083). As credenciais sao descartaveis e so valem localme
 ```bash
 pip install pyjwt cryptography
 dotnet tool install --global dotnet-ef
-bash .specs/features/fase4/os-service/proof-env/run_proofs.sh --mutations .specs/features/fase4/os-service/mutations.json
+bash .specs/features/fase4/servico-os/proof-env/run_proofs.sh --mutations .specs/features/fase4/servico-os/mutations.json
 ```
 
 Notas:

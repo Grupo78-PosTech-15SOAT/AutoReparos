@@ -32,6 +32,13 @@
 | AD-025 | Nomes em português também no código (L-02, AD-010): solutions, projetos e namespaces renomeados para `AutoReparos.Cobranca.*` (antes `Billing`), `AutoReparos.Execucao.*` (antes `Execution`), `AutoReparos.OS.*` (caixa `Os` corrigida) e `AutoReparos.Cadastros.*` (antes `API`, `Application`, `Domain`, `Infra`; `Web` e solution `AutoReparos.App.slnx` incluídos); pasta de spec `billing` renomeada para `cobranca`; comandos de prova e mutações atualizados nos `checks.md` e `mutations.json`. Ficam como estão: nomes de classes (`BillingDbContext`, `BillingService`), ids de migrations, chaves de configuração (`ConnectionStrings__Billing`), nomes de testes e `proofs.md`/`verification.md` históricos. As provas das features com PASS precisam ser reexecutadas no novo HEAD | User: "tem que incluir o de Cadastro também que era App antes" e "Sim, antes do push" (11/11) | active | 2026-11-11 |
 | AD-026 | D-25: proteção obrigatória só na `main` de OS, Cobrança, Execução, Cadastros e Web (PR com 1 aprovação, status checks `build`, `test`, `quality`, `strict`, vale para admins, sem force push nem exclusão); `develop` sem proteção. `AutoReparos.Web` criado público pelo usuário com `main` inicial (`91a1aa1`). Plano `infra-ci-observabilidade` aprovado | User: "Branch protegida: main", "Repositório Web: Vamos criar", "Sim, aprovo e crio" (11/11) | active | 2026-11-11 |
 | AD-027 | D-26: L-01 não depende de DynamoDB Streams; o AC 5 de `infra-ci-observabilidade` traça SQS e SNS. Streams e `saga.avancou.v1` seguem opcionais (AD-024) | User: "Pode seguir" (11/11), em resposta à recomendação de tirar Streams do AC 5 | active | 2026-11-11 |
+| AD-029 | D-27: renomear a pasta da feature TLC `os-service` para `servico-os`, atualizando links, identificadores de feature e comandos de prova. O repositório `AutoReparos.OS`, a branch `feature/os-service-contracts` e evidências históricas de verificação mantêm seus nomes | User: "melhor \"servico-os\"" (11/11), corrigindo a escolha inicial de `ordens-servico` | active | 2026-11-11 |
+
+## Handoff: renomeação da pasta de spec da OS - 2026-11-11
+
+- D-27/AD-029: `.specs/features/fase4/os-service/` foi renomeada para `.specs/features/fase4/servico-os/`. Links, mapa, comandos de prova e `.gitattributes` foram atualizados; as evidências históricas mantêm o identificador antigo.
+- Validação independente em `servico-os/validation.md`: links, plano, checks e sintaxe dos scripts PASS. `dotnet build AutoReparos.slnx -c Release --no-restore -m:1` passou (6 avisos NU1900 de consulta ao NuGet); `dotnet test` da suíte unitária OS passou, 125/125.
+- Gate TLC completo pendente: `proofs.md` histórico foi gravado em `ba95d75` e a árvore compartilhada contém alterações simultâneas. Reexecutar o ambiente C5, as três mutações e `validate_verification.py` em um `HEAD` definitivo com árvore limpa.
 
 ## Handoff: infra-ci-observabilidade - 2026-11-11
 
@@ -72,7 +79,7 @@ Iniciativa **Fase 4** em `.specs/features/fase4/` (mapa em `FEATURES.md`). Branc
 
 | Feature | Estado | Evidência |
 | --- | --- | --- |
-| `os-service` | **PASS** (3ª rodada de Verifier). Provas 7/7, 3 mutações mortas | `os-service/verification.md`, `proofs.md` |
+| `servico-os` | **PASS** (3ª rodada de Verifier). Provas 7/7, 3 mutações mortas | `servico-os/verification.md`, `proofs.md` |
 | `cobranca` | **PASS** (3ª rodada). Provas 11/11, 3 mutações mortas | `cobranca/verification.md`, `proofs.md` |
 | `execucao` | **PASS** (1ª rodada). Provas 8/8 (6 checks, build, format), 3 mutações mortas | `execucao/verification.md`, `proofs.md` |
 | `saga-mensageria` | **PASS** (2ª rodada de Verifier). Provas 9/9, 3 mutações mortas; regressão no mesmo HEAD: os-service 7/7, billing 11/11, execucao 8/8, 3 mutações mortas cada | `saga-mensageria/verification.md`, `proofs.md` |
@@ -108,7 +115,7 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 2. **Preferências da memória do Claude não sincronizam.** As regras de commit estão em AD-002; repita-as ao Claude.
 3. **Skill `tlc-spec-lean`:** instalada no repositório em `.agents/skills/tlc-spec-lean/` (SKILL.md, `references/` e `scripts/`) para descoberta automática no Antigravity e Claude Code. Os scripts do gate ficam em `.agents/skills/tlc-spec-lean/scripts/` e rodam com Python 3.8+.
 4. **Ferramentas:** Git Bash, Docker (imagem `postgres:16-alpine`; os testes de Billing e Execution usam Testcontainers), .NET 10 SDK com acesso ao NuGet, `dotnet-ef` (`dotnet tool install --global dotnet-ef`), Python com `pip install pyjwt cryptography`.
-5. **Ambiente de prova do os-service (C5):** agora versionado em `.specs/features/fase4/os-service/proof-env/` (`harness.sh`, `run_proofs.sh`, `mock_issuer.py`, `README.md`). Comando: `bash .specs/features/fase4/os-service/proof-env/run_proofs.sh --mutations .specs/features/fase4/os-service/mutations.json`. Os containers e processos locais (`os-proof-pg`, emissor na porta 8099, API na 5083) não migram.
+5. **Ambiente de prova do serviço OS (C5):** agora versionado em `.specs/features/fase4/servico-os/proof-env/` (`harness.sh`, `run_proofs.sh`, `mock_issuer.py`, `README.md`). Comando: `bash .specs/features/fase4/servico-os/proof-env/run_proofs.sh --mutations .specs/features/fase4/servico-os/mutations.json`. Os containers e processos locais (`os-proof-pg`, emissor na porta 8099, API na 5083) não migram.
 
 ### Como rodar o gate de uma feature
 

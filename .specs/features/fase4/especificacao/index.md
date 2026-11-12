@@ -93,7 +93,7 @@ Regras de sincronização (detalhadas no § 8):
 
 | Feature (`../<feature>/plan.md`) | Estado (10/11) | Specs desta pasta |
 |---|---|---|
-| [`os-service`](../os-service/plan.md) | ✅ PASS (abertura, consulta, histórico de criação) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md), [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
+| [`servico-os`](../servico-os/plan.md) | ✅ PASS (abertura, consulta, histórico de criação) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md), [Bancos](./microsservicos/fase4_spec_bancos_de_dados.md) |
 | [`cobranca`](../cobranca/plan.md) | ✅ PASS (orçamento, Checkout Pro, webhook, reembolso) | [Mercado Pago](./microsservicos/fase4_spec_integracao_mercado_pago.md) |
 | [`execucao`](../execucao/plan.md) | ✅ PASS (fila, etapas, conclusão, falha, reexecução) | [Separação](./microsservicos/fase4_spec_separacao_microsservicos.md) |
 | [`saga-mensageria`](../saga-mensageria/plan.md) | ✅ PASS (orquestração, compensações de orçamento e execução, cancelamento) | [Saga](./saga/fase4_spec_saga_pattern.md), [Comunicação](./comunicacao/fase4_spec_comunicacao_microsservicos.md) |
@@ -255,6 +255,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-24 | **Aplicar L-02 aos tipos de mensagem já implementados** (10/11): trocar o comando `billing.orcamento.cancelar.v1` por `cobranca.cancelar-orcamento.v1`, nome já previsto no catálogo; os demais tipos existentes já usam português e conservam sua semântica | AD-022; José: "Vamos trocar os eventos para português" | [Comunicação § 4.5](./comunicacao/fase4_spec_comunicacao_microsservicos.md#45-catálogo-de-mensagens) |
 | D-25 | **Proteção obrigatória só na `main`** (11/11): `main` de OS, Cobrança, Execução, Cadastros e Web exige PR com 1 aprovação e os jobs `build`, `test` e `quality` como status checks; a `develop` não recebe proteção obrigatória. O repositório `AutoReparos.Web` foi criado (público) nesta data, confirmando D-03 | AD-026; Usuário: "Branch protegida: main" e "Repositório Web: Vamos criar" | [CI/CD § 4.3](./cicd/fase4_spec_cicd_e_protecao_de_branches.md#43-proteção-de-branches) |
 | D-26 | **L-01 não depende de DynamoDB Streams** (11/11): a regra exige um banco por passo, cumprida hoje pelo despacho da Saga (`saga-mensageria`, PASS). Streams é só um dos mecanismos de publicar a Outbox do DynamoDB (o outro é varredura por índice) e fica opcional; `infra-ci-observabilidade` traça SQS e SNS, sem Streams | AD-027; Usuário: "Pode seguir" (recomendação de tirar Streams do AC 5) | [Saga § 4.8](./saga/fase4_spec_saga_pattern.md#48-regra-l-01-no-os-service--opção-c) |
+| D-27 | **Pasta TLC da OS renomeada para `servico-os`** (11/11): o nome da feature, seus links e comandos de prova acompanham a pasta; o repositório `AutoReparos.OS`, a branch `feature/os-service-contracts` e os registros históricos de provas conservam seus nomes | AD-029; usuário: "melhor \"servico-os\"" ao definir o nome alvo para a pasta `os-service` no PR #46 | [Plano da OS](../servico-os/plan.md) |
 
 ### 6.2 Regras obrigatórias do grupo
 

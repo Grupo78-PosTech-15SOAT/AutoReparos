@@ -2,7 +2,7 @@
 
 Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet format submodules/AutoReparos.OS/AutoReparos.OS.slnx --verify-no-changes`
-Plan: `.specs/features/fase4/os-service/plan.md`
+Plan: `.specs/features/fase4/servico-os/plan.md`
 
 5 checks · 1 slice · 2 one-way doors · 0 open questions, 0 blocking
 
@@ -47,7 +47,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.IntegrationTests --
 ## Handoff
 
 - **Settled mid-build:** user: "OS não seria melhor em upper-case por ser sigla?"; repositório local `submodules/AutoReparos.OS`.
-- **Dispatched:** os_verifier - fresh independent verifier (2026-11-09), root HEAD 73f4cec, OS repo d9f9cd8; os_verifier_r2 - segunda rodada independente (2026-11-09), root HEAD ff71be7; os_verifier_r3 - terceira rodada independente (2026-11-09), root HEAD d982c59
+- **Dispatched:** os_verifier - fresh independent verifier (2026-11-09), root HEAD 73f4cec, OS repo d9f9cd8; os_verifier_r2 - segunda rodada independente (2026-11-09), root HEAD ff71be7; os_verifier_r3 - terceira rodada independente (2026-11-09), root HEAD d982c59; spec_rename_verifier - revisão independente da renomeação da pasta para `servico-os` (2026-11-11)
 - **Boundary:** endpoints, migrações PostgreSQL, autorização por perfil e publicador SQS com outbox, retentativas e DLQ implementados. C5 verifica privilégios efetivos e acesso por tokens, mas falhou sem `OS_PROOF_DB_CONNECTION`; exige ambiente provisionado conforme README do serviço. `check_proofs.py` registrou 6 pass e 1 fail (C5), com árvore suja e contagens desconhecidas; verificação independente e commits permanecem pendentes.
 - **Abandoned:** none
 - **Walked:** none - backend behavior, no screen capture
