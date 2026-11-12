@@ -51,7 +51,7 @@ def source():
     paths = git(CADASTROS, "ls-tree", "-r", "--name-only", BASE_CADASTROS, "--", "AutoReparos.Web")
     files = [path for path in paths.splitlines() if path.startswith("AutoReparos.Web/")]
     require(len(files) == 98, "Baseline do Angular deveria conter 98 arquivos; encontrou {}".format(len(files)))
-    ci_exceptions = {"README.md", "package.json", "yarn.lock", "angular.json"}
+    ci_exceptions = {"README.md", "package.json", "yarn.lock", "angular.json", "docker-entrypoint.sh"}
     for original in files:
         relative = original[len("AutoReparos.Web/") :]
         destination = WEB / relative

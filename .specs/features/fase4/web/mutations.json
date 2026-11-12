@@ -1,0 +1,24 @@
+[
+  {
+    "file": "submodules/AutoReparos.Web/docker-entrypoint.sh",
+    "old": "window.__env.apiUrl = '$API_URL'",
+    "new": "window.__env.apiURL = '$API_URL'",
+    "proof": "python scripts/specs/assert_web_extraction.py --check runtime-env",
+    "label": "C6: API_URL injetado em propriedade de nome errado (apiURL em vez de apiUrl)"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/.github/workflows/ci-cd.yml",
+    "old": "branches: [develop, main]",
+    "new": "branches: [main]",
+    "proof": "python scripts/specs/assert_web_extraction.py --check web-ci",
+    "label": "C7: CI do Web deixa de disparar em push na develop"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/nginx.conf",
+    "old": "try_files $uri $uri/ /index.html;",
+    "new": "try_files $uri $uri/ =404;",
+    "proof": "python scripts/specs/assert_web_extraction.py --check docker",
+    "label": "C5: rota /login deixa de cair no index.html (200 vira 404)"
+  }
+]
+
