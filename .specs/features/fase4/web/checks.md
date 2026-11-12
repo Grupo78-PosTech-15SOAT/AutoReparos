@@ -10,7 +10,7 @@ Plan: `.specs/features/fase4/web/plan.md`
 
 ### S1 - Fonte única da aplicação
 
-**C1** - `develop` do Web deriva de `91a1aa1` e conserva todos os arquivos rastreados da aplicação Angular de Cadastros em `3d71ba8`, salvo os 5 ajustes documentados no Coverage (AC 1)
+**C1** - `develop` do Web deriva de `91a1aa1` e conserva todos os arquivos rastreados da aplicação Angular de Cadastros em `3d71ba8`, salvo os 6 ajustes documentados no Coverage (AC 1)
 Proof: `python scripts/specs/assert_web_extraction.py --check source`
 
 **C2** - Cadastros não rastreia mais `AutoReparos.Web` nem referencia essa pasta em CI ou Compose (AC 2)
@@ -48,7 +48,7 @@ Proof: `python scripts/specs/assert_web_extraction.py --check readme`
 
 | Set (size) | Member -> proof | Unproven |
 | --- | --- | --- |
-| fonte do projeto (2) | 98 caminhos rastreados de `3d71ba8`, dos quais 93 com bytes iguais e 5 ajustes documentados (`README.md`, `package.json`, `yarn.lock`, `angular.json` e `docker-entrypoint.sh`, este por `5d1aeae`, coletor OpenTelemetry sob demanda) C1 · pasta removida do Cadastros C2 | - |
+| fonte do projeto (2) | 98 caminhos rastreados de `3d71ba8`, dos quais 92 com bytes iguais e 6 ajustes documentados (`README.md`, `package.json`, `yarn.lock`, `angular.json`, `docker-entrypoint.sh` e `nginx.conf`; os dois últimos em `5d1aeae` para resolver o coletor OpenTelemetry sob demanda e permitir o smoke Docker) C1 · pasta removida do Cadastros C2 | - |
 | branches/ponteiro (3) | `main` inicial preservada C1 · `develop` contém Angular C1 · gitlink do pai em `origin/develop` C3 | - |
 | comandos locais (3) | instalação congelada C4 · build C4 · teste C4 | - |
 | rotas de smoke (2) | `/` 200 C5 · `/login` 200 C5 | - |

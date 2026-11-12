@@ -51,14 +51,14 @@ def source():
     paths = git(CADASTROS, "ls-tree", "-r", "--name-only", BASE_CADASTROS, "--", "AutoReparos.Web")
     files = [path for path in paths.splitlines() if path.startswith("AutoReparos.Web/")]
     require(len(files) == 98, "Baseline do Angular deveria conter 98 arquivos; encontrou {}".format(len(files)))
-    ci_exceptions = {"README.md", "package.json", "yarn.lock", "angular.json", "docker-entrypoint.sh"}
+    ci_exceptions = {"README.md", "package.json", "yarn.lock", "angular.json", "docker-entrypoint.sh", "nginx.conf"}
     for original in files:
         relative = original[len("AutoReparos.Web/") :]
         destination = WEB / relative
         require(destination.is_file(), "Arquivo migrado ausente: {}".format(destination))
         git(WEB, "cat-file", "-e", "HEAD:{}".format(relative))
         if relative in ci_exceptions:
-            continue  # Documentação e configuração/dependência de cobertura do CI são ajustes aprovados.
+            continue  # Documentação, CI e resolução tardia do coletor OTel são ajustes documentados.
         expected = run("git", "-C", CADASTROS, "show", "{}:{}".format(BASE_CADASTROS, original))
         committed = run("git", "-C", WEB, "show", "HEAD:{}".format(relative))
         require(committed == expected, "Conteúdo original mudou: {}".format(original))
