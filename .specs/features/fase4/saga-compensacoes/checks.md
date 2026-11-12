@@ -95,6 +95,6 @@ Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests -
 
 - **Settled mid-build:** 2026-11-12 - "Worktree novo da saga" (build em `.claude/worktrees/saga-compensacoes`, branch `feature/saga-compensacoes`); orçamento sem insumos (`itens` vazio) vai direto a `ExecucaoLiberada` e `itens` ausente vai à DLQ; etapa 5 "Insumos reservados" só existe quando há insumos
 - **Dispatched:** none
-- **Boundary:** C1, C2, C3, C4, C13 e C14 fechados (Cobrança `6e54a04`; OS `6c327a3`, testes em `SagaInsumosTests`, 125 testes antigos seguem verdes); faltam C5 a C12. Build verde nas duas solutions. Desvio a confirmar: os testes de C6, C7, C8, C11 e C12 do OS ficam em `AutoReparos.OS.Tests` (onde existe o harness com DynamoDB local e a API real), não em `Api.Tests`/`IntegrationTests` como os `Proof:` dizem; a claim não muda, só o projeto que hospeda o teste
+- **Boundary:** fechados C1, C2, C3, C4, C6, C7, C8, C11 (parcial: lista, detalhe e retentar) e C13, C14 (Cobrança `6e54a04`; OS `6c327a3`, `c22788f`, `38374a2`; testes `SagaInsumosTests`, `SagaConsoleRotaTests`, `SagaConcorrenciaTests`). Faltam C5, C9, C10 e C12 (prazos, lembrete e reprocessamento de DLQ nos três serviços); `check_proofs.py` e o Verifier não rodaram. Desvio a confirmar: testes do OS em `AutoReparos.OS.Tests`, não em `Api.Tests`/`IntegrationTests`
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
