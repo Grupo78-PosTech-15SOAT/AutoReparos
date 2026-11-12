@@ -175,3 +175,10 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - `SagaOS` emite `cobranca.cancelar-orcamento.v1` em compensações novas, normaliza `EtapaSaga.Compensacao` legada sem duplicar etapas e `ComandoSaga.NormalizarTipo()` converte `Tipo` e `Corpo.tipo` de comandos pendentes legados preservando `eventId`, demais campos, backoff e ordem.
 - `CancelamentoOrcamentoService` na Cobrança aceita `cobranca.cancelar-orcamento.v1` e o alias legado `billing.orcamento.cancelar.v1`, deduplicando pelo mesmo `eventId` na Inbox (`eventos_processados`) em qualquer ordem de chegada.
 - `scripts/specs/verificar_eventos_portugues.py` valida os 4 artefatos de contrato; `scripts/specs/verificar_links.py`: 49 arquivos, 196 links, 0 problemas.
+
+### Handoff: SonarCloud no plano Free (12/11/2026)
+
+- Os jobs `quality` dos workflows de OS, Web, Cobrança, Execução e Cadastros receberam condição para executar somente em push na `main` ou PR com destino à `main`; build e testes continuam acionados em `develop`.
+- Commits enviados nas branches `codex/sonarcloud-free-20261112`: OS `7cf9a16`, Web `6975b7f`, Cobrança `6f08e1c`, Execução `7d55ec8`, Cadastros `fb0b099`. Os ponteiros do repositório pai devem acompanhar esses commits.
+- Verifier independente: PASS em `.specs/features/fase4/infra-ci-observabilidade/validation.md`, com os quatro cenários de evento e três mutações por workflow. `assert_pipelines.py --check jobs` passou nos cinco repositórios; `verificar_links.py`: 60 arquivos, 204 links, 0 problemas.
+- Pendente: observar execução remota em PR para `main`. `assert_pipelines.py --check qualidade` tem falso positivo preexistente no Web porque procura `sonarcloud.io` textual, mas o workflow usa `SonarSource/sonarqube-scan-action`.
