@@ -27,11 +27,11 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~AutenticarClienteEndpointInterno`
 Proof: `dotnet test submodules/AutoReparos.AuthLambda/tests --filter FullyQualifiedName~ClienteAuthFunctionTests`
 Proof: `dotnet test submodules/AutoReparos.AuthLambda/tests --filter FullyQualifiedName~CadastrosClientTests`
-Proof: `! git grep -q -e '\[\$eks,\$lambda\]' -- .github`
+Proof: `python3 scripts/specs/verificar_infra_cadastros.py rds-sem-lambda`
 
 **C6** - O endpoint interno recusa chamada de fora do cluster ou sem `X-Chave-Interna` válido (AC 6)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~EndpointInternoRecusaSemChave`
-Proof: `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s | grep -q 'kind: NetworkPolicy'`
+Proof: `python3 scripts/specs/verificar_infra_cadastros.py networkpolicy`
 
 ### S2 - Notificações e CRUD mantido
 
