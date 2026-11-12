@@ -261,6 +261,10 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-29 | **Notificações reusam o SendGrid** (12/11): o consumidor de eventos do Cadastros usa o `NotificacaoService` (SendGrid, com retry) já existente; o plano dizia SMTP, mas o App nunca usou SMTP | AD-031; Usuário: "Reusar o SendGrid (Recommended)" | [Plano do Cadastros](../cadastros/plan.md) |
 | D-30 | **Cadastros emite o token do cliente** (12/11): `POST /internal/clientes/autenticar` recebe CPF e e-mail (como a AuthLambda já faz), devolve o cliente e o JWT RS256 com `kid`; a AuthLambda deixa de assinar token e de ter segredo | AD-032; Usuário: "Cadastros emite o token (Recommended)" | [Plano do Cadastros](../cadastros/plan.md) |
 | D-31 | **CRUD do Cadastros valida com 400** (12/11): a validação de domínio do CRUD de clientes, veículos e usuários continua respondendo 400, como no App; o 422 do plano não existe no contrato atual e não será introduzido | AD-033; Usuário: "Manter 400, ajustar plano" | [Plano do Cadastros](../cadastros/plan.md) |
+| D-34 | **Database do Cadastros: `cadastros_db` só no ambiente local** (12/11): o compose local e os testes usam `cadastros_db`/`cadastros_test`; no RDS de produção o `db_name` permanece `autoreparos_db`, porque trocá-lo recria a instância. Renomear fica para a próxima recriação do RDS, em `infra-ci-observabilidade` | AD-036; Usuário: "Ajustar a spec" (achado "Door 1" do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
+| D-35 | **Fila, DLQ, assinaturas SNS e IAM das notificações são de `infra-ci-observabilidade`** (12/11): o Cadastros consome a fila configurada em `Notificacoes__FilaUrl`/`Notificacoes__DlqUrl`; provisioná-las e os produtores incluírem `clienteId` nos eventos ficam fora do plano do Cadastros. Os workflows avisam quando as variables estão vazias | AD-037; Usuário: "Ajustar a spec" (achado AC 5 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
+| D-36 | **AC 6 do Cadastros vale na aplicação e na entrada de rede** (12/11): o endpoint interno recusa chamada sem `X-Chave-Interna` válida (teste) e só é publicado num ALB interno separado do API Gateway (prova no chart); "fora do cluster" por NetworkPolicy depende de o EKS aplicar política de rede, o que fica para `infra-ci-observabilidade` | AD-038; Usuário: "Ajustar a spec" (achado C6 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
+| D-37 | **Provas de rede e de IaC do Cadastros são estáticas** (12/11): o SG do RDS sem a Lambda é provado por `grep` nos workflows e em `variables.tf`, e a NetworkPolicy por renderização do chart; um `terraform plan` real exige credenciais AWS e fica para `infra-ci-observabilidade` | AD-039; Usuário: "Ajustar a spec" (achado C5 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
 
 ### 6.2 Regras obrigatórias do grupo
 
@@ -293,6 +297,8 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 12/11/2026 | D-28: `/api/v1` passa a coexistir com o prefixo atual; D-17: e-mail por SendGrid em vez de SMTP (D-29) | O código do App usa `/api/...` e SendGrid; o plano supunha `/api/v1` e SMTP |
 | 12/11/2026 | D-11: o endpoint interno recebe CPF e e-mail e devolve também o JWT; D-21: o token do cliente passa a ser emitido pelo Cadastros (D-30) | A AuthLambda assinava o próprio HS256 e buscava por CPF e e-mail |
 | 12/11/2026 | D-31: status 422 do CRUD do Cadastros substituído por 400 (contrato atual) | O App sempre respondeu 400 à validação; "contratos mantidos sem mudança" prevalece |
+| 12/11/2026 | D-34: Door 1 do Cadastros passa a `cadastros_db` só no local; RDS mantém `autoreparos_db` | Renomear o `db_name` recria o RDS |
+| 12/11/2026 | D-35: AC 5 do Cadastros deixa de provisionar fila, DLQ e SNS; D-36: AC 6 deixa de exigir prova de "fora do cluster" por NetworkPolicy; D-37: provas de rede e IaC estáticas | Achados do Verifier que dependem de infraestrutura e de credenciais AWS |
 
 ---
 

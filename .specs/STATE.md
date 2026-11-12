@@ -38,6 +38,10 @@
 | AD-031 | D-29: notificações do Cadastros reusam o `NotificacaoService` com SendGrid; plano corrigido de SMTP para SendGrid | User: "Reusar o SendGrid (Recommended)" (12/11) | active |
 | AD-032 | D-30: `POST /internal/clientes/autenticar` recebe CPF e e-mail e devolve cliente e JWT RS256 com `kid`; a AuthLambda deixa de assinar HS256 e de usar segredo de assinatura | User: "Cadastros emite o token (Recommended)" (12/11) | active |
 | AD-033 | D-31: o CRUD de clientes, veículos e usuários do Cadastros responde 400 à validação (contrato atual); plano e checks trocam 422 por 400 | User: "Manter 400, ajustar plano" (12/11) | active |
+| AD-036 | D-34: `cadastros_db` vale no compose e nos testes locais; o `db_name` do RDS permanece `autoreparos_db` até a próxima recriação | User: "Ajustar a spec" (12/11) | active |
+| AD-037 | D-35: fila, DLQ, SNS e IAM das notificações fora do plano do Cadastros (`infra-ci-observabilidade`); produtores incluem `clienteId` nos eventos | User: "Ajustar a spec" (12/11) | active |
+| AD-038 | D-36: AC 6 = recusa sem chave (teste) + `/internal` só num ALB interno separado do API Gateway (prova no chart); NetworkPolicy depende do CNI do EKS | User: "Ajustar a spec" (12/11) | active |
+| AD-039 | D-37: provas de SG do RDS e da NetworkPolicy são estáticas; `terraform plan` real fica para `infra-ci-observabilidade` | User: "Ajustar a spec" (12/11) | active |
 
 ## Handoff: sincronização dos repositórios - 2026-11-12
 

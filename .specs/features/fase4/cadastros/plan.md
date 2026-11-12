@@ -1,6 +1,6 @@
 # Fase 4 - App reduzido a Cadastros
 
-**Approved**: 2026-11-12 - user: "Aprovo" Revisada em 2026-11-12 por D-28 a D-31 (AD-030 a AD-033); D-31 troca o status 422 do CRUD por 400. Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
+**Revisão pendente de aprovação**: revisada em 2026-11-12 por D-34 a D-37 (AD-036 a AD-039); a aprovação de 2026-11-12 (user: "Aprovo") cobria D-28 a D-31. D-34 a D-37 ajustam database local, infraestrutura de notificações, AC 6 e provas estáticas após a verificação. Ajustes de 11/11 (AD-023): ajustada após as decisões D-11, D-12, D-17 e D-21 (AD-023). Decisões de origem: D-01, D-11, D-17, D-21, D-23, D-28, D-29, D-30 de `.specs/features/fase4/especificacao/index.md` (AD-013, AD-017, AD-023).
 
 ## Problem
 
@@ -10,7 +10,7 @@ O App ainda concentra clientes, veículos, usuários, catálogo, insumos e o flu
 
 Esta entrega reduz o App e expõe os contratos de que os outros serviços precisam.
 
-1. App remove OS, orçamento, catálogo, insumos e dashboard, e passa a usar uma database própria renomeada (door 1).
+1. App remove OS, orçamento, catálogo, insumos e dashboard, e passa a usar uma database própria, `cadastros_db` no ambiente local (door 1, D-34).
 2. Cadastros publica discovery OIDC e JWKS com chave assimétrica (door 2); OS, Cobrança e Execução validam o token por `Authority`.
 3. OS valida cliente e veículo por REST; AuthLambda autentica o cliente por endpoint interno.
 4. Notificações por e-mail passam a consumir eventos da sua fila assinando os tópicos SNS dos produtores.
@@ -35,7 +35,7 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 | Front | What changes |
 | --- | --- |
 | domínio | App mantém só clientes, veículos, usuários e notificações. |
-| stored data | Remoção de tabelas que mudaram de dono; database renomeada para `cadastros_db`. |
+| stored data | Remoção de tabelas que mudaram de dono; database própria (`cadastros_db` no compose e nos testes; o RDS mantém `autoreparos_db`, D-34). |
 | readers | OS e AuthLambda leem por REST; serviços validam JWT pelo JWKS; frontend usa os novos paths. |
 
 ## Surface
@@ -52,7 +52,7 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 
 | Door | Literal shape | Alternative rejected and why |
 | --- | --- | --- |
-| 1 | Repositório `AutoReparos.Cadastros` (renomeado do App) com database `cadastros_db` | Cadastros dentro do OS reescreveria código testado num serviço já verificado |
+| 1 | Repositório `AutoReparos.Cadastros` (renomeado do App) com database própria (`cadastros_db` local; RDS mantém `autoreparos_db`, D-34) | Cadastros dentro do OS reescreveria código testado num serviço já verificado |
 | 2 | JWT RS256 com chave privada em Secret do K8s (uma chave ativa, `kid` no token, rotação manual documentada) e JWKS público com cache de 10 minutos nos serviços | Chave simétrica compartilhada exigiria distribuir o segredo de assinatura a todos os serviços |
 
 ## Criteria
@@ -65,8 +65,8 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 2. WHEN o OS abrir uma OS THEN SHALL validar cliente e veículo pelo REST do Cadastros, e 404 SHALL impedir a abertura.
 3. WHEN um serviço validar um JWT emitido pelo Cadastros THEN SHALL obter a chave pública pelo JWKS, sem segredo compartilhado.
 4. WHEN a AuthLambda autenticar um cliente THEN SHALL usar o endpoint interno (CPF e e-mail), receber o JWT emitido pelo Cadastros, sem acesso ao banco e sem segredo de assinatura, e o SG do RDS SHALL deixar de liberar a Lambda.
-5. WHEN um evento de orçamento, conclusão, pagamento ou lembrete chegar THEN Cadastros SHALL enviar a notificação ao cliente uma única vez por `eventId`.
-6. IF o endpoint interno for chamado de fora do cluster, ou sem o cabeçalho `X-Chave-Interna` válido (segredo no K8s) THEN a chamada SHALL ser recusada (NetworkPolicy e chave interna).
+5. WHEN um evento de orçamento, conclusão, pagamento ou lembrete chegar THEN Cadastros SHALL enviar a notificação ao cliente uma única vez por `eventId`, lendo a fila configurada em `Notificacoes__FilaUrl` (provisioná-la é de `infra-ci-observabilidade`, D-35).
+6. IF o endpoint interno for chamado sem o cabeçalho `X-Chave-Interna` válido (segredo no K8s) THEN a chamada SHALL ser recusada; o endpoint só é publicado num ALB interno separado do API Gateway, e a NetworkPolicy restringe a origem onde o EKS a aplica (D-36).
 7. WHEN o OS consultar cliente ou veículo THEN SHALL repassar o JWT do usuário que abre a OS; WHEN não houver usuário (origem em evento) THEN SHALL usar a chave interna.
 8. WHEN o Cadastros publicar o JWKS THEN o token SHALL levar `kid` da chave ativa.
 9. IF o envio do e-mail falhar THEN Cadastros SHALL repetir com backoff exponencial e, ao esgotar, enviar a mensagem para a DLQ própria; o `eventId` só é registrado como notificado após o envio.
@@ -78,6 +78,9 @@ New: NotificacaoEnviada (deduplicação por `eventId`); Cliente, Veiculo e Usuar
 | Extrair notificações para repositório próprio | Opcional (D-17), só se sobrar tempo. |
 | Extrair o frontend e adaptar os paths antigos | Depende da feature `web`, ainda sem plano (D-03). |
 | Rotação automática de chaves | Manual e documentada; suficiente para o prazo. |
+| Provisionar fila SQS, DLQ, assinaturas SNS e IAM das notificações; produtores incluírem `clienteId` nos eventos | `infra-ci-observabilidade` e as features dos produtores (D-35). |
+| Renomear o `db_name` do RDS para `cadastros_db` | Recria a instância; fica para a próxima recriação (D-34). |
+| Garantir que o EKS aplica NetworkPolicy e provar o SG do RDS por `terraform plan` | Dependem de infraestrutura e credenciais AWS (D-36, D-37). |
 
 ## Assumptions
 
