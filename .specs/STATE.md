@@ -42,6 +42,8 @@
 | AD-037 | D-35: fila, DLQ, SNS e IAM das notificações fora do plano do Cadastros (`infra-ci-observabilidade`); produtores incluem `clienteId` nos eventos | User: "Ajustar a spec" (12/11) | active |
 | AD-038 | D-36: AC 6 = recusa sem chave (teste) + `/internal` só num ALB interno separado do API Gateway (prova no chart); NetworkPolicy depende do CNI do EKS | User: "Ajustar a spec" (12/11) | active |
 | AD-039 | D-37: provas de SG do RDS e da NetworkPolicy são estáticas; `terraform plan` real fica para `infra-ci-observabilidade` | User: "Ajustar a spec" (12/11) | active |
+| AD-034 | D-32: a Cobrança inclui `itens` `{insumoId, quantidade}` no `orcamento.aprovado.v1` e o OS monta `execucao.reservar-insumos.v1` a partir deles; campo aditivo, o veredito de `saga-mensageria` não reabre; a Cobrança entra nos checks de `saga-compensacoes` | User: "1. A" (12/11) | active |
+| AD-035 | D-33: a Saga só publica `execucao.cancelar-reserva.v1` depois de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; durante `ReservandoInsumos` o cancelamento fica em 409; `insumos.reserva-cancelada.v1` é consumida e registrada como resultado do passo | User: "2. A" (12/11) | active |
 
 ## Handoff: sincronização dos repositórios - 2026-11-12
 
@@ -101,7 +103,7 @@
 ## Unificação da especificação da Fase 4 - 2026-11-09 (atualizada em 10/11)
 
 - **Entrega do trabalho: 17/11/2026.** Divisão em 5 tarefas e cronograma em `.specs/features/fase4/especificacao/index.md` § 7.1 e § 7.2.
-- Planos aguardando aprovação do usuário (todos sem `**Approved**`; os `checks.md` antigos de `infra-ci-observabilidade` e `pacote-entrega` devem ser derivados de novo): `infra-ci-observabilidade`, `pacote-entrega` (revisados) (pendentes). `saga-compensacoes` (reescrito, AD-024) foi aprovado em 11/11 (user: "Aprovo") e tem `checks.md` derivado e validado; build não iniciado, depende de `insumos`. `insumos` e `cadastros` foram aprovados em 11/11 (user: "Aprovo os dois") e já têm `checks.md` derivados e validados; build não iniciado. `saga-mensageria` mantém o plano aprovado e o PASS (AD-021).
+- Planos aguardando aprovação do usuário (todos sem `**Approved**`; os `checks.md` antigos de `infra-ci-observabilidade` e `pacote-entrega` devem ser derivados de novo): `infra-ci-observabilidade`, `pacote-entrega` (revisados) (pendentes). `saga-compensacoes` (reescrito, AD-024; revisado por AD-034 e AD-035) foi aprovado em 11/11 e de novo em 12/11 (user: "Aprovo") e tem `checks.md` derivado de novo (14 checks) e validado; build não iniciado, depende de `insumos`. `insumos` e `cadastros` foram aprovados em 11/11 (user: "Aprovo os dois") e já têm `checks.md` derivados e validados; build não iniciado. `saga-mensageria` mantém o plano aprovado e o PASS (AD-021).
 - Em 10/11 a especificação do José saiu de `docs/specs/fase4/` e passou a morar em `.specs/features/fase4/especificacao/` (o quê e por quê), ao lado das pastas TLC de cada feature (como, verificável). O `index.md` dessa pasta é o registro único de decisões (D-xx); cada `AD-xxx` daqui cita o seu D-xx. Papéis no § 3.1 e protocolo de preenchimento no § 8 do índice e no `AGENTS.md` da raiz.
 - Na mesclagem local de `feature/os-service-contracts` em `docs/fase4-especificacao-inicial`, os ponteiros de App, AuthLambda, Infra.Database e Infra.K8s ficaram na `develop` atual. A branch `feature/os-service-contracts` do Infra.K8s partiu de `607f1de`, sem o provisionamento centralizado: rebasear na `develop` antes do PR.
 - Decisões em aberto (nenhuma bloqueia `saga-mensageria`): D-11, D-21, D-12, D-14b, D-15, D-16, D-17.

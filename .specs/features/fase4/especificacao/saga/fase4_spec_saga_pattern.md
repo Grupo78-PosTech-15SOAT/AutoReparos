@@ -150,6 +150,10 @@ Os insumos ficam no Execução, no PostgreSQL dele (D-01). Cada insumo tem `Quan
 | **Confirmar** (baixa) | Conclusão da execução | Na mesma transação da conclusão: `reservado -= q`, reserva → `Confirmada`, Outbox `execucao.concluida.v1` |
 | **Cancelar** (devolução) | Compensação `execucao.cancelar-reserva.v1` | Inbox + reservas `Reservada` → `Cancelada` + `disponivel += q, reservado -= q` + Outbox `insumos.reserva-cancelada.v1`. Reserva já `Confirmada` não é cancelada |
 
+Origem dos itens (D-32, AD-034): a Cobrança inclui `itens` `{insumoId, quantidade}` no `orcamento.aprovado.v1`, a partir do orçamento aprovado; o OS monta o comando de reserva com eles e não consulta a Cobrança nem o catálogo.
+
+Ordem (D-33, AD-035): em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; o SQS padrão não ordena mensagens, então a ordem vem da própria Saga, não da Execução.
+
 Idempotência: a reserva é única por (OS, insumo); reservar de novo a mesma OS não reserva o dobro, e cancelar duas vezes não devolve o dobro.
 
 ### 4.6 Travas de estado (D-18c)

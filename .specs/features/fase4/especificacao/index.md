@@ -265,6 +265,8 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-35 | **Fila, DLQ, assinaturas SNS e IAM das notificações são de `infra-ci-observabilidade`** (12/11): o Cadastros consome a fila configurada em `Notificacoes__FilaUrl`/`Notificacoes__DlqUrl`; provisioná-las e os produtores incluírem `clienteId` nos eventos ficam fora do plano do Cadastros. Os workflows avisam quando as variables estão vazias | AD-037; Usuário: "Ajustar a spec" (achado AC 5 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
 | D-36 | **AC 6 do Cadastros vale na aplicação e na entrada de rede** (12/11): o endpoint interno recusa chamada sem `X-Chave-Interna` válida (teste) e só é publicado num ALB interno separado do API Gateway (prova no chart); "fora do cluster" por NetworkPolicy depende de o EKS aplicar política de rede, o que fica para `infra-ci-observabilidade` | AD-038; Usuário: "Ajustar a spec" (achado C6 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
 | D-37 | **Provas de rede e de IaC do Cadastros são estáticas** (12/11): o SG do RDS sem a Lambda é provado por `grep` nos workflows e em `variables.tf`, e a NetworkPolicy por renderização do chart; um `terraform plan` real exige credenciais AWS e fica para `infra-ci-observabilidade` | AD-039; Usuário: "Ajustar a spec" (achado C5 do Verifier) | [Plano do Cadastros](../cadastros/plan.md) |
+| D-32 | **Itens da reserva vêm no `orcamento.aprovado.v1`** (12/11): a Cobrança inclui `itens` (`{insumoId, quantidade}`, do orçamento aprovado com preço congelado) no evento; o OS monta `execucao.reservar-insumos.v1` com eles, sem consultar ninguém. Campo só aditivo no contrato de `saga-mensageria` (PASS, congelado por AD-021); sem `itens` o OS não reserva | AD-034; Usuário: "1. A" (opção A: Cobrança inclui os itens no evento) | [Plano da Saga](../saga-compensacoes/plan.md) |
+| D-33 | **Cancelamento espera a confirmação da reserva** (12/11): em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1` (o 409 `saga_em_andamento` já bloqueia o comando); a Execução não muda, então o PASS de `insumos` fica | AD-035; Usuário: "2. A" (opção A: a Saga só cancela depois da confirmação) | [Plano da Saga](../saga-compensacoes/plan.md) |
 
 ### 6.2 Regras obrigatórias do grupo
 
@@ -299,6 +301,7 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 12/11/2026 | D-31: status 422 do CRUD do Cadastros substituído por 400 (contrato atual) | O App sempre respondeu 400 à validação; "contratos mantidos sem mudança" prevalece |
 | 12/11/2026 | D-34: Door 1 do Cadastros passa a `cadastros_db` só no local; RDS mantém `autoreparos_db` | Renomear o `db_name` recria o RDS |
 | 12/11/2026 | D-35: AC 5 do Cadastros deixa de provisionar fila, DLQ e SNS; D-36: AC 6 deixa de exigir prova de "fora do cluster" por NetworkPolicy; D-37: provas de rede e IaC estáticas | Achados do Verifier que dependem de infraestrutura e de credenciais AWS |
+| 12/11/2026 | D-32: `orcamento.aprovado.v1` ganha o campo `itens` (aditivo); D-33: cancelamento só depois da confirmação da reserva | O evento não levava os itens que a reserva exige; `insumos` deixou aberta a ordem entre reservar e cancelar |
 
 ---
 
