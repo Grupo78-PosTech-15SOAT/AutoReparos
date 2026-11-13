@@ -29,7 +29,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~PrazoSemRespostaCompensa`
 
 **C6** - Cancelamento depois da conclusão da execução responde 409 e a reserva `Confirmada` permanece (AC 6)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~CancelamentoAposConclusaoRecusado`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelamentoAposConclusaoRecusado`
 
 **C13** - A Cobrança publica `orcamento.aprovado.v1` com `itens` `{insumoId, quantidade}` do orçamento aprovado, mantendo `eventId` determinístico e os campos já existentes (AC 1, D-32)
 Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~OrcamentoAprovadoCarregaItens`
@@ -37,7 +37,7 @@ Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests -
 ### S2 - Travas e concorrência
 
 **C7** - Em `ReservandoInsumos` ou `Compensando`, `retentar` e novo cancelamento respondem 409 `saga_em_andamento` (AC 7)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ComandosConflitantesRecebem409`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ComandosConflitantesRecebem409`
 
 **C14** - Em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; depois da confirmação o cancelamento publica o comando (AC 6a, D-33)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelarReservaSoDepoisDaConfirmacao`
@@ -54,10 +54,10 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~LembreteNaoExpiraOrcamento`
 
 **C11** - Consultar, listar e retentar Sagas executa a ação e registra autor, data e motivo no histórico, aplicado à OS por mensagem de transição, sem gravar nos dois bancos (AC 11)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ConsoleAdminRegistraAcao`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ConsoleAdminRegistraAcao`
 
 **C12** - `POST /api/v1/admin/dlq/reprocessar` devolve à fila de origem até a quantidade pedida e registra a ação, em OS, Cobrança e Execução (AC 12)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ReprocessaDlqDoOs`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ReprocessaDlqDoOs`
 Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~ReprocessaDlqDaCobranca`
 Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --filter FullyQualifiedName~ReprocessaDlqDaExecucao`
 
