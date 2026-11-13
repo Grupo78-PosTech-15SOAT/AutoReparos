@@ -1,6 +1,6 @@
 # Fase 4 - Saga: compensações, reserva de insumos e operação
 
-**Approved**: 2026-11-11 - user: "Aprovo". Plano reescrito em 11/11/2026 para estender `saga-mensageria` (PASS, plano aprovado em 2026-11-06, congelado por AD-021) em vez de repetir o que ele já entrega. Decisões de origem: D-18, D-20, L-01 e D-19 (adiada) de `.specs/features/fase4/especificacao/index.md` § 6, AD-011, AD-015, AD-019, AD-021 e AD-024 do `.specs/STATE.md`. Os checks desta feature serão derivados depois da aprovação. Depende de `insumos`.
+**Approved**: 2026-11-12 - user: "Aprovo" (revisão por D-32 e D-33; aprovação anterior de 2026-11-11, "Aprovo", cobria o plano sem elas). Revisado em 12/11/2026 por D-32 (itens no `orcamento.aprovado.v1`, Cobrança passa a mudar) e D-33 (cancelamento só depois da confirmação da reserva); a aprovação anterior (2026-11-11, "Aprovo") valia para o plano sem essas duas decisões. Plano reescrito em 11/11/2026 para estender `saga-mensageria` (PASS, plano aprovado em 2026-11-06, congelado por AD-021) em vez de repetir o que ele já entrega. Decisões de origem: D-18, D-20, D-32, D-33, L-01 e D-19 (adiada) de `.specs/features/fase4/especificacao/index.md` § 6, AD-011, AD-015, AD-019, AD-021, AD-024, AD-034 e AD-035 do `.specs/STATE.md`. Os checks foram derivados de novo em 2026-11-12, depois desta aprovação. Depende de `insumos` (PASS).
 
 ## Problem
 
@@ -10,9 +10,9 @@ A Saga entregue por `saga-mensageria` já compensa o orçamento e a liberação,
 
 Esta entrega estende a Saga existente no OS Service e liga-a à reserva de `insumos`. Os critérios 1 a 5 e 12 do plano original (Saga persistida, deduplicação, transação única, sincronização da OS e retry com DLQ) já estão entregues e verificados em `saga-mensageria` e ficam herdados. Desenho detalhado em `.specs/features/fase4/especificacao/saga/fase4_spec_saga_pattern.md` § 4.4 a 4.7.
 
-1. Entre `OrcamentoAprovado` (exists) e `ExecucaoLiberada` (exists) entra o estado `ReservandoInsumos` (door 1): a Saga publica `execucao.reservar-insumos.v1` com os itens e só libera a execução com `insumos.reservados.v1`.
+1. Entre `OrcamentoAprovado` (exists) e `ExecucaoLiberada` (exists) entra o estado `ReservandoInsumos` (door 1): a Saga publica `execucao.reservar-insumos.v1` com os itens e só libera a execução com `insumos.reservados.v1`. Os itens vêm no `orcamento.aprovado.v1`, que a Cobrança passa a publicar com `itens` (campo aditivo, D-32); sem `itens` a Saga não reserva e o evento vai para a DLQ.
 2. Sem saldo (`insumos.reserva-falhou.v1`, door 2) a Saga vai para `AguardandoInsumos`, sem compensar, com alerta diário; a pessoa autorizada retenta ou cancela.
-3. A compensação antes do pivô passa a incluir `execucao.cancelar-reserva.v1` (door 2), em ordem inversa da reserva e do orçamento.
+3. A compensação antes do pivô passa a incluir `execucao.cancelar-reserva.v1` (door 2), em ordem inversa da reserva e do orçamento. Em `ReservandoInsumos` o cancelamento espera `insumos.reservados.v1` ou `insumos.reserva-falhou.v1` antes de publicar `cancelar-reserva` (D-33); a Saga consome `insumos.reserva-cancelada.v1` como resultado do passo.
 4. Travas: enquanto a Saga está em `ReservandoInsumos` (door 1) ou `Compensando` (exists), comandos conflitantes recebem 409 `saga_em_andamento`.
 5. Job de prazos reenvia passos sem resposta e emite `saga.lembrete.v1` (door 2); console administrativo lista, detalha e retenta Sagas; cada serviço reprocessa a própria DLQ.
 
@@ -58,6 +58,7 @@ Equivalência com os nomes do plano original (decisão de reaproveitar os estado
 | domínio | Saga ganha dois estados, a etapa de reserva, travas e prazos configuráveis. |
 | stored data | Itens e etapas novos na tabela DynamoDB `autoreparos-os-saga`; sem migração. |
 | readers | Cadastros consome `saga.lembrete.v1`; console administrativo consulta a Saga por REST. |
+| contrato da Cobrança | `orcamento.aprovado.v1` ganha `itens` (aditivo, D-32); a Cobrança entra no build e nos testes desta feature. |
 
 ## Surface
 
@@ -86,12 +87,13 @@ Mensagens internas versionadas: catálogo em `.specs/features/fase4/especificaca
 
 **Acceptance Criteria**
 
-1. WHEN `orcamento.aprovado.v1` for consumido THEN OS Service SHALL levar a Saga a `ReservandoInsumos` e publicar `execucao.reservar-insumos.v1` com `ordemServicoId` e os itens `{insumoId, quantidade}`, gravando transição, Inbox e comando pendente numa única transação do DynamoDB, antes de qualquer `ordem-servico.liberada.v1`.
+1. WHEN `orcamento.aprovado.v1` for consumido THEN OS Service SHALL levar a Saga a `ReservandoInsumos` e publicar `execucao.reservar-insumos.v1` com `ordemServicoId` e os itens `{insumoId, quantidade}` lidos do próprio evento (a Cobrança passa a incluí-los), gravando transição, Inbox e comando pendente numa única transação do DynamoDB, antes de qualquer `ordem-servico.liberada.v1`.
 2. WHEN `insumos.reservados.v1` chegar THEN OS Service SHALL levar a Saga a `ExecucaoLiberada` e publicar `ordem-servico.liberada.v1`.
 3. IF `insumos.reserva-falhou.v1` chegar THEN OS Service SHALL levar a Saga a `AguardandoInsumos` sem compensar o orçamento, emitir o alerta `saga.aguardando-insumos` uma vez por dia enquanto durar, e `retentar` SHALL reenviar a reserva enquanto o cancelamento SHALL compensar.
 4. IF o orçamento for recusado ou a OS for cancelada antes do início da execução THEN OS Service SHALL publicar `execucao.cancelar-reserva.v1` quando houver reserva e `cobranca.cancelar-orcamento.v1`, em ordem inversa, e terminar em `Compensada`, registrando o resultado de cada passo.
 5. IF a liberação ou a reserva não for confirmada após o prazo técnico e os reenvios THEN OS Service SHALL compensar a reserva e o orçamento e terminar em `Compensada` com motivo `liberacao_sem_resposta`; se a compensação falhar, SHALL terminar em `CompensacaoFalhou` com alerta.
 6. IF um cancelamento chegar depois da conclusão da execução THEN OS Service SHALL recusá-lo com 409 e a reserva `Confirmada` SHALL permanecer.
+6a. WHILE a Saga estiver em `ReservandoInsumos` THEN OS Service SHALL NOT publicar `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; a compensação por prazo esgotado é a única exceção e fica registrada como risco consciente.
 
 ### Locks and concurrency (P1)
 
@@ -139,4 +141,4 @@ None - este plano não altera elementos do PDF binding.
 - `.specs/features/fase4/saga-mensageria/contracts.md` - estados, mensagens e prazos já implementados.
 - `.specs/features/fase4/especificacao/saga/fase4_spec_saga_pattern.md` - desenho detalhado da Saga.
 - `.specs/features/fase4/especificacao/comunicacao/fase4_spec_comunicacao_microsservicos.md` - catálogo de mensagens.
-- `.specs/STATE.md` - AD-001, AD-010 a AD-015, AD-019, AD-021 e AD-024.
+- `.specs/STATE.md` - AD-001, AD-010 a AD-015, AD-019, AD-021, AD-024, AD-034 e AD-035.

@@ -515,11 +515,13 @@ Crie o arquivo `.env` na raiz do repositório pai:
 DB_PASSWORD=admin123
 
 # Segurança e JWT
-JWT_SECRET=FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9
+# Chave RSA privada PKCS#8 em PEM (use \n no lugar das quebras de linha); veja .env.example
+JWT_CHAVE_PRIVADA_PEM="-----BEGIN PRIVATE KEY-----\nCOLE_AQUI_A_CHAVE_PKCS8\n-----END PRIVATE KEY-----"
+JWT_ISSUER=http://localhost:8080
+CHAVE_INTERNA=troque_por_um_segredo_forte
 JWT_EXPIRY_HOURS=2
 SEED_USER_EMAIL=admin@autoreparos.com
 SEED_USER_PASSWORD=Admin@123
-APROVACAO_TOKEN_SECRET=another_super_secret_key_for_approval_tokens_with_enough_length
 
 # Integração de E-mail (SendGrid)
 SENDGRID_API_KEY=SG.dummy_key
@@ -719,6 +721,10 @@ Esse Environment não precisa de variables próprias: lê `AWS_ACCOUNT_ID`, `AWS
 | `EKS_CLUSTER_NAME` | `autoreparos-cluster` | Nome do cluster usado no provisionamento e na checagem de recursos existentes. |
 | `K8S_NAMESPACE` | `autoreparos` | Namespace do Helm, da aplicação e dos secrets Kubernetes. |
 | `SEED_USER_EMAIL` | E-mail do administrador inicial | Usuário criado pela aplicação. |
+| `CADASTROS_ISSUER` | URL pública do Cadastros | `iss` dos JWT e `issuer` do discovery OIDC (`/.well-known/openid-configuration`). |
+| `CADASTROS_INTERNAL_URL` | URL interna do Cadastros alcançável da VPC | Usada pela Lambda de autenticação (`POST /internal/clientes/autenticar`); a Lambda não acessa o banco. |
+| `CADASTROS_NOTIFICACOES_FILA_URL` / `CADASTROS_NOTIFICACOES_DLQ_URL` | URLs da fila SQS e da DLQ do Cadastros | Consumo de eventos de notificação; vazias desligam o consumidor. |
+| `VPC_PRIVATE_CIDRS` | `10.0.1.0/24,10.0.2.0/24` | CIDRs das subnets privadas (ALB interno e Lambda) liberados na NetworkPolicy do Cadastros. |
 | `SENDGRID_FROM_EMAIL` | Remetente verificado no SendGrid | Endereço de envio de e-mail; pode ficar vazio quando envio estiver desabilitado. |
 | `SENDGRID_FROM_NAME` | `AutoReparos` | Nome exibido no remetente. |
 
@@ -727,9 +733,9 @@ Esse Environment não precisa de variables próprias: lê `AWS_ACCOUNT_ID`, `AWS
 | Nome exato | Valor / finalidade |
 |---|---|
 | `AWS_ROLE_ARN` | ARN da role OIDC de provisionamento/deploy, por exemplo `arn:aws:iam::123456789012:role/AutoReparosGitHubDeployRole`. |
-| `JWT_SECRET` | Chave aleatória forte; o mesmo valor alimenta a API e a Lambda. |
+| `JWT_CHAVE_PRIVADA_PEM` | Chave RSA privada (PKCS#8, PEM) com que o Cadastros assina os JWT RS256; os serviços validam pelo JWKS público. |
+| `CHAVE_INTERNA` | Segredo de `X-Chave-Interna`, compartilhado entre o Cadastros, o OS e a Lambda (rotas `/internal` e consulta sem usuário). |
 | `SEED_USER_PASSWORD` | Senha forte do administrador inicial. |
-| `APROVACAO_TOKEN_SECRET` | Outra chave aleatória forte para os tokens de aprovação. |
 | `GRAFANA_ADMIN_PASSWORD` | Senha forte de administrador do Grafana. |
 | `SENDGRID_API_KEY` | Chave do SendGrid quando envio estiver habilitado; pode ficar ausente para desabilitar envio. |
 
