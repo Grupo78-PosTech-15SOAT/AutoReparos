@@ -172,7 +172,7 @@ Idempotência: a reserva é única por (OS, insumo); reservar de novo a mesma OS
 | `LiberandoExecucao` | 2 min | Reenvia até 3 vezes; depois compensa a reserva → `FalhaLiberacao` |
 | `Cancelando` | 5 min | Reenvia as compensações pendentes; depois `compensacaoPendente = true` e alerta |
 
-**Lembretes de negócio** (sem expiração automática, D-09): orçamento sem resposta → lembrete ao cliente após 48 h e alerta à recepção após 7 dias; `AguardandoPagamento` → lembrete após 24 h; `AguardandoInsumos` → alerta diário.
+**Lembretes de negócio** (sem expiração automática, D-09): orçamento sem resposta → lembrete ao cliente após 48 h e alerta à recepção após 7 dias (anterior à Saga: fica com a Cobrança, fora de `saga-compensacoes`, D-38); `AguardandoPagamento` → lembrete após 24 h; `AguardandoInsumos` → alerta diário.
 
 **Implementação:** um job periódico no OS consulta o índice `estado + prazoEm` da tabela da Saga (§ 4.8). A SQS só atrasa mensagens até 15 minutos, então não serve para prazos longos.
 
