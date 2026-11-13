@@ -34,16 +34,10 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 **C13** - A Cobrança publica `orcamento.aprovado.v1` com `itens` `{insumoId, quantidade}` do orçamento aprovado, mantendo `eventId` determinístico e os campos já existentes (AC 1, D-32)
 Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~OrcamentoAprovadoCarregaItens`
 
-**C13** - A Cobrança publica `orcamento.aprovado.v1` com `itens` `{insumoId, quantidade}` do orçamento aprovado, mantendo `eventId` determinístico e os campos já existentes (AC 1, D-32)
-Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~OrcamentoAprovadoCarregaItens`
-
 ### S2 - Travas e concorrência
 
 **C7** - Em `ReservandoInsumos` ou `Compensando`, `retentar` e novo cancelamento respondem 409 `saga_em_andamento` (AC 7)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ComandosConflitantesRecebem409`
-
-**C14** - Em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; depois da confirmação o cancelamento publica o comando (AC 6a, D-33)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelarReservaSoDepoisDaConfirmacao`
 
 **C14** - Em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; depois da confirmação o cancelamento publica o comando (AC 6a, D-33)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelarReservaSoDepoisDaConfirmacao`
