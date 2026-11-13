@@ -1,6 +1,6 @@
 # Fase 4 - Adaptação do Web às APIs dos serviços
 
-**Revisão pendente de aprovação** - plano escrito em 13/11/2026; o usuário respondeu as quatro perguntas de escopo (D-39 / AD-042) e ainda não aprovou o texto. Nunca escrever a linha `**Approved**` sem as palavras do usuário.
+**Approved**: 2026-11-13 - user: "Aprovo" (plano escrito em 13/11/2026 depois das quatro respostas de escopo, D-39 / AD-042; os checks foram derivados depois desta aprovação).
 
 **Decisões de origem:** D-03 / AD-028 (Web extraído; esta é a etapa funcional posterior), D-39 / AD-042 (escopo desta etapa), D-28 a D-31 e D-37 (Cadastros em `/api/v1` e JWT RS256 com JWKS), D-13 (cada repositório mantém seu pipeline), D-18 / AD-011 (console de Sagas e reprocessamento). Levantamento em [levantamento.md](levantamento.md).
 

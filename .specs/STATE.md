@@ -228,6 +228,15 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - **Decisões do usuário já tomadas e refletidas na spec:** manter `cadastros_db` só local (RDS segue `autoreparos_db`), infraestrutura de notificações fora do plano, AC 6 reescrito, provas de SG e NetworkPolicy estáticas.
 - **Próximos passos:** produtores incluírem `clienteId` nos eventos (OS e Cobrança); `Authentication:Audience` do OS alinhado com o emissor do Cadastros (o Cadastros não emite `aud`); criar no GitHub os secrets `JWT_CHAVE_PRIVADA_PEM` e `CHAVE_INTERNA` e as variables `CADASTROS_ISSUER`, `CADASTROS_INTERNAL_URL`, `CADASTROS_NOTIFICACOES_FILA_URL`, `CADASTROS_NOTIFICACOES_DLQ_URL`, `VPC_PRIVATE_CIDRS`; `/internal` usa um ALB interno próprio (cujo DNS é `CADASTROS_INTERNAL_URL`); abrir os PRs (submódulos primeiro, base `develop`; o PR do pai sobre `feature/os-service-contracts`); fila SQS, DLQ, SNS, IAM e CNI com NetworkPolicy ficam em `infra-ci-observabilidade`.
 
+## Handoff: web-adaptacao - 2026-11-13
+
+- Plano `.specs/features/fase4/web-adaptacao/plan.md` aprovado em 13/11 (user: "Aprovo"; D-39 / AD-042) e `checks.md` derivado e validado (31 checks, 0 erros; 5 avisos de prova por script, padrão da feature `web`). Build não iniciado. Branch `feature/web-adaptacao` (worktree `.claude/worktrees/web-adaptacao`, a partir de `feature/saga-compensacoes`), commit local, sem push.
+- Ordem sugerida de construção: S2 primeiro (rotas novas do OS e da Cobrança, C6 a C14, com migration do token na Cobrança), depois S1 (camada HTTP, Nginx e compose), S3 a S6 (telas) e S7. As rotas novas moram em branches de OS e Cobrança a partir de `feature/saga-compensacoes`.
+- Os nomes de teste dos checks estão congelados (filtros `--filter` dos specs do Web e `FullyQualifiedName~...` dos .NET); o script `scripts/specs/assert_web_adaptacao.py` (checks `proxy`, `compose`, `legado`, `cobertura`, `node`) ainda precisa ser escrito.
+- Assunções com `Confirmed? n` a rever na construção: login do operador em `/api/auth/login`, consulta pública só por código da OS, compose local com os serviços, validade de 7 dias do link, papéis do Kanban e da fila.
+- Armadilha do gate no Windows: as provas rodam em `cmd.exe`, que pode não achar `npx` nem `python`; conferir o PATH antes de rodar `check_proofs.py` (ver as armadilhas do gate de 11/11).
+- Nenhum dos PRs de `insumos` e da saga foi mesclado ainda; esta feature depende deles na `develop`.
+
 ## Handoff: build de saga-compensacoes - 2026-11-12
 
 - Worktree `.claude/worktrees/saga-compensacoes`, branch `feature/saga-compensacoes` (pai a partir de `feature/insumos`); submódulos Cobrança (de `ac8bf46`), Execução (de `e6551e3`, local) e OS (de `7cf9a16`) com a mesma branch.
