@@ -230,12 +230,16 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 
 ## Handoff: web-adaptacao - 2026-11-13
 
-- Plano `.specs/features/fase4/web-adaptacao/plan.md` aprovado em 13/11 (user: "Aprovo"; D-39 / AD-042) e `checks.md` derivado e validado (31 checks, 0 erros; 5 avisos de prova por script, padrão da feature `web`). Build não iniciado. Branch `feature/web-adaptacao` (worktree `.claude/worktrees/web-adaptacao`, a partir de `feature/saga-compensacoes`), commit local, sem push.
-- Ordem sugerida de construção: S2 primeiro (rotas novas do OS e da Cobrança, C6 a C14, com migration do token na Cobrança), depois S1 (camada HTTP, Nginx e compose), S3 a S6 (telas) e S7. As rotas novas moram em branches de OS e Cobrança a partir de `feature/saga-compensacoes`.
-- Os nomes de teste dos checks estão congelados (filtros `--filter` dos specs do Web e `FullyQualifiedName~...` dos .NET); o script `scripts/specs/assert_web_adaptacao.py` (checks `proxy`, `compose`, `legado`, `cobertura`, `node`) ainda precisa ser escrito.
-- Assunções com `Confirmed? n` a rever na construção: login do operador em `/api/auth/login`, consulta pública só por código da OS, compose local com os serviços, validade de 7 dias do link, papéis do Kanban e da fila.
-- Armadilha do gate no Windows: as provas rodam em `cmd.exe`, que pode não achar `npx` nem `python`; conferir o PATH antes de rodar `check_proofs.py` (ver as armadilhas do gate de 11/11).
-- Nenhum dos PRs de `insumos` e da saga foi mesclado ainda; esta feature depende deles na `develop`.
+- Plano `.specs/features/fase4/web-adaptacao/plan.md` aprovado em 13/11 (user: "Aprovo"; D-39 / AD-042) e `checks.md` derivado e validado (31 checks, 0 erros; 5 avisos de prova por script, padrão da feature `web`). Branch `feature/web-adaptacao` no pai (worktree `.claude/worktrees/web-adaptacao`, a partir de `feature/saga-compensacoes`), commits locais, sem push. Usuário mandou construir ("Construir", 13/11).
+- **Build em andamento (fase 1, 3 agentes em paralelo, cada um só commita dentro do seu submódulo, na branch `feature/web-adaptacao` criada a partir do ponteiro do pai):**
+  - OS (`submodules/AutoReparos.OS`): C6 `ListaOsPaginadaEFiltrada` e C7 `ConsultaPublicaNaoExpoeClienteNemVeiculo`.
+  - Cobrança (`submodules/AutoReparos.Cobranca`): C8 a C14 (consulta de orçamento e pagamento, `TokenAprovacao` com migration, link, resumo e aprovação públicos, concorrência e log).
+  - Web (`submodules/AutoReparos.Web`): C1, C4, C5 (HTTP, erros, auth), C15 a C19 (Nova OS, Kanban com 7 status, detalhe, cancelamento, consulta pública) e a remoção do legado (parte do C29).
+- **Falta (fase 2):** Web C20 a C28 (orçamento, link, aprovação por token, pagamento, fila de execução, catálogo e estoque, console de Sagas, guard de papel); `scripts/specs/assert_web_adaptacao.py` com `proxy`, `compose`, `legado`, `cobertura`, `node` (C2, C3, C29 a C31); `nginx.conf` do Web com os 5 prefixos e variáveis `OS_URL`, `COBRANCA_URL`, `EXECUCAO_URL`, `CADASTROS_URL`; compose do pai subindo OS, Cobrança, Execução, Cadastros e Web.
+- **Depois:** atualizar os ponteiros dos submódulos no pai (cada agente deixa commits locais nos submódulos; o pai ainda não aponta para eles), rodar `check_proofs.py` com 3 mutações, Verifier independente (`author != verifier`) e só então PRs. Nada foi enviado ao remoto.
+- Para conferir o que cada agente deixou: `git -C submodules/AutoReparos.<OS|Cobranca|Web> log --oneline origin/..HEAD` (ou `git log feature/web-adaptacao`) no worktree `.claude/worktrees/web-adaptacao`; se um agente for interrompido, retomar a partir do último commit do submódulo.
+- Assunções `Confirmed? n` a rever na construção: login do operador em `/api/auth/login`, consulta pública só por código da OS, compose local com os serviços, validade de 7 dias do link, papéis do Kanban e da fila.
+- Armadilha do gate no Windows: as provas rodam em `cmd.exe`, que pode não achar `npx` nem `python`; conferir o PATH antes do `check_proofs.py`. Esta feature depende de `insumos` e da saga na `develop` (PRs ainda não mesclados).
 
 ## Handoff: build de saga-compensacoes - 2026-11-12
 
