@@ -25,11 +25,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - ConnectionStrings__DbConnection=Host=postgres;Database=autoreparos;Username=admin;Password=${DB_PASSWORD}
-      - Jwt__Secret=${JWT_SECRET}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__ChavePrivadaPem=${JWT_CHAVE_PRIVADA_PEM}
+      - Interno__Chave=${CHAVE_INTERNA}
       - Jwt__ExpiryHours=${JWT_EXPIRY_HOURS}
       - SeedUser__Email=${SEED_USER_EMAIL}
       - SeedUser__Password=${SEED_USER_PASSWORD}
-      - AprovacaoToken__Secret=${APROVACAO_TOKEN_SECRET}
       - SendGrid__ApiKey=${SENDGRID_API_KEY}
       - SendGrid__FromEmail=${SENDGRID_FROM_EMAIL}
       - SendGrid__FromName=${SENDGRID_FROM_NAME}
