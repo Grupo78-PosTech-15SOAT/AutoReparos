@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/DependencyInjectionAPI.cs",
+    "old": ".RequireRole(\"Administrador\", \"Atendente\", \"Mecanico\", ChaveInternaAuthenticationHandler.RoleServicoInterno));",
+    "new": ".RequireRole(\"Administrador\", \"Atendente\", ChaveInternaAuthenticationHandler.RoleServicoInterno));",
+    "proof": "dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~ConsultaClienteVeiculoPorJwtOuChaveInterna",
+    "label": "C2 ConsultaCadastro deixa de aceitar o papel Mecanico"
+  },
+  {
+    "file": "submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/DependencyInjectionAPI.cs",
+    "old": "ValidateIssuer = true,",
+    "new": "ValidateIssuer = false,",
+    "proof": "dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~JwtValidadoPeloJwksComKid",
+    "label": "C3 Cadastros deixa de validar o issuer do JWT"
+  },
+  {
+    "file": "submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application/Clientes/UseCases/AutenticarClienteUseCase.cs",
+    "old": "StringComparison.OrdinalIgnoreCase",
+    "new": "StringComparison.Ordinal",
+    "proof": "dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~AutenticarClienteEndpointInterno",
+    "label": "C5 e-mail do cliente comparado sem ignorar caixa"
+  }
+]
