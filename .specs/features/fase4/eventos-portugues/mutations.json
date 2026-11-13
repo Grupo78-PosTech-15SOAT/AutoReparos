@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/TiposMensagem.cs",
+    "old": "tipo == BillingOrcamentoCancelarLegado ? CobrancaCancelarOrcamento : tipo;",
+    "new": "tipo;",
+    "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~LegacySagaStageGeneratesPortugueseCancellation",
+    "label": "NormalizarComando deixa de converter o tipo legado billing.orcamento.cancelar.v1 para cobranca.cancelar-orcamento.v1"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/ComandoSaga.cs",
+    "old": "if (normalizado != atual)",
+    "new": "if (false)",
+    "proof": "dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyPendingCancellationIsNormalizedWithoutChangingEventId",
+    "label": "ComandoSaga.NormalizarTipo atualiza apenas o registro Tipo e mantem o tipo legado no JSON Corpo enviado"
+  },
+  {
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Application/Mensageria.cs",
+    "old": "tipo is CancelarOrcamento or CancelarOrcamentoLegado;",
+    "new": "tipo is CancelarOrcamento;",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~LegacyAndPortugueseAliasesDeduplicateByEventId",
+    "label": "EhCancelamentoOrcamento rejeita o alias legado billing.orcamento.cancelar.v1 em transito"
+  }
+]

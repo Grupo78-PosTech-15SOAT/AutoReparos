@@ -5,7 +5,7 @@
 > **Critério do PDF:** Separação em Microsserviços → Orçamento e Pagamento (Billing Service) → *Obs.: para a parte de pagamentos devemos nos integrar com o Mercado Pago*  
 > **Requisitos cobertos (índice):** R06, R07  
 > **Repositórios afetados:** `AutoReparos.Billing` → `AutoReparos.Cobranca`, `AutoReparos.Infra.K8s` (rota do webhook no API Gateway), `AutoReparos.Web`  
-> **Feature `.specs`:** `.specs/features/fase4/billing/` (PASS em 09/11)  
+> **Feature `.specs`:** `.specs/features/fase4/cobranca/` (PASS em 09/11)  
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
 > **Status:** Decidido (D-09, D-10). Implementado na branch do Enrico; faltam integração com a Saga, sandbox e itens abertos do Verifier
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sobe o ambiente de prova local do os-service (C5 - ServiceDatabaseIsolation) e exporta OS_PROOF_*.
-# Uso: source .specs/features/fase4/os-service/proof-env/harness.sh
+# Uso: source .specs/features/fase4/servico-os/proof-env/harness.sh
 # Requisitos: Git Bash, Docker, .NET 10 SDK, dotnet-ef (dotnet tool install --global dotnet-ef),
 #             Python 3 com `pip install pyjwt cryptography`. Credenciais abaixo sao descartaveis (somente local).
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,11 +31,11 @@ curl -s -o /dev/null http://localhost:8099/tokens || (cd "$HERE" && nohup python
 # 4. API publicada fora de bin/ (nao trava os builds dos testes), porta 5083
 if ! curl -s -o /dev/null http://localhost:5083/; then
   rm -rf "$WORK/api-out"
-  dotnet publish "$OS/AutoReparos.OS.Api/AutoReparos.Os.Api.csproj" -o "$WORK/api-out" --nologo -v q >/dev/null 2>&1
+  dotnet publish "$OS/AutoReparos.OS.Api/AutoReparos.OS.Api.csproj" -o "$WORK/api-out" --nologo -v q >/dev/null 2>&1
   ( export ConnectionStrings__OrdemServico="Host=localhost;Port=$PGPORT;Database=$DB;Username=postgres;Password=$PGPW" \
            Authentication__Authority="http://localhost:8099" Authentication__Audience="autoreparos-os" \
            Authentication__RequireHttpsMetadata=false ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS="http://localhost:5083"
-    cd "$WORK/api-out" && nohup dotnet AutoReparos.Os.Api.dll > "$WORK/api.log" 2>&1 < /dev/null & )
+    cd "$WORK/api-out" && nohup dotnet AutoReparos.OS.Api.dll > "$WORK/api.log" 2>&1 < /dev/null & )
   for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:5083/ && break; sleep 1; done
 fi
 

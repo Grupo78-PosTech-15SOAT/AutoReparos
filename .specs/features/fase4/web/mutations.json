@@ -1,0 +1,38 @@
+[
+  {
+    "file": "submodules/AutoReparos.Web/.github/workflows/ci-cd.yml",
+    "old": "branches: [develop, main]",
+    "new": "branches: [main]",
+    "proof": "python scripts/specs/assert_web_extraction.py --check web-ci",
+    "label": "C7: CI do Web deixa de disparar em push na develop"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/.github/workflows/ci-cd.yml",
+    "old": "branches: [main]",
+    "new": "branches: [develop]",
+    "proof": "python scripts/specs/assert_web_extraction.py --check web-ci",
+    "label": "C7: CI do Web dispara PR na develop em vez da main"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/nginx.conf",
+    "old": "try_files $uri $uri/ /index.html;",
+    "new": "try_files $uri $uri/ =404;",
+    "proof": "python scripts/specs/assert_web_extraction.py --check docker",
+    "label": "C5: rota /login deixa de cair no index.html (200 vira 404)"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/nginx.conf",
+    "old": "try_files $uri $uri/ /index.html;",
+    "new": "return 200 '<html>placeholder</html>';",
+    "proof": "python scripts/specs/assert_web_extraction.py --check docker",
+    "label": "C5: servidor devolve HTML genérico 200 em vez do Angular"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/docker-entrypoint.sh",
+    "old": "encoded_url=\"$(printf '%s' \"$API_URL\" | od -An -tx1 | tr -d '[:space:]' | sed 's/../%&/g')\"",
+    "new": "encoded_url=\"$API_URL\"",
+    "proof": "python scripts/specs/assert_web_extraction.py --check runtime-env",
+    "label": "C6: URL com apóstrofo deixa de ser serializada antes de entrar no JavaScript"
+  }
+]
+

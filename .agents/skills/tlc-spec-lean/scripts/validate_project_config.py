@@ -6,7 +6,7 @@ import sys
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parents[3]
+    root = Path(__file__).resolve().parents[4]
     feature = sys.argv[1] if len(sys.argv) > 1 else ""
     config = (root / ".agents" / "AGENTS.md").read_text(encoding="utf-8")
     checks_path = root / ".specs" / "features" / feature / "checks.md"
@@ -22,7 +22,7 @@ def main() -> int:
     if match.group(1) != declared.group(1):
         print(f"mutation count mismatch: project={match.group(1)}, checks={declared.group(1)}", file=sys.stderr)
         return 1
-    package = root / ".specs" / "tlc-spec-lean"
+    package = root / ".agents" / "skills" / "tlc-spec-lean"
     required = [
         "SKILL.md", "NOTICE.md",
         "references/plan.md", "references/checks.md", "references/build.md",

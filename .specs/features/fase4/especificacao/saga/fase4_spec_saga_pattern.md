@@ -5,7 +5,7 @@
 > **Critério do PDF:** Requisitos obrigatórios → *Implementação do Saga Pattern*  
 > **Requisitos cobertos (índice):** R14, R15, R16, R17  
 > **Repositórios afetados:** `AutoReparos.OS` (orquestrador), `AutoReparos.Cobranca`, `AutoReparos.Execucao`, `AutoReparos` (README)  
-> **Feature `.specs`:** `.specs/features/fase4/saga-mensageria/plan.md` (revisão pendente de aprovação)  
+> **Feature `.specs`:** `.specs/features/fase4/saga-compensacoes/plan.md` (revisão pendente de aprovação); base entregue em `.specs/features/fase4/saga-mensageria/plan.md` (PASS)  
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
 > **Status:** Desenho decidido em 09 e 10/11/2026 (D-07, D-09, D-18, D-19, D-20, L-01 opção C)
 
@@ -150,6 +150,10 @@ Os insumos ficam no Execução, no PostgreSQL dele (D-01). Cada insumo tem `Quan
 | **Confirmar** (baixa) | Conclusão da execução | Na mesma transação da conclusão: `reservado -= q`, reserva → `Confirmada`, Outbox `execucao.concluida.v1` |
 | **Cancelar** (devolução) | Compensação `execucao.cancelar-reserva.v1` | Inbox + reservas `Reservada` → `Cancelada` + `disponivel += q, reservado -= q` + Outbox `insumos.reserva-cancelada.v1`. Reserva já `Confirmada` não é cancelada |
 
+Origem dos itens (D-32, AD-034): a Cobrança inclui `itens` `{insumoId, quantidade}` no `orcamento.aprovado.v1`, a partir do orçamento aprovado; o OS monta o comando de reserva com eles e não consulta a Cobrança nem o catálogo.
+
+Ordem (D-33, AD-035): em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; o SQS padrão não ordena mensagens, então a ordem vem da própria Saga, não da Execução.
+
 Idempotência: a reserva é única por (OS, insumo); reservar de novo a mesma OS não reserva o dobro, e cancelar duas vezes não devolve o dobro.
 
 ### 4.6 Travas de estado (D-18c)
@@ -197,7 +201,7 @@ Métricas e alertas: `saga_paradas{estado}`, `saga_compensacoes_total{passo}`, `
 | `saga.avancou.v1` | PostgreSQL | Inbox + status da OS + histórico |
 | Comandos REST do atendente que mexem na Saga (cancelar, entregar) | DynamoDB | Transição condicional + Outbox |
 
-Publicação da Outbox do DynamoDB: **DynamoDB Streams** acionando o publicador (ou varredura por índice como alternativa). O status da OS no PostgreSQL atualiza milissegundos depois da Saga; a consulta de status lê o PostgreSQL, e o console de administração lê a Saga.
+Publicação da Outbox do DynamoDB: **DynamoDB Streams** acionando o publicador (ou varredura por índice como alternativa). Por D-26 (11/11) o mecanismo é opcional: a L-01 exige um banco por passo, e o despacho entregue em `saga-mensageria` já cumpre isso. O status da OS no PostgreSQL atualiza milissegundos depois da Saga; a consulta de status lê o PostgreSQL, e o console de administração lê a Saga.
 
 Modelo da tabela `autoreparos-os-saga`:
 

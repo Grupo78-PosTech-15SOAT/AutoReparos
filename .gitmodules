@@ -1,9 +1,9 @@
 [submodule "submodules/AutoReparos.AuthLambda"]
 	path = submodules/AutoReparos.AuthLambda
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda.git
-[submodule "submodules/AutoReparos.App"]
-	path = submodules/AutoReparos.App
-	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App.git
+[submodule "submodules/AutoReparos.Cadastros"]
+	path = submodules/AutoReparos.Cadastros
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros.git
 [submodule "submodules/AutoReparos.Infra.Database"]
 	path = submodules/AutoReparos.Infra.Database
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database.git
@@ -13,11 +13,15 @@
 [submodule "submodules/AutoReparos.OS"]
 	path = submodules/AutoReparos.OS
 	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS.git
-[submodule "submodules/AutoReparos.Billing"]
-	path = submodules/AutoReparos.Billing
-	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Billing.git
-	branch = feature/os-service-contracts
-[submodule "submodules/AutoReparos.Execution"]
-	path = submodules/AutoReparos.Execution
-	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execution.git
-	branch = feature/execution-service
+[submodule "submodules/AutoReparos.Cobranca"]
+	path = submodules/AutoReparos.Cobranca
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca.git
+	branch = develop
+[submodule "submodules/AutoReparos.Execucao"]
+	path = submodules/AutoReparos.Execucao
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao.git
+	branch = develop
+[submodule "submodules/AutoReparos.Web"]
+	path = submodules/AutoReparos.Web
+	url = https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web.git
+	branch = develop

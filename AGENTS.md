@@ -13,7 +13,7 @@ Configuração do projeto:
 mutations: 3
 ```
 
-Use Python 3.8+ e os scripts portáveis em `.specs/tlc-spec-lean/scripts/`. Não migre especificações históricas em `docs/specs/` salvo solicitação específica.
+Use Python 3.8+ e os scripts portáveis em `.agents/skills/tlc-spec-lean/scripts/`. Não migre especificações históricas em `docs/specs/` salvo solicitação específica.
 
 ## Onde ficam as especificações e como preenchê-las
 
@@ -33,7 +33,7 @@ Use Python 3.8+ e os scripts portáveis em `.specs/tlc-spec-lean/scripts/`. Não
 3. Plano aprovado afetado por decisão: revise-o e troque `**Approved**` por `**Revisão pendente de aprovação**`. Nunca escreva a linha `**Approved**` sem as palavras do usuário; os `checks.md` são derivados de novo depois da aprovação.
 4. Spec transversal nova: siga as seções das existentes (cabeçalho; Critério; Estado atual; Lacunas; Desenho; Passos para a mudança; Critérios de aceite) e registre-a no mapa (§ 3) e na matriz (§ 4) do índice.
 5. Feature nova: `<feature>/plan.md` no formato TLC, com as decisões de origem no topo e a seção da spec transversal em "Sources", em vez de copiar o desenho; registre no `FEATURES.md` e no § 3.1 do índice.
-6. Antes de commitar: `python3 scripts/specs/verificar_links.py` e `python3 .specs/tlc-spec-lean/scripts/validate_plan.py fase<N>/<feature>` sem erros; diagramas Mermaid válidos; caminhos relativos; português; nomes de serviços, filas e eventos em português.
+6. Antes de commitar: `python3 scripts/specs/verificar_links.py` e `python3 .agents/skills/tlc-spec-lean/scripts/validate_plan.py fase<N>/<feature>` sem erros; diagramas Mermaid válidos; caminhos relativos; português; nomes de serviços, filas e eventos em português.
 
 ## Monitoramento de Contexto e Handoff
 - **Alerta de Contexto (60%)**: O assistente deve monitorar ativamente a densidade da conversa (volume de tokens consumidos, saídas de comandos e leituras extensas acumuladas).

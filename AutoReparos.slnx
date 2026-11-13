@@ -1,11 +1,11 @@
 <Solution>
-  <Project Path="submodules/AutoReparos.App/AutoReparos.API/AutoReparos.API.csproj" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.Application/AutoReparos.Application.csproj" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.Application.Tests/AutoReparos.Application.Tests.csproj" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.Domain/AutoReparos.Domain.csproj" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.Domain.Tests/AutoReparos.Domain.Tests.csproj" Id="6658fb98-8936-4a5b-a9e3-009fd37847ec" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.Infra/AutoReparos.Infra.csproj" />
-  <Project Path="submodules/AutoReparos.App/AutoReparos.IntegrationTests/AutoReparos.IntegrationTests.csproj" Id="8d51165e-e3d3-483c-9bd8-3869ededcf9d" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/AutoReparos.Cadastros.Api.csproj" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application/AutoReparos.Cadastros.Application.csproj" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests/AutoReparos.Cadastros.Application.Tests.csproj" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Domain/AutoReparos.Cadastros.Domain.csproj" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Domain.Tests/AutoReparos.Cadastros.Domain.Tests.csproj" Id="6658fb98-8936-4a5b-a9e3-009fd37847ec" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Infrastructure/AutoReparos.Cadastros.Infrastructure.csproj" />
+  <Project Path="submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests/AutoReparos.Cadastros.IntegrationTests.csproj" Id="8d51165e-e3d3-483c-9bd8-3869ededcf9d" />
   <Project Path="submodules/AutoReparos.AuthLambda/src/AutoReparos.AuthLambda.csproj" />
   <Project Path="submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj" />
   <Project Path="docker-compose.dcproj">

@@ -7,7 +7,7 @@
 > **Autores:** Grupo 78 - Pós-Tech Software Architecture (15SOAT / 13SOAT)  
 > **Repositórios Envolvidos:**
 > - Repositório Banco de Dados: [`AutoReparos.Infra.Database`](../../submodules/AutoReparos.Infra.Database)
-> - Repositório Aplicação: [`AutoReparos.App`](../../submodules/AutoReparos.App)
+> - Repositório Aplicação: [`AutoReparos.App`](../../submodules/AutoReparos.Cadastros)
 > - Repositório Serverless: [`AutoReparos.AuthLambda`](../../submodules/AutoReparos.AuthLambda)
 
 ---

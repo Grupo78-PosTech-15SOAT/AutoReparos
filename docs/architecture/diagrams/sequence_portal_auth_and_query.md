@@ -20,7 +20,7 @@ sequenceDiagram
     participant G as API Gateway v2
     participant L as Lambda<br/>AutoReparos.AuthLambda
     participant D as RDS PostgreSQL 16
-    participant A as AutoReparos.API<br/>(EKS)
+    participant A as AutoReparos.Cadastros.Api<br/>(EKS)
     participant O as OTel Collector
 
     rect rgb(238, 245, 255)
@@ -71,7 +71,7 @@ sequenceDiagram
     actor C as Cliente
     participant P as Portal Angular
     participant G as API Gateway v2
-    participant A as AutoReparos.API
+    participant A as AutoReparos.Cadastros.Api
     participant U as ObterMinhasOrdensServicoUseCase
     participant D as RDS PostgreSQL 16
 
@@ -105,7 +105,7 @@ sequenceDiagram
     participant P as Portal / Cliente
     participant G as API Gateway v2
     participant L as Lambda de autenticação
-    participant A as AutoReparos.API
+    participant A as AutoReparos.Cadastros.Api
     participant D as RDS PostgreSQL
 
     rect rgb(255, 245, 245)
@@ -149,7 +149,7 @@ Collector, que os distribui ([ADR-003](../ADR-003-end-to-end-observability-strat
 
 ```mermaid
 flowchart LR
-    A["AutoReparos.API<br/>span da requisição<br/>+ log JSON com TraceId/SpanId<br/>+ métricas"]
+    A["AutoReparos.Cadastros.Api<br/>span da requisição<br/>+ log JSON com TraceId/SpanId<br/>+ métricas"]
     COL["OTel Collector"]
     JAE["Jaeger — trace completo<br/>HTTP → EF Core → Npgsql"]
     PROM["Prometheus — métricas<br/>prefixo autoreparos_"]
@@ -181,7 +181,7 @@ Para exercitar o fluxo sem AWS, com o stack de observabilidade completo:
 cp .env.example .env            # preencher as senhas
 docker compose up -d postgres otel-collector prometheus jaeger loki
 dotnet build AutoReparos.slnx
-dotnet run --project submodules/AutoReparos.App/AutoReparos.API
+dotnet run --project submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api
 ```
 
 Pontos que costumam custar tempo:
