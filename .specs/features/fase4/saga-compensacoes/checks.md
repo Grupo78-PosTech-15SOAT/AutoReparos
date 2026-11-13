@@ -43,7 +43,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelarReservaSoDepoisDaConfirmacao`
 
 **C8** - Dois eventos concorrentes para a mesma Saga, inclusive nos estados novos, gravam uma única transição por escrita condicional de versão (AC 8)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.IntegrationTests --filter FullyQualifiedName~EventosConcorrentesGravamUmaTransicao`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~EventosConcorrentesGravamUmaTransicao`
 
 ### S3 - Prazos, lembretes e operação
 
