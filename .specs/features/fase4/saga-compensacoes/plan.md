@@ -1,6 +1,6 @@
 # Fase 4 - Saga: compensações, reserva de insumos e operação
 
-**Approved**: 2026-11-12 - user: "Aprovo" (revisão por D-32 e D-33; aprovação anterior de 2026-11-11, "Aprovo", cobria o plano sem elas). Revisado em 12/11/2026 por D-32 (itens no `orcamento.aprovado.v1`, Cobrança passa a mudar) e D-33 (cancelamento só depois da confirmação da reserva); a aprovação anterior (2026-11-11, "Aprovo") valia para o plano sem essas duas decisões. Plano reescrito em 11/11/2026 para estender `saga-mensageria` (PASS, plano aprovado em 2026-11-06, congelado por AD-021) em vez de repetir o que ele já entrega. Decisões de origem: D-18, D-20, D-32, D-33, L-01 e D-19 (adiada) de `.specs/features/fase4/especificacao/index.md` § 6, AD-011, AD-015, AD-019, AD-021, AD-024, AD-034 e AD-035 do `.specs/STATE.md`. Os checks foram derivados de novo em 2026-11-12, depois desta aprovação. Depende de `insumos` (PASS).
+**Revisão pendente de aprovação** (D-38, 13/11: AC 10 reduzido aos prazos de `AguardandoPagamento` e `AguardandoInsumos`; aprovação anterior: 2026-11-12 - user: "Aprovo" (revisão por D-32 e D-33; aprovação anterior de 2026-11-11, "Aprovo", cobria o plano sem elas). Revisado em 12/11/2026 por D-32 (itens no `orcamento.aprovado.v1`, Cobrança passa a mudar) e D-33 (cancelamento só depois da confirmação da reserva); a aprovação anterior (2026-11-11, "Aprovo") valia para o plano sem essas duas decisões. Plano reescrito em 11/11/2026 para estender `saga-mensageria` (PASS, plano aprovado em 2026-11-06, congelado por AD-021) em vez de repetir o que ele já entrega. Decisões de origem: D-18, D-20, D-32, D-33, D-38, L-01 e D-19 (adiada) de `.specs/features/fase4/especificacao/index.md` § 6, AD-011, AD-015, AD-019, AD-021, AD-024, AD-034 e AD-035 do `.specs/STATE.md`. Os checks foram derivados de novo em 2026-11-12, depois desta aprovação; devem ser derivados de novo depois da aprovação da revisão de D-38.) Depende de `insumos` (PASS).
 
 ## Problem
 
@@ -103,7 +103,7 @@ Mensagens internas versionadas: catálogo em `.specs/features/fase4/especificaca
 ### Deadlines, reminders and operation (P2)
 
 9. WHEN um prazo técnico vencer (`PrazoReserva` 2 min, `PrazoLiberacao` 2 min e `PrazoCompensacao` 15 min, configuráveis, com até 3 reenvios) THEN o job SHALL reenviar o passo e, esgotados os reenvios, compensar ou marcar intervenção com alerta.
-10. WHEN um prazo de negócio vencer (orçamento sem resposta, `AguardandoPagamento`, `AguardandoInsumos`) THEN o job SHALL publicar `saga.lembrete.v1` e SHALL não expirar nem cancelar o orçamento.
+10. WHEN um prazo de negócio da Saga vencer (`AguardandoPagamento`, lembrete a cada 24 h, ou `AguardandoInsumos`, junto do alerta diário) THEN o job SHALL publicar `saga.lembrete.v1` e SHALL não expirar nem cancelar o orçamento.
 11. WHEN um administrador consultar uma Saga, listar Sagas paradas ou retentar um passo THEN OS Service SHALL executar a ação e registrar autor, data e motivo no histórico, aplicado à OS por mensagem de transição (sem gravar nos dois bancos).
 12. WHEN um administrador reprocessar a DLQ de um serviço THEN o serviço SHALL devolver à fila de origem até a quantidade pedida e registrar a ação.
 

@@ -259,6 +259,7 @@ Registro único das decisões da Fase 4. A coluna "`.specs`" aponta a decisão e
 | D-27 | **Pasta TLC da OS renomeada para `servico-os`** (11/11): o nome da feature, seus links e comandos de prova acompanham a pasta; o repositório `AutoReparos.OS`, a branch `feature/os-service-contracts` e os registros históricos de provas conservam seus nomes | AD-029; usuário: "melhor \"servico-os\"" ao definir o nome alvo para a pasta `os-service` no PR #46 | [Plano da OS](../servico-os/plan.md) |
 | D-32 | **Itens da reserva vêm no `orcamento.aprovado.v1`** (12/11): a Cobrança inclui `itens` (`{insumoId, quantidade}`, do orçamento aprovado com preço congelado) no evento; o OS monta `execucao.reservar-insumos.v1` com eles, sem consultar ninguém. Campo só aditivo no contrato de `saga-mensageria` (PASS, congelado por AD-021); sem `itens` o OS não reserva | AD-034; Usuário: "1. A" (opção A: Cobrança inclui os itens no evento) | [Plano da Saga](../saga-compensacoes/plan.md) |
 | D-33 | **Cancelamento espera a confirmação da reserva** (12/11): em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1` (o 409 `saga_em_andamento` já bloqueia o comando); a Execução não muda, então o PASS de `insumos` fica | AD-035; Usuário: "2. A" (opção A: a Saga só cancela depois da confirmação) | [Plano da Saga](../saga-compensacoes/plan.md) |
+| D-38 | **Lembrete de "orçamento sem resposta" fica fora de `saga-compensacoes`** (13/11): o AC 10 de `saga-compensacoes` cobre só os prazos de negócio que existem dentro da Saga (`AguardandoPagamento`, lembrete a cada 24 h, e `AguardandoInsumos`, junto do alerta diário). O orçamento sem resposta acontece antes de a Saga existir; o lembrete ao cliente (48 h) e o alerta à recepção (7 dias) ficam com a Cobrança, em feature própria, como dívida consciente | AD-040; Usuário: "pode seguir" (opção 1: reduzir o AC 10 aos dois prazos entregues) | ativa |
 
 ### 6.2 Regras obrigatórias do grupo
 
@@ -289,6 +290,7 @@ Nenhuma em 11/11: D-11, D-12, D-14b, D-15, D-16, D-17 e D-21 passaram para o § 
 | 11/11/2026 | D-26: AC 5 de `infra-ci-observabilidade` deixa de exigir traces por DynamoDB Streams; L-01 lida como "um banco por passo", sem mecanismo obrigatório de publicação | Streams adiado por AD-024 e fora do escopo de infra; prazo de 17/11 |
 | 11/11/2026 | D-03: extração do Web deixa de ser corte opcional e ganha plano próprio; rotas para as novas APIs e telas novas ficam para depois | Usuário pediu a `develop` do Web e a migração da camada Angular nesta etapa; escolheu "Extração e integração do repositório (recomendado)" |
 | 12/11/2026 | D-32: `orcamento.aprovado.v1` ganha o campo `itens` (aditivo); D-33: cancelamento só depois da confirmação da reserva | O evento não levava os itens que a reserva exige; `insumos` deixou aberta a ordem entre reservar e cancelar |
+| 13/11/2026 | D-18d: lembrete de orçamento sem resposta sai do AC 10 de `saga-compensacoes` | O prazo é anterior à Saga; só a Cobrança pode emiti-lo (D-38) |
 
 ---
 

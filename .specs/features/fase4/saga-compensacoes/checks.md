@@ -50,7 +50,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 **C9** - Prazo técnico vencido (`PrazoReserva` 2 min, `PrazoLiberacao` 2 min, `PrazoCompensacao` 15 min, até 3 reenvios) reenvia o passo e, esgotados os reenvios, compensa ou marca intervenção com alerta (AC 9)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~PrazoTecnicoReenviaEEsgota`
 
-**C10** - Prazo de negócio vencido publica `saga.lembrete.v1` e nunca expira nem cancela o orçamento (AC 10)
+**C10** - Prazo de negócio da Saga vencido (`AguardandoPagamento` ou `AguardandoInsumos`) publica `saga.lembrete.v1` e nunca expira nem cancela o orçamento (AC 10)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~LembreteNaoExpiraOrcamento`
 
 **C11** - Consultar, listar e retentar Sagas executa a ação e registra autor, data e motivo no histórico, aplicado à OS por mensagem de transição, sem gravar nos dois bancos (AC 11)
