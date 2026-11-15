@@ -1,9 +1,11 @@
 # Fase 4 - Infraestrutura, CI/CD e observabilidade
 
-**Approved**: 2026-11-11 - user: "Sim, aprovo e crio". Revisão de 10/11 com as decisões de 11/11: branch protegida só `main`; repositório Web criado nesta entrega.
-**Approved**: 2026-11-11 - user: "Pode seguir" - AC 5 sem DynamoDB Streams (D-26): a L-01 é cumprida pelo despacho com um banco por passo, e o Streams fica opcional para a Outbox da Saga.
+Aprovação anterior: 2026-11-11 - user: "Sim, aprovo e crio". Revisão de 10/11 com as decisões de 11/11: branch protegida só `main`; repositório Web criado nesta entrega.
+Aprovação anterior: 2026-11-11 - user: "Pode seguir" - AC 5 sem DynamoDB Streams (D-26): a L-01 é cumprida pelo despacho com um banco por passo, e o Streams fica opcional para a Outbox da Saga.
 
-**Revisão pendente de aprovação** (10/11/2026): inclui Cadastros e Web, SNS/SQS e DynamoDB por IaC, proteção com status checks obrigatórios e evidências pedidas no feedback da Fase 3 (D-13, D-19, D-22 de `.specs/features/fase4/especificacao/index.md`). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
+**Revisão pendente de aprovação** (15/11/2026): os ACs 3, 4 e 7 (deploy no EKS, aprovação de produção e IaC dos recursos exclusivos) passaram para [`deploy-servicos`](../deploy-servicos/plan.md) (D-40) e o staging saiu do escopo (D-41); o texto dos critérios ainda não foi ajustado e os `checks.md` precisam ser derivados de novo depois da aprovação.
+
+**Revisão pendente de aprovação** (10/11/2026): inclui Cadastros e Web, SNS/SQD-49S e DynamoDB por IaC, proteção com status checks obrigatórios e evidências pedidas no feedback da Fase 3 (D-13, D-19, D-22 de `.specs/features/fase4/especificacao/index.md`). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
 
 ## Problem
 
