@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-43 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+44 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -155,6 +155,9 @@ Proof: `scripts/smoke/aws-credenciais.sh`
 
 **C43** - O token de Cliente emitido pelo Cadastros leva o claim `clienteId` igual ao id do cliente (o mesmo valor do `sub`), e o token de usuário da oficina não leva `clienteId` (D-63, acrescentado em 16/11: achado ao preparar o checkout de ponta a ponta; sem o claim a Cobrança responde `403` ao Cliente na aprovação do orçamento e no checkout)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedName~JwtClienteIdTests`
+
+**C44** - O security group `autoreparos-auth-lambda-sg-production` permite saída TCP `80` só para o CIDR da VPC, para a AuthLambda alcançar o ALB interno do Cadastros (`Cadastros__BaseUrl` em `http://`); sem ela, `POST /auth/cliente` responde `503` por timeout (acrescentado em 16/11: achado ao preparar o checkout de ponta a ponta)
+Proof: `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base auth-lambda-rede`
 
 ## Coverage
 
