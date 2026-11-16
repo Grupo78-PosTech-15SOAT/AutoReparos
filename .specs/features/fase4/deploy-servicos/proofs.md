@@ -1,8 +1,8 @@
 # fase4/deploy-servicos proofs
 
-**HEAD**: 948eff4
+**HEAD**: 92d16f3
 **Tree**: clean
-**Result**: 46 pass, 0 fail; mutations 0 killed, 3 not
+**Result**: 53 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -41,13 +41,20 @@
 | C30 | `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base vpc-endpoints` | 1 | - | pass |
 | C31 | `scripts/infra/configurar-github.sh --verificar` | count unknown | - | pass |
 | C32 | `scripts/infra/configurar-github.sh --verificar-idempotencia` | count unknown | - | pass |
-| C33 | `scripts/specs/smoke_deploy.sh execucao` | count unknown | - | pass |
-| C34 | `scripts/specs/assert_rollback.sh execucao` | count unknown | - | pass |
+| C33 | `scripts/smoke/deploy-execucao.sh execucao` | count unknown | - | pass |
+| C34 | `scripts/smoke/rollback-execucao.sh execucao` | count unknown | - | pass |
 | C35 | `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor` | count unknown | - | pass |
 | C36 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedNa` | count unknown | - | pass |
 | C36 | `python3 scripts/specs/assert_deploy.py --check jwt-audiencia` | count unknown | - | pass |
 | C37 | `python3 -m unittest discover -s scripts/infra/tests -p test_token_servico.py` | 4 | - | pass |
 | C37 | `scripts/infra/configurar-github.sh --verificar-token-servico` | count unknown | - | pass |
+| C38 | `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base roles-deploy` | 1 | - | pass |
+| C39 | `python3 scripts/specs/simular_iam.py --caso boundary` | count unknown | - | pass |
+| C40 | `python3 scripts/specs/simular_iam.py --caso state` | count unknown | - | pass |
+| C41 | `scripts/smoke/mercado-pago.sh` | count unknown | - | pass |
+| C42 | `scripts/smoke/aws-credenciais.sh` | count unknown | - | pass |
+| C43 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedNa` | count unknown | - | pass |
+| C44 | `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base auth-lambda-rede` | 1 | - | pass |
 | Build | `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx` | - | - | pass |
 | Build | `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx` | - | - | pass |
 | Build | `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx` | - | - | pass |
@@ -57,6 +64,6 @@
 
 | Mutation | Location | Killed |
 | --- | --- | --- |
-| C18/AC 15 (D-60): deploy do Cadastros com always() deixa de exigir test verde | `submodules/AutoReparos.Cadastros/.github/workflows/ci-cd.yml:109` | no |
-| C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:145` | no |
-| C35/porta 4: OS publica comandos da Saga na fila sem consumidor da Cobrança | `submodules/AutoReparos.OS/deploy/helm/os/values.yaml:31` | no |
+| C18/AC 15 (D-60): deploy do Cadastros com always() deixa de exigir test verde | `submodules/AutoReparos.Cadastros/.github/workflows/ci-cd.yml:109` | yes |
+| C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:182` | yes |
+| C35/porta 4: OS publica comandos da Saga na fila sem consumidor da Cobrança | `submodules/AutoReparos.OS/deploy/helm/os/values.yaml:31` | yes |
