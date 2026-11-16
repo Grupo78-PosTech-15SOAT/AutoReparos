@@ -37,18 +37,26 @@ import re
 import subprocess
 import sys
 
-from lean_config import _section, plan_approved, plan_marks_binding, plan_owes_pictures, read_mutations
+from lean_config import _section, plan_approved, plan_marks_binding, plan_owes_pictures, read_mutations, running_pictures
 
-PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+PROOF_RE = re.compile(r"^\*{0,3}\s*Proof\s*\*{0,3}\s*:[ \t]*(\S.*)$", re.IGNORECASE)
 RUNNING_SUFFIX = ".running.png"
-ROUND_RE = re.compile(r"^\**\s*Round\s*\**\s*:\s*\**\s*(\d+)", re.IGNORECASE)
-JUDGED_HEAD_RE = re.compile(r"^\**\s*HEAD\s*\**\s*:\s*\**\s*`?([0-9a-f]{7,40})", re.IGNORECASE)
+ROUND_RE = re.compile(r"^\*{0,3}\s*Round\s*\*{0,3}\s*:\s*\*{0,3}\s*(\d+)", re.IGNORECASE)
+JUDGED_HEAD_RE = re.compile(r"^\*{0,3}\s*HEAD\s*\*{0,3}\s*:\s*\*{0,3}\s*`?([0-9a-f]{7,40})", re.IGNORECASE)
 MAX_ROUNDS = 2
 BROWSER_PROOF_RE = re.compile(r"^`?browser\b", re.IGNORECASE)
 WALK_PROOF_RE = re.compile(r"^`?walk\b", re.IGNORECASE)
-WALKED_RE = re.compile(r"^\s*[-*]?\s*\**walked\**\s*:", re.IGNORECASE)
-SHOT_RE = re.compile(r"[\w./-]+\.running\.png")
 CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
+
+
+def is_walked_line(line):
+    text = line.lstrip()
+    if text.startswith(("-", "*")):
+        text = text[1:].lstrip()
+    text = text.lstrip("*")
+    if not text.lower().startswith("walked"):
+        return False
+    return text[len("walked"):].lstrip("* \t").startswith(":")
 
 
 def _feature_dirs(root):
@@ -256,7 +264,7 @@ def _walk_logged(checks_lines, name):
     """A `walk` proof's evidence is the author's `**Walked:**` line; with none, nothing was visited."""
     walks = [ln for ln in checks_lines
              if (m := PROOF_RE.match(ln.strip())) and WALK_PROOF_RE.match(m.group(1).strip())]
-    if walks and not any(WALKED_RE.match(ln) for ln in _section(checks_lines, "Handoff")):
+    if walks and not any(is_walked_line(ln) for ln in _section(checks_lines, "Handoff")):
         return [
             f"{name}: checks.md has a `walk` proof but its `## Handoff` has no `**Walked:**` line - "
             f"the visit the proof names is not on record"
@@ -275,7 +283,7 @@ def _browser_shots(fdir, name, running):
         match = PROOF_RE.match(ln.strip())
         if not match or not BROWSER_PROOF_RE.match(match.group(1).strip()):
             continue
-        shots = SHOT_RE.findall(match.group(1))
+        shots = running_pictures(match.group(1))
         if not shots:
             errors.append(
                 f"{name}: a browser proof names no `.running.png` - the screens sub-agent judges the saved "
