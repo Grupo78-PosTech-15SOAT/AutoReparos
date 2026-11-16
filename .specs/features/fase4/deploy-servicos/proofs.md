@@ -1,8 +1,8 @@
 # fase4/deploy-servicos proofs
 
-**HEAD**: 92d16f3
+**HEAD**: 33730bf
 **Tree**: clean
-**Result**: 53 pass, 0 fail; mutations 3 killed, 0 not
+**Result**: 53 pass, 0 fail; mutations 6 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -65,5 +65,8 @@
 | Mutation | Location | Killed |
 | --- | --- | --- |
 | C18/AC 15 (D-60): deploy do Cadastros com always() deixa de exigir test verde | `submodules/AutoReparos.Cadastros/.github/workflows/ci-cd.yml:109` | yes |
-| C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:182` | yes |
+| C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:188` | yes |
 | C35/porta 4: OS publica comandos da Saga na fila sem consumidor da Cobrança | `submodules/AutoReparos.OS/deploy/helm/os/values.yaml:31` | yes |
+| R2 C18/AC 15 (D-60): always() trocado por (success() \ | `\` | yes |
+| R2 C39/porta 2: deny da tag Servico com ForAllValues (TagRole com Servico=os junto de outra chave passa) | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:138` | yes |
+| R2 C24/C39 porta 2: role de deploy altera trust, política e tags das roles de outro serviço | `submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl:57` | yes |
