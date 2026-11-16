@@ -1,6 +1,8 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Revisão pendente de aprovação** (10/11/2026): inclui os 4 serviços e o Web e as correções pedidas no feedback da Fase 3 (vídeo curto, implementação, dashboards e proteção de branches não mostrados). A versão anterior foi aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` desta feature precisam ser derivados de novo depois da aprovação.
+**Approved**: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código atual sustenta; pagamento recusado e falta de saldo não compensam, D-63).
+
+Aprovação anterior: 2026-11-16 - user: "Aprovo e envie" (revisão de 10/11 com o BDD acrescentado em 16/11 pela D-63, "No OS, com harness (Recommended)"). Versão anterior aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois desta aprovação.
 
 ## Problem
 
@@ -8,9 +10,10 @@ A conclusão da Fase 4 exige evidências técnicas e acadêmicas em cada reposit
 
 ## Shape
 
-Esta entrega reúne evidências produzidas pelos serviços e infraestrutura; não duplica código nem altera artefatos-fonte dos repositórios.
+Esta entrega reúne evidências produzidas pelos serviços e infraestrutura e acrescenta o que faltava para o PDF: os cenários BDD no OS (D-63), os READMEs com a Saga justificada e a cobertura, e o Postman de OS, Cobrança e Execução. Não altera código de produto.
 
-1. Coletar README, documentação, API, cobertura e manifests dos repositórios OS, Cobranca, Execucao, Cadastros e Web (exists).
+0. Escrever os cenários BDD do fluxo completo e de duas compensações em `AutoReparos.OS.BddTests` (Reqnroll, `# language: pt`) sobre o `SagaHarness` (new, door 2).
+1. Completar README, documentação, API, cobertura e manifests dos repositórios OS, Cobranca, Execucao, Cadastros e Web (exists).
 2. Preparar roteiro cronometrado (alvo de 13 a 14 minutos) e vídeo público/não listado com demonstração de fluxo, falhas, código, deploy, proteção de branches e observabilidade (roteiro na spec de vídeo, exists).
 3. Preparar PDF com participantes, links, diagrama e justificativas e submetê-lo ao portal após revisão/autorização (door 1).
 
@@ -42,6 +45,7 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 | Door | Literal shape | Alternative rejected and why |
 | --- | --- | --- |
 | 1 | Submissão externa somente após revisão da equipe e autorização explícita | Publicação sem revisão pode expor conteúdo incompleto ou informação pessoal. |
+| 2 | Projeto `AutoReparos.OS.BddTests` no repositório do OS, na solution e no `ci-cd.yml` (build e test já o alcançam); cenários em `.feature` em português | BDD no pai contra o `docker compose` (D-14b): o compose do pai não sobe os serviços de negócio e montá-lo não cabe até 17/11 (D-63). |
 
 ## Criteria
 
@@ -56,6 +60,7 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 5. WHEN PDF final for preparado THEN SHALL conter participantes, links dos repositórios e vídeo, diagrama de serviços/bancos/comunicação, estratégia e justificativa da Saga e justificativas da divisão/tecnologias.
 6. IF participantes ou URLs finais estiverem ausentes THEN o pacote SHALL identificar cada entrada pendente e não submeter versão incompleta.
 7. IF for submetido conteúdo externamente THEN a equipe SHALL revisar e autorizar explicitamente a submissão.
+8. WHEN a suíte do OS rodar THEN SHALL executar com Reqnroll pelo menos quatro cenários, com Cobrança e Execução simuladas: o fluxo completo da OS com pagamento aprovado; o pagamento recusado, que só registra no histórico e deixa a Saga aguardando, sem compensar; a falta de saldo na reserva, que deixa a Saga em `AguardandoInsumos` com alerta e, ao cancelar, compensa só o orçamento; e a liberação recusada pelo Execução, que compensa a reserva e o orçamento em ordem inversa. A prova SHALL falhar se menos de quatro cenários forem executados ou se algum falhar (R19, D-63).
 
 ## Out of scope
 
@@ -63,6 +68,7 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 | --- | --- |
 | Criar conteúdo ou evidências inexistentes | Devem vir das entregas técnicas e da equipe. |
 | Publicar vídeo ou submeter PDF sem revisão/consentimento | A submissão é uma ação externa e exige autorização específica. |
+| BDD no pai contra os 4 serviços reais | Dívida registrada na D-63; exige compose completo. |
 
 ## Assumptions
 
