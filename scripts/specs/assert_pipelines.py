@@ -109,7 +109,7 @@ def nivel_superior(expressao):
         texto = texto[3:-2]
     anterior = None
     while anterior != texto:
-        anterior, texto = texto, re.sub(r"\([^()]*\)", "(...)", texto)
+        anterior, texto = texto, re.sub(r"\([^()]*\)", "[...]", texto)
     return texto
 
 
