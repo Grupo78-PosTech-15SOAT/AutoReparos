@@ -10,7 +10,7 @@
     "file": "submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl",
     "old": "\"Resource\": \"arn:aws:s3:::${bucket}/servicos/${servico}/*\"",
     "new": "\"Resource\": \"arn:aws:s3:::${bucket}/servicos/*\"",
-    "proof": "python3 scripts/specs/simular_iam.py --caso deploy",
+    "proof": "python3 scripts/specs/simular_iam.py --caso state",
     "label": "C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço"
   },
   {

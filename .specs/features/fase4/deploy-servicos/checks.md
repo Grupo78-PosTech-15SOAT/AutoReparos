@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-38 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+40 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -140,6 +140,12 @@ Proof: `scripts/infra/configurar-github.sh --verificar-token-servico`
 
 **C38** - O trust de cada `autoreparos-deploy-<servico>` aceita, além do assunto do C23, a forma imutável do mesmo assunto, `repo:Grupo78-PosTech-15SOAT@272379485/AutoReparos.<Repo>@<id do repositório>:environment:production`, e nenhuma outra (D-61, acrescentado em 16/11)
 Proof: `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base roles-deploy`
+
+**C39** - Sob o boundary `autoreparos-servico-boundary`, uma IRSA da Cobrança (tag `Servico=cobranca`) com política inline `Allow *` é negada em `secretsmanager:GetSecretValue` no segredo do OS e em `dynamodb:PutItem` em `autoreparos-os-saga`, e permitida no próprio segredo e em `sqs:SendMessage` em `autoreparos-os-saga`; a role de deploy da Cobrança é negada em `iam:CreateRole` sem `Servico=cobranca`, em trocar ou tirar a tag `Servico` da própria IRSA e em `lambda:InvokeFunction` no provisionador fora da Function URL, e continua com `lambda:InvokeFunctionUrl` (portas 2, 9 e 10; acrescentado em 16/11: achados 1 e 2 do Verifier)
+Proof: `python3 scripts/specs/simular_iam.py --caso boundary`
+
+**C40** - A role de deploy da Cobrança é negada em `s3:GetObject` e `s3:PutObject` em `servicos/os/production.tfstate` e em `dynamodb:PutItem` na tabela de lock com `dynamodb:LeadingKeys` do state do OS, e permitida nos próprios (portas 2 e 3; acrescentado em 16/11: achado 4 do Verifier)
+Proof: `python3 scripts/specs/simular_iam.py --caso state`
 
 ## Coverage
 

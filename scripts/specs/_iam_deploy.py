@@ -46,7 +46,7 @@ def casos():
          "sqs:CreateQueue", fila("autoreparos-cobranca-solicitacoes"), True, None),
         ("cobranca cria a própria role IRSA com o boundary", MODELO, cobranca,
          "iam:CreateRole", role("autoreparos-cobranca-irsa"), True,
-         {"iam:PermissionsBoundary": [BOUNDARY]}),
+         {"iam:PermissionsBoundary": [BOUNDARY], "aws:RequestTag/Servico": ["cobranca"]}),
         ("cobranca chama a Function URL do provisionador", MODELO, cobranca,
          "lambda:InvokeFunctionUrl", PROVISIONADOR, True, None),
     ]
