@@ -47,7 +47,7 @@
 
 ## 3. Arquitetura final
 
-Diagrama em [`arquitetura_e_justificativa.md`](arquitetura_e_justificativa.md) (seção 1). 🔲 Exportar para PNG ou SVG antes de gerar o PDF.
+Diagrama em [`arquitetura_e_justificativa.md`](arquitetura_e_justificativa.md) (seção 1). Imagem pronta para o PDF: ![Arquitetura final](diagrama_arquitetura.png) (também em `diagrama_arquitetura.svg`).
 
 ## 4. Estratégia da Saga
 

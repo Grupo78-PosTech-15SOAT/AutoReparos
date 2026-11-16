@@ -7,61 +7,58 @@
 Mostra o que está implantado e o que ficou fora. O fan-out por SNS (D-19) e a fila de notificações do Cadastros não foram provisionados (D-35, D-46) e aparecem tracejados.
 
 ```mermaid
-flowchart LR
-    subgraph Borda
-        Web["AutoReparos.Web<br/>Angular"]
+flowchart TB
+    subgraph Borda["Borda"]
+        direction LR
+        Web["AutoReparos.Web<br/>Angular, na raiz do gateway"]
         APIGW["API Gateway<br/>HTTP v2"]
         Lambda["AuthLambda<br/>CPF para JWT"]
         MP["Mercado Pago<br/>Checkout Pro"]
     end
 
-    subgraph EKS["AWS EKS - namespace por serviço"]
+    subgraph EKS["AWS EKS - um namespace por serviço"]
+        direction LR
         OS["OS<br/>ordem de serviço<br/>+ orquestrador da Saga"]
         Cob["Cobrança<br/>orçamento e pagamento"]
         Exec["Execução<br/>fila, catálogo e insumos"]
         Cad["Cadastros<br/>clientes, veículos, usuários<br/>emissão do JWT"]
-        Obs["OTel Collector, Prometheus<br/>Grafana, Loki, Jaeger"]
     end
 
+    Obs["Observabilidade (namespace autoreparos)<br/>OTel Collector, Prometheus, Grafana, Loki, Jaeger"]
+
     subgraph Mensageria["Mensageria"]
+        direction LR
         SQS[["SQS: filas por serviço + DLQ<br/>comandos e respostas da Saga"]]
         SNS[["SNS: fan-out de eventos<br/>não provisionado (D-46)"]]
     end
 
     subgraph Dados["Dados"]
-        DBOS[("PostgreSQL os_db")]
+        direction LR
+        DBOS[("PostgreSQL<br/>os_db")]
         DDB[("DynamoDB<br/>estado da Saga")]
-        DBCob[("PostgreSQL cobranca_db")]
-        DBExec[("PostgreSQL execucao_db")]
-        DBCad[("PostgreSQL autoreparos_db<br/>Cadastros")]
+        DBCob[("PostgreSQL<br/>cobranca_db")]
+        DBExec[("PostgreSQL<br/>execucao_db")]
+        DBCad[("PostgreSQL<br/>autoreparos_db")]
     end
 
     Web --> APIGW
-    APIGW -->|"POST /auth/cliente"| Lambda
-    APIGW -->|"/api/*"| OS
-    APIGW --> Cob
-    APIGW --> Exec
-    APIGW --> Cad
     MP -->|"webhook"| APIGW
+    APIGW -->|"POST /auth/cliente"| Lambda
+    APIGW -->|"/api/*"| EKS
     Lambda -->|"HTTP interno + chave"| Cad
     OS -->|"REST: valida cliente e veículo"| Cad
-    OS <-->|"comandos e respostas"| SQS
-    Cob <--> SQS
-    Exec <--> SQS
-    SNS -.-> Cad
     Cob --> MP
+    EKS <-->|"comandos e respostas"| SQS
+    SNS -.-> Cad
     OS --> DBOS
     OS --> DDB
     Cob --> DBCob
     Exec --> DBExec
     Cad --> DBCad
-    OS -.->|"OTLP"| Obs
-    Cob -.->|"OTLP"| Obs
-    Exec -.->|"OTLP"| Obs
-    Cad -.->|"OTLP"| Obs
+    EKS -.->|"OTLP"| Obs
 ```
 
-Legenda: linha cheia é chamada ou mensagem em uso; tracejada é telemetria (OTLP) ou item não provisionado. As quatro databases PostgreSQL ficam numa única instância RDS, cada uma com usuário próprio. Para exportar para o PDF, colar o bloco em [mermaid.live](https://mermaid.live) ou usar o `mermaid-cli`.
+Legenda: linha cheia é chamada ou mensagem em uso; tracejada é telemetria (OTLP) ou item não provisionado. As quatro databases PostgreSQL ficam numa única instância RDS, cada uma com usuário próprio. Imagens para o PDF: [`diagrama_arquitetura.png`](diagrama_arquitetura.png) e [`diagrama_arquitetura.svg`](diagrama_arquitetura.svg), geradas a partir do bloco acima com o `mermaid-cli`.
 
 ## 2. Justificativa da divisão dos microsserviços
 
