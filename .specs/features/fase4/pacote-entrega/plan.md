@@ -1,6 +1,6 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Revisão pendente de aprovação** (16/11/2026): o AC 8 passa a descrever os quatro cenários que o código atual sustenta; pagamento recusado e falta de saldo não compensam hoje (a versão aprovada os chamava de compensações). Os `checks.md` C4 e a Coverage de BDD acompanham.
+**Approved**: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código atual sustenta; pagamento recusado e falta de saldo não compensam, D-63).
 
 Aprovação anterior: 2026-11-16 - user: "Aprovo e envie" (revisão de 10/11 com o BDD acrescentado em 16/11 pela D-63, "No OS, com harness (Recommended)"). Versão anterior aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois desta aprovação.
 
