@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-37 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+38 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -89,7 +89,7 @@ Proof: `python3 scripts/specs/assert_deploy.py --check sem-staging`
 **C22** - `stacks/base` tem `instance_types` com padrão `["t3.medium"]`, `desired` e `min` 2 e `max` 3 (AC 19)
 Proof: `python3 scripts/specs/assert_deploy.py --check plataforma-nos`
 
-**C23** - A plataforma cria os namespaces `os`, `cobranca`, `execucao` e `cadastros`, o boundary `autoreparos-servico-boundary` e as 4 roles `autoreparos-deploy-<servico>` com trust só em `repo:Grupo78-PosTech-15SOAT/AutoReparos.<Repo>:environment:production` (ou na forma imutável do mesmo assunto, `repo:Grupo78-PosTech-15SOAT@272379485/AutoReparos.<Repo>@<id do repositório>:environment:production`, que os repositórios de serviço usam e o GitHub não deixa desligar; revisto em 16/11 a pedido do José: "we need to find another way ... like fixing issues") e access entry `AmazonEKSEditPolicy` limitada ao namespace do serviço (AC 20)
+**C23** - A plataforma cria os namespaces `os`, `cobranca`, `execucao` e `cadastros`, o boundary `autoreparos-servico-boundary` e as 4 roles `autoreparos-deploy-<servico>` com trust só em `repo:Grupo78-PosTech-15SOAT/AutoReparos.<Repo>:environment:production` e access entry `AmazonEKSEditPolicy` limitada ao namespace do serviço (AC 20)
 Proof: `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base roles-deploy`
 
 **C24** - O simulador do IAM nega à role de deploy da Cobrança `sqs:CreateQueue` em `autoreparos-os-*` e `iam:CreateRole` sem o boundary, e permite `sqs:CreateQueue` em `autoreparos-cobranca-*` e `lambda:InvokeFunctionUrl` no provisionador (AC 20)
@@ -137,6 +137,9 @@ Proof: `python3 scripts/specs/assert_deploy.py --check jwt-audiencia`
 **C37** - O token de serviço da Cobrança é um JWT RS256 com o `kid` RFC 7638 da chave do Cadastros, `iss` = URL do API Gateway sem barra final, `aud = autoreparos`, `sub = cobranca`, papel `ServicoOS` e validade de 30 dias, com assinatura que confere com a chave pública; depois do provisionamento, `configurar-github.sh` grava `TOKEN_SERVICO` no Environment `production` da Cobrança e o job `deploy` o injeta em `OsService__BearerToken` e `Execucao__BearerToken` (D-58, acrescentado em 16/11)
 Proof: `python3 -m unittest discover -s scripts/infra/tests -p test_token_servico.py`
 Proof: `scripts/infra/configurar-github.sh --verificar-token-servico`
+
+**C38** - O trust de cada `autoreparos-deploy-<servico>` aceita, além do assunto do C23, a forma imutável do mesmo assunto, `repo:Grupo78-PosTech-15SOAT@272379485/AutoReparos.<Repo>@<id do repositório>:environment:production`, e nenhuma outra (D-61, acrescentado em 16/11)
+Proof: `scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base roles-deploy`
 
 ## Coverage
 
