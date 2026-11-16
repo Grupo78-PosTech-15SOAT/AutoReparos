@@ -52,6 +52,7 @@ Toda política que o simulador avalia fica num arquivo `.json.tftpl` renderizado
 
 - Cada serviço, nível repositório: variáveis `AWS_REGION=us-east-1`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE`. Environment `production`: revisores José e Enrico, só a branch `main`, variável `AWS_ROLE_ARN=arn:aws:iam::198903849859:role/autoreparos-deploy-<servico>`.
 - Cadastros, Environment `production`, segredos: `JWT_CHAVE_PRIVADA_PEM`, `CHAVE_INTERNA`, `SEED_USER_PASSWORD`, `SENDGRID_API_KEY`; variáveis `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SEED_USER_EMAIL`.
+- Cobrança, Environment `production`, segredos `TOKEN_SERVICO` (D-58), `MERCADOPAGO_ACCESS_TOKEN` e `MERCADOPAGO_WEBHOOK_SECRET` (D-62, copiados de `/autoreparos/production/cobranca/mercadopago-{access-token,webhook-secret}` quando existem).
 - OS, Environment `production`, segredo `CHAVE_INTERNA` (o OS chama o Cadastros com `Cadastros:ChaveInterna`; `Cadastros:BaseUrl` = `http://cadastros.cadastros.svc.cluster.local:8080`).
 - Pai: `AWS_ROLE_ARN` como variável e como segredo nos Environments `production` e `aws-bootstrap` (o `bootstrap-aws.yml` lê o segredo). Variável `CHAVE_INTERNA_IMPRESSAO` (16 hex do SHA-256 da chave) no pai, no Cadastros e no OS, para o `--verificar` provar que a chave é a mesma sem ler segredo de volta. Senha do Grafana em `/autoreparos/production/plataforma/grafana-admin-password` (`SecureString`, versão 1).
 - Origem: `SecureString` em `/autoreparos/production/cadastros/{jwt-chave-privada-pem,chave-interna,seed-user-password}` (gerados uma vez, versão 1) e `sendgrid-*` (já existem). A `CHAVE_INTERNA` do pai sai do mesmo parâmetro.
@@ -83,7 +84,7 @@ Ordem do job `deploy`: Terraform → imagem → provisionador → kubeconfig →
 | `autoreparos-execucao-saida-dlq` | reprocessador da Execução | Execução (`Sqs:DeadLetterQueueUrl`) |
 | `autoreparos-cadastros-notificacoes` + DLQ | Cadastros (`Notificacoes:FilaUrl`) | OS (`Sqs:CadastrosQueueUrl`, `saga.lembrete.v1`) |
 
-Secrets além de `<servico>-database`: `os-segredos` (`Cadastros__ChaveInterna`) e `cadastros-segredos` (`Jwt__ChavePrivadaPem`, `Interno__Chave`, `SeedUser__Password`, `SendGrid__ApiKey`). A role de deploy ganhou `ec2:DescribeSubnets` (o Terraform do Cadastros lê os CIDRs privados para a NetworkPolicy).
+Secrets além de `<servico>-database`: `os-segredos` (`Cadastros__ChaveInterna`), `cobranca-segredos` (`TokenServico`, `MercadoPagoAccessToken`, `MercadoPagoWebhookSecret`, só as preenchidas) e `cadastros-segredos` (`Jwt__ChavePrivadaPem`, `Interno__Chave`, `SeedUser__Password`, `SendGrid__ApiKey`). A role de deploy ganhou `ec2:DescribeSubnets` (o Terraform do Cadastros lê os CIDRs privados para a NetworkPolicy).
 
 ## Decisões de 16/11 (D-57, D-58)
 

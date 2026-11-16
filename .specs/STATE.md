@@ -69,6 +69,7 @@
 | AD-063 | D-59: fila `autoreparos-cobranca-execucoes` sem consumidor e `Sqs:QueueUrl` do OS vazio ficam como estão; consumir esses eventos fica fora do prazo | José: "Manter assim (Recommended)" (16/11) | active | 2026-11-16 |
 | AD-064 | D-60: `workflow_dispatch` com `ignorar_quality` no `ci-cd.yml` do Cadastros libera o `deploy` com o `quality` vermelho (build, test e aprovação continuam obrigatórios) | José: "we need to find another way to active this deploy for now, like fixing issues or allowing manual turn on" (16/11) | active | 2026-11-16 |
 | AD-065 | D-61: trust de `autoreparos-deploy-<servico>` com as duas formas do `sub` (clássica e imutável) do mesmo repositório e Environment `production`; aplicado na conta por `aws iam update-assume-role-policy` em 16/11 e no Terraform do `stacks/base` (Infra.K8s `c464251`) | José: "You can run the Github fix"; "we need to find another way to active this deploy for now, like fixing issues" (16/11) | active | 2026-11-16 |
+| AD-066 | D-62: Mercado Pago na Cobrança implantada: SSM `/autoreparos/production/cobranca/mercadopago-{access-token,webhook-secret}` → `configurar-github.sh` → segredos `MERCADOPAGO_*` do Environment `production` → Secret `cobranca-segredos` → `MercadoPago__AccessToken`/`MercadoPago__WebhookSecret` (opcionais); Cobrança PR #7 e pai `798eb1c` | José: "yes make mercado pago changes"; "acabei de colocar a assinatura e o access token na aws ... quero colocar no github" (16/11) | active | 2026-11-16 |
 
 ## Handoff: deploy-servicos - 2026-11-15
 

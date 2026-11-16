@@ -1,6 +1,6 @@
 # Deploy por serviço
 
-**Revisão pendente de aprovação** (16/11): AC 15 com a exceção do disparo manual com `ignorar_quality` no Cadastros (D-60); porta 2 com o trust nas duas formas do `sub` do OIDC (D-61) e o boundary limitado ao serviço pela tag `Servico` do principal (achado ALTA do Verifier). Aprovação anterior: 2026-11-15 - user: "Plano está aprovado" (na mesma mensagem: "a configuração do github deve ser parte do plano por sua parte, só me peça as variáveis se for necessário ou gere automaticamente" e "Credencial admin do RDS; NAT-> use recomendado", incorporados como D-54, D-55 e D-56)
+**Revisão pendente de aprovação** (16/11): AC 15 com a exceção do disparo manual com `ignorar_quality` no Cadastros (D-60); porta 2 com o trust nas duas formas do `sub` do OIDC (D-61) e o boundary limitado ao serviço pela tag `Servico` do principal (achado ALTA do Verifier); credenciais do Mercado Pago na Cobrança e AC 29 (D-62). Aprovação anterior: 2026-11-15 - user: "Plano está aprovado" (na mesma mensagem: "a configuração do github deve ser parte do plano por sua parte, só me peça as variáveis se for necessário ou gere automaticamente" e "Credencial admin do RDS; NAT-> use recomendado", incorporados como D-54, D-55 e D-56)
 
 Decisões de origem: D-40 a D-47, D-50 a D-56 (D-49 substituída pela D-54) em [`especificacao/index.md`](../especificacao/index.md#61-decididas) (AD-043 a AD-054); justificativa em [ADR-004](../../../../docs/architecture/ADR-004-migrations-por-job-pre-upgrade.md) e [ADR-005](../../../../docs/architecture/ADR-005-deploy-independente-por-microsservico.md).
 
@@ -145,6 +145,8 @@ O serviço tem imagem, responde à probe e sabe só migrar quando pedido.
 25. The VPC SHALL ter os endpoints do tipo gateway de S3 e DynamoDB associados às tabelas de rota privadas, mantendo um NAT Gateway (D-55)
 26. WHEN `scripts/infra/configurar-github.sh` roda THEN SHALL deixar o pai com `AWS_ACCOUNT_ID=198903849859`, o `TF_STATE_BUCKET` novo e o `AWS_ROLE_ARN` de `autoreparos-github-pai` em `production` e `aws-bootstrap`, e cada serviço com `AWS_REGION`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE` e o Environment `production` (revisores José e Enrico, só `main`, `AWS_ROLE_ARN` da role do serviço), gerando a chave JWT, a `CHAVE_INTERNA` (a mesma no pai e no Cadastros) e a senha do usuário inicial, guardadas também como `SecureString` no SSM; só a chave do SendGrid é pedida (D-56)
     - rodar duas vezes → mesmo estado, sem gerar chaves novas por cima das que existem
+29. WHEN os segredos `MERCADOPAGO_ACCESS_TOKEN` e `MERCADOPAGO_WEBHOOK_SECRET` existem no Environment `production` da Cobrança THEN o pod da Cobrança SHALL receber `MercadoPago__AccessToken` e `MercadoPago__WebhookSecret` do Secret `cobranca-segredos` (D-62)
+    - segredos ausentes → o deploy conclui com aviso e a Cobrança sobe; `POST /api/v1/webhooks/mercado-pago` sem assinatura → `401`
 
 ### S6: Um serviço implantado de verdade (P1)
 
@@ -162,7 +164,6 @@ O serviço tem imagem, responde à probe e sabe só migrar quando pedido.
 | Tópicos SNS e assinaturas | D-46: entram depois como recurso aditivo, sem trocar filas |
 | Propagação de trace nas mensagens, dashboard da Saga | `infra-ci-observabilidade` AC 5 |
 | Aplicar a proteção da `main` e o `SONAR_TOKEN` | `infra-ci-observabilidade` AC 2; o `deploy` depende do `quality` verde, então o token precisa existir antes do primeiro deploy |
-| Credenciais do Mercado Pago | José ainda não tem; a Cobrança sobe sem elas, checkout e webhook ficam para quando existirem |
 | Deploy do Web e da AuthLambda | Continuam no pai (D-45) |
 | Rotas públicas de `/api/v1/admin/dlq/reprocessar` | A mesma rota existe em OS, Cobrança e Execução e não dá para separar por prefixo; ficam acessíveis por `kubectl port-forward` |
 | Renomear a database do Cadastros | D-34: recriaria o RDS |
@@ -175,8 +176,8 @@ O serviço tem imagem, responde à probe e sabe só migrar quando pedido.
 | Conta AWS | `198903849859`, do José, plano gratuito com US$ 100; a plataforma é provisionada nela antes do primeiro deploy | D-50 (substitui a D-48) | y - José: "Sim, minha conta (Recommended)" |
 | Créditos para testes e vídeo | US$ 100, perto de 330 h a US$ 0,30/h (EKS + NAT + 2 `t3.medium`); o ambiente é destruído depois do vídeo | `freetier get-account-plan-state` em 15/11: FREE, ACTIVE, US$ 100; depois da entrada na organização os créditos ficam na conta gerencial `156342300286`; budget com avisos em US$ 50 e US$ 90 (D-51) | y - José |
 | Identidade dos pods | IRSA, pelo OIDC provider que o cluster já tem | O cluster já usa IRSA no LB Controller e no EBS CSI; Pod Identity exigiria outro add-on | n |
-| Segredos do serviço | Gerados pelo `configurar-github.sh` (chave JWT, `CHAVE_INTERNA`, senha do usuário inicial) e gravados no GitHub e como `SecureString` no SSM; a chave do SendGrid é pedida ao José; Mercado Pago vazio; senha da database pelo Terraform do serviço no Secrets Manager | D-56 | y - José: "só me peça as variáveis se for necessário ou gere automaticamente" |
-| Mercado Pago | Variáveis vazias; a Cobrança sobe e o checkout responde erro de integração | José: "Eu ainda não tenho" | y - José: "Eu ainda não tenho" |
+| Segredos do serviço | Gerados pelo `configurar-github.sh` (chave JWT, `CHAVE_INTERNA`, senha do usuário inicial) e gravados no GitHub e como `SecureString` no SSM; SendGrid e Mercado Pago lidos do SSM, onde o José os grava (D-56, D-62); senha da database pelo Terraform do serviço no Secrets Manager | D-56 | y - José: "só me peça as variáveis se for necessário ou gere automaticamente" |
+| Mercado Pago | Access Token e assinatura do webhook da aplicação de teste no SSM, copiados pelo `configurar-github.sh` para o Environment da Cobrança e injetados pelo chart; sem eles a Cobrança sobe e o checkout responde erro de integração | D-62 (antes: "variáveis vazias", José: "Eu ainda não tenho") | y - José: "yes make mercado pago changes" |
 | Validação de JWT entre serviços | `Authentication__Authority` e o issuer do Cadastros recebem a mesma URL pública do API Gateway, lida pelo job de deploy em `/autoreparos/production/apigateway/endpoint`; a variável `CADASTROS_ISSUER` fica dispensada; os pods buscam o discovery pela NAT | O `iss` do token é a URL pública; ler do SSM (D-53) garante o mesmo valor nos 4 serviços | n |
 | Ordem do primeiro deploy | Plataforma (pai) → Cadastros → Execução → Cobrança → OS | Cada um depende de JWKS do Cadastros; o OS publica nas filas dos outros, que o consumidor cria | n |
 | Teto de gasto | Desligamento automático em US$ 80 do orçamento total de US$ 100 (D-52): apaga EKS, nós, NAT, load balancers e RDS e anexa `autoreparos-congelado` às roles `autoreparos*`, inclusive as de deploy desta feature; fora do Terraform para o `destroy-aws.yml` não apagá-lo | José: "Faça impedir" | y - José: "Faça impedir" |
