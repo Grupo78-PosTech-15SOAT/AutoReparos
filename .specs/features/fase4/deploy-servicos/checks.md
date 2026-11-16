@@ -165,5 +165,6 @@ Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor
 
 - **Settled mid-build:** none
 - **Dispatched:** build S1 (C1–C9) a um subagente em 2026-11-15, base `4606034` no pai e `feature/deploy-servicos` em OS `a6663d1`, Cobrança `92156d6`, Execução `d83badf` — returned (C1–C9 verdes)
+- **Dispatched:** 2026-11-16, base no pai = commit das provas compartilhadas (`tf_test.sh`, `simular_iam.py`, módulos `_deploy_*`/`_iam_*`, [`contratos.md`](./contratos.md)); três subagentes de build em paralelo: (A) serviços S2–S4 + C35 (C10–C21, C35) em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, Cadastros `528bcef`; (B1) plataforma C22–C27, C30–C32 e a parte de role de deploy do C17 em Infra.K8s `c13cfc5` e no pai; (B2) provisionador C28–C29 em Infra.Database `4d8c103` — pending
 - **Boundary:** C1–C9 fechados em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, pai `ac1add8` (provas reexecutadas pelo autor em 15/11)
 - **Abandoned:** none

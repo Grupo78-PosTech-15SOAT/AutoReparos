@@ -10,24 +10,15 @@ import glob
 import json
 import os
 import shutil
-import subprocess
 import sys
 
+from _deploy_comum import SERVICOS_IMPLANTADOS, executar, ultimas_linhas
 from _repositorios import caminho_repositorio, reportar
+import _deploy_plataforma
+import _deploy_servicos
 
-SERVICOS_IMPLANTADOS = ["OS", "Cobranca", "Execucao", "Cadastros"]
 PORTA = "8080"
 USUARIOS_ROOT = {"", "root", "0"}
-
-
-def executar(comando, diretorio=None):
-    """Roda o comando e devolve (código de saída, saída combinada)."""
-    processo = subprocess.run(comando, cwd=diretorio, capture_output=True, text=True, encoding="utf-8")
-    return processo.returncode, (processo.stdout + processo.stderr).strip()
-
-
-def ultimas_linhas(texto, quantidade=20):
-    return "\n".join(texto.splitlines()[-quantidade:])
 
 
 def porta_configurada(variaveis):
@@ -102,6 +93,12 @@ CHECKS = {
     "dockerfile-os": lambda: checar_imagem("OS"),
     "iac-formatado": checar_iac_formatado,
 }
+# Checks dos serviços (S2-S4, C35) e da plataforma (S5) ficam em módulos próprios.
+for _modulo in (_deploy_servicos, _deploy_plataforma):
+    _repetidos = set(CHECKS) & set(_modulo.CHECKS)
+    if _repetidos:
+        raise SystemExit(f"checks repetidos em {_modulo.__name__}: {sorted(_repetidos)}")
+    CHECKS.update(_modulo.CHECKS)
 
 
 def main():
