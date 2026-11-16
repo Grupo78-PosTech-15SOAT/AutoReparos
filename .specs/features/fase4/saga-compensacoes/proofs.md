@@ -1,6 +1,6 @@
 # fase4/saga-compensacoes proofs
 
-**HEAD**: 6f32542
+**HEAD**: 696733d
 **Tree**: clean
 **Result**: 21 pass, 0 fail; mutations 6 killed, 0 not
 
@@ -34,7 +34,7 @@
 | --- | --- | --- |
 | C9 limite de reenvios do passo < -> <= (quarto reenvio) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:362` | yes |
 | C5/C9 prazo da reserva usa PrazoLiberacao | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:344` | yes |
-| C12 DLQ do OS deixa de rotear execucao.reservar-insumos.v1 para a fila da Execucao | `submodules\AutoReparos.OS\AutoReparos.OS.Api\ReprocessadorDlq.cs:44` | yes |
+| C12 DLQ do OS deixa de rotear execucao.reservar-insumos.v1 para a fila da Execucao | `submodules\AutoReparos.OS\AutoReparos.OS.Api\ReprocessadorDlq.cs:46` | yes |
 | C10 intervalo do lembrete de pagamento 24 h -> 12 h | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:22` | yes |
 | C14 remove a trava D-33 (cancelamento aceito em ReservandoInsumos) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:249` | yes |
 | C4 reserva compensada depois do orcamento (ordem invertida) | `submodules\AutoReparos.OS\AutoReparos.OS.Domain\SagaOS.cs:617` | yes |
