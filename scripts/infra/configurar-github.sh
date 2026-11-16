@@ -48,6 +48,8 @@ P_GRAFANA="${SSM}/plataforma/grafana-admin-password"
 P_SENDGRID_KEY="${SSM}/cadastros/sendgrid-api-key"
 P_SENDGRID_EMAIL="${SSM}/cadastros/sendgrid-from-email"
 P_SENDGRID_NOME="${SSM}/cadastros/sendgrid-from-name"
+P_MP_TOKEN="${SSM}/cobranca/mercadopago-access-token"
+P_MP_WEBHOOK="${SSM}/cobranca/mercadopago-webhook-secret"
 GERADOS=("$P_JWT" "$P_CHAVE" "$P_SEED" "$P_GRAFANA")
 
 # servico -> repositório AutoReparos.<Repo>
@@ -262,6 +264,11 @@ aplicar() {
   repo="$(repo_de os)"
   definir_segredo_do_ssm "$repo" CHAVE_INTERNA "$P_CHAVE" production
   definir_variavel "$repo" CHAVE_INTERNA_IMPRESSAO "$impressao_chave" production
+
+  # Credenciais do Mercado Pago (opcionais): gravadas pelo José no SSM; copiadas se existirem.
+  repo="$(repo_de cobranca)"
+  if parametro_existe "$P_MP_TOKEN"; then definir_segredo_do_ssm "$repo" MERCADOPAGO_ACCESS_TOKEN "$P_MP_TOKEN" production; else echo "pulado MERCADOPAGO_ACCESS_TOKEN: $P_MP_TOKEN não existe"; fi
+  if parametro_existe "$P_MP_WEBHOOK"; then definir_segredo_do_ssm "$repo" MERCADOPAGO_WEBHOOK_SECRET "$P_MP_WEBHOOK" production; else echo "pulado MERCADOPAGO_WEBHOOK_SECRET: $P_MP_WEBHOOK não existe"; fi
 
   gerar_token_servico
   echo "Concluído ($MODO). Confira com: $0 --verificar"
