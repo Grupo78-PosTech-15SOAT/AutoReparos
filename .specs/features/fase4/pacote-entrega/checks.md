@@ -19,7 +19,7 @@ Proof: `python scripts/specs/assert_entrega.py --check saga`
 **C3** - OS, Cobrança e Execução têm Swagger/OpenAPI exposto ou uma collection Postman versionada no repositório (AC 1)
 Proof: `python scripts/specs/assert_entrega.py --check api`
 
-**C4** - A suíte `AutoReparos.OS.BddTests` executa pelo menos 3 cenários Reqnroll (fluxo completo, pagamento recusado e falha na reserva) e todos passam; zero cenários executados reprova (AC 8, D-63)
+**C4** - A suíte `AutoReparos.OS.BddTests` executa pelo menos 4 cenários Reqnroll (fluxo completo com pagamento aprovado, pagamento recusado sem compensação, falta de saldo com compensação só do orçamento ao cancelar e liberação recusada com compensação em ordem inversa) e todos passam; menos de 4 executados reprova (AC 8, D-63)
 Proof: `python scripts/specs/assert_entrega.py --check bdd`
 
 ### S2 - Vídeo, PDF e submissão
@@ -42,7 +42,7 @@ Proof: walk - registrar a autorização antes do envio
 | --- | --- | --- |
 | conteúdo do repositório (5) | Dockerfile C1 · manifests C1 · CI/CD C1 · README com arquitetura e cobertura C1 · Swagger/Postman C3 | - |
 | README (3) | Saga justificada C2 · papel na Saga C2 · Web C2 | - |
-| BDD (3) | fluxo completo C4 · pagamento recusado C4 · falha na reserva C4 | - |
+| BDD (4) | fluxo completo C4 · pagamento recusado C4 · falta de saldo C4 · liberação recusada C4 | - |
 | vídeo (6) | plataforma C5 · visibilidade C5 · até 15 min C5 · fluxo, Saga e falha C6 · deploy com testes C6 · monitoramento e tracing C6 | - |
 | PDF (7) | participantes C7 · links C7 · vídeo C7 · diagrama C7 · Saga C7 · divisão C7 · tecnologias C7 | - |
 | salvaguardas (2) | entrada ausente C7 · autorização C8 | - |

@@ -1,6 +1,8 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Approved**: 2026-11-16 - user: "Aprovo e envie" (revisão de 10/11 com o BDD acrescentado em 16/11 pela D-63, "No OS, com harness (Recommended)"). Versão anterior aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois desta aprovação.
+**Revisão pendente de aprovação** (16/11/2026): o AC 8 passa a descrever os quatro cenários que o código atual sustenta; pagamento recusado e falta de saldo não compensam hoje (a versão aprovada os chamava de compensações). Os `checks.md` C4 e a Coverage de BDD acompanham.
+
+Aprovação anterior: 2026-11-16 - user: "Aprovo e envie" (revisão de 10/11 com o BDD acrescentado em 16/11 pela D-63, "No OS, com harness (Recommended)"). Versão anterior aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois desta aprovação.
 
 ## Problem
 
@@ -58,7 +60,7 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 5. WHEN PDF final for preparado THEN SHALL conter participantes, links dos repositórios e vídeo, diagrama de serviços/bancos/comunicação, estratégia e justificativa da Saga e justificativas da divisão/tecnologias.
 6. IF participantes ou URLs finais estiverem ausentes THEN o pacote SHALL identificar cada entrada pendente e não submeter versão incompleta.
 7. IF for submetido conteúdo externamente THEN a equipe SHALL revisar e autorizar explicitamente a submissão.
-8. WHEN a suíte do OS rodar THEN SHALL executar com Reqnroll pelo menos um cenário do fluxo completo da OS (orçamento, reserva de insumos, execução e pagamento aprovado) e dois de compensação (pagamento recusado e falha na reserva), com Cobrança e Execução simuladas, e a prova SHALL falhar se nenhum cenário for executado (R19, D-63).
+8. WHEN a suíte do OS rodar THEN SHALL executar com Reqnroll pelo menos quatro cenários, com Cobrança e Execução simuladas: o fluxo completo da OS com pagamento aprovado; o pagamento recusado, que só registra no histórico e deixa a Saga aguardando, sem compensar; a falta de saldo na reserva, que deixa a Saga em `AguardandoInsumos` com alerta e, ao cancelar, compensa só o orçamento; e a liberação recusada pelo Execução, que compensa a reserva e o orçamento em ordem inversa. A prova SHALL falhar se menos de quatro cenários forem executados ou se algum falhar (R19, D-63).
 
 ## Out of scope
 
