@@ -3,6 +3,8 @@
 Cada check é uma função sem argumentos que devolve (erros, mensagem de sucesso) e entra em CHECKS.
 Os checks de chart rodam `helm template` com valores de exemplo, sem cluster.
 """
+import fnmatch
+import json
 import os
 import re
 import shutil
@@ -411,22 +413,119 @@ def filas_declaradas(repo):
     return nomes
 
 
+# Tabela "Serviços" de contratos.md: cada chave de produtor -> (consumidor, chave que o consumidor lê no chart).
+PRODUCAO = {
+    ("Cobranca", "Sqs__QueueUrl"): ("OS", "Sqs__SagaQueueUrl"),
+    ("Execucao", "Sqs__OsServiceQueueUrl"): ("OS", "Sqs__SagaQueueUrl"),
+    ("OS", "Sqs__BillingQueueUrl"): ("Cobranca", "Sqs__ComandosQueueUrl"),
+    ("OS", "Sqs__ExecucaoQueueUrl"): ("Execucao", "Sqs__LiberadasQueueUrl"),
+    ("OS", "Sqs__CadastrosQueueUrl"): ("Cadastros", "Notificacoes__FilaUrl"),
+}
+# D-59: execucao.concluida.v1 vai para uma fila da Cobrança que ninguém consome ainda.
+SEM_CONSUMIDOR = {("Execucao", "Sqs__BillingQueueUrl"): "autoreparos-cobranca-execucoes"}
+# DLQs de saída (outbox esgotado): o produtor publica na própria fila.
+SAIDA_PROPRIA = {("Cobranca", "Sqs__DeadLetterQueueUrl"), ("Execucao", "Sqs__DeadLetterQueueUrl")}
+# Chaves que o próprio serviço lê (fila de entrada e DLQ dela).
+CONSUMO = {
+    "OS": {"Sqs__SagaQueueUrl", "Sqs__SagaDeadLetterQueueUrl"},
+    "Cobranca": {"Sqs__ComandosQueueUrl", "Sqs__ComandosDeadLetterQueueUrl"},
+    "Execucao": {"Sqs__LiberadasQueueUrl", "Sqs__LiberadasDeadLetterQueueUrl"},
+    "Cadastros": {"Notificacoes__FilaUrl", "Notificacoes__DlqUrl"},
+}
+
+
+def politica_irsa(repo):
+    """Política IRSA do serviço renderizada como o templatefile() do Terraform dele."""
+    from simular_iam import renderizar  # noqa: PLC0415
+    caminho = os.path.relpath(os.path.join(diretorio_terraform(repo), "politicas", "irsa.json.tftpl"), RAIZ)
+    return json.loads(renderizar(caminho, {"conta": CONTA, "regiao": REGIAO}))
+
+
+def permite(politica, acao, recurso):
+    """Avaliação estática: algum Allow sem condição casa ação e recurso e nenhum Deny casa."""
+    def casa(declaracao):
+        acoes = declaracao.get("Action", [])
+        recursos = declaracao.get("Resource", [])
+        acoes = [acoes] if isinstance(acoes, str) else acoes
+        recursos = [recursos] if isinstance(recursos, str) else recursos
+        return (any(fnmatch.fnmatchcase(acao.lower(), a.lower()) for a in acoes)
+                and any(fnmatch.fnmatchcase(recurso, r) for r in recursos))
+
+    declaracoes = politica.get("Statement", [])
+    declaracoes = [declaracoes] if isinstance(declaracoes, dict) else declaracoes
+    if any(d.get("Effect") == "Deny" and casa(d) for d in declaracoes):
+        return False
+    return any(d.get("Effect") == "Allow" and "Condition" not in d and casa(d) for d in declaracoes)
+
+
+def urls_de_fila(objetos):
+    urls = {}
+    for carga in do_tipo(objetos, "Deployment") + do_tipo(objetos, "Job"):
+        for container in containers(carga):
+            for chave, valor in variaveis(container, objetos).items():
+                if isinstance(valor, str) and "sqs" in valor:
+                    urls.setdefault(chave, set()).add(valor)
+    return urls
+
+
+def checar_ligacoes(urls, erros):
+    """Cada chave de produtor aponta para a mesma fila que o consumidor lê, e a IRSA do produtor pode publicar nela."""
+    politicas = {}
+    for repo, chaves in urls.items():
+        servico = servico_de(repo)
+        for chave, valores in sorted(chaves.items()):
+            if len(valores) != 1:
+                erros.append(f"{repo}: {chave} tem valores diferentes entre as cargas: {sorted(valores)}")
+                continue
+            fila = next(iter(valores)).rsplit("/", 1)[-1]
+            publica = True
+            if (repo, chave) in PRODUCAO:
+                consumidor, chave_consumidor = PRODUCAO[(repo, chave)]
+                lida = urls.get(consumidor, {}).get(chave_consumidor)
+                if lida != valores:
+                    erros.append(f"{repo}: {chave} aponta para {fila}, mas {consumidor} lê "
+                                 f"{chave_consumidor}={sorted(lida or [])}")
+            elif (repo, chave) in SEM_CONSUMIDOR:
+                if fila != SEM_CONSUMIDOR[(repo, chave)]:
+                    erros.append(f"{repo}: {chave} aponta para {fila}, esperado {SEM_CONSUMIDOR[(repo, chave)]} (D-59)")
+            elif (repo, chave) in SAIDA_PROPRIA or chave in CONSUMO.get(repo, set()):
+                publica = (repo, chave) in SAIDA_PROPRIA
+                if not fila.startswith(f"autoreparos-{servico}-"):
+                    erros.append(f"{repo}: {chave} aponta para {fila}, que não é fila de {repo}")
+            else:
+                erros.append(f"{repo}: {chave} não está na tabela Serviços de contratos.md (produtor ou consumidor)")
+                continue
+            if publica:
+                if repo not in politicas:
+                    try:
+                        politicas[repo] = politica_irsa(repo)
+                    except (OSError, ValueError) as erro:
+                        politicas[repo] = None
+                        erros.append(f"{repo}: política IRSA ilegível: {erro}")
+                arn = f"arn:aws:sqs:{REGIAO}:{CONTA}:{fila}"
+                if politicas[repo] is not None and not permite(politicas[repo], "sqs:SendMessage", arn):
+                    erros.append(f"{repo}: {chave} aponta para {fila}, mas a política IRSA de {repo} não permite "
+                                 f"sqs:SendMessage nela")
+    for (repo, chave), (consumidor, chave_consumidor) in sorted(PRODUCAO.items()):
+        if repo in urls and chave not in urls[repo]:
+            erros.append(f"{repo}: o chart não injeta {chave} (produtor para {consumidor})")
+        if consumidor in urls and chave_consumidor not in urls[consumidor]:
+            erros.append(f"{consumidor}: o chart não injeta {chave_consumidor}, que {repo} alimenta")
+
+
 def checar_filas_produtor_consumidor():
     erros = []
     por_servico = {servico_de(repo): repo for repo in SERVICOS_IMPLANTADOS}
     declaradas = {repo: filas_declaradas(repo) for repo in SERVICOS_IMPLANTADOS}
     total = 0
+    por_repo = {}
     for repo in SERVICOS_IMPLANTADOS:
         falhas, objetos, _ = renderizar_chart(repo)
         if falhas:
             erros += falhas
             continue
-        urls = set()
-        for carga in do_tipo(objetos, "Deployment") + do_tipo(objetos, "Job"):
-            for container in containers(carga):
-                for chave, valor in variaveis(container, objetos).items():
-                    if isinstance(valor, str) and "sqs" in valor:
-                        urls.add((chave, valor))
+        por_repo[repo] = urls_de_fila(objetos)
+        urls = {(chave, valor) for chave, valores in por_repo[repo].items() for valor in valores}
         if not urls:
             erros.append(f"{repo}: o chart não injeta nenhuma URL de fila")
         for chave, valor in sorted(urls):
@@ -445,7 +544,9 @@ def checar_filas_produtor_consumidor():
             elif fila not in declaradas[consumidor]:
                 erros.append(f"{repo}: {chave} aponta para {fila}, que o Terraform de {consumidor} não declara "
                              f"(declaradas: {sorted(declaradas[consumidor])})")
-    return erros, f"OK filas-produtor-consumidor: {total} URLs de fila apontam para filas do Terraform do consumidor"
+    checar_ligacoes(por_repo, erros)
+    return erros, (f"OK filas-produtor-consumidor: {total} URLs de fila apontam para filas do Terraform do consumidor, "
+                   f"cada produtor para a fila que o consumidor lê, com sqs:SendMessage na política IRSA")
 
 
 AUDIENCIA = "autoreparos"
