@@ -1,6 +1,6 @@
 # fase4/cadastros proofs
 
-**HEAD**: ed35766
+**HEAD**: 696733d
 **Tree**: clean
 **Result**: 21 pass, 0 fail; mutations 3 killed, 0 not
 
@@ -18,8 +18,8 @@
 | C5 | `git grep -q -e "eks\]" -- .github/workflows/destroy-aws.yml` | count unknown | - | pass |
 | C5 | `grep -q ">= 1" submodules/AutoReparos.Infra.Database/terraform/variables.tf` | count unknown | - | pass |
 | C6 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedNam` | count unknown | - | pass |
-| C6 | `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --show-only charts/api/templates/networkpolicy.` | count unknown | - | pass |
-| C6 | `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --set ingress.enabled=true --show-only template` | count unknown | - | pass |
+| C6 | `helm template cadastros submodules/AutoReparos.Cadastros/deploy/helm/cadastros --show-only templates/networkpo` | count unknown | - | pass |
+| C6 | `helm template cadastros submodules/AutoReparos.Cadastros/deploy/helm/cadastros --show-only templates/ingress-i` | count unknown | - | pass |
 | C7 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedNam` | count unknown | - | pass |
 | C7 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedNam` | count unknown | - | pass |
 | C8 | `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedNam` | count unknown | - | pass |

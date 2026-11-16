@@ -153,7 +153,7 @@ Proof: `scripts/smoke/mercado-pago.sh`
 **C42** - Nos namespaces `os`, `cobranca`, `execucao` e `cadastros`, os pods rodam e os logs dos últimos 10 minutos não têm `AWSSDK.SecurityToken`, `AccessDenied` nem `not authorized`: o IRSA entrega credenciais e SQS/DynamoDB respondem (acrescentado em 16/11: achado em produção, nenhum check cobria o IRSA no runtime)
 Proof: `scripts/smoke/aws-credenciais.sh`
 
-**C43** - O token de Cliente emitido pelo Cadastros leva o claim `clienteId` igual ao id do cliente (o mesmo valor do `sub`), e o token de usuário da oficina não leva `clienteId` (D-63, acrescentado em 16/11: achado ao preparar o checkout de ponta a ponta; sem o claim a Cobrança responde `403` ao Cliente na aprovação do orçamento e no checkout)
+**C43** - O token de Cliente emitido pelo Cadastros leva o claim `clienteId` igual ao id do cliente (o mesmo valor do `sub`), e o token de usuário da oficina não leva `clienteId` (D-64, acrescentado em 16/11: achado ao preparar o checkout de ponta a ponta; sem o claim a Cobrança responde `403` ao Cliente na aprovação do orçamento e no checkout)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedName~JwtClienteIdTests`
 
 **C44** - O security group `autoreparos-auth-lambda-sg-production` permite saída TCP `80` só para o CIDR da VPC, para a AuthLambda alcançar o ALB interno do Cadastros (`Cadastros__BaseUrl` em `http://`); sem ela, `POST /auth/cliente` responde `503` por timeout (acrescentado em 16/11: achado ao preparar o checkout de ponta a ponta)

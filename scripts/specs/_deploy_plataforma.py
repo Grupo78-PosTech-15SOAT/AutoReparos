@@ -290,9 +290,38 @@ def checar_web_ingress():
     return erros, f"OK web-ingress: Web em {GRUPO_ALB} com group.order {ordem_web}, acima de {comparados}"
 
 
+def checar_destroy_servicos():
+    """O destroy-aws.yml destrói o state de cada serviço (servicos/*) com o Terraform dos serviços, antes da Lambda e da plataforma."""
+    caminho = os.path.join(WORKFLOWS, "destroy-aws.yml")
+    with open(caminho, encoding="utf-8") as arquivo:
+        passos = yaml.safe_load(arquivo)["jobs"]["teardown"]["steps"]
+    nomes = [passo.get("name", "") for passo in passos]
+    erros = []
+    indices = [i for i, nome in enumerate(nomes) if "service stacks" in nome]
+    if not indices:
+        return ["destroy-aws.yml sem o passo que remove os service stacks (servicos/*)"], ""
+    posicao = indices[0]
+    corpo = passos[posicao].get("run", "")
+    for servico in SERVICOS_IMPLANTADOS:
+        if not re.search(rf"{servico.lower()}:{servico}", corpo):
+            erros.append(f"o passo dos service stacks não cobre {servico}")
+    if "infra/terraform" not in corpo or "terraform -chdir" not in corpo or " destroy " not in corpo:
+        erros.append("o passo dos service stacks não executa terraform destroy")
+    for alvo in ("Remove Lambda", "Remove platform add-ons"):
+        outros = [i for i, nome in enumerate(nomes) if nome == alvo]
+        if outros and outros[0] < posicao:
+            erros.append(f"os service stacks saem depois do passo {alvo!r}; a IRSA depende da plataforma")
+    versoes = [str(passo.get("with", {}).get("terraform_version")) for passo in passos[:posicao]
+               if "setup-terraform" in passo.get("uses", "")]
+    if not versoes or versoes[-1] != "1.15.8":
+        erros.append(f"Terraform antes dos service stacks é {versoes[-1] if versoes else 'ausente'}, esperado 1.15.8 (o dos serviços)")
+    return erros, f"OK destroy-servicos: {len(SERVICOS_IMPLANTADOS)} serviços destruídos antes da Lambda e da plataforma, com o Terraform 1.15.8"
+
+
 CHECKS = {
     "plataforma-nos": checar_plataforma_nos,
     "ssm-plataforma": checar_ssm_plataforma,
     "pai-so-web": checar_pai_so_web,
     "web-ingress": checar_web_ingress,
+    "destroy-servicos": checar_destroy_servicos,
 }

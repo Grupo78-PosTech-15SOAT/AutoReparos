@@ -194,6 +194,37 @@ jobs:
           done
           test -z "${lbs:-}" || { echo '::error::Load balancers remain; refusing to remove the AWS Load Balancer Controller'; exit 1; }
           echo 'Application secrets were deleted with the namespace; RDS secret/state are retained unless separately selected.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        with:
+          terraform_version: 1.15.8
+          terraform_wrapper: false
+      - name: Remove the service stacks (servicos/*)
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # ECR, IRSA, filas, tabelas e segredos de cada serviço têm state próprio (servicos/<servico>/production.tfstate,
+          # chave fixa no versions.tf do serviço) e saem antes da plataforma e da rede, de que a IRSA depende.
+          for par in os:OS cobranca:Cobranca execucao:Execucao cadastros:Cadastros; do
+            servico="${par%%:*}"
+            dir="submodules/AutoReparos.${par##*:}/infra/terraform"
+            terraform -chdir="$dir" init -reconfigure -input=false -no-color \
+              -backend-config="bucket=$TF_STATE_BUCKET" -backend-config="region=$AWS_REGION" \
+              -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+            gerenciado="$(terraform -chdir="$dir" state pull | jq -s 'length > 0 and any(.[0].resources[]?; .mode == "managed" and (.instances | length > 0))')"
+            if [ "$gerenciado" = true ]; then
+              terraform -chdir="$dir" destroy -auto-approve -input=false -no-color
+              echo "$servico: infraestrutura do serviço removida." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$servico: no managed resources in the service state." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
       - name: Remove Lambda
         if: ${{ steps.ids.outputs.has_lambda == 'true' }}
         working-directory: submodules/AutoReparos.AuthLambda/infra

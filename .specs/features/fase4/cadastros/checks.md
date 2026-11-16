@@ -33,8 +33,8 @@ Proof: `grep -q ">= 1" submodules/AutoReparos.Infra.Database/terraform/variables
 
 **C6** - O endpoint interno recusa chamada sem `X-Chave-Interna` válido e só é publicado num ALB interno separado do API Gateway (AC 6, D-36)
 Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.IntegrationTests --filter FullyQualifiedName~EndpointInternoRecusaSemChave`
-Proof: `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --show-only charts/api/templates/networkpolicy.yaml`
-Proof: `helm template autoreparos submodules/AutoReparos.Infra.K8s/k8s --set ingress.enabled=true --show-only templates/ingress.yaml | grep -q "autoreparos-cadastros-interno"`
+Proof: `helm template cadastros submodules/AutoReparos.Cadastros/deploy/helm/cadastros --show-only templates/networkpolicy.yaml`
+Proof: `helm template cadastros submodules/AutoReparos.Cadastros/deploy/helm/cadastros --show-only templates/ingress-interno.yaml | grep -q "autoreparos-cadastros-interno"`
 
 ### S2 - Notificações e CRUD mantido
 
