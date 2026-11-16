@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Cadastros/.github/workflows/ci-cd.yml",
+    "old": "needs.build.result == 'success' && needs.test.result == 'success' && (needs.quality.result",
+    "new": "needs.build.result == 'success' && (needs.quality.result",
+    "proof": "python3 scripts/specs/assert_pipelines.py --check deploy-producao",
+    "label": "C18/AC 15 (D-60): deploy do Cadastros com always() deixa de exigir test verde"
+  },
+  {
+    "file": "submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl",
+    "old": "\"Resource\": \"arn:aws:s3:::${bucket}/servicos/${servico}/*\"",
+    "new": "\"Resource\": \"arn:aws:s3:::${bucket}/servicos/*\"",
+    "proof": "python3 scripts/specs/simular_iam.py --caso deploy",
+    "label": "C24/porta 2-3: role de deploy lê e grava o state de qualquer serviço"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/deploy/helm/os/values.yaml",
+    "old": "  cobranca: autoreparos-cobranca-comandos",
+    "new": "  cobranca: autoreparos-cobranca-execucoes",
+    "proof": "python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor",
+    "label": "C35/porta 4: OS publica comandos da Saga na fila sem consumidor da Cobrança"
+  }
+]
