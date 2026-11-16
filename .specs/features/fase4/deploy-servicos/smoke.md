@@ -15,3 +15,4 @@ Uma linha por execução contra o ambiente de produção (conta `198903849859`).
 | 2026-11-16T07:11Z | `36cab07` | `deploy-execucao` | PASS | OK smoke_deploy execucao: pipeline verde, 200 com token do Cadastros e 401 sem token |
 | 2026-11-16T07:11Z | `36cab07` | `mercado-pago` | PASS | OK smoke_mercado_pago: credenciais no pod da Cobrança e webhook recusando assinatura inválida |
 | 2026-11-16T07:12Z | `36cab07` | `aws-credenciais` | PASS | OK smoke_aws_credenciais: os, cobranca, execucao e cadastros sem erro de credencial da AWS em 10m |
+| 2026-11-16T07:15Z | `9736cc5` | Notificação simulada do Mercado Pago (manual, José) | PASS | Painel: `payment.updated` id `123456` → `422 Unprocessable Entity` (o painel marca como falha por não ser 2xx). Log da Cobrança `9817ecf`: assinatura aceita, `GET /v1/payments/123456` → 404, sem exceção |
