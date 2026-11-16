@@ -186,6 +186,7 @@ O que já roda passa a ter prova, e a `main` passa a barrar o que não passou.
 | Tópicos SNS do OS e da Cobrança (D-19 completa) | D-67: só um produtor cabe no prazo; OS e Cobrança seguem com SQS direto |
 | Propagar trace pelo HTTP entre serviços | Já é feito pela instrumentação `HttpClient` e AspNetCore que os serviços têm |
 | Dashboards "Saúde dos microsserviços" e "Mensageria" e alertas do § 4.4 da spec | Cortes de 15/11 (§ 7.3 do índice: dashboards além do da Saga) |
+| Traces da AuthLambda | Fica fora do fluxo da OS e da Saga (só faz o login do cliente). Exportar até o Collector exigiria expor o Collector do EKS à Lambda (load balancer interno e regra de SG); o X-Ray não é ferramenta da Fase 3. A spec já marca como opcional (Observabilidade § 4.1), e o login aparece no Jaeger pelo span HTTP de `/internal/clientes/autenticar` no Cadastros |
 | Persistência do Jaeger | O Jaeger all-in-one guarda em memória; os traces da demonstração são gerados depois do último deploy da observabilidade |
 | Deploy, aprovação de produção e IaC por serviço (antigos ACs 3, 4 e 7) | Em `deploy-servicos` (D-40) |
 | Staging | D-41 |

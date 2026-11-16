@@ -78,6 +78,21 @@ def checar_qualidade(servico, texto, erros):
             erros.append(f"{servico}: job `quality` sem `{trecho}`")
 
 
+def checar_execucao_main(servico, erros):
+    """C24 de infra-ci-observabilidade (D-68): a última execução de ci-cd.yml na main tem build, test e quality verdes."""
+    repo = nome_completo(servico)
+    status, corpo = gh_api(f"repos/{repo}/actions/workflows/ci-cd.yml/runs?branch=main&status=completed&per_page=1")
+    if status != 0 or not corpo or not corpo.get("workflow_runs"):
+        erros.append(f"{servico}: nenhuma execução concluída de ci-cd.yml na main")
+        return
+    execucao = corpo["workflow_runs"][0]
+    status, corpo = gh_api(f"repos/{repo}/actions/runs/{execucao['id']}/jobs")
+    conclusoes = {j["name"]: j["conclusion"] for j in (corpo or {}).get("jobs", [])}
+    for job in JOBS_OBRIGATORIOS:
+        if conclusoes.get(job) != "success":
+            erros.append(f"{servico}: job `{job}` da execução {execucao['id']} na main terminou em {conclusoes.get(job)}")
+
+
 def checar_execucao_pr(servico, erros):
     repo = nome_completo(servico)
     status, corpo = gh_api(f"repos/{repo}/actions/workflows/ci-cd.yml/runs?event=pull_request&per_page=1")
@@ -260,15 +275,20 @@ def checar_sem_deploy_fora_da_main(servico, texto, erros):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", required=True,
-                        choices=["jobs", "cobertura", "qualidade", "execucao-pr", *CHECKS_DE_DEPLOY])
+                        choices=["jobs", "cobertura", "qualidade", "execucao-pr", "execucao-main", *CHECKS_DE_DEPLOY])
     parser.add_argument("--minimo", type=int, default=80)
     args = parser.parse_args()
 
     erros = []
-    repositorios = SERVICOS_IMPLANTADOS if args.check in CHECKS_DE_DEPLOY else SERVICOS
+    # AC 1 revisado (D-68) cobre os 4 serviços de negócio; o Web (Angular) fica como está e só entra em jobs/qualidade/execucao-pr.
+    so_servicos = {"execucao-main", "cobertura"}
+    repositorios = SERVICOS_IMPLANTADOS if args.check in CHECKS_DE_DEPLOY or args.check in so_servicos else SERVICOS
     for servico in repositorios:
         if args.check == "execucao-pr":
             checar_execucao_pr(servico, erros)
+            continue
+        if args.check == "execucao-main":
+            checar_execucao_main(servico, erros)
             continue
         texto = ler_workflow(servico)
         if texto is None:

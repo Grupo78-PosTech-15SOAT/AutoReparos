@@ -150,7 +150,7 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
+- **Dispatched:** builders do S1 (trace) em 16/11 a partir das `main` (OS `f2b946b`, Cobrança `aa06062`, Execução `ef92b33`, Cadastros `4a7cd00`), um por submódulo, branch `feature/mensageria-rastreavel`
 - **Boundary:** checks derivados do plano aprovado em 16/11 (`9fc2230`); build não iniciado
 - **Abandoned:** C1 a C14 de 10/11 a 12/11 (staging, deploy e IaC por serviço passaram para `deploy-servicos`, D-40, D-41, D-68)
 - **Walked:** none
