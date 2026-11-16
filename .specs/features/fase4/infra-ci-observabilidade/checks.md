@@ -149,8 +149,8 @@ Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Integ
 
 ## Handoff
 
-- **Settled mid-build:** none
+- **Settled mid-build:** 16/11 - AuthLambda fora do trace (Out of scope do plano): José perguntou "No AuthLambda não deveria ter traces também? Não sei se funciona assim"; ficou opcional, sem pedido de inclusão
 - **Dispatched:** builders do S1 (trace) em 16/11 a partir das `main` (OS `f2b946b`, Cobrança `aa06062`, Execução `ef92b33`, Cadastros `4a7cd00`), um por submódulo, branch `feature/mensageria-rastreavel`
-- **Boundary:** checks derivados do plano aprovado em 16/11 (`9fc2230`); build não iniciado
+- **Boundary:** S1 (C1-C8) e S2 em código (C10-C15) fechados localmente, sem push: OS `8ede04e` (trace) e `ba7430d` (métricas), Cobrança `803bc6f`, Execução `0818d1a`, Cadastros `dd2053d`, Infra.K8s `656fdd0` (dashboard e datasources, branch `feature/observabilidade-saga`). Provas verdes: `fontes`, `meter-os`, `grafana`, `simular_iam --caso irsa` (22 casos). Builders do S1 interrompidos pelo limite de uso; OS, Cobrança e Execução terminados na conversa principal. Correção durante o build: o `ContextoTrace.Serializar` da Cobrança e da Execução passava o envelope por `JsonNode` e reescapava o `+` das datas (`\u002B00:00`), mudando o contrato; trocado por acréscimo dos campos de trace no fim do JSON. Testes de contrato exato (Execução `CancelamentoExecucaoTests`, Cobrança `Names`) passam a ignorar só `traceparent`/`tracestate`, provados em `TraceMensageriaTests`. C6: depois de `execucao.concluida.v1` a Saga espera o pagamento e não gera comando; a continuidade do trace é provada com `insumos.reservados` → `ordem-servico.liberada` e o processamento de `execucao.concluida.v1` sob o trace T. Falta: S3 (SNS), PRs e deploys (OK do José), walks C9, C16, C23 e C25, Verifier
 - **Abandoned:** C1 a C14 de 10/11 a 12/11 (staging, deploy e IaC por serviço passaram para `deploy-servicos`, D-40, D-41, D-68)
 - **Walked:** none
