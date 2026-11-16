@@ -29,7 +29,7 @@ Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter Full
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~PrazoSemRespostaCompensa`
 
 **C6** - Cancelamento depois da conclusão da execução responde 409 e a reserva `Confirmada` permanece (AC 6)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~CancelamentoAposConclusaoRecusado`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelamentoAposConclusaoRecusado`
 
 **C13** - A Cobrança publica `orcamento.aprovado.v1` com `itens` `{insumoId, quantidade}` do orçamento aprovado, mantendo `eventId` determinístico e os campos já existentes (AC 1, D-32)
 Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~OrcamentoAprovadoCarregaItens`
@@ -37,27 +37,27 @@ Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests -
 ### S2 - Travas e concorrência
 
 **C7** - Em `ReservandoInsumos` ou `Compensando`, `retentar` e novo cancelamento respondem 409 `saga_em_andamento` (AC 7)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ComandosConflitantesRecebem409`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ComandosConflitantesRecebem409`
 
 **C14** - Em `ReservandoInsumos` a Saga não publica `execucao.cancelar-reserva.v1` antes de `insumos.reservados.v1` ou `insumos.reserva-falhou.v1`; depois da confirmação o cancelamento publica o comando (AC 6a, D-33)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~CancelarReservaSoDepoisDaConfirmacao`
 
 **C8** - Dois eventos concorrentes para a mesma Saga, inclusive nos estados novos, gravam uma única transição por escrita condicional de versão (AC 8)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.IntegrationTests --filter FullyQualifiedName~EventosConcorrentesGravamUmaTransicao`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~EventosConcorrentesGravamUmaTransicao`
 
 ### S3 - Prazos, lembretes e operação
 
 **C9** - Prazo técnico vencido (`PrazoReserva` 2 min, `PrazoLiberacao` 2 min, `PrazoCompensacao` 15 min, até 3 reenvios) reenvia o passo e, esgotados os reenvios, compensa ou marca intervenção com alerta (AC 9)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~PrazoTecnicoReenviaEEsgota`
 
-**C10** - Prazo de negócio vencido publica `saga.lembrete.v1` e nunca expira nem cancela o orçamento (AC 10)
+**C10** - Prazo de negócio da Saga vencido (`AguardandoPagamento` ou `AguardandoInsumos`) publica `saga.lembrete.v1` e nunca expira nem cancela o orçamento (AC 10)
 Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~LembreteNaoExpiraOrcamento`
 
 **C11** - Consultar, listar e retentar Sagas executa a ação e registra autor, data e motivo no histórico, aplicado à OS por mensagem de transição, sem gravar nos dois bancos (AC 11)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ConsoleAdminRegistraAcao`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ConsoleAdminRegistraAcao`
 
 **C12** - `POST /api/v1/admin/dlq/reprocessar` devolve à fila de origem até a quantidade pedida e registra a ação, em OS, Cobrança e Execução (AC 12)
-Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~ReprocessaDlqDoOs`
+Proof: `dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~ReprocessaDlqDoOs`
 Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --filter FullyQualifiedName~ReprocessaDlqDaCobranca`
 Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --filter FullyQualifiedName~ReprocessaDlqDaExecucao`
 
@@ -93,8 +93,8 @@ Proof: `dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests -
 
 ## Handoff
 
-- **Settled mid-build:** none
+- **Settled mid-build:** 2026-11-12 - "Worktree novo da saga" (build em `.claude/worktrees/saga-compensacoes`, branch `feature/saga-compensacoes`); orçamento sem insumos (`itens` vazio) vai direto a `ExecucaoLiberada` e `itens` ausente vai à DLQ; etapa 5 "Insumos reservados" só existe quando há insumos
 - **Dispatched:** none
-- **Boundary:** checks derivados de novo em 2026-11-12 depois da aprovação (D-32, D-33); `insumos` está PASS (Execução `e6551e3`, na branch `feature/insumos`, ainda fora da `develop`); build não iniciado
+- **Boundary:** fechados C1, C2, C3, C4, C6, C7, C8, C11 (parcial: lista, detalhe e retentar) e C13, C14 (Cobrança `6e54a04`; OS `6c327a3`, `c22788f`, `38374a2`; testes `SagaInsumosTests`, `SagaConsoleRotaTests`, `SagaConcorrenciaTests`). Faltam C5, C9, C10 e C12 (prazos, lembrete e reprocessamento de DLQ nos três serviços); `check_proofs.py` e o Verifier não rodaram. Desvio a confirmar: testes do OS em `AutoReparos.OS.Tests`, não em `Api.Tests`/`IntegrationTests`
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
