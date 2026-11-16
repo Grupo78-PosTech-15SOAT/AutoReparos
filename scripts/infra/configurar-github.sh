@@ -5,6 +5,7 @@
 #   scripts/infra/configurar-github.sh --simular                  mostra o que aplicaria, só lendo
 #   scripts/infra/configurar-github.sh --verificar                C31: confere o GitHub, só lendo; sai != 0 se faltar algo
 #   scripts/infra/configurar-github.sh --verificar-idempotencia   C32: os segredos gerados continuam na versão 1
+#   scripts/infra/configurar-github.sh --verificar-token-servico  C37: a Cobrança tem o TOKEN_SERVICO (D-58)
 #
 # Gera uma única vez, como SecureString no SSM (nunca sobrescreve), a chave JWT do Cadastros, a CHAVE_INTERNA
 # (a mesma no pai, no Cadastros e no OS), a senha do usuário inicial e a senha do Grafana do pai. Lê o SendGrid
@@ -23,8 +24,9 @@ case "${1:-}" in
   --simular) MODO=simular ;;
   --verificar) MODO=verificar ;;
   --verificar-idempotencia) MODO=verificar-idempotencia ;;
-  -h | --help) sed -n '2,17p' "$0"; exit 0 ;;
-  *) echo "uso: $0 [--simular | --verificar | --verificar-idempotencia]" >&2; exit 2 ;;
+  --verificar-token-servico) MODO=verificar-token-servico ;;
+  -h | --help) sed -n '2,18p' "$0"; exit 0 ;;
+  *) echo "uso: $0 [--simular | --verificar | --verificar-idempotencia | --verificar-token-servico]" >&2; exit 2 ;;
 esac
 
 PERFIL="${AWS_PROFILE_FASE4:-autoreparos}"
@@ -260,7 +262,30 @@ aplicar() {
   repo="$(repo_de os)"
   definir_segredo_do_ssm "$repo" CHAVE_INTERNA "$P_CHAVE" production
   definir_variavel "$repo" CHAVE_INTERNA_IMPRESSAO "$impressao_chave" production
+
+  gerar_token_servico
   echo "Concluído ($MODO). Confira com: $0 --verificar"
+}
+
+# D-58: JWT de serviço da Cobrança, assinado com a chave do Cadastros. O emissor é a URL do API Gateway,
+# que só existe depois do provision-aws.yml; antes disso o passo é pulado. Rodar de novo renova os 30 dias.
+gerar_token_servico() {
+  local repo emissor
+  repo="$(repo_de cobranca)"
+  if ! parametro_existe "${SSM}/apigateway/endpoint"; then
+    echo "pulado TOKEN_SERVICO da Cobrança: ${SSM}/apigateway/endpoint ainda não existe (rode de novo depois do provision-aws.yml)"
+    return 0
+  fi
+  if [ "$MODO" = simular ]; then
+    echo "[simular] gh secret set TOKEN_SERVICO -R $repo --env production < token assinado com $P_JWT"
+    return 0
+  fi
+  emissor="$(valor_ssm "${SSM}/apigateway/endpoint")"
+  (umask 077 && valor_ssm "$P_JWT" > "$TMP/chave.pem")
+  python3 "$(dirname "$0")/token_servico.py" --chave "$TMP/chave.pem" --emissor "$emissor" \
+    | gh secret set TOKEN_SERVICO -R "$repo" --env production
+  rm -f "$TMP/chave.pem"
+  echo "gerado TOKEN_SERVICO da Cobrança (emissor $emissor, 30 dias)"
 }
 
 # ------------------------------------------------------------------------------------------- C31
@@ -366,9 +391,18 @@ verificar_idempotencia() {
   echo "OK configurar-github --verificar-idempotencia: ${#GERADOS[@]} segredos gerados uma vez só"
 }
 
+# ------------------------------------------------------------------------------------------- C37
+
+verificar_token_servico() {
+  conferir_segredo "$(repo_de cobranca)" TOKEN_SERVICO production
+  [ "$FALHAS" -eq 0 ] || { echo "$FALHAS falha(s)"; exit 1; }
+  echo "OK configurar-github --verificar-token-servico: Cobrança com TOKEN_SERVICO no Environment production"
+}
+
 conferir_ferramentas
 case "$MODO" in
   aplicar | simular) aplicar ;;
   verificar) verificar ;;
   verificar-idempotencia) verificar_idempotencia ;;
+  verificar-token-servico) verificar_token_servico ;;
 esac
