@@ -175,19 +175,22 @@ def checar_deploy_verifica_saude(servico, texto, erros):
         return
     helm = posicao(job, "helm upgrade --install")
     rollout = posicao(job, "kubectl rollout status")
-    saude = job.find("/health", helm or 0) if helm is not None else -1
     if helm is None:
         erros.append(f"{servico}: deploy sem helm upgrade --install")
         return
     if rollout is None or rollout < helm:
         erros.append(f"{servico}: deploy sem kubectl rollout status depois do helm upgrade")
-    if saude < 0 or (rollout is not None and saude < rollout):
+        return
+    saude = job.find("/health", rollout)
+    if saude < 0:
         erros.append(f"{servico}: deploy sem GET /health depois do rollout")
         return
     resto = job[saude:]
-    if not re.search(r"(\$status\"?\s*(!=|=|==|-ne|-eq)\s*\"?200)|(200\"?\s*(!=|=|==)\s*\"?\$status)", resto):
+    # A falha precisa ficar no ramo em que o status é diferente de 200: `if [ "$status" != "200" ]; then ... exit 1`.
+    falha = re.search(r'\$status"?\s*(!=|-ne)\s*"?200"?\s*\]?;?\s*then(.*?)\bfi\b', resto, re.DOTALL)
+    if not falha:
         erros.append(f"{servico}: o GET /health não compara o status com 200")
-    if "exit 1" not in resto:
+    elif "exit 1" not in falha.group(2):
         erros.append(f"{servico}: o GET /health não falha o job quando o status não é 200")
 
 
