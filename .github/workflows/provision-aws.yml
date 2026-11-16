@@ -38,25 +38,24 @@ jobs:
       cluster_name: ${{ steps.outputs.outputs.cluster_name }}
       eks_security_group_id: ${{ steps.outputs.outputs.eks_security_group_id }}
       lambda_security_group_id: ${{ steps.outputs.outputs.lambda_security_group_id }}
-      ecr_api_repository_url: ${{ steps.outputs.outputs.ecr_api_repository_url }}
       ecr_web_repository_url: ${{ steps.outputs.outputs.ecr_web_repository_url }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v4.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
         with:
           version: v3.16.4
       - name: Verify identity and record existing resource inventory
@@ -102,7 +101,7 @@ jobs:
               exit 1
             fi
           fi
-      - name: Apply network, EKS and ECR base layer
+      - name: Apply network, EKS, ECR, service namespaces and deploy roles
         working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/base
         run: |
           set -euo pipefail
@@ -110,7 +109,8 @@ jobs:
             -backend-config="bucket=$TF_STATE_BUCKET" -backend-config='key=network/production/terraform.tfstate' \
             -backend-config="region=$AWS_REGION" -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
           terraform plan -input=false -no-color -out="$RUNNER_TEMP/base.tfplan" \
-            -var="aws_region=$AWS_REGION" -var="cluster_name=${{ vars.EKS_CLUSTER_NAME }}" -var='kubernetes_version=1.35' -var='environment=production'
+            -var="aws_region=$AWS_REGION" -var="cluster_name=${{ vars.EKS_CLUSTER_NAME }}" -var='kubernetes_version=1.35' -var='environment=production' \
+            -var="tf_state_bucket=$TF_STATE_BUCKET" -var="tf_lock_table=$TF_LOCK_TABLE"
           terraform apply -input=false -auto-approve "$RUNNER_TEMP/base.tfplan"
           rm -f "$RUNNER_TEMP/base.tfplan"
       - id: outputs
@@ -125,7 +125,6 @@ jobs:
           echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> "$GITHUB_OUTPUT"
           echo "oidc_provider_arn=$(terraform output -raw oidc_provider_arn)" >> "$GITHUB_OUTPUT"
           echo "oidc_provider_url=$(terraform output -raw oidc_provider_url)" >> "$GITHUB_OUTPUT"
-          echo "ecr_api_repository_url=$(terraform output -raw ecr_api_repository_url)" >> "$GITHUB_OUTPUT"
           echo "ecr_web_repository_url=$(terraform output -raw ecr_web_repository_url)" >> "$GITHUB_OUTPUT"
       - name: Install EKS platform add-ons and AWS Load Balancer Controller
         working-directory: submodules/AutoReparos.Infra.K8s/terraform/stacks/platform
@@ -160,22 +159,24 @@ jobs:
     outputs:
       db_secret_arn: ${{ steps.outputs.outputs.db_secret_arn }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v4.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
-      - name: Apply RDS and database access rules
+      - name: Package database provisioner
+        run: submodules/AutoReparos.Infra.Database/lambda/provisionador/empacotar.sh
+      - name: Apply RDS, database access rules and database provisioner
         working-directory: submodules/AutoReparos.Infra.Database/terraform
         env:
           TF_VAR_vpc_id: ${{ needs.base-platform.outputs.vpc_id }}
@@ -205,30 +206,45 @@ jobs:
       lambda_arn: ${{ steps.outputs.outputs.lambda_arn }}
       lambda_function_name: ${{ steps.outputs.outputs.lambda_function_name }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: actions/setup-dotnet@v4.3.1
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
         with:
           dotnet-version: 10.0.x
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v4.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
+      - id: cadastros
+        name: Resolve the internal Cadastros URL for the authentication Lambda
+        env:
+          CLUSTER_NAME: ${{ needs.base-platform.outputs.cluster_name }}
+          CADASTROS_INTERNAL_URL: ${{ vars.CADASTROS_INTERNAL_URL }}
+        run: |
+          set -euo pipefail
+          # O Ingress /internal do Cadastros (grupo autoreparos-cadastros-interno) é criado pelo deploy do próprio
+          # Cadastros; antes dele, vale a variável CADASTROS_INTERNAL_URL (ou fica vazio até o próximo deploy-app.yml).
+          url=''
+          aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$AWS_REGION" >/dev/null
+          host="$(kubectl get ingress -n cadastros -o json 2>/dev/null | jq -r '[.items[] | select(.metadata.annotations["alb.ingress.kubernetes.io/group.name"] == "autoreparos-cadastros-interno") | .status.loadBalancer.ingress[0].hostname // empty] | first // empty' || true)"
+          if [ -n "$host" ]; then url="http://$host"; else url="$CADASTROS_INTERNAL_URL"; fi
+          if [ -z "$url" ]; then echo '::warning::Cadastros ainda não implantado e CADASTROS_INTERNAL_URL vazia: a AuthLambda só autentica clientes depois do deploy do Cadastros e de um novo deploy-app.yml'; fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
       - name: Build Lambda package
         working-directory: submodules/AutoReparos.AuthLambda/src
         run: |
           dotnet publish AutoReparos.AuthLambda.csproj -c Release -r linux-x64 --self-contained false -o "$RUNNER_TEMP/lambda-publish"
           (cd "$RUNNER_TEMP/lambda-publish" && zip -q -r "$RUNNER_TEMP/auth-lambda.zip" .)
-      - uses: actions/upload-artifact@v4.6.2
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: auth-lambda-package
           path: ${{ runner.temp }}/auth-lambda.zip
@@ -240,7 +256,7 @@ jobs:
           TF_VAR_private_subnet_ids: ${{ needs.base-platform.outputs.private_subnet_ids }}
           TF_VAR_lambda_security_group_id: ${{ needs.base-platform.outputs.lambda_security_group_id }}
           TF_VAR_api_gateway_execution_arn: ''
-          TF_VAR_cadastros_base_url: ${{ vars.CADASTROS_INTERNAL_URL }}
+          TF_VAR_cadastros_base_url: ${{ steps.cadastros.outputs.url }}
           TF_VAR_cadastros_chave_interna: ${{ secrets.CHAVE_INTERNA }}
           LAMBDA_ZIP: ${{ runner.temp }}/auth-lambda.zip
         run: |
@@ -275,120 +291,57 @@ jobs:
     outputs:
       listener_arn: ${{ steps.listener.outputs.listener_arn }}
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
         with:
           version: v3.16.4
-      - name: Build and push API and Web images
+      - name: Build and push the Web image
         env:
-          ECR_API: ${{ needs.base-platform.outputs.ecr_api_repository_url }}
           ECR_WEB: ${{ needs.base-platform.outputs.ecr_web_repository_url }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
-          registry="${ECR_API%%/*}"
+          registry="${ECR_WEB%%/*}"
           aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$registry"
-          docker build -t "$ECR_API:$IMAGE_TAG" -f submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/Dockerfile submodules/AutoReparos.Cadastros
           docker build -t "$ECR_WEB:$IMAGE_TAG" -f submodules/AutoReparos.Web/Dockerfile submodules/AutoReparos.Web
-          docker push "$ECR_API:$IMAGE_TAG"
           docker push "$ECR_WEB:$IMAGE_TAG"
-      - name: Connect to EKS and create runtime secrets
+      - name: Connect to EKS and create the observability secret
         env:
-          DB_SECRET_ARN: ${{ needs.database.outputs.db_secret_arn }}
-          JWT_CHAVE_PRIVADA_PEM: ${{ secrets.JWT_CHAVE_PRIVADA_PEM }}
-          CHAVE_INTERNA: ${{ secrets.CHAVE_INTERNA }}
-          SEED_USER_PASSWORD: ${{ secrets.SEED_USER_PASSWORD }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
-          for value in "$JWT_CHAVE_PRIVADA_PEM" "$CHAVE_INTERNA" "$SEED_USER_PASSWORD" "$GRAFANA_ADMIN_PASSWORD"; do test -n "$value" || { echo '::error::A required production secret is empty'; exit 1; }; echo "::add-mask::$value"; done
-          db="$(aws secretsmanager get-secret-value --secret-id "$DB_SECRET_ARN" --query SecretString --output text | jq -r '.connectionString')"
-          echo "::add-mask::$db"
+          test -n "$GRAFANA_ADMIN_PASSWORD" || { echo '::error::GRAFANA_ADMIN_PASSWORD is empty'; exit 1; }
+          echo "::add-mask::$GRAFANA_ADMIN_PASSWORD"
           aws eks update-kubeconfig --name '${{ needs.base-platform.outputs.cluster_name }}' --region "$AWS_REGION"
           kubectl create namespace '${{ vars.K8S_NAMESPACE }}' --dry-run=client -o yaml | kubectl apply -f -
-          jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg db "$db" --arg jwt "$JWT_CHAVE_PRIVADA_PEM" --arg interna "$CHAVE_INTERNA" --arg seed "$SEED_USER_PASSWORD" --arg sendgrid "$SENDGRID_API_KEY" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-api-secrets",namespace:$namespace},type:"Opaque",stringData:{"ConnectionStrings__DbConnection":$db,"Jwt__ChavePrivadaPem":$jwt,"Interno__Chave":$interna,"SeedUser__Password":$seed,"SendGrid__ApiKey":$sendgrid}}' | kubectl apply -f -
           jq -n --arg namespace '${{ vars.K8S_NAMESPACE }}' --arg password "$GRAFANA_ADMIN_PASSWORD" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-grafana-admin",namespace:$namespace},type:"Opaque",stringData:{"admin-password":$password}}' | kubectl apply -f -
-          unset db JWT_CHAVE_PRIVADA_PEM CHAVE_INTERNA SEED_USER_PASSWORD SENDGRID_API_KEY GRAFANA_ADMIN_PASSWORD
-      - name: Run migrations as a one-off EKS Job
+          unset GRAFANA_ADMIN_PASSWORD
+      - name: Deploy Web and observability with Helm
         env:
-          API_IMAGE: ${{ needs.base-platform.outputs.ecr_api_repository_url }}:${{ github.sha }}
-        run: |
-          set -euo pipefail
-          namespace='${{ vars.K8S_NAMESPACE }}'
-          job="migrate-${GITHUB_RUN_ID}"
-          jq -n --arg namespace "$namespace" --arg name "$job" --arg image "$API_IMAGE" '
-            def api_secret($key):
-              {name: $key, valueFrom: {secretKeyRef: {name: "autoreparos-api-secrets", key: $key}}};
-            {
-              apiVersion: "batch/v1",
-              kind: "Job",
-              metadata: {name: $name, namespace: $namespace},
-              spec: {
-                backoffLimit: 0,
-                activeDeadlineSeconds: 600,
-                template: {
-                  spec: {
-                    restartPolicy: "Never",
-                    containers: [{
-                      name: "migrations",
-                      image: $image,
-                      env: [
-                        {name: "Database__RunMigrations", value: "true"},
-                        api_secret("ConnectionStrings__DbConnection")
-                      ]
-                    }]
-                  }
-                }
-              }
-            }' | kubectl apply -f -
-          if ! kubectl wait --for=condition=complete "job/$job" -n "$namespace" --timeout=10m; then
-            kubectl describe job "$job" -n "$namespace" || true
-            kubectl describe pods -n "$namespace" -l "job-name=$job" || true
-            kubectl logs "job/$job" -n "$namespace" -c migrations --tail=100 --pod-running-timeout=5s || true
-            exit 1
-          fi
-          kubectl delete "job/$job" -n "$namespace" --wait=true
-      - name: Deploy API, Web and observability with Helm
-        env:
-          ECR_API: ${{ needs.base-platform.outputs.ecr_api_repository_url }}
           ECR_WEB: ${{ needs.base-platform.outputs.ecr_web_repository_url }}
-          SENDGRID_FROM_EMAIL: ${{ vars.SENDGRID_FROM_EMAIL }}
-          SENDGRID_FROM_NAME: ${{ vars.SENDGRID_FROM_NAME }}
         run: |
           set -euo pipefail
-          if [ -z '${{ vars.CADASTROS_NOTIFICACOES_FILA_URL }}' ]; then echo '::warning::CADASTROS_NOTIFICACOES_FILA_URL está vazia: o consumidor de notificações do Cadastros ficará desligado e nenhum e-mail de evento será enviado'; fi
-          if [ -z '${{ vars.CADASTROS_NOTIFICACOES_DLQ_URL }}' ]; then echo '::warning::CADASTROS_NOTIFICACOES_DLQ_URL está vazia: mensagens com falha de envio não terão para onde ir'; fi
-          if [ -z '${{ vars.CADASTROS_INTERNAL_URL }}' ]; then echo '::warning::CADASTROS_INTERNAL_URL está vazia: a AuthLambda não conseguirá autenticar clientes'; fi
+          # OS, Cobrança, Execução e Cadastros são implantados pelos próprios repositórios (ADR-005).
           helm upgrade --install autoreparos submodules/AutoReparos.Infra.K8s/k8s \
             --namespace '${{ vars.K8S_NAMESPACE }}' --create-namespace \
             -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml \
             -f submodules/AutoReparos.Infra.K8s/k8s/values-production.yaml \
-            --set-string api.image.repository="$ECR_API" --set-string api.image.tag='${{ github.sha }}' \
             --set-string web.image.repository="$ECR_WEB" --set-string web.image.tag='${{ github.sha }}' \
-            --set-string api.config.seedUserEmail='${{ vars.SEED_USER_EMAIL }}' \
-            --set-string api.config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
-            --set-string api.config.sendGridFromName="$SENDGRID_FROM_NAME" \
-            --set-string api.config.jwtIssuer='${{ vars.CADASTROS_ISSUER }}' \
-            --set-string api.config.notificacoesFilaUrl='${{ vars.CADASTROS_NOTIFICACOES_FILA_URL }}' \
-            --set-string api.config.notificacoesDlqUrl='${{ vars.CADASTROS_NOTIFICACOES_DLQ_URL }}' \
-            --set "api.networkPolicy.allowedCidrs={${{ vars.VPC_PRIVATE_CIDRS }}}" \
             --wait --timeout 10m
-          kubectl rollout status deployment/autoreparos-api -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
           kubectl rollout status deployment/autoreparos-web -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
           for _ in $(seq 1 60); do
-            dns="$(kubectl get ingress autoreparos-api-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+            dns="$(kubectl get ingress autoreparos-web-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
             test -n "$dns" && break
             sleep 10
           done
@@ -397,8 +350,9 @@ jobs:
         name: Resolve internal ALB listener ARN
         run: |
           set -euo pipefail
-          dns="$(kubectl get ingress autoreparos-api-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
-          test -n "$dns" || { echo '::error::The API ingress has no ALB DNS name'; exit 1; }
+          # O Ingress do Web está no grupo autoreparos-internal, o mesmo ALB que recebe as regras dos serviços.
+          dns="$(kubectl get ingress autoreparos-web-ingress -n '${{ vars.K8S_NAMESPACE }}' -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+          test -n "$dns" || { echo '::error::The Web ingress has no ALB DNS name'; exit 1; }
           alb_arn="$(aws elbv2 describe-load-balancers --region "$AWS_REGION" --query "LoadBalancers[?DNSName=='$dns'].LoadBalancerArn | [0]" --output text)"
           listener_arn="$(aws elbv2 describe-listeners --load-balancer-arn "$alb_arn" --region "$AWS_REGION" --query 'Listeners[?Port==`80`].ListenerArn | [0]' --output text)"
           test "$listener_arn" != None && test -n "$listener_arn" || { echo '::error::Could not resolve ALB listener ARN'; exit 1; }
@@ -410,19 +364,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v4.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
       - name: Add Lambda and private ALB integrations to API Gateway
