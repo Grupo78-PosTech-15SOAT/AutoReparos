@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-35 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+37 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -130,6 +130,14 @@ Proof: `scripts/specs/assert_rollback.sh execucao`
 **C35** - Os nomes da porta 4 batem entre produtores e consumidores: cada URL de fila que um serviço recebe do chart aponta para uma fila declarada no Terraform do consumidor (porta 4)
 Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor`
 
+**C36** - O token emitido pelo Cadastros leva `aud = autoreparos` (ou o valor de `Jwt:Audience`), e os charts de OS, Cobrança e Execução renderizam `Authentication__Audience=autoreparos`, igual ao `Jwt__Audience` do chart do Cadastros (D-57, acrescentado em 16/11: achado no build, bloqueava o AC 27)
+Proof: `dotnet test submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Application.Tests --filter FullyQualifiedName~JwtAudienciaTests`
+Proof: `python3 scripts/specs/assert_deploy.py --check jwt-audiencia`
+
+**C37** - O token de serviço da Cobrança é um JWT RS256 com o `kid` RFC 7638 da chave do Cadastros, `iss` = URL do API Gateway sem barra final, `aud = autoreparos`, `sub = cobranca`, papel `ServicoOS` e validade de 30 dias, com assinatura que confere com a chave pública; depois do provisionamento, `configurar-github.sh` grava `TOKEN_SERVICO` no Environment `production` da Cobrança e o job `deploy` o injeta em `OsService__BearerToken` e `Execucao__BearerToken` (D-58, acrescentado em 16/11)
+Proof: `python3 -m unittest discover -s scripts/infra/tests -p test_token_servico.py`
+Proof: `scripts/infra/configurar-github.sh --verificar-token-servico`
+
 ## Coverage
 
 | Set (size) | Member -> proof | Unproven |
@@ -147,6 +155,8 @@ Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor
 | provisionador, AC 12 (4 exemplos) | nova C29 · existente C29 · outra role 403 C29 · OS sem `cobranca_db` C29 | - |
 | configuração do GitHub, AC 26 (11) | pai `AWS_ACCOUNT_ID` C31 · pai `TF_STATE_BUCKET` C31 · pai `AWS_ROLE_ARN` production C31 · pai `AWS_ROLE_ARN` aws-bootstrap C31 · OS C31 · Cobrança C31 · Execução C31 · Cadastros C31 · chave JWT C32 · `CHAVE_INTERNA` C32 · senha inicial C32 | - |
 | parâmetros SSM novos (3) | `cluster_name` C27 · `oidc_provider_arn` C27 · `oidc_provider_url` C27 | - |
+| audiência do JWT, D-57 (4) | Cadastros emite C36 · OS exige C36 · Cobrança exige C36 · Execução exige C36 | - |
+| token de serviço, D-58 (3) | formato e assinatura C37 · segredo na Cobrança C37 · injeção no chart C37 | - |
 | deploy real, S6 (3) | com token 200 C33 · sem token 401 C33 · rollback C34 | - |
 
 ## Swept
@@ -163,9 +173,9 @@ Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor
 
 ## Handoff
 
-- **Settled mid-build:** none
+- **Settled mid-build:** 16/11 - D-57 "Cadastros emite aud (Recommended)" (C36 acrescentado); D-58 "Gerar no configurar-github (Recommended)"; D-59 "Manter assim (Recommended)"; autorizações: "Crie o PR", "Rodar configurar-github.sh", "Disparar bootstrap e provision"
 - **Dispatched:** build S1 (C1–C9) a um subagente em 2026-11-15, base `4606034` no pai e `feature/deploy-servicos` em OS `a6663d1`, Cobrança `92156d6`, Execução `d83badf` — returned (C1–C9 verdes)
 - **Dispatched:** 2026-11-16, base no pai = commit das provas compartilhadas (`tf_test.sh`, `simular_iam.py`, módulos `_deploy_*`/`_iam_*`, [`contratos.md`](./contratos.md)); três subagentes de build em paralelo: (A) serviços S2–S4 + C35 (C10–C21, C35) em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, Cadastros `528bcef`; (B1) plataforma C22–C27, C30–C32 e a parte de role de deploy do C17 em Infra.K8s `c13cfc5` e no pai; (B2) provisionador C28–C29 em Infra.Database `4d8c103` — returned (A e B1 retomados depois do limite de uso; os três com provas verdes, reexecutadas pelo autor em 16/11)
 - **Boundary:** C1–C9 fechados em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, pai `ac1add8` (provas reexecutadas pelo autor em 15/11)
-- **Boundary (16/11):** C10–C30 e C35 verdes, reexecutados pelo autor sem concorrência. Serviços: OS `7b9178f`, Cobrança `d45d7db`, Execução `d71b7fd`, Cadastros `a9ce44a`; plataforma: Infra.K8s `6e01482` (inclui `ec2:DescribeSubnets` na role de deploy e acesso de administrador do cluster para `AccountFullAccessRole`), Infra.Database `699fc8c`; pai: `_deploy_*`, `_iam_*`, `assert_pipelines.py`, workflows e `configurar-github.sh`. C31–C32 implementados e vermelhos até o `configurar-github.sh` rodar de verdade (precisa da autorização do José). C33–C34 dependem do ambiente no ar. Abertas no § 6.3 do índice: D-57 (audiência do JWT, bloqueia C33), D-58 (token de serviço da Cobrança), D-59 (mensagens sem consumidor). Plano: Landing ganhou a porta 10 (provider aws 6.x do Infra.Database) e o Shape segue a ordem real do job (Terraform antes da imagem)
+- **Boundary (16/11):** C10–C30 e C35 verdes, reexecutados pelo autor sem concorrência. Serviços: OS `7b9178f`, Cobrança `d45d7db`, Execução `d71b7fd`, Cadastros `a9ce44a`; plataforma: Infra.K8s `6e01482` (inclui `ec2:DescribeSubnets` na role de deploy e acesso de administrador do cluster para `AccountFullAccessRole`), Infra.Database `699fc8c`; pai: `_deploy_*`, `_iam_*`, `assert_pipelines.py`, workflows e `configurar-github.sh`. C31–C32 verdes depois de rodar o `configurar-github.sh` duas vezes em 16/11 (autorizado). C33–C34 dependem do ambiente no ar. Abertas no § 6.3 do índice: D-57 (audiência do JWT, bloqueia C33), D-58 (token de serviço da Cobrança), D-59 (mensagens sem consumidor). Plano: Landing ganhou a porta 10 (provider aws 6.x do Infra.Database) e o Shape segue a ordem real do job (Terraform antes da imagem)
 - **Abandoned:** none

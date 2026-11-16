@@ -448,7 +448,34 @@ def checar_filas_produtor_consumidor():
     return erros, f"OK filas-produtor-consumidor: {total} URLs de fila apontam para filas do Terraform do consumidor"
 
 
+AUDIENCIA = "autoreparos"
+
+
+def checar_jwt_audiencia():
+    """C36 (D-57): o Cadastros emite aud = autoreparos e OS, Cobrança e Execução exigem o mesmo valor."""
+    erros = []
+    falhas, objetos, _ = renderizar_chart("Cadastros")
+    if falhas:
+        return falhas, ""
+    emitidas = {str((c.get("data") or {}).get("Jwt__Audience")) for c in do_tipo(objetos, "ConfigMap")
+                if "Jwt__Audience" in (c.get("data") or {})}
+    if emitidas != {AUDIENCIA}:
+        erros.append(f"Cadastros: Jwt__Audience renderizado {sorted(emitidas)}, esperado {AUDIENCIA!r}")
+    for repo in ("OS", "Cobranca", "Execucao"):
+        falhas, objetos, _ = renderizar_chart(repo)
+        if falhas:
+            erros += falhas
+            continue
+        servico = servico_de(repo)
+        deployments = [d for d in do_tipo(objetos, "Deployment") if nome(d) == servico]
+        valores = {variaveis(c, objetos).get("Authentication__Audience") for d in deployments for c in containers(d)}
+        if valores != {AUDIENCIA}:
+            erros.append(f"{repo}: Authentication__Audience renderizado {sorted(map(str, valores))}, esperado {AUDIENCIA!r}")
+    return erros, f"OK jwt-audiencia: Cadastros emite aud={AUDIENCIA} e OS, Cobranca e Execucao exigem o mesmo valor"
+
+
 CHECKS = {
+    "jwt-audiencia": checar_jwt_audiencia,
     "terraform-servicos": checar_terraform_servicos,
     "chart-hooks": checar_chart_hooks,
     "chart-deployment": checar_chart_deployment,

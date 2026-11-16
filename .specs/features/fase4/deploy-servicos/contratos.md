@@ -84,3 +84,8 @@ Ordem do job `deploy`: Terraform → imagem → provisionador → kubeconfig →
 | `autoreparos-cadastros-notificacoes` + DLQ | Cadastros (`Notificacoes:FilaUrl`) | OS (`Sqs:CadastrosQueueUrl`, `saga.lembrete.v1`) |
 
 Secrets além de `<servico>-database`: `os-segredos` (`Cadastros__ChaveInterna`) e `cadastros-segredos` (`Jwt__ChavePrivadaPem`, `Interno__Chave`, `SeedUser__Password`, `SendGrid__ApiKey`). A role de deploy ganhou `ec2:DescribeSubnets` (o Terraform do Cadastros lê os CIDRs privados para a NetworkPolicy).
+
+## Decisões de 16/11 (D-57, D-58)
+
+- Audiência: o Cadastros emite `aud = autoreparos` (`Jwt:Audience`, chart `config.jwtAudience`); OS, Cobrança e Execução exigem o mesmo valor (`autenticacao.audiencia`).
+- Token de serviço: `scripts/infra/token_servico.py` assina com `/autoreparos/production/cadastros/jwt-chave-privada-pem`; o `configurar-github.sh` grava `TOKEN_SERVICO` no Environment `production` da Cobrança quando `/autoreparos/production/apigateway/endpoint` existe; o job da Cobrança cria o Secret `cobranca-segredos` (`TokenServico`), que o chart injeta em `OsService__BearerToken` e `Execucao__BearerToken`.
