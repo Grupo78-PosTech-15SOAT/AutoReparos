@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-41 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+42 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -150,6 +150,9 @@ Proof: `python3 scripts/specs/simular_iam.py --caso state`
 **C41** - Com `MERCADOPAGO_ACCESS_TOKEN` e `MERCADOPAGO_WEBHOOK_SECRET` no Environment `production` da Cobrança, o Deployment `cobranca` entrega `MercadoPago__AccessToken` e `MercadoPago__WebhookSecret` a partir do Secret `cobranca-segredos` (opcionais), o Secret tem as duas chaves, e `POST /api/v1/webhooks/mercado-pago` com corpo válido sem assinatura ou com assinatura falsa responde `401` pelo API Gateway (AC 29, D-62, derivado em 16/11 depois da aprovação)
 Proof: `scripts/smoke/mercado-pago.sh`
 
+**C42** - Nos namespaces `os`, `cobranca`, `execucao` e `cadastros`, os pods rodam e os logs dos últimos 10 minutos não têm `AWSSDK.SecurityToken`, `AccessDenied` nem `not authorized`: o IRSA entrega credenciais e SQS/DynamoDB respondem (acrescentado em 16/11: achado em produção, nenhum check cobria o IRSA no runtime)
+Proof: `scripts/smoke/aws-credenciais.sh`
+
 ## Coverage
 
 | Set (size) | Member -> proof | Unproven |
@@ -190,7 +193,7 @@ Proof: `scripts/smoke/mercado-pago.sh`
 - **Dispatched:** 2026-11-16, base no pai = commit das provas compartilhadas (`tf_test.sh`, `simular_iam.py`, módulos `_deploy_*`/`_iam_*`, [`contratos.md`](./contratos.md)); três subagentes de build em paralelo: (A) serviços S2–S4 + C35 (C10–C21, C35) em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, Cadastros `528bcef`; (B1) plataforma C22–C27, C30–C32 e a parte de role de deploy do C17 em Infra.K8s `c13cfc5` e no pai; (B2) provisionador C28–C29 em Infra.Database `4d8c103` — returned (A e B1 retomados depois do limite de uso; os três com provas verdes, reexecutadas pelo autor em 16/11)
 - **Dispatched:** 2026-11-16, Verifier independente (author != verifier) no pai a partir de `e17f182` — returned (FAIL: 3 mutações sobreviveram, 6 achados; `9896a71`)
 - **Dispatched:** 2026-11-16, builder das correções dos achados 1 a 5 do Verifier (boundary por serviço via tag, `InvokeFunction` só pela URL, C18 sob `always()`, isolamento do state, C35 casando produtor e consumidor), base `798eb1c` — returned (Infra.K8s `574b0d5`, `22edc66`; pai `18d5fdd`, `ccb61ab`, `a66e629`; C39 e C40 acrescentados; 3 mutações mortas)
-- **Dispatched:** 2026-11-16, builder do achado de produção: `AWSSDK.SecurityToken` ausente nos 4 serviços (IRSA não funciona, SQS/DynamoDB falham) e webhook do Mercado Pago com `500` quando o pagamento não existe (deveria ser `422`); base `f335497` — pending
+- **Dispatched:** 2026-11-16, builder do achado de produção: `AWSSDK.SecurityToken` ausente nos 4 serviços (IRSA não funciona, SQS/DynamoDB falham) e webhook do Mercado Pago com `500` quando o pagamento não existe (deveria ser `422`); base `f335497` — returned (PRs OS #8, Cobrança #11, Execução #6, Cadastros #13 para a `develop`; smoke `aws-credenciais.sh` no pai `0e1c4f9`; C42 acrescentado)
 - **Boundary:** C1–C9 fechados em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, pai `ac1add8` (provas reexecutadas pelo autor em 15/11)
 - **Boundary (16/11):** C10–C30 e C35 verdes, reexecutados pelo autor sem concorrência. Serviços: OS `7b9178f`, Cobrança `d45d7db`, Execução `d71b7fd`, Cadastros `a9ce44a`; plataforma: Infra.K8s `6e01482` (inclui `ec2:DescribeSubnets` na role de deploy e acesso de administrador do cluster para `AccountFullAccessRole`), Infra.Database `699fc8c`; pai: `_deploy_*`, `_iam_*`, `assert_pipelines.py`, workflows e `configurar-github.sh`. C31–C32 verdes depois de rodar o `configurar-github.sh` duas vezes em 16/11 (autorizado). C33–C34 dependem do ambiente no ar. Abertas no § 6.3 do índice: D-57 (audiência do JWT, bloqueia C33), D-58 (token de serviço da Cobrança), D-59 (mensagens sem consumidor). Plano: Landing ganhou a porta 10 (provider aws 6.x do Infra.Database) e o Shape segue a ordem real do job (Terraform antes da imagem)
 - **Boundary (16/11, manhã):** ambiente no ar na `198903849859` (provision `43798710926`). Execução implantada pelo próprio pipeline (run `43802318029`, 3ª tentativa, depois de aceitar o assunto imutável do OIDC nas roles de deploy e fixar o `scramp<1.5` no provisionador, Infra.Database `0830a4d`) e Cadastros implantado pelo disparo manual com `ignorar_quality` (D-60, run `43807273466`). C33 verde (`smoke_deploy.sh`: 200 com token do Cadastros e 5 serviços, 401 sem token), C34 verde (`assert_rollback.sh`: revisão 2 `failed`, revisão 3 `deployed` "Rollback to 1", API respondendo). C37 verde (token da Cobrança gravado). Falta: `deploy-app.yml` para a URL interna do Cadastros na AuthLambda; deploys de Cobrança e OS (fora dos checks); Verifier

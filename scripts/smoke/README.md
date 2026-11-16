@@ -15,7 +15,7 @@ scripts/smoke/rodar.sh aws-credenciais     # depois de cada deploy
 | `deploy-execucao.sh execucao` | C33 | Último pipeline da `main` da Execução com `deploy` verde; login no Cadastros pelo gateway; `GET /api/v1/servicos` com token → `200` e 5 serviços; sem token → `401` | Só leitura |
 | `rollback-execucao.sh execucao` | C34 | Uma versão com `/health` quebrado fica `failed` e o `--atomic` volta à anterior; a API continua respondendo | Troca o Secret da Execução por alguns minutos e restaura (trap); acrescenta 2 revisões ao Helm |
 | `mercado-pago.sh` | C41 | Pod da Cobrança recebe `MercadoPago__AccessToken` e `MercadoPago__WebhookSecret` de `cobranca-segredos`; webhook sem assinatura ou com assinatura falsa → `401` | Só leitura |
-| `aws-credenciais.sh` | — | Logs dos pods de `os`, `cobranca`, `execucao` e `cadastros` nos últimos 10 minutos sem `AWSSDK.SecurityToken` (pacote do STS ausente, IRSA quebrado), `AccessDenied` nem `not authorized` | Só leitura |
+| `aws-credenciais.sh` | C42 | Logs dos pods de `os`, `cobranca`, `execucao` e `cadastros` nos últimos 10 minutos sem `AWSSDK.SecurityToken` (pacote do STS ausente, IRSA quebrado), `AccessDenied` nem `not authorized` | Só leitura |
 
 Requisitos: `kubectl` com acesso ao cluster (`aws eks update-kubeconfig --name AutoReparosEKS --profile autoreparos`), `helm`, `gh` autenticado, `aws` com o perfil `autoreparos`, `curl` e `python3`.
 
