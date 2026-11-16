@@ -177,7 +177,7 @@ def split_row(line):
 
 
 def is_separator(line):
-    return bool(re.match(r"^\s*\|?[\s:|-]+\|?\s*$", line)) and "-" in line
+    return "-" in line and all(char in " \t|:-" for char in line)
 
 
 def section_bounds(lines, names):
@@ -283,7 +283,7 @@ def check_criteria(lines):
     # label and the list, and treating it as a terminator silently skips every criterion.
     for i, ln in enumerate(lines, start=1):
         stripped = ln.strip()
-        if re.match(r"^\*{0,2}Acceptance Criteria\*{0,2}\s*:?\s*$", stripped, re.IGNORECASE):
+        if stripped.strip("* \t:").lower() == "acceptance criteria":
             in_ac, blanks = True, 0
             continue
         if not in_ac:
@@ -382,8 +382,23 @@ USER_QUOTE_RE = re.compile(r"\buser\b[^\"“]*[\"“][^\"”]{3,}[\"”]", re.IG
 
 # A hop's module: the backticked name right before its marker.
 MARKED_MODULE_RE = re.compile(r"`([^`]+)`\s*\((?:exists|existing|new|door\s*\d+)\)", re.IGNORECASE)
-DATA_NONE_RE = re.compile(r"^\W*Data\W*:?\s*none\b", re.IGNORECASE)
 NEW_LINE_RE = re.compile(r"^\W*New\W*:", re.IGNORECASE)
+
+
+def has_data_none(line):
+    """Recognize a `Data: none` declaration without ambiguous punctuation repeats."""
+    pos = 0
+    while pos < len(line) and not (line[pos].isalnum() or line[pos] == "_"):
+        pos += 1
+    if line[pos:pos + 4].lower() != "data":
+        return False
+    pos += 4
+    while pos < len(line) and not (line[pos].isalnum() or line[pos] == "_"):
+        pos += 1
+    if line[pos:pos + 4].lower() != "none":
+        return False
+    end = pos + 4
+    return end == len(line) or not (line[end].isalnum() or line[end] == "_")
 
 
 def raw_lines(path):
@@ -443,7 +458,7 @@ def check_drawings(lines, shape, plan_path):
                         "in both, or the two describe different systems"
                     )
     has_er = any(b[1] == "erDiagram" for b in blocks)
-    if not has_er and not any(DATA_NONE_RE.match(x) for x in body):
+    if not has_er and not any(has_data_none(x) for x in body):
         errors.append(
             "Shape has no `erDiagram` of the data this reads or writes - draw the entities it touches and "
             "how they relate, or state `Data: none - <why>`"

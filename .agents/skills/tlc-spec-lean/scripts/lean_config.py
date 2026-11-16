@@ -19,11 +19,30 @@ BINDING_RE = re.compile(r"(?<![-\w])binding\b", re.IGNORECASE)
 NOT_BINDING_RE = re.compile(r"\b(non|not)[- ]binding\b", re.IGNORECASE)
 CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 SCREEN_CRITERION_RE = re.compile(r"\bSHALL\s+(?:NOT\s+)?(?:show|display|render|hide)\b", re.IGNORECASE)
-PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*`?browser\b", re.IGNORECASE)
+PROOF_RE = re.compile(r"^\*{0,3}\s*Proof\s*\*{0,3}\s*:\s*`?browser\b", re.IGNORECASE)
 CRITERION_RE = re.compile(r"^\s*\d+\.\s+(.*)$")
 APPROVED_RE = re.compile(
     r"^\**\s*Approved\s*\**\s*:\s*\**\s*\d{4}-\d{2}-\d{2}\b.*\buser\s*:\s*[\"“][^\"”]*\S[^\"”]*[\"”]",
     re.IGNORECASE)
+
+
+def running_pictures(text):
+    """Return screenshot paths without a backtracking search over dotted names."""
+    suffix = ".running.png"
+    pictures = []
+    pos = 0
+    while pos < len(text):
+        if not (text[pos].isalnum() or text[pos] in "_./-"):
+            pos += 1
+            continue
+        start = pos
+        while pos < len(text) and (text[pos].isalnum() or text[pos] in "_./-"):
+            pos += 1
+        token = text[start:pos]
+        end = token.rfind(suffix)
+        if end > 0:
+            pictures.append(token[:end + len(suffix)])
+    return pictures
 
 
 def plan_approved(plan_lines):

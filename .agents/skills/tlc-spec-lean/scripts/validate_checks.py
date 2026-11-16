@@ -62,15 +62,15 @@ from lean_config import MAX_MUTATIONS, plan_approved, plan_marks_binding, read_m
 
 REQUIRED_SECTIONS = ["Checks", "Coverage", "Swept"]
 
-CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
-PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
+CHECK_RE = re.compile(r"^\*{0,3}\s*(C\d+)\s*\*{0,3}\s*[-–—:][ \t]*(\S.*)$")
+PROOF_RE = re.compile(r"^\*{0,3}\s*Proof\s*\*{0,3}\s*:[ \t]*(\S.*)$", re.IGNORECASE)
 # A state a capture draws is proven by the screenshot the author saved, and a visit by the author's
 # walk - neither by a test selector.
 SCREEN_PROOF_RE = re.compile(r"^`?(?:browser|walk)\b")
 CAPTURE_RE = re.compile(r"`([^`\s]+\.(?:png|jpe?g|webp|gif))`", re.IGNORECASE)
 CID_RE = re.compile(r"\bC\d+\b")
 PLACEHOLDER_RE = re.compile(r"^\s*[\[<].+[\]>]\s*$")
-SIZE_RE = re.compile(r"\((\d+)\s*(?:[a-z\- ]+)?\)")
+SIZE_RE = re.compile(r"\((\d+)[ \t]*(?:[a-z-]+(?:[ \t]+[a-z-]+)*)?\)")
 ROUTE_RE = re.compile(r"(/[A-Za-z0-9_\-/:{}.]*)")
 TABLE_DRIVEN_RE = re.compile(r"table[- ]driven", re.IGNORECASE)
 
@@ -139,6 +139,20 @@ def _autodetect(root):
 
 def split_row(line):
     return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def parse_swept_line(line):
+    """Read a markdown bullet and its colon-separated dimension in linear time."""
+    text = line.lstrip()
+    if not text or text[0] not in "-*":
+        return None
+    label, separator, landing = text[1:].lstrip().partition(":")
+    if not separator:
+        return None
+    label = label.strip(" *\t")
+    if not label or "*" in label:
+        return None
+    return label, landing
 
 
 def is_separator(line):
@@ -259,7 +273,7 @@ def plan_screen_captures(checks_path):
     if not crit:
         return {}
     for i in range(*crit):
-        m = re.match(r"^\s*(\d+)\.\s+(.*)$", lines[i])
+        m = re.match(r"^\s*(\d+)\.[ \t]+(\S.*)$", lines[i])
         if not m:
             continue
         cited = sorted({os.path.basename(p).split(".")[0] for p in CAPTURE_RE.findall(m.group(2))
@@ -360,11 +374,11 @@ def check_file(path):
     if swept:
         found = {}
         for i in range(*swept):
-            m = re.match(r"^\s*[-*]\s*\**([^:*]+?)\**\s*:\s*(.*)$", lines[i])
-            if not m:
+            parsed = parse_swept_line(lines[i])
+            if not parsed:
                 continue
-            key = m.group(1).strip().lower()
-            landing = m.group(2).strip()
+            key = parsed[0].strip().lower()
+            landing = parsed[1].strip()
             for canon, aliases in DIMENSIONS.items():
                 if key in aliases:
                     found[canon] = (landing, i + 1)

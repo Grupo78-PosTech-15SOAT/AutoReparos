@@ -28,11 +28,11 @@ import subprocess
 import sys
 
 import runners
+from lean_config import running_pictures
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CHECK_RE = re.compile(r"^\**\s*(C\d+)\s*\**\s*[-–—:]\s*(.+)$")
-PROOF_RE = re.compile(r"^\**\s*Proof\s*\**\s*:\s*(.+)$", re.IGNORECASE)
-PICTURE_RE = re.compile(r"`?([\w./-]+\.running\.png)`?")
+CHECK_RE = re.compile(r"^\*{0,3}\s*(C\d+)\s*\*{0,3}\s*[-–—:][ \t]*(\S.*)$")
+PROOF_RE = re.compile(r"^\*{0,3}\s*Proof\s*\*{0,3}\s*:[ \t]*(\S.*)$", re.IGNORECASE)
 COUNT_RES = [  # tests that ran, read from a runner's own summary when it has no JUnit report
     re.compile(r"Ran (\d+) tests?"),
     re.compile(r"(\d+) passed"),
@@ -171,8 +171,7 @@ def main(argv=None):
         if kind == "none":
             result = "**no proof**"
         elif kind == "browser":
-            m = PICTURE_RE.search(proof)
-            pic = os.path.basename(m.group(1)) if m else None
+            pic = next((os.path.basename(name) for name in running_pictures(proof)), None)
             on_disk = pic and any(pic in fs for _, _, fs in os.walk(fdir))
             verdict = screens.get(pic or "", "")
             if not on_disk:
