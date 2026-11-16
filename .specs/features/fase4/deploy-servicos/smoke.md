@@ -10,3 +10,4 @@ Uma linha por execução contra o ambiente de produção (conta `198903849859`).
 | 2026-11-16T06:32Z | `490dee1` | Access Token do Mercado Pago (manual, `GET /users/me`) | PASS | Conta vendedora de teste `TESTUSER4451475770762391424`, site `MLB`, pode vender (rodado pelo agente) |
 | 2026-11-16T06:34Z | `490dee1` | `deploy-execucao` | PASS | OK smoke_deploy execucao: pipeline verde, 200 com token do Cadastros e 401 sem token |
 | 2026-11-16T06:34Z | `490dee1` | `mercado-pago` | PASS | OK smoke_mercado_pago: credenciais no pod da Cobrança e webhook recusando assinatura inválida |
+| 2026-11-16T06:40Z | `f335497` | Notificação simulada do Mercado Pago (manual, José) | FAIL | Assinatura aceita (passou da validação); consulta do pagamento inventado `123456` deu 404 no Mercado Pago e a Cobrança respondeu `500` em vez de `422`. Logs também mostraram `AWSSDK.SecurityToken` ausente nos 4 serviços (IRSA sem credencial; SQS/DynamoDB falhando) |
