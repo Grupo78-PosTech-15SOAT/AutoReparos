@@ -14,6 +14,8 @@ SOB_BOUNDARY = (BOUNDARY, {"conta": CONTA, "regiao": REGIAO})
 TUDO = {"Version": "2012-10-17", "Statement": [{"Effect": "Allow", "Action": "*", "Resource": "*"}]}
 COBRANCA = {"aws:PrincipalTag/Servico": ["cobranca"]}
 CRIAR_COM_BOUNDARY = {"iam:PermissionsBoundary": [_iam_deploy.BOUNDARY]}
+TAG_ROLE = "iam:TagRole"
+UNTAG_ROLE = "iam:UntagRole"
 
 
 def segredo(caminho):
@@ -55,29 +57,29 @@ def casos():
         _deploy("deploy cobranca cria role com o boundary e Servico = cobranca", "iam:CreateRole", irsa, True,
                 {**CRIAR_COM_BOUNDARY, "aws:RequestTag/Servico": ["cobranca"],
                  "aws:TagKeys": ("stringList", ["Servico"])}),
-        _deploy("deploy cobranca troca a tag Servico da própria IRSA para os", "iam:TagRole", irsa, False,
+        _deploy("deploy cobranca troca a tag Servico da própria IRSA para os", TAG_ROLE, irsa, False,
                 {"aws:RequestTag/Servico": ["os"], "aws:TagKeys": ("stringList", ["Servico"])}),
-        _deploy("deploy cobranca tira a tag Servico da própria IRSA", "iam:UntagRole", irsa, False,
+        _deploy("deploy cobranca tira a tag Servico da própria IRSA", UNTAG_ROLE, irsa, False,
                 {"aws:TagKeys": ("stringList", ["Servico"])}),
         # A chave da tag de role não distingue caixa: `servico=os` substitui `Servico=cobranca` (achado R2 ALTA).
-        _deploy("deploy cobranca grava a tag servico = os na própria IRSA", "iam:TagRole", irsa, False,
+        _deploy("deploy cobranca grava a tag servico = os na própria IRSA", TAG_ROLE, irsa, False,
                 {"aws:RequestTag/servico": ["os"], "aws:TagKeys": ("stringList", ["servico"])}),
-        _deploy("deploy cobranca grava a tag SERVICO = os na própria IRSA", "iam:TagRole", irsa, False,
+        _deploy("deploy cobranca grava a tag SERVICO = os na própria IRSA", TAG_ROLE, irsa, False,
                 {"aws:RequestTag/SERVICO": ["os"], "aws:TagKeys": ("stringList", ["SERVICO"])}),
-        _deploy("deploy cobranca tira a tag servico da própria IRSA", "iam:UntagRole", irsa, False,
+        _deploy("deploy cobranca tira a tag servico da própria IRSA", UNTAG_ROLE, irsa, False,
                 {"aws:TagKeys": ("stringList", ["servico"])}),
         _deploy("deploy cobranca cria role com o boundary e servico = os", "iam:CreateRole", irsa, False,
                 {**CRIAR_COM_BOUNDARY, "aws:RequestTag/servico": ["os"], "aws:TagKeys": ("stringList", ["servico"])}),
         # Várias chaves na mesma requisição (achado R2: ForAllValues no lugar de ForAnyValue).
-        _deploy("deploy cobranca troca Ambiente e Servico = os da própria IRSA", "iam:TagRole", irsa, False,
+        _deploy("deploy cobranca troca Ambiente e Servico = os da própria IRSA", TAG_ROLE, irsa, False,
                 {"aws:RequestTag/Ambiente": ["production"], "aws:RequestTag/Servico": ["os"],
                  "aws:TagKeys": ("stringList", ["Ambiente", "Servico"])}),
-        _deploy("deploy cobranca tira Ambiente e Servico da própria IRSA", "iam:UntagRole", irsa, False,
+        _deploy("deploy cobranca tira Ambiente e Servico da própria IRSA", UNTAG_ROLE, irsa, False,
                 {"aws:TagKeys": ("stringList", ["Ambiente", "Servico"])}),
         # Tag de sessão Servico sobrepõe a da role: a role de deploy não passa tags de sessão.
         _deploy("deploy cobranca assume a própria IRSA com a tag de sessão Servico = os", "sts:TagSession", irsa,
                 False, {"aws:RequestTag/Servico": ["os"], "aws:TagKeys": ("stringList", ["Servico"])}),
-        _deploy("deploy cobranca troca outra tag da própria IRSA", "iam:TagRole", irsa, True,
+        _deploy("deploy cobranca troca outra tag da própria IRSA", TAG_ROLE, irsa, True,
                 {"aws:RequestTag/Ambiente": ["production"], "aws:TagKeys": ("stringList", ["Ambiente"])}),
         # Provisionador só pela Function URL (porta 10).
         _deploy("deploy cobranca invoca o provisionador direto", "lambda:InvokeFunction", PROVISIONADOR, False),
