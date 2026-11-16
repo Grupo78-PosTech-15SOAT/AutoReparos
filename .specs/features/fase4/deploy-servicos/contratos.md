@@ -68,3 +68,19 @@ Toda política que o simulador avalia fica num arquivo `.json.tftpl` renderizado
 - Role de deploy: ECR em `autoreparos-<servico>` e `autoreparos-<servico>-*`; SSM só nos prefixos não secretos (`vpc_id`, `subnets`, `security-groups`, `eks`, `apigateway`, `database`, `provisionador-db`); `ListBucket` com `servicos/<servico>/*` e `env:/*`; lock com `dynamodb:LeadingKeys` em `<bucket>/servicos/<servico>/*`; nega explicitamente role sem o boundary, remoção do boundary e alteração da política de boundary.
 - Cluster com `access_config` `API_AND_CONFIG_MAP`; acesso humano de administrador para `role/managed/AccountFullAccessRole` (José e Enrico).
 - URL interna do Cadastros para a AuthLambda: os jobs `lambda` do pai procuram o Ingress do grupo `autoreparos-cadastros-interno` no namespace `cadastros`; sem ele, `vars.CADASTROS_INTERNAL_URL`. No primeiro provisionamento fica vazia; depois do deploy do Cadastros, `deploy-app.yml` atualiza a Lambda.
+
+## Serviços (entregue pelo lote A, 16/11)
+
+Ordem do job `deploy`: Terraform → imagem → provisionador → kubeconfig → Secrets → Helm → `rollout status` → `GET /health`. O chart monta as URLs de fila pelo nome (conta + nome literal no `values.yaml`).
+
+| Fila (`-dlq` quando há) | Consumidor | Produtores |
+| --- | --- | --- |
+| `autoreparos-os-saga` + DLQ | OS (`Sqs:SagaQueueUrl`) | Cobrança (`Sqs:QueueUrl`), Execução (`Sqs:OsServiceQueueUrl`), reprocessador do OS |
+| `autoreparos-cobranca-comandos` + DLQ | Cobrança (`Sqs:ComandosQueueUrl`) | OS (`Sqs:BillingQueueUrl`) |
+| `autoreparos-cobranca-execucoes` + DLQ | nenhum (D-59) | Execução (`Sqs:BillingQueueUrl`, `execucao.concluida.v1`) |
+| `autoreparos-cobranca-saida-dlq` | reprocessador da Cobrança | Cobrança (`Sqs:DeadLetterQueueUrl`) |
+| `autoreparos-execucao-liberadas` + DLQ | Execução (`Sqs:LiberadasQueueUrl`) | OS (`Sqs:ExecucaoQueueUrl`) |
+| `autoreparos-execucao-saida-dlq` | reprocessador da Execução | Execução (`Sqs:DeadLetterQueueUrl`) |
+| `autoreparos-cadastros-notificacoes` + DLQ | Cadastros (`Notificacoes:FilaUrl`) | OS (`Sqs:CadastrosQueueUrl`, `saga.lembrete.v1`) |
+
+Secrets além de `<servico>-database`: `os-segredos` (`Cadastros__ChaveInterna`) e `cadastros-segredos` (`Jwt__ChavePrivadaPem`, `Interno__Chave`, `SeedUser__Password`, `SendGrid__ApiKey`). A role de deploy ganhou `ec2:DescribeSubnets` (o Terraform do Cadastros lê os CIDRs privados para a NetworkPolicy).

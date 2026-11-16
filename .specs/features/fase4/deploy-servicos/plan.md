@@ -15,7 +15,7 @@ Quando isto estiver pronto, um merge na `main` de qualquer um dos quatro serviç
 Reaproveita a plataforma do pai (VPC, EKS, RDS, ALB interno, API Gateway, bucket de state, OIDC do cluster) e o padrão do Cadastros (Job que migra e sai, chart do subchart `api`), em vez de criar uma plataforma nova. As regras que decidem o resultado ficam em artefatos que o repositório consegue testar sem AWS: `terraform validate`, `helm template` e os `assert_*.py` do pai, mais testes .NET para `/health` e para a flag de migration.
 
 1. push na `main` de um serviço -> `ci-cd.yml` do serviço (exists) - `build`, `test` (cobertura ≥ 80%) e `quality` precisam passar; o job novo `deploy` só existe na `main` e espera aprovação no Environment `production`
-2. job `deploy` (new) - assume a role OIDC do repositório (door 2) na conta `198903849859`, publica a imagem no ECR do serviço com a tag igual ao SHA
+2. job `deploy` (new) - assume a role OIDC do repositório (door 2) na conta `198903849859`; roda primeiro o passo 3 (é o Terraform que cria o ECR) e só então publica a imagem no ECR do serviço com a tag igual ao SHA
 3. `infra/terraform` do serviço (door 1) - `terraform apply` com state `servicos/<servico>/production.tfstate` (door 3): ECR, filas e DLQs de entrada do serviço (door 4), role IRSA, senha da database no Secrets Manager e, no OS, as 2 tabelas DynamoDB da Saga; lê a plataforma só pelos parâmetros SSM `/autoreparos/production/*` (D-53), sem `terraform_remote_state`; em seguida o job chama a Function URL do `autoreparos-provisionador-db` (door 9), assinada com a role do repositório, que cria a database e o usuário do serviço se ainda não existem
 4. `deploy/helm/{servico}` (door 5) - `helm upgrade --install --atomic` no namespace do serviço (door 6): o hook migra com `Database__RunMigrations=true` (door 7, D-47), depois o Deployment com 1 réplica, HPA 1–3, probes em `/health` e ServiceAccount com a role IRSA
 5. Ingress do serviço no grupo ALB compartilhado `autoreparos-internal` (door 8, o mesmo ALB interno que o VPC Link do API Gateway já usa) - regras por prefixo de rota; o API Gateway (exists) continua mandando `ANY /api/{proxy+}` ao ALB
@@ -25,8 +25,8 @@ Reaproveita a plataforma do pai (VPC, EKS, RDS, ALB interno, API Gateway, bucket
 ```mermaid
 flowchart TD
     P["1. push na main<br/>ci-cd.yml (exists): build → test → quality"] --> A{"Environment production<br/>aprovação"}
-    A -->|aprovado| D["2. deploy: OIDC (door 2)<br/>imagem → ECR autoreparos-{servico}"]
-    D --> T["3. terraform apply infra/terraform (door 1)<br/>ECR, SQS+DLQ, IRSA, segredo, DynamoDB (OS)"]
+    A -->|aprovado| D["2. deploy: OIDC (door 2)"]
+    D --> T["3. terraform apply infra/terraform (door 1)<br/>ECR, SQS+DLQ, IRSA, segredo, DynamoDB (OS)<br/>depois imagem → ECR autoreparos-{servico}"]
     T --> J1["3b. autoreparos-provisionador-db<br/>database e usuário (door 9)"]
     J1 --> H["4. helm upgrade --install --atomic<br/>deploy/helm/{servico} (door 5)"]
     H --> J2["4a. hook: migra e sai (door 7)"]
