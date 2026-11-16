@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prova C34 de deploy-servicos: uma versão com /health quebrado é desfeita pelo --atomic.
-# Uso: scripts/specs/assert_rollback.sh execucao
+# Uso: scripts/smoke/rollback-execucao.sh execucao
 #
 # Como quebra o /health sem trocar o código: o /health do serviço verifica a database, e o pod lê a connection
 # string do Secret <servico>-database só ao iniciar. O script troca o Secret por uma connection string para um

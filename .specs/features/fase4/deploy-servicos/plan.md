@@ -156,6 +156,18 @@ O serviço tem imagem, responde à probe e sabe só migrar quando pedido.
     - sem token → `401`
 28. IF uma versão com `/health` quebrado é implantada THEN o `--atomic` SHALL restaurar a revisão anterior e `helm history` SHALL mostrar a revisão falha como `failed` e a anterior de novo como `deployed`
 
+## Smoke tests
+
+Testes contra o ambiente de produção depois de cada deploy, em [`scripts/smoke/`](../../../../scripts/smoke/README.md); cada execução fica registrada em [`smoke.md`](./smoke.md) pelo `scripts/smoke/rodar.sh`.
+
+| Teste | Critério | Check |
+| --- | --- | --- |
+| `deploy-execucao.sh` - pipeline verde, `200` com token do Cadastros e `401` sem token pelo gateway | AC 27 | C33 |
+| `rollback-execucao.sh` - versão com `/health` quebrado desfeita pelo `--atomic`, API respondendo | AC 28 | C34 |
+| `mercado-pago.sh` - credenciais no pod da Cobrança e webhook recusando assinatura inválida | AC 29 | C41 |
+| Manual: notificação simulada no painel do Mercado Pago | AC 29 | registro em `smoke.md` |
+| Manual: checkout de ponta a ponta com comprador de teste | D-62 | registro em `smoke.md` |
+
 ## Out of scope
 
 | Excluded | Why |

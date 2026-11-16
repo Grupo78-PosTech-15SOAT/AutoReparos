@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prova C33 de deploy-servicos: um serviço implantado de verdade pelo próprio pipeline.
-# Uso: scripts/specs/smoke_deploy.sh execucao
+# Uso: scripts/smoke/deploy-execucao.sh execucao
 #
 # 1. O último ci-cd.yml da main de AutoReparos.Execucao terminou com o job deploy verde (depois da aprovação
 #    no Environment production).

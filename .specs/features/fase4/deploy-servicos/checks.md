@@ -122,10 +122,10 @@ Proof: `scripts/infra/configurar-github.sh --verificar-idempotencia`
 ### S6 - Um serviço implantado de verdade
 
 **C33** - O último workflow da `main` da Execução terminou verde depois da aprovação, e `GET <API Gateway>/api/v1/servicos` responde `200` com os 5 serviços semeados usando um token emitido pelo Cadastros do mesmo ambiente, e `401` sem token (AC 27)
-Proof: `scripts/specs/smoke_deploy.sh execucao`
+Proof: `scripts/smoke/deploy-execucao.sh execucao`
 
 **C34** - Depois de implantar uma versão com `/health` quebrado, `helm history execucao` mostra essa revisão como `failed` e a anterior de novo como `deployed`, e `/api/v1/servicos` continua respondendo (AC 28)
-Proof: `scripts/specs/assert_rollback.sh execucao`
+Proof: `scripts/smoke/rollback-execucao.sh execucao`
 
 **C35** - Os nomes da porta 4 batem entre produtores e consumidores: cada URL de fila que um serviço recebe do chart aponta para uma fila declarada no Terraform do consumidor (porta 4)
 Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor`
@@ -148,7 +148,7 @@ Proof: `python3 scripts/specs/simular_iam.py --caso boundary`
 Proof: `python3 scripts/specs/simular_iam.py --caso state`
 
 **C41** - Com `MERCADOPAGO_ACCESS_TOKEN` e `MERCADOPAGO_WEBHOOK_SECRET` no Environment `production` da Cobrança, o Deployment `cobranca` entrega `MercadoPago__AccessToken` e `MercadoPago__WebhookSecret` a partir do Secret `cobranca-segredos` (opcionais), o Secret tem as duas chaves, e `POST /api/v1/webhooks/mercado-pago` com corpo válido sem assinatura ou com assinatura falsa responde `401` pelo API Gateway (AC 29, D-62, derivado em 16/11 depois da aprovação)
-Proof: `scripts/specs/smoke_mercado_pago.sh`
+Proof: `scripts/smoke/mercado-pago.sh`
 
 ## Coverage
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prova C41 de deploy-servicos (AC 29, D-62): credenciais do Mercado Pago chegam ao pod da Cobrança.
-# Uso: scripts/specs/smoke_mercado_pago.sh
+# Uso: scripts/smoke/mercado-pago.sh
 #
 # 1. O Deployment `cobranca` entrega MercadoPago__AccessToken e MercadoPago__WebhookSecret a partir do Secret
 #    `cobranca-segredos` (chaves MercadoPagoAccessToken e MercadoPagoWebhookSecret), com optional: true.
