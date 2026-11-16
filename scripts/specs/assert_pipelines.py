@@ -113,6 +113,56 @@ def nivel_superior(expressao):
     return texto
 
 
+def termos(expressao, operador):
+    """Divide a expressão nos termos ligados por `operador` (&& ou ||) fora de parênteses, sem ${{ }} nem os
+    parênteses que envolvem a expressão inteira."""
+    texto = expressao.strip()
+    if texto.startswith("${{") and texto.endswith("}}"):
+        texto = texto[3:-2].strip()
+    while texto.startswith("(") and texto.endswith(")") and nivel_superior(texto) == "[...]":
+        texto = texto[1:-1].strip()
+    partes, profundidade, inicio, i = [], 0, 0, 0
+    while i < len(texto):
+        if texto[i] == "(":
+            profundidade += 1
+        elif texto[i] == ")":
+            profundidade -= 1
+        elif profundidade == 0 and texto.startswith(operador, i):
+            partes.append(texto[inicio:i].strip())
+            inicio = i + len(operador)
+            i = inicio
+            continue
+        i += 1
+    partes.append(texto[inicio:].strip())
+    return partes
+
+
+def normalizar(termo):
+    return re.sub(r"\s+", " ", termo.strip())
+
+
+SUCESSO = "needs.{}.result == 'success'"
+IGNORAR_QUALITY = "github.event_name == 'workflow_dispatch' && inputs.ignorar_quality"
+
+
+def gate_sob_always(job):
+    """Com always() a condição substitui o gate implícito do needs: devolve os jobs obrigatórios que ela deixa
+    de exigir verdes. build e test precisam ser termos de nível superior; quality também pode estar num OU cujo
+    outro ramo é só a exceção da D-60 (disparo manual com inputs.ignorar_quality)."""
+    topo = [normalizar(t) for t in termos(condicao(job), "&&")]
+    faltando = [nome for nome in ("build", "test") if SUCESSO.format(nome) not in topo]
+    quality = SUCESSO.format("quality")
+    if quality not in topo:
+        aceito = False
+        for termo in topo:
+            ramos = [normalizar(" && ".join(termos(r, "&&"))) for r in termos(termo, "||")]
+            if len(ramos) == 2 and quality in ramos and IGNORAR_QUALITY in ramos:
+                aceito = True
+        if not aceito:
+            faltando.append("quality")
+    return faltando
+
+
 def so_na_main(job):
     """A condição exige github.ref == 'refs/heads/main' como termo de um E de nível superior."""
     topo = nivel_superior(condicao(job))
@@ -140,6 +190,9 @@ def checar_deploy_producao(servico, texto, erros):
         erros.append(f"{servico}: deploy precisa de needs: [build, test, quality] ({needs.group(0).strip() if needs else None})")
     if not so_na_main(job) or "develop" in condicao(job):
         erros.append(f"{servico}: deploy não fica restrito a refs/heads/main (if: {condicao(job)!r})")
+    if re.search(r"\balways\(\)", condicao(job)):
+        for nome in gate_sob_always(job):
+            erros.append(f"{servico}: deploy com always() não exige needs.{nome}.result == 'success' (if: {condicao(job)!r})")
     if not re.search(r"^    environment:\s*production\s*$", job, re.MULTILINE):
         erros.append(f"{servico}: deploy sem environment: production")
     permissoes = bloco(job, "permissions", 4) or ""
