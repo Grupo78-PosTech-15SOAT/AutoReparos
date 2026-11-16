@@ -6,7 +6,7 @@
 > **Requisitos cobertos (índice):** R22, R23, R24, R25, R26, R28, R33  
 > **Repositórios afetados:** os 4 serviços, `AutoReparos.Web`, `AutoReparos.AuthLambda`, `AutoReparos.Infra.K8s`, `AutoReparos.Infra.Database`, `AutoReparos` (pai e `scripts/infra/setup-github-governance.sh`)  
 > **Base:** [Diagnóstico do estado atual](../diagnostico/fase4_diagnostico_estado_atual.md) · **Índice:** [`../index.md`](../index.md)  
-> **Status:** Rascunho inicial — papel do pai no provisionamento a validar (D-13)
+> **Status:** Revisada em 15/11 — estado atual de 13/11; deploy por serviço decidido (D-40 a D-49) e planejado em `deploy-servicos`
 
 ---
 
@@ -24,41 +24,67 @@
 
 ## 2. Estado atual
 
-| Repositório | Gatilhos | Build | Testes | Qualidade | Imagem | Deploy K8s |
+Levantamento de 13/11/2026 na branch `feature/saga-compensacoes` (ponteiros dos submódulos fixados nela). Substitui o retrato de 09/11.
+
+### 2.1 Pipelines e deploy
+
+| Repositório | Workflow | Build | Testes | Qualidade | Imagem | Deploy K8s |
 |---|---|---|---|---|---|---|
-| AutoReparos.App | push/PR em `main` e `develop` | ✅ | ✅ | ❌ | ❌ | ❌ |
-| AutoReparos (pai) — `ci.yml` | push/PR | ✅ (todos os submódulos) | ✅ | ❌ (SonarCloud automático fora do workflow) | — | — |
-| AutoReparos (pai) — `provision-aws.yml` / `deploy-app.yml` (desde 06/11) | **Manual** (Environment `production` + confirmação por texto) | ✅ | — | ❌ | ✅ API e Web no ECR | ✅ `helm upgrade` do chart do Infra.K8s |
-| AutoReparos.AuthLambda | push/PR + `workflow_dispatch` com confirmação | ✅ | ✅ | ❌ | n/a | n/a (Terraform da Lambda) |
-| Infra.Database / Infra.K8s | push/PR + manuais | n/a | `fmt`/`validate` | ❌ | n/a | Provisionamento manual |
+| OS | `ci-cd.yml` | ✅ | ✅ cobertura ≥ 80% | ✅ SonarCloud | ❌ **sem Dockerfile** | ❌ |
+| Cobranca | `ci-cd.yml` | ✅ | ✅ | ✅ | ❌ (Dockerfile na raiz, sem job) | ❌ |
+| Execucao | `ci-cd.yml` | ✅ | ✅ unitário + integração | ✅ | ❌ (Dockerfile na raiz, sem job) | ❌ |
+| Cadastros | `ci-cd.yml` | ✅ | ✅ | ✅ | só pelo pai | só pelo pai |
+| Web | `ci-cd.yml` | ✅ | ✅ | ✅ | só pelo pai | só pelo pai |
+| AuthLambda | `ci.yml` (push/PR) | ✅ | ✅ | ❌ | n/a (zip) | n/a (Terraform aplicado pelo pai) |
+| Infra.K8s / Infra.Database | `ci.yml` (push/PR) | n/a | `fmt`/`validate`/`helm lint` | ❌ | n/a | apply só pelo pai |
+| AutoReparos (pai) — `ci.yml` | push/PR | ✅ só `AutoReparos.slnx` (Cadastros e AuthLambda) e `yarn build` do Web | ✅ | ❌ | — | — |
+| AutoReparos (pai) — `provision-aws.yml` / `deploy-app.yml` | **manual** (`workflow_dispatch` na `main`, texto de confirmação, Environment `production`) | ✅ | — | ❌ | ✅ Cadastros → ECR `autoreparos-api`, Web → `autoreparos-web` | ✅ um release Helm único `autoreparos` do chart guarda-chuva `Infra.K8s/k8s`, `--wait` **sem `--atomic`**; smoke só por `rollout status` |
 
 Outros pontos:
 
-- Autenticação na AWS por OIDC (`AWS_ROLE_ARN`) já usada no pai e na Lambda.
-- Segredos da API lidos do Secrets Manager e injetados no cluster pelo workflow do pai.
-- Migrations controladas por configuração (`Database:RunMigrations`), executadas pelo fluxo de deploy antes do rollout.
-- Actions referenciadas por tag (ex.: `@v6.0.2`) desde o PR #44 (06/11). O SonarCloud reprovou esse PR (Security Rating C), mas ele foi mesclado porque a `main` não exige o check — exemplo concreto da lacuna de proteção de branches.
-- Desde 06/11 o **provisionamento e o deploy são centralizados no pai e manuais** (ver [diagnóstico § 8](../diagnostico/fase4_diagnostico_estado_atual.md#8-provisionamento-aws-centralizado-mesclado-em-0611)). Nenhum repositório de serviço faz deploy.
+- **OIDC:** só o pai autentica na AWS, pelo secret `AWS_ROLE_ARN`. Não há role por repositório nem *access entry*/RBAC por namespace no EKS.
+- **Segredos:** a connection string vem do Secrets Manager (`autoreparos/production/database/credentials`); JWT, chave interna, SendGrid e senhas vêm de GitHub Secrets do pai e entram no cluster por `kubectl apply`.
+- **Migrations:** três modelos diferentes. Cadastros usa um Job com `Database__RunMigrations=true` criado pelo workflow do pai; Cobrança e Execução chamam `MigrateAsync()` incondicional no startup; o OS não migra (o README manda rodar `dotnet ef database update`).
+- **Health:** só Cadastros e Web expõem `/health`; OS, Cobrança e Execução não têm endpoint de saúde para probes nem para o health check do ALB.
+- **Actions:** os repositórios de serviço já fixam por SHA com a tag em comentário; pai, AuthLambda e Infra ainda usam tag.
+- **Prova:** `scripts/specs/assert_pipelines.py --check deploy-staging` e `--check deploy-producao` já existem e hoje falham nos 5 repositórios.
 
-### 2.1 Proteção de branches (GitHub API, 04/11/2026 — confirmado sem mudanças em 09/11/2026)
+### 2.2 Plataforma na AWS (Infra.K8s, Infra.Database)
 
-| Repositório | `main` | Status checks obrigatórios | `develop` |
-|---|---|---|---|
-| App, AuthLambda, Infra.Database, Infra.K8s | PR + 1 aprovação, `strict`, vale para admins | **Nenhum** (`contexts: []`) | sem proteção |
-| AutoReparos (pai) | PR sem aprovação mínima, não vale para admins | **Nenhum** | sem proteção |
+| Recurso | Estado |
+|---|---|
+| Rede e cluster (`stacks/base`) | VPC `10.0.0.0/16`, 2 AZs, 1 NAT; EKS 1.35 `autoreparos-cluster` em `us-east-1`, node group `t3.small` 2–4 nós |
+| Add-ons (`stacks/platform`) | AWS Load Balancer Controller (ALB interno), metrics-server, EBS CSI |
+| Borda (`stacks/gateway`) | API Gateway HTTP com VPC Link para o listener do ALB interno; `POST /auth/cliente` (Lambda), `ANY /api/{proxy+}`, `/health`, `/` |
+| Ingress (chart guarda-chuva) | `/api` e `/health` inteiros → Cadastros; `/` → Web; `/internal` → Cadastros num ALB separado. **Não há rota para OS, Cobrança e Execução** |
+| ECR | só `autoreparos-api` (Cadastros) e `autoreparos-web` |
+| RDS (`Infra.Database`) | 1 instância PostgreSQL 16 `db.t4g.micro`, **1 database `autoreparos_db` e 1 usuário admin**; nenhuma database ou usuário para OS, Cobrança e Execução |
+| Mensageria e Saga | **nenhuma** fila/DLQ SQS, tópico SNS ou tabela DynamoDB em IaC. O código já depende de SQS (7 URLs no OS, 4 na Cobrança, 5 na Execução, 2 no Cadastros) e de 2 tabelas DynamoDB no OS (`autoreparos-os-saga`, `autoreparos-os-saga-eventos`). Nenhum serviço usa SNS ainda (D-19 adiado por AD-024) |
+| Identidade dos pods | sem IRSA/Pod Identity e sem `AWS_REGION` no chart; o node role não tem SQS nem DynamoDB, então nem o consumidor de notificações do Cadastros autentica no EKS |
+| Observabilidade | subchart `observability` (OTel Collector, Prometheus, Jaeger, Loki, Grafana em ClusterIP) |
+
+### 2.3 Proteção de branches
+
+`scripts/infra/setup-github-governance.sh` já protege a `main` de OS, Cobranca, Execucao, Cadastros e Web exigindo `build`, `test` e `quality` (D-25); AuthLambda e Infra ficam sem checks e o pai fica fora do script. A aplicação real no GitHub depende do `SONAR_TOKEN` em cada repositório (ver `infra-ci-observabilidade`) e não foi reconferida em 13/11.
 
 ---
 
 ## 3. Lacunas
 
-1. Nenhum repositório de serviço faz deploy no Kubernetes; o deploy da aplicação está no pai.
-2. Nenhuma verificação de qualidade (Sonar) dentro dos pipelines.
-3. Nenhum repositório exige status checks para o merge; o pai nem exige aprovação.
-4. Os repositórios novos (OS, Billing, Execution) existem só com a branch de feature, sem `main`, sem proteção e fora do script de governança; Web ainda não existe. Execution já tem `ci.yml`.
+1. **Nenhum repositório de serviço publica imagem nem faz deploy.** O único caminho até o EKS é o deploy manual do pai, que só cobre Cadastros e Web, num release único e sem rollback automático.
+2. **OS, Cobrança e Execução não existem no cluster:** sem Dockerfile (OS), sem `/health`, sem ECR, sem chart, sem rota no Ingress e no API Gateway.
+3. **Recursos de runtime sem IaC:** filas e DLQs SQS, tabelas DynamoDB da Saga e databases/usuários por serviço não são provisionados por ninguém; o Cadastros recebe as URLs de fila por variáveis manuais.
+4. **Pods sem identidade AWS:** sem IRSA ou Pod Identity, nenhum serviço consegue usar SQS ou DynamoDB no EKS.
+5. **Migrations em três modelos diferentes**, duas delas no startup sem controle de concorrência entre réplicas.
+6. **Capacidade:** o node group `t3.small` 2–4 foi dimensionado para um serviço e a observabilidade; quatro serviços com 2 réplicas cada não cabem com folga.
+7. **Inconsistências no chart atual:** o Cadastros lê `OpenTelemetry:*`, mas o chart injeta `Telemetry__*` (exporta para `localhost` no EKS); duas chaves de migração (`SkipStartupMigration` e `RunMigrations`); `scripts/infra/build-push-images.sh` e `scripts/k8s/test-local-helm.sh` apontam para um Dockerfile que não existe.
+8. **Superadas desde 09/11:** qualidade no CI (os 5 têm `quality` com SonarCloud) e inclusão dos repositórios novos no script de governança.
 
 ---
 
 ## 4. Proposta (a validar)
+
+> **Decidido em 15/11 (D-40 a D-56):** deploy só em produção, Terraform e chart no repositório de cada serviço, database criada pelo provisionador da plataforma chamado pelo pipeline do serviço (D-54), Job de migration no chart, pai só com a plataforma, endpoints de S3 e DynamoDB na VPC (D-55) e configuração do GitHub por script (D-56). O desenho implementável está no plano [`deploy-servicos`](../../deploy-servicos/plan.md) e a justificativa no [ADR-005](../../../../../docs/architecture/ADR-005-deploy-independente-por-microsservico.md) e no [ADR-004](../../../../../docs/architecture/ADR-004-migrations-por-job-pre-upgrade.md). Onde esta seção diverge, valem as decisões.
 
 ### 4.1 Pipeline padrão de cada serviço (`.github/workflows/ci-cd.yml`)
 
@@ -76,8 +102,8 @@ flowchart LR
 | `build` | PR e push | `dotnet restore`/`build` |
 | `test` | PR e push | Testcontainers no runner; publica `.trx` e cobertura como artefatos |
 | `quality` | PR e push | SonarCloud com `sonar.qualitygate.wait=true` ([spec de testes](../testes-qualidade/fase4_spec_testes_e_qualidade.md)) |
-| `image` | push em `develop` e `main` | Build da imagem, scan (ECR scan on push já existe), push no ECR do próprio serviço |
-| `deploy` | push em `develop` → staging (namespace compartilhado); push em `main` → produção com aprovação no Environment `production` (D-22) | OIDC → role do repositório → `aws eks update-kubeconfig` → Job de migration (hook do Helm) → `helm upgrade --install --atomic` no namespace do serviço |
+| `image` | push na `main` (D-41) | Build da imagem, scan (ECR scan on push já existe), push no ECR do próprio serviço |
+| `deploy` | push na `main` → produção com aprovação no Environment `production` (D-41; o staging da D-22 saiu) | OIDC → role do repositório → `aws eks update-kubeconfig` → Job de migration (hook do Helm) → `helm upgrade --install --atomic` no namespace do serviço |
 | `smoke` | após o deploy | `kubectl rollout status` e chamada ao `/health` do serviço pelo ingress |
 
 Regras:

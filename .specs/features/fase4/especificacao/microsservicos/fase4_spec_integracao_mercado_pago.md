@@ -39,7 +39,7 @@ Documentação oficial: <https://www.mercadopago.com.br/developers/pt/docs>.
 1. Orçamento sem itens: a reserva de insumos precisa de insumo, quantidade e valor.
 2. Eventos de orçamento e pagamento fora do catálogo (§ 4.5 da comunicação) e sem consumo de `execucao.concluida.v1`.
 3. Nenhum teste no sandbox real.
-4. Rota pública do webhook ausente; segredos não provisionados no cluster.
+4. ~~Rota pública do webhook ausente; segredos não provisionados no cluster.~~ Resolvido em 16/11 (D-62): rota `ANY /api/{proxy+}` do API Gateway até a Cobrança e segredos pelo Environment `production` → Secret `cobranca-segredos`; webhook cadastrado no painel em `<API Gateway>/api/v1/webhooks/mercado-pago`.
 
 ---
 

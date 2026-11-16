@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
-"""Provas C1-C4, C8 e C10 de infra-ci-observabilidade: lê o ci-cd.yml de cada serviço.
+"""Provas dos pipelines: lê o ci-cd.yml de cada serviço.
 
-Uso: python scripts/specs/assert_pipelines.py --check <jobs|cobertura|qualidade|execucao-pr|deploy-staging|deploy-producao> [--minimo 80]
+infra-ci-observabilidade C1-C4 (jobs, cobertura, qualidade, execucao-pr) nos 5 repositórios e deploy-servicos
+C18-C20 (deploy-producao, deploy-verifica-saude, sem-deploy-fora-da-main) nos 4 serviços implantados pelo próprio
+repositório (o Web continua implantado pelo pai).
+
+Uso: python scripts/specs/assert_pipelines.py --check <jobs|cobertura|qualidade|execucao-pr|deploy-producao|deploy-verifica-saude|sem-deploy-fora-da-main> [--minimo 80]
 """
 import argparse
 import re
 import sys
 
+from _deploy_comum import SERVICOS_IMPLANTADOS
 from _repositorios import (JOBS_OBRIGATORIOS, SERVICOS, bloco, gh_api, jobs, ler_workflow,
                            nome_completo, reportar)
+
+CHECKS_DE_DEPLOY = {
+    "deploy-producao": lambda servico, texto, erros: checar_deploy_producao(servico, texto, erros),
+    "deploy-verifica-saude": lambda servico, texto, erros: checar_deploy_verifica_saude(servico, texto, erros),
+    "sem-deploy-fora-da-main": lambda servico, texto, erros: checar_sem_deploy_fora_da_main(servico, texto, erros),
+}
 
 
 def branches_do_gatilho(texto, evento):
@@ -81,42 +92,179 @@ def checar_execucao_pr(servico, erros):
             erros.append(f"{servico}: job `{job}` da execução {execucao['id']} terminou em {conclusoes.get(job)}")
 
 
-def checar_deploy(servico, texto, erros, ambiente):
-    candidatos = {nome: corpo for nome, corpo in jobs(texto).items() if nome.startswith("deploy")}
-    if not candidatos:
-        erros.append(f"{servico}: nenhum job de deploy")
+SHA_FIXO = re.compile(r"^[0-9a-f]{40}$")
+MARCAS_DE_PUBLICACAO = ("docker push", "docker login", "aws ecr", "helm upgrade", "kubectl apply", "terraform apply",
+                        "configure-aws-credentials", "provisionador-db")
+
+
+def condicao(job):
+    achado = re.search(r"^    if:\s*(.+)$", job, re.MULTILINE)
+    return achado.group(1).strip() if achado else ""
+
+
+def nivel_superior(expressao):
+    """Tira ${{ }} e o conteúdo entre parênteses, deixando só os termos de nível superior da expressão."""
+    texto = expressao.strip()
+    if texto.startswith("${{") and texto.endswith("}}"):
+        texto = texto[3:-2]
+    anterior = None
+    while anterior != texto:
+        anterior, texto = texto, re.sub(r"\([^()]*\)", "[...]", texto)
+    return texto
+
+
+def termos(expressao, operador):
+    """Divide a expressão nos termos ligados por `operador` (&& ou ||) fora de parênteses, sem ${{ }} nem os
+    parênteses que envolvem a expressão inteira."""
+    texto = expressao.strip()
+    if texto.startswith("${{") and texto.endswith("}}"):
+        texto = texto[3:-2].strip()
+    while texto.startswith("(") and texto.endswith(")") and nivel_superior(texto) == "[...]":
+        texto = texto[1:-1].strip()
+    partes, profundidade, inicio, i = [], 0, 0, 0
+    while i < len(texto):
+        if texto[i] == "(":
+            profundidade += 1
+        elif texto[i] == ")":
+            profundidade -= 1
+        elif profundidade == 0 and texto.startswith(operador, i):
+            partes.append(texto[inicio:i].strip())
+            inicio = i + len(operador)
+            i = inicio
+            continue
+        i += 1
+    partes.append(texto[inicio:].strip())
+    return partes
+
+
+def normalizar(termo):
+    return re.sub(r"\s+", " ", termo.strip())
+
+
+SUCESSO = "needs.{}.result == 'success'"
+IGNORAR_QUALITY = "github.event_name == 'workflow_dispatch' && inputs.ignorar_quality"
+
+
+def gate_sob_always(job):
+    """Com always() a condição substitui o gate implícito do needs: devolve os jobs obrigatórios que ela deixa
+    de exigir verdes. build e test precisam ser termos de nível superior; quality também pode estar num OU cujo
+    outro ramo é só a exceção da D-60 (disparo manual com inputs.ignorar_quality)."""
+    topo = [normalizar(t) for t in termos(condicao(job), "&&")]
+    faltando = [nome for nome in ("build", "test") if SUCESSO.format(nome) not in topo]
+    quality = SUCESSO.format("quality")
+    if quality not in topo:
+        aceito = False
+        for termo in topo:
+            ramos = [normalizar(" && ".join(termos(r, "&&"))) for r in termos(termo, "||")]
+            if len(ramos) == 2 and quality in ramos and IGNORAR_QUALITY in ramos:
+                aceito = True
+        if not aceito:
+            faltando.append("quality")
+    return faltando
+
+
+def so_na_main(job):
+    """A condição exige github.ref == 'refs/heads/main' como termo de um E de nível superior."""
+    topo = nivel_superior(condicao(job))
+    return "||" not in topo and re.search(r"github\.ref\s*==\s*'refs/heads/main'", topo) is not None
+
+
+def posicao(texto, trecho):
+    indice = texto.find(trecho)
+    return indice if indice >= 0 else None
+
+
+def job_deploy(servico, texto, erros):
+    job = jobs(texto).get("deploy")
+    if job is None:
+        erros.append(f"{servico}: job `deploy` ausente")
+    return job
+
+
+def checar_deploy_producao(servico, texto, erros):
+    job = job_deploy(servico, texto, erros)
+    if job is None:
         return
-    if "id-token: write" not in texto:
-        erros.append(f"{servico}: sem permissão id-token: write para OIDC")
-    if ambiente == "staging":
-        job = next((c for c in candidatos.values() if "staging" in c), None)
-        if job is None:
-            erros.append(f"{servico}: nenhum job de deploy para staging")
-            return
-        exigidos = ["refs/heads/develop", "configure-aws-credentials", "helm upgrade --install",
-                    "--atomic", "deploy/helm/", "kubectl rollout status"]
-    else:
-        job = next((c for c in candidatos.values() if "environment: production" in c), None)
-        if job is None:
-            erros.append(f"{servico}: nenhum job de deploy com environment: production")
-            return
-        exigidos = ["refs/heads/main", "us-east-1", "helm upgrade --install", "--atomic"]
+    needs = re.search(r"^    needs:\s*\[([^\]]*)\]", job, re.MULTILINE)
+    if not needs or {n.strip() for n in needs.group(1).split(",")} != set(JOBS_OBRIGATORIOS):
+        erros.append(f"{servico}: deploy precisa de needs: [build, test, quality] ({needs.group(0).strip() if needs else None})")
+    if not so_na_main(job) or "develop" in condicao(job):
+        erros.append(f"{servico}: deploy não fica restrito a refs/heads/main (if: {condicao(job)!r})")
+    if re.search(r"\balways\(\)", condicao(job)):
+        for nome in gate_sob_always(job):
+            erros.append(f"{servico}: deploy com always() não exige needs.{nome}.result == 'success' (if: {condicao(job)!r})")
+    if not re.search(r"^    environment:\s*production\s*$", job, re.MULTILINE):
+        erros.append(f"{servico}: deploy sem environment: production")
+    permissoes = bloco(job, "permissions", 4) or ""
+    for trecho in ("id-token: write", "contents: read"):
+        if trecho not in permissoes:
+            erros.append(f"{servico}: deploy sem a permissão `{trecho}`")
+    usos = re.findall(r"uses:\s*([^\s@#]+)@([^\s#]+)", job)
+    for acao, versao in usos:
+        if not acao.startswith("./") and not SHA_FIXO.match(versao):
+            erros.append(f"{servico}: `{acao}@{versao}` não está fixada em SHA de 40 caracteres")
+    exigidos = ["us-east-1", "aws-actions/configure-aws-credentials", "role-to-assume: ${{ vars.AWS_ROLE_ARN }}",
+                "terraform init", "-backend-config", "vars.TF_STATE_BUCKET", "vars.TF_LOCK_TABLE", "terraform apply",
+                "docker build", "docker push", "${{ github.sha }}", "/autoreparos/production/provisionador-db/url",
+                "--aws-sigv4", "aws eks update-kubeconfig", f"{servico.lower()}-database", "kubectl apply",
+                "helm upgrade --install", "--atomic"]
     for trecho in exigidos:
         if trecho not in job:
-            erros.append(f"{servico}: deploy {ambiente} sem `{trecho}`")
-    if ambiente == "staging" and not re.search(r"(--namespace|-n)\s+staging", job):
-        erros.append(f"{servico}: deploy staging fora do namespace staging")
+            erros.append(f"{servico}: deploy sem `{trecho}`")
+    helm = posicao(job, "helm upgrade --install")
+    for trecho, descricao in (("/autoreparos/production/provisionador-db/url", "chamada ao provisionador"),
+                              ("--aws-sigv4", "chamada assinada ao provisionador"),
+                              ("terraform apply", "terraform apply"),
+                              ("docker push", "publicação da imagem"),
+                              (f"{servico.lower()}-database", f"Secret {servico.lower()}-database")):
+        indice = posicao(job, trecho)
+        if helm is not None and indice is not None and indice > helm:
+            erros.append(f"{servico}: {descricao} acontece depois do helm upgrade")
+
+
+def checar_deploy_verifica_saude(servico, texto, erros):
+    job = job_deploy(servico, texto, erros)
+    if job is None:
+        return
+    helm = posicao(job, "helm upgrade --install")
+    rollout = posicao(job, "kubectl rollout status")
+    if helm is None:
+        erros.append(f"{servico}: deploy sem helm upgrade --install")
+        return
+    if rollout is None or rollout < helm:
+        erros.append(f"{servico}: deploy sem kubectl rollout status depois do helm upgrade")
+        return
+    saude = job.find("/health", rollout)
+    if saude < 0:
+        erros.append(f"{servico}: deploy sem GET /health depois do rollout")
+        return
+    resto = job[saude:]
+    # A falha precisa ficar no ramo em que o status é diferente de 200: `if [ "$status" != "200" ]; then ... exit 1`.
+    falha = re.search(r'\$status"?\s*(!=|-ne)\s*"?200"?\s*\]?;?\s*then(.*?)\bfi\b', resto, re.DOTALL)
+    if not falha:
+        erros.append(f"{servico}: o GET /health não compara o status com 200")
+    elif "exit 1" not in falha.group(2):
+        erros.append(f"{servico}: o GET /health não falha o job quando o status não é 200")
+
+
+def checar_sem_deploy_fora_da_main(servico, texto, erros):
+    for nome, job in jobs(texto).items():
+        marcas = [marca for marca in MARCAS_DE_PUBLICACAO if marca in (job or "")]
+        if marcas and not so_na_main(job):
+            erros.append(f"{servico}: job `{nome}` publica ou implanta ({', '.join(marcas)}) sem ficar restrito "
+                         f"a refs/heads/main (if: {condicao(job)!r})")
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", required=True,
-                        choices=["jobs", "cobertura", "qualidade", "execucao-pr", "deploy-staging", "deploy-producao"])
+                        choices=["jobs", "cobertura", "qualidade", "execucao-pr", *CHECKS_DE_DEPLOY])
     parser.add_argument("--minimo", type=int, default=80)
     args = parser.parse_args()
 
     erros = []
-    for servico in SERVICOS:
+    repositorios = SERVICOS_IMPLANTADOS if args.check in CHECKS_DE_DEPLOY else SERVICOS
+    for servico in repositorios:
         if args.check == "execucao-pr":
             checar_execucao_pr(servico, erros)
             continue
@@ -130,11 +278,9 @@ def main():
             checar_cobertura(servico, texto, erros, args.minimo)
         elif args.check == "qualidade":
             checar_qualidade(servico, texto, erros)
-        elif args.check == "deploy-staging":
-            checar_deploy(servico, texto, erros, "staging")
         else:
-            checar_deploy(servico, texto, erros, "producao")
-    return reportar(erros, f"OK {args.check}: {len(SERVICOS)} repositórios")
+            CHECKS_DE_DEPLOY[args.check](servico, texto, erros)
+    return reportar(erros, f"OK {args.check}: {len(repositorios)} repositórios")
 
 
 if __name__ == "__main__":
