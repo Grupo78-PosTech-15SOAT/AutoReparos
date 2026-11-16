@@ -12,10 +12,10 @@ Plan: `.specs/features/tlc-spec-lean-bootstrap/plan.md`
 Proof: `walk` - inspect `.agents/AGENTS.md` TLC workflow instructions
 
 **C2** - Project config declares `mutations: 3`, and scripts/templates are stored under `.specs/` (AC 2, 3)
-Proof: `python .specs/tlc-spec-lean/scripts/validate_project_config.py tlc-spec-lean-bootstrap`
+Proof: `python .agents/skills/tlc-spec-lean/scripts/validate_project_config.py tlc-spec-lean-bootstrap`
 
 **C3** - A plan without explicit user approval is rejected by the plan/check gate (AC 4)
-Proof: `python .specs/tlc-spec-lean/scripts/validate_checks.py tlc-spec-lean-bootstrap --root .`
+Proof: `python .agents/skills/tlc-spec-lean/scripts/validate_checks.py tlc-spec-lean-bootstrap --root .`
 
 **C4** - Existing `docs/specs/` content is preserved (AC 6)
 Proof: `git diff --exit-code HEAD -- docs/specs/`

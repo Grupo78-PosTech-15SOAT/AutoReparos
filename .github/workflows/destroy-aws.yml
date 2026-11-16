@@ -222,7 +222,7 @@ jobs:
           HAS_RDS_INSTANCE: ${{ steps.ids.outputs.has_rds_instance }}
         run: |
           set -euo pipefail
-          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ steps.ids.outputs.cluster_sg }}' --arg lambda '${{ steps.ids.outputs.lambda_sg }}' '[$eks,$lambda]')"
+          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ steps.ids.outputs.cluster_sg }}' '[$eks]')"
           snapshot="autoreparos-production-${GITHUB_RUN_ID}-final"
           if [ "$HAS_RDS_INSTANCE" = true ]; then
             plan="$(mktemp "$RUNNER_TEMP/rds-teardown.XXXXXX")"

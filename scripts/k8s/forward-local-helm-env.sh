@@ -33,9 +33,10 @@ helm upgrade --install autoreparos k8s/ \
   --set api.config.seedUserEmail="$SEED_USER_EMAIL" \
   --set api.config.sendGridFromEmail="$SENDGRID_FROM_EMAIL" \
   --set api.config.sendGridFromName="$SENDGRID_FROM_NAME" \
-  --set api.secrets.jwtSecret="$JWT_SECRET" \
+  --set api.secrets.jwtChavePrivadaPem="$JWT_CHAVE_PRIVADA_PEM" \
+  --set api.secrets.chaveInterna="$CHAVE_INTERNA" \
+  --set api.config.jwtIssuer="$JWT_ISSUER" \
   --set api.secrets.seedUserPassword="$SEED_USER_PASSWORD" \
-  --set api.secrets.aprovacaoTokenSecret="$APROVACAO_TOKEN_SECRET" \
   --set api.secrets.sendGridApiKey="$SENDGRID_API_KEY" \
   --set database.password="$DB_PASSWORD"
 

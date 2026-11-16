@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Infrastructure/ExecucaoDbContext.cs",
+    "old": " AND \\\"QuantidadeDisponivel\\\" >= {item.Quantidade}\", ct);",
+    "new": "\", ct);",
+    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.IntegrationTests --no-build --no-restore --filter FullyQualifiedName~FaltaDeSaldoNaoReservaNada",
+    "label": "reserva desconta sem a guarda WHERE QuantidadeDisponivel >= q (porta 1, C2 e C4)"
+  },
+  {
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Application/Contratos.cs",
+    "old": "(await store.ListarReservasAsync(ordem.OrdemServicoId, ct)).Where(r => r.Status == StatusReserva.Reservada).ToList();",
+    "new": "(await store.ListarReservasAsync(ordem.OrdemServicoId, ct)).Where(r => false).ToList();",
+    "proof": "dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.IntegrationTests --no-build --no-restore --filter FullyQualifiedName~ConclusaoConfirmaReservas",
+    "label": "conclusao da execucao deixa de confirmar e baixar as reservas (C5)"
+  },
+  {
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Domain/Orcamento.cs",
+    "old": "return itens.Sum(i => i.Quantidade * i.PrecoUnitario);",
+    "new": "return itens.Sum(i => i.PrecoUnitario);",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~OrcamentoGuardaSnapshotDePreco",
+    "label": "valor do orcamento ignora a quantidade no total dos itens do snapshot (C10)"
+  }
+]

@@ -27,37 +27,37 @@ The codebase follows **Clean Architecture** combined with **Vertical Slice** org
 
 ```
 AutoReparos/
-├── AutoReparos.Domain/             # Core Domain (Entities, Value Objects, Enums, Interfaces)
-├── AutoReparos.Application/        # Use Cases, Application Services, DTOs, Validation
-├── AutoReparos.Infra/              # EF Core DbContext, PostgreSQL Repositories, Identity, External APIs
-├── AutoReparos.API/                # ASP.NET Core Endpoints, Swagger, OpenTelemetry, DI Setup
+├── AutoReparos.Cadastros.Domain/             # Core Domain (Entities, Value Objects, Enums, Interfaces)
+├── AutoReparos.Cadastros.Application/        # Use Cases, Application Services, DTOs, Validation
+├── AutoReparos.Cadastros.Infrastructure/              # EF Core DbContext, PostgreSQL Repositories, Identity, External APIs
+├── AutoReparos.Cadastros.Api/                # ASP.NET Core Endpoints, Swagger, OpenTelemetry, DI Setup
 ├── AutoReparos.Web/                # Angular 19 Web Frontend (Standalone Components, Signals)
-├── AutoReparos.Domain.Tests/       # Domain Unit Tests (xUnit, FluentAssertions)
-├── AutoReparos.Application.Tests/  # Application Logic Tests (xUnit, Moq)
-└── AutoReparos.IntegrationTests/   # API & Database Integration Tests (Testcontainers)
+├── AutoReparos.Cadastros.Domain.Tests/       # Domain Unit Tests (xUnit, FluentAssertions)
+├── AutoReparos.Cadastros.Application.Tests/  # Application Logic Tests (xUnit, Moq)
+└── AutoReparos.Cadastros.IntegrationTests/   # API & Database Integration Tests (Testcontainers)
 ```
 
 ### Layer Rules & Dependencies
 
-#### 1. `AutoReparos.Domain` (Pure Domain Layer)
+#### 1. `AutoReparos.Cadastros.Domain` (Pure Domain Layer)
 - **Zero External Dependencies:** No framework dependencies (no EF Core, ASP.NET, or external libraries in Domain).
 - **Rich Domain Models:** Protect domain invariants inside entity methods (`OrdemServico.Aprovar()`, `Insumo.DecrementarEstoque()`). Avoid anemic models.
 - **Value Objects:** Enforce domain rules inside Value Objects (`CPF`, `CNPJ`, `Placa`, `Email`). Value objects must be immutable.
 - **Repository Contracts:** Domain defines repository interfaces (`IOrdemServicoRepository`, `IClienteRepository`).
 
-#### 2. `AutoReparos.Application` (Orchestration Layer)
-- Depends only on `AutoReparos.Domain`.
+#### 2. `AutoReparos.Cadastros.Application` (Orchestration Layer)
+- Depends only on `AutoReparos.Cadastros.Domain`.
 - Implements use-case orchestration (`OrdemServicoService`, `ClienteService`, `NotificacaoService`).
 - Contains request/response DTOs and mapping logic.
 - Handles validation logic before invoking domain actions.
 
-#### 3. `AutoReparos.Infra` (Infrastructure & Persistence)
-- Depends on `AutoReparos.Application` and `AutoReparos.Domain`.
+#### 3. `AutoReparos.Cadastros.Infrastructure` (Infrastructure & Persistence)
+- Depends on `AutoReparos.Cadastros.Application` and `AutoReparos.Cadastros.Domain`.
 - Contains `AppDbContext` (EF Core with PostgreSQL via `Npgsql.EntityFrameworkCore.PostgreSQL`).
 - Implements domain repository interfaces (`OrdemServicoRepository`, `ClienteRepository`).
 - Configures ASP.NET Core Identity, JWT Token Generation, and SendGrid email integration.
 
-#### 4. `AutoReparos.API` (HTTP & Entrypoint)
+#### 4. `AutoReparos.Cadastros.Api` (HTTP & Entrypoint)
 - Exposes Minimal APIs / Controllers for web consumption.
 - Configures Dependency Injection (`DependencyInjectionAPI.cs`).
 - Configures OpenTelemetry observability (Jaeger, Prometheus, Loki).
@@ -154,7 +154,7 @@ dotnet build AutoReparos.slnx
 dotnet test AutoReparos.slnx
 
 # Run API Project locally
-dotnet run --project AutoReparos.API/AutoReparos.API.csproj
+dotnet run --project AutoReparos.Cadastros.Api/AutoReparos.Cadastros.Api.csproj
 
 # Build Angular Frontend
 cd AutoReparos.Web
@@ -172,7 +172,7 @@ docker-compose up -d --build
 
 When executing tasks on this repository:
 1. **Inspect Before Mutating:** Read existing target files and tests to understand existing domain contracts before adding code.
-2. **Preserve DDD Boundaries:** Do not add infrastructure code (EF Core annotations, SQL queries) inside `AutoReparos.Domain`.
+2. **Preserve DDD Boundaries:** Do not add infrastructure code (EF Core annotations, SQL queries) inside `AutoReparos.Cadastros.Domain`.
 3. **Verify Every Change:** Never declare success without executing `dotnet build` / `dotnet test` or `yarn build`.
 4. **Submodules & CI/CD Integrity:** Always use `submodules: recursive` in GitHub Actions checkout, pin all action `uses:` to 40-char commit SHAs (SonarCloud rule), and use HTTPS URLs in `.gitmodules`.
 5. **No Code Duplication:** Completely remove legacy root folders and duplicated test suites when migrating to submodules.
@@ -184,13 +184,13 @@ When executing tasks on this repository:
 
 ## Spec-driven development (TLC Spec Lean)
 
-New features in this repository follow the TLC Spec Lean workflow in `.specs/tlc-spec-lean/SKILL.md`. Use `.specs/STATE.md` and confirmed lessons as context; create `.specs/features/<feature>/plan.md` with EARS criteria and wait for explicit user approval. Derive and validate `checks.md` before implementation, implement against frozen checks, and run proof and verification gates before completion. For changes under roughly three files with no one-way door, use only `checks.md` with an `## Intent` section as allowed by the skill.
+New features in this repository follow the TLC Spec Lean workflow in `.agents/skills/tlc-spec-lean/SKILL.md`. Use `.specs/STATE.md` and confirmed lessons as context; create `.specs/features/<feature>/plan.md` with EARS criteria and wait for explicit user approval. Derive and validate `checks.md` before implementation, implement against frozen checks, and run proof and verification gates before completion. For changes under roughly three files with no one-way door, use only `checks.md` with an `## Intent` section as allowed by the skill.
 
-Configuration (.specs/tlc-spec-lean/scripts/lean_config.py):
+Configuration (.agents/skills/tlc-spec-lean/scripts/lean_config.py):
 
 ## tlc-spec-lean
 mutations: 3
 
-Use Python 3.8+ and the scripts in `.specs/tlc-spec-lean/scripts/`. Do not migrate historical specifications in `docs/specs/` unless specifically requested.
+Use Python 3.8+ and the scripts in `.agents/skills/tlc-spec-lean/scripts/`. Do not migrate historical specifications in `docs/specs/` unless specifically requested.
 
 Specification location: from Phase 4 on, every phase specification lives in `.specs/features/fase<N>/` — the "what and why" part (PDF requirements, current state, decision register, cross-cutting design) in `especificacao/` starting at `index.md`, and one TLC folder per feature. Phases 1-3 stay in `docs/specs/fase<N>/` as history; never add new files there. The filling protocol is in the root `AGENTS.md` (section "Onde ficam as especificações e como preenchê-las").

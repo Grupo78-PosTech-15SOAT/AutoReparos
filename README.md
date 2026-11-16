@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-10.0-512bd4" alt=".NET 10.0">
-  <img src="https://img.shields.io/badge/Angular-19-dd0031" alt="Angular 19">
+  <img src="https://img.shields.io/badge/Angular-22-dd0031" alt="Angular 22">
   <img src="https://img.shields.io/badge/Docker-Enabled-2496ed" alt="Docker Enabled">
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791" alt="PostgreSQL 16">
   <img src="https://img.shields.io/badge/Architecture-DDD%20%2F%20Clean-blue" alt="Architecture DDD/Clean">
@@ -33,7 +33,7 @@ O projeto foi concebido e evoluído ao longo das três fases do **Tech Challenge
 3. [Desenho e Padrões da Arquitetura](#3-desenho-e-padrões-da-arquitetura)
    - [Diagrama Geral de Componentes (Fase 3)](#diagrama-geral-de-componentes-fase-3)
    - [Clean Architecture & DDD na Aplicação Principal](#clean-architecture--ddd-na-aplicação-principal)
-   - [Frontend Web Angular 19 (Signals & Standalone)](#frontend-web-angular-19-signals--standalone)
+   - [Frontend Web Angular 22 (Signals & Standalone)](#frontend-web-angular-22-signals--standalone)
    - [Arquitetura Serverless & Fluxo de Autenticação de Clientes](#arquitetura-serverless--fluxo-de-autenticação-de-clientes)
    - [Diagrama de Sequência: Autenticação Serverless e Consulta de OS](#diagrama-de-sequência-autenticação-serverless-e-consulta-de-os)
 4. [Banco de Dados: Modelo Relacional e Justificativa](#4-banco-de-dados-modelo-relacional-e-justificativa)
@@ -87,7 +87,7 @@ O projeto AutoReparos foi desenvolvido incrementalmente para solucionar os garga
   - **Infraestrutura como Código (Terraform):** Provisionamento de VPC na AWS com subnets públicas/privadas, NAT Gateways, cluster AWS EKS e repositórios AWS ECR com State remoto em AWS S3.
   - **Pipeline de CI/CD (GitHub Actions):** Esteira automatizada contendo validação de concorrência, build, execução de testes unitários e de integração, `terraform apply`, build/push de contêineres e deploy no EKS via Helm.
   - **Observabilidade Completa:** Instrumentação nativa de tracing distribuído e métricas com **OpenTelemetry (OTel Collector)**, exportação para Prometheus, visualização de traces no Jaeger e agregação de logs no Loki.
-  - **Frontend Moderno:** Aplicação web responsiva em **Angular 19** utilizando **Standalone Components** e **Signals**, com interceptors globais e design system acessível.
+  - **Frontend Moderno:** Aplicação web responsiva em **Angular 22** utilizando **Standalone Components** e **Signals**, com interceptors globais e design system acessível.
 
 ### Fase 3: Operação Corporativa, Serverless e Segregação Multi-Repo
 - **Desafio Corporativo:** A expansão da oficina para múltiplas unidades exigiu elevar a arquitetura ao padrão corporativo:
@@ -104,14 +104,18 @@ O projeto AutoReparos foi desenvolvido incrementalmente para solucionar os garga
 
 Para atender integralmente aos requisitos corporativos da Fase 3 sem perder a capacidade de orquestração local unificada, o AutoReparos adota a abordagem **Multi-Repo com Git Submodules**.
 
-### Os 4 Repositórios Oficiais da Fase 3
+### Repositórios do ecossistema na Fase 4
 
 | # | Repositório | Responsabilidade | Tecnologias Principais |
 |---|---|---|---|
 | **1** | [**AutoReparos.AuthLambda**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda) | Function Serverless para autenticação de clientes externos via CPF + E-mail, emissão de JWT efêmero (1h) e validação matemática de CPF. | .NET 10, C#, AWS Lambda Core, Npgsql, JWT |
 | **2** | [**AutoReparos.Infra.Database**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database) | Provisionamento IaC dedicado do banco de dados relacional gerenciado (AWS RDS PostgreSQL 16), Subnet Groups, Security Groups e backup automatizado. | Terraform, AWS RDS PostgreSQL 16 |
 | **3** | [**AutoReparos.Infra.K8s**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s) | Provisionamento IaC do Cluster AWS EKS, Node Groups escaláveis, VPC e AWS API Gateway HTTP v2 integrado às rotas da aplicação e da Lambda. | Terraform, AWS EKS, AWS API Gateway v2 |
-| **4** | [**AutoReparos.App**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.App) | Núcleo da aplicação corporativa: API REST (.NET 10 Minimal APIs), Domínio (DDD), Infraestrutura (EF Core), suíte de testes e Frontend Angular 19. | .NET 10, EF Core 10, Angular 19, Yarn, Docker |
+| **4** | [**AutoReparos.Cadastros**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros) | API, domínio e persistência de cadastros; o frontend foi extraído. | .NET 10, EF Core 10, Docker |
+| **5** | [**AutoReparos.OS**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS) | Ordens de serviço e orquestração da Saga. | .NET 10, PostgreSQL, DynamoDB |
+| **6** | [**AutoReparos.Cobranca**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca) | Orçamentos, pagamentos e reembolsos. | .NET 10, PostgreSQL |
+| **7** | [**AutoReparos.Execucao**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao) | Fila, etapas, catálogo e insumos. | .NET 10, PostgreSQL |
+| **8** | [**AutoReparos.Web**](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web) | Aplicação Angular independente na branch `develop`. | Angular 22, Yarn, Docker |
 
 ### Organização dos Repositórios no Ecossistema
 
@@ -133,18 +137,11 @@ AutoReparos/                                         # Repositório Pai / Orques
     │   ├── .github/workflows/ci.yml
     │   └── README.md
     │
-    ├── AutoReparos.App/                             # Submódulo 4: Aplicação Principal
-    │   ├── AutoReparos.API/                         # Endpoints REST & Controllers
-    │   ├── AutoReparos.Application/                 # Casos de Uso & DTOs
-    │   ├── AutoReparos.Domain/                      # Entidades DDD & Value Objects
-    │   ├── AutoReparos.Infra/                       # EF Core 10 & PostgreSQL
-    │   ├── AutoReparos.Web/                         # Frontend Angular 19 (Signals)
-    │   ├── AutoReparos.Domain.Tests/                # 113 testes unitários
-    │   ├── AutoReparos.Application.Tests/           # 123 testes unitários
-    │   ├── AutoReparos.IntegrationTests/            # 67 testes com Testcontainers
-    │   ├── AutoReparos.App.slnx                     # Solution autônoma
-    │   ├── .github/workflows/ci.yml                 # CI/CD (Testes + Docker)
-    │   └── README.md
+    ├── AutoReparos.Cadastros/                       # Backend de cadastros (.NET)
+    ├── AutoReparos.Cobranca/                        # Orçamentos e pagamentos (.NET)
+    ├── AutoReparos.Execucao/                        # Execução e insumos (.NET)
+    ├── AutoReparos.OS/                              # OS e Saga (.NET)
+    ├── AutoReparos.Web/                             # Frontend Angular 22 independente
     │
     ├── AutoReparos.Infra.Database/                  # Submódulo 2: Terraform AWS RDS
     └── AutoReparos.Infra.K8s/                       # Submódulo 3: Terraform AWS EKS & API Gateway
@@ -165,8 +162,8 @@ Em conformidade com a especificação da Fase 3:
 ```mermaid
 graph TB
     subgraph Clients["Camada de Clientes e Acesso"]
-        Browser["Portal Web do Cliente (Angular 19)"]
-        Operator["Estação de Trabalho do Operador (Angular 19)"]
+        Browser["Portal Web do Cliente (Angular 22)"]
+        Operator["Estação de Trabalho do Operador (Angular 22)"]
     end
 
     subgraph Edge["Borda de Nuvem (AWS API Gateway v2)"]
@@ -187,7 +184,7 @@ graph TB
         RouteCore --> Ingress
         
         subgraph Pods["Deployments & Pods Escaláveis"]
-            APIService["AutoReparos.API (.NET 10)"]
+            APIService["AutoReparos.Cadastros.Api (.NET 10)"]
             HPA["Horizontal Pod Autoscaler (HPA)"]
             HPA -.->|CPU/RAM > 80%| APIService
         end
@@ -221,30 +218,30 @@ graph TB
 A aplicação principal (`AutoReparos.App`) implementa estritamente os preceitos de **Clean Architecture** e **DDD**, garantindo inversão de dependências e isolamento completo do domínio:
 
 ```
-AutoReparos.API (Controllers / Minimal APIs)
+AutoReparos.Cadastros.Api (Controllers / Minimal APIs)
        ↓
-AutoReparos.Application (Casos de Uso / DTOs / Validação)
+AutoReparos.Cadastros.Application (Casos de Uso / DTOs / Validação)
        ↓
-AutoReparos.Domain (Entidades Ricas / Value Objects / Interfaces)
+AutoReparos.Cadastros.Domain (Entidades Ricas / Value Objects / Interfaces)
        ↑
-AutoReparos.Infra (EF Core / Repositórios PostgreSQL / Identity / SendGrid)
+AutoReparos.Cadastros.Infrastructure (EF Core / Repositórios PostgreSQL / Identity / SendGrid)
 ```
 
-- **`AutoReparos.Domain` (Zero Dependências Externas):**
+- **`AutoReparos.Cadastros.Domain` (Zero Dependências Externas):**
   - Entidades ricas com encapsulamento de invariantes (`OrdemServico`, `Cliente`, `Veiculo`, `Insumo`, `Servico`, `Usuario`).
   - Value Objects imutáveis com validação embutida (`Documento` com validação de algoritmo Módulo 11 de CPF e CNPJ, `Placa` com suporte a padrão convencional e Mercosul, `Email`).
   - Exceções ricas de domínio (`DomainException`, `BusinessRuleException`).
-- **`AutoReparos.Application`:**
+- **`AutoReparos.Cadastros.Application`:**
   - Padrão **Vertical Slice** organizado por Bounded Contexts.
   - Orquestração de casos de uso com mapeamento estrito para DTOs de entrada e saída.
-- **`AutoReparos.Infra`:**
+- **`AutoReparos.Cadastros.Infrastructure`:**
   - Persistência via Entity Framework Core com mapeamentos Fluent API explícitos.
   - Repositórios com transações ACID consistentes.
-- **`AutoReparos.API`:**
+- **`AutoReparos.Cadastros.Api`:**
   - Dupla camada de adaptadores: **Endpoints** (ASP.NET Minimal APIs) e **Controllers** (Clean Architecture Adapters) para total desacoplamento do framework.
   - Middlewares globais de tratamento de exceções e mapeamento de Problem Details.
 
-### Frontend Web Angular 19 (Signals & Standalone)
+### Frontend Web Angular 22 (Signals & Standalone)
 
 O frontend (`AutoReparos.Web`) é construído com os mais modernos padrões de arquitetura Angular:
 - **Standalone Components:** 100% livre de `NgModule`, proporcionando carregamento assíncrono e tree-shaking otimizado.
@@ -277,7 +274,7 @@ sequenceDiagram
     participant APIGW as AWS API Gateway
     participant Lambda as AutoReparos.AuthLambda
     participant RDS as PostgreSQL (RDS)
-    participant API as AutoReparos.API (EKS)
+    participant API as AutoReparos.Cadastros.Api (EKS)
 
     Note over Cliente,APIGW: 1. Autenticação Serverless (Sem Senha)
     Cliente->>APIGW: POST /auth/cliente { cpf: "976.321.800-44", email: "leandro.silva@email.com" }
@@ -291,7 +288,7 @@ sequenceDiagram
 
     Note over Cliente,API: 2. Consulta de Ordens de Serviço (Zero-Trust)
     Cliente->>APIGW: GET /api/ordem-servico/minhas-os (Header: Bearer eyJhbGci...)
-    APIGW->>API: Proxy para AutoReparos.API
+    APIGW->>API: Proxy para AutoReparos.Cadastros.Api
     API->>API: Valida assinatura do JWT e checa Policy "ClientePolicy"
     API->>API: Extrai ID do Cliente da claim 'sub' (Isolamento de Dados)
     API->>RDS: Busca apenas OSs vinculadas ao ID do cliente autenticado
@@ -518,11 +515,13 @@ Crie o arquivo `.env` na raiz do repositório pai:
 DB_PASSWORD=admin123
 
 # Segurança e JWT
-JWT_SECRET=FBQOvEaUYAlmdilnGOk7vKzO9xUHiLgb8QCFUrk6af9
+# Chave RSA privada PKCS#8 em PEM (use \n no lugar das quebras de linha); veja .env.example
+JWT_CHAVE_PRIVADA_PEM="-----BEGIN PRIVATE KEY-----\nCOLE_AQUI_A_CHAVE_PKCS8\n-----END PRIVATE KEY-----"
+JWT_ISSUER=http://localhost:8080
+CHAVE_INTERNA=troque_por_um_segredo_forte
 JWT_EXPIRY_HOURS=2
 SEED_USER_EMAIL=admin@autoreparos.com
 SEED_USER_PASSWORD=Admin@123
-APROVACAO_TOKEN_SECRET=another_super_secret_key_for_approval_tokens_with_enough_length
 
 # Integração de E-mail (SendGrid)
 SENDGRID_API_KEY=SG.dummy_key
@@ -543,7 +542,7 @@ docker compose up -d --build
 ```
 
 Endpoints disponíveis:
-- **Aplicação Web (Angular 19):** [http://localhost:4200](http://localhost:4200)
+- **Aplicação Web (Angular 22):** [http://localhost:4200](http://localhost:4200)
 - **API REST & Swagger:** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 - **pgAdmin (Gerenciador do PostgreSQL):** [http://localhost:5050](http://localhost:5050)
 - **Jaeger (Distributed Traces):** [http://localhost:16686](http://localhost:16686)
@@ -552,17 +551,17 @@ Endpoints disponíveis:
 ### Executando os Testes Automatizados
 
 A solução conta com **354 testes automatizados** (100% passando):
-- **Domínio (`AutoReparos.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
-- **Aplicação (`AutoReparos.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
+- **Domínio (`AutoReparos.Cadastros.Domain.Tests`):** 113 testes unitários (regras de negócio puras).
+- **Aplicação (`AutoReparos.Cadastros.Application.Tests`):** 134 testes unitários (casos de uso e telemetria).
 - **Serverless (`AutoReparos.AuthLambda.Tests`):** 40 testes unitários (Módulo 11 CPF, geração de token).
-- **Integração (`AutoReparos.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
+- **Integração (`AutoReparos.Cadastros.IntegrationTests`):** 67 testes executados contra PostgreSQL real via **Testcontainers** (sem banco in-memory).
 
 ```bash
 # Executar todos os testes da solução unificada:
 dotnet test AutoReparos.slnx
 
 # Executar testes da aplicação principal (submódulo):
-dotnet test submodules/AutoReparos.App/AutoReparos.App.slnx
+dotnet test submodules/AutoReparos.Cadastros/AutoReparos.App.slnx
 
 # Executar testes da Lambda Serverless (submódulo):
 dotnet test submodules/AutoReparos.AuthLambda/tests/AutoReparos.AuthLambda.Tests.csproj
@@ -578,7 +577,7 @@ Cada um dos 4 repositórios possui sua própria esteira automatizada no **GitHub
 1. **`AutoReparos.AuthLambda`:** Restauração, compilação .NET 10, execução de 40 testes unitários com cobertura e empacotamento do arquivo zip serverless.
 2. **`AutoReparos.App`:** Validação paralela:
    - Backend: Compilação .NET 10, testes unitários, testes de integração com Testcontainers PostgreSQL e build da imagem Docker.
-   - Frontend: Instalação via Yarn, build de produção Angular 19 e testes de componentes.
+   - Frontend: Instalação via Yarn, build de produção Angular 22 e testes de componentes.
 3. **`AutoReparos.Infra.Database`:** `terraform fmt`, `terraform validate`, `tflint`, security scanning com tfsec/Checkov e `terraform plan`.
 4. **`AutoReparos.Infra.K8s`:** Validação de sintaxe Terraform e validação de templates de Helm Charts.
 
@@ -722,6 +721,10 @@ Esse Environment não precisa de variables próprias: lê `AWS_ACCOUNT_ID`, `AWS
 | `EKS_CLUSTER_NAME` | `autoreparos-cluster` | Nome do cluster usado no provisionamento e na checagem de recursos existentes. |
 | `K8S_NAMESPACE` | `autoreparos` | Namespace do Helm, da aplicação e dos secrets Kubernetes. |
 | `SEED_USER_EMAIL` | E-mail do administrador inicial | Usuário criado pela aplicação. |
+| `CADASTROS_ISSUER` | URL pública do Cadastros | `iss` dos JWT e `issuer` do discovery OIDC (`/.well-known/openid-configuration`). |
+| `CADASTROS_INTERNAL_URL` | URL interna do Cadastros alcançável da VPC | Usada pela Lambda de autenticação (`POST /internal/clientes/autenticar`); a Lambda não acessa o banco. |
+| `CADASTROS_NOTIFICACOES_FILA_URL` / `CADASTROS_NOTIFICACOES_DLQ_URL` | URLs da fila SQS e da DLQ do Cadastros | Consumo de eventos de notificação; vazias desligam o consumidor. |
+| `VPC_PRIVATE_CIDRS` | `10.0.1.0/24,10.0.2.0/24` | CIDRs das subnets privadas (ALB interno e Lambda) liberados na NetworkPolicy do Cadastros. |
 | `SENDGRID_FROM_EMAIL` | Remetente verificado no SendGrid | Endereço de envio de e-mail; pode ficar vazio quando envio estiver desabilitado. |
 | `SENDGRID_FROM_NAME` | `AutoReparos` | Nome exibido no remetente. |
 
@@ -730,9 +733,9 @@ Esse Environment não precisa de variables próprias: lê `AWS_ACCOUNT_ID`, `AWS
 | Nome exato | Valor / finalidade |
 |---|---|
 | `AWS_ROLE_ARN` | ARN da role OIDC de provisionamento/deploy, por exemplo `arn:aws:iam::123456789012:role/AutoReparosGitHubDeployRole`. |
-| `JWT_SECRET` | Chave aleatória forte; o mesmo valor alimenta a API e a Lambda. |
+| `JWT_CHAVE_PRIVADA_PEM` | Chave RSA privada (PKCS#8, PEM) com que o Cadastros assina os JWT RS256; os serviços validam pelo JWKS público. |
+| `CHAVE_INTERNA` | Segredo de `X-Chave-Interna`, compartilhado entre o Cadastros, o OS e a Lambda (rotas `/internal` e consulta sem usuário). |
 | `SEED_USER_PASSWORD` | Senha forte do administrador inicial. |
-| `APROVACAO_TOKEN_SECRET` | Outra chave aleatória forte para os tokens de aprovação. |
 | `GRAFANA_ADMIN_PASSWORD` | Senha forte de administrador do Grafana. |
 | `SENDGRID_API_KEY` | Chave do SendGrid quando envio estiver habilitado; pode ficar ausente para desabilitar envio. |
 

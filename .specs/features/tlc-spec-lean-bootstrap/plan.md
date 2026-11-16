@@ -10,12 +10,12 @@ Quando esta integração estiver pronta, novas features seguirão plano revisado
 
 ## Shape
 
-Reutiliza `.agents/AGENTS.md` como instrução central e o pacote TLC instalado em `.specs/tlc-spec-lean/`; as regras do workflow ficam nos artefatos `.specs/features/<feature>/` e são validadas pelos scripts locais.
+Reutiliza `.agents/AGENTS.md` como instrução central e o pacote TLC instalado em `.agents/skills/tlc-spec-lean/`; as regras do workflow ficam nos artefatos `.specs/features/<feature>/` e são validadas pelos scripts locais.
 
 1. contribuidores e agentes -> `AGENTS.md` (exists) -> encaminha às instruções do projeto
 2. instruções -> `.agents/AGENTS.md` (exists) -> exige o fluxo TLC e a aprovação do plano
 3. feature -> `.specs/features/<feature>/plan.md` (door 1) -> `.specs/features/<feature>/checks.md` (door 2)
-4. checks -> `.specs/tlc-spec-lean/scripts/` (door 3) -> validadores e provas
+4. checks -> `.agents/skills/tlc-spec-lean/scripts/` (door 3) -> validadores e provas
 5. resultado -> `.specs/features/<feature>/proofs.md` e `.specs/features/<feature>/verification.md` (door 4)
 
 ```mermaid
@@ -24,7 +24,7 @@ flowchart LR
   B --> C[plan.md aprovado]
   C --> D[checks.md validado]
   D --> E[implementação]
-  E --> F[.specs/tlc-spec-lean/scripts/check_proofs.py (door 3)]\n  F --> G[verification.md (door 4)]
+  E --> F[.agents/skills/tlc-spec-lean/scripts/check_proofs.py (door 3)]\n  F --> G[verification.md (door 4)]
 ```
 
 **Changes underneath**
@@ -45,7 +45,7 @@ Data: none - this workflow stores only project specification artifacts, not busi
 
 | One-way door | Literal shape | Alternative rejected |
 | --- | --- | --- |
-| localização do pacote e artefatos | `.specs/tlc-spec-lean/` e `.specs/features/<feature>/` | misturar com especificações históricas em `docs/specs/` |
+| localização do pacote e artefatos | `.agents/skills/tlc-spec-lean/` e `.specs/features/<feature>/` | misturar com especificações históricas em `docs/specs/` |
 | configuração do mutation count | `mutations: 3` em `.agents/AGENTS.md` e mesma contagem em cada `checks.md` | contagem implícita ou variável por agente |
 | formato dos artefatos | nomes e estrutura definidos pelo skill TLC Spec Lean 2.1.0 | adaptar os validadores para convenções locais |
 
@@ -59,7 +59,7 @@ Data: none - this workflow stores only project specification artifacts, not busi
 
 1. WHEN um contribuidor iniciar uma feature nova THEN as instruções do projeto SHALL exigir as fases TLC Spec Lean e aprovação explícita do plano, exceto mudanças pequenas sem porta de mão única conforme o skill.
 2. WHEN uma feature iniciar THEN a configuração SHALL declarar `mutations: 3` e cada `checks.md` SHALL declarar a mesma quantidade.
-3. WHEN o fluxo for configurado THEN os scripts e instruções TLC SHALL estar no repositório sob `.specs/tlc-spec-lean/` com caminhos relativos portáveis.
+3. WHEN o fluxo for configurado THEN os scripts e instruções TLC SHALL estar no repositório sob `.agents/skills/tlc-spec-lean/` com caminhos relativos portáveis.
 4. IF um plano não tiver a linha de aprovação literal do usuário THEN `validate_checks.py` SHALL rejeitar o início da implementação daquela feature.
 5. WHEN uma feature atingir verificação THEN as instruções SHALL exigir gates de provas e verificação TLC e o relatório SHALL destacar qualquer gate vermelho.
 6. WHEN a integração for adicionada THEN os documentos e specs existentes em `docs/specs/` SHALL permanecer intactos.

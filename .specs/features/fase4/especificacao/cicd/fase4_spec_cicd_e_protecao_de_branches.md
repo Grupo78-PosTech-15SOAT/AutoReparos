@@ -105,7 +105,7 @@ Atualizar [`scripts/infra/setup-github-governance.sh`](../../../../../scripts/in
 1. Incluir os repositórios novos com os nomes em português (OS, Cobranca, Execucao, Cadastros, Web e, se houver, Notificacao).
 2. Preencher `required_status_checks.contexts` por repositório com os nomes dos jobs (por exemplo, `build`, `test`, `quality`) em vez de `[]`.
 3. Aplicar no pai a mesma regra dos filhos (1 aprovação, checks, vale para admins).
-4. Proteger também a `develop` (PR obrigatório e checks), já que ela é a branch de integração.
+4. ~~Proteger também a `develop`~~: fora por D-25 (11/11). Só a `main` tem proteção obrigatória; a `develop` segue como branch de integração sem regra no GitHub.
 5. Gerar uma evidência (saída do `gh api .../branches/main/protection` e print da tela de configurações) para o README e o vídeo, atendendo ao feedback da Fase 3.
 
 ---

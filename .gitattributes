@@ -1,3 +1,3 @@
 # Scripts de prova rodam no Git Bash: fim de linha LF obrigatorio mesmo no Windows
-.specs/features/fase4/os-service/proof-env/*.sh text eol=lf
-.specs/features/fase4/os-service/proof-env/*.py text eol=lf
+.specs/features/fase4/servico-os/proof-env/*.sh text eol=lf
+.specs/features/fase4/servico-os/proof-env/*.py text eol=lf

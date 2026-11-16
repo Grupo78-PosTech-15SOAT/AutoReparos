@@ -1,1 +1,154 @@
-{"version": 1, "lessons": []}
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::autorizacao por papel teste cada papel aceito administrador atendente mecanico nao so um remover um papel da politica deve falhar um teste",
+      "text": "Autorização por papel: teste cada papel aceito (Administrador, Atendente, Mecanico), não só um; remover um papel da política deve falhar um teste.",
+      "signal": "surviving_mutant",
+      "scope": "api/auth",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C2 ConsultaCadastro (api/auth)"
+      ],
+      "created": "2026-11-12T19:23:21Z",
+      "last_seen": "2026-11-12T19:23:21Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::validacao de jwt alem da chave errada teste token assinado com a chave certa e emissor estrangeiro sem isso validateissuer false passa despercebido",
+      "text": "Validação de JWT: além da chave errada, teste token assinado com a chave certa e emissor estrangeiro; sem isso ValidateIssuer=false passa despercebido.",
+      "signal": "surviving_mutant",
+      "scope": "api/auth",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C3 ValidateIssuer (api/auth)"
+      ],
+      "created": "2026-11-12T19:23:21Z",
+      "last_seen": "2026-11-12T19:23:21Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::comparacoes de identidade e mail cpf teste caixa diferente e espacos nas pontas porque os chamadores reais normalizam de formas distintas",
+      "text": "Comparações de identidade (e-mail, CPF): teste caixa diferente e espaços nas pontas, porque os chamadores reais normalizam de formas distintas.",
+      "signal": "surviving_mutant",
+      "scope": "application/clientes",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C5 AutenticarClienteUseCase (application/clientes)"
+      ],
+      "created": "2026-11-12T19:23:21Z",
+      "last_seen": "2026-11-12T19:23:21Z"
+    },
+    {
+      "id": "L-004",
+      "key": "ac_gap::idempotencia por eventid exige teste de entregas simultaneas com atraso no envio existe enviar registrar sem trava duplica e mails e so o indice unico protege o registro",
+      "text": "Idempotência por eventId exige teste de entregas simultâneas com atraso no envio; Existe-enviar-Registrar sem trava duplica e-mails e só o índice único protege o registro.",
+      "signal": "ac_gap",
+      "scope": "application/notificacoes",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C7 ProcessarEventoNotificacaoUseCase (application/notificacoes)"
+      ],
+      "created": "2026-11-12T19:23:21Z",
+      "last_seen": "2026-11-12T19:23:21Z"
+    },
+    {
+      "id": "L-005",
+      "key": "ac_gap::consumidor sqs com backoff em linha defina visibilitytimeout cobrindo as esperas e leia uma mensagem por vez senao a reentrega quebra o uma vez por eventid e a dlq",
+      "text": "Consumidor SQS com backoff em linha: defina VisibilityTimeout cobrindo as esperas e leia uma mensagem por vez, senão a reentrega quebra o 'uma vez por eventId' e a DLQ.",
+      "signal": "ac_gap",
+      "scope": "infrastructure/sqs",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C8 SqsFilaNotificacoes (infrastructure/sqs)"
+      ],
+      "created": "2026-11-12T19:23:21Z",
+      "last_seen": "2026-11-12T19:23:21Z"
+    },
+    {
+      "id": "L-006",
+      "key": "spec_precision_gap::criterios de rede fora do cluster precisam dizer qual camada prova o que aplicacao prova a chave o chart prova a entrada networkpolicy depende do cni e api gateway com catch all expoe qualquer rota do alb",
+      "text": "Critérios de rede ('fora do cluster') precisam dizer qual camada prova o quê: aplicação prova a chave, o chart prova a entrada; NetworkPolicy depende do CNI e API Gateway com catch-all expõe qualquer rota do ALB.",
+      "signal": "spec_precision_gap",
+      "scope": "infra/rede",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C6 AC6 (infra/rede)"
+      ],
+      "created": "2026-11-12T19:23:22Z",
+      "last_seen": "2026-11-12T19:23:22Z"
+    },
+    {
+      "id": "L-007",
+      "key": "spec_precision_gap::renomear banco gerenciado recria a instancia o plano deve dizer se o rename vale no rds ou so no ambiente local antes de virar criterio",
+      "text": "Renomear banco gerenciado recria a instância: o plano deve dizer se o rename vale no RDS ou só no ambiente local antes de virar critério.",
+      "signal": "spec_precision_gap",
+      "scope": "infra/database",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "plan Door 1 cadastros_db (infra/database)"
+      ],
+      "created": "2026-11-12T19:23:22Z",
+      "last_seen": "2026-11-12T19:23:22Z"
+    },
+    {
+      "id": "L-008",
+      "key": "gate_fail::no windows check proofs roda em cmd exe sem python node no path e sem ou aspas simples use so dotnet git grep e helm e defina dotnet cli ui language en com decodificacao tolerante",
+      "text": "No Windows, check_proofs roda em cmd.exe: sem python/node no PATH e sem '!' ou aspas simples; use só dotnet, git, grep e helm, e defina DOTNET_CLI_UI_LANGUAGE=en com decodificação tolerante.",
+      "signal": "gate_fail",
+      "scope": "tooling",
+      "status": "candidate",
+      "features": [
+        "fase4/cadastros"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "check_proofs Windows (tooling)"
+      ],
+      "created": "2026-11-12T19:23:22Z",
+      "last_seen": "2026-11-12T19:23:22Z"
+    }
+  ],
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "schema": 1,
+  "next_id": 9
+}

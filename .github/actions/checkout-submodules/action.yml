@@ -21,7 +21,7 @@ runs:
         owner: Grupo78-PosTech-15SOAT
         repositories: |
           AutoReparos
-          AutoReparos.App
+          AutoReparos.Cadastros
           AutoReparos.AuthLambda
           AutoReparos.Infra.Database
           AutoReparos.Infra.K8s
