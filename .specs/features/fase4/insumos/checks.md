@@ -71,6 +71,7 @@ Proof: `dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests -
 
 - **Settled mid-build:** none
 - **Dispatched:** none
-- **Boundary:** checks derivados em 2026-11-11, build não iniciado
+- **Boundary:** build em 2026-11-12 nas branches `feature/insumos` do pai, da Execução e da Cobrança (worktree `.claude/worktrees/insumos`); nada commitado. C1-C9 verdes na Execução (suíte completa 136 + 9 integração) e C10 verde na Cobrança (suíte completa 85); `dotnet format --verify-no-changes` limpo nas duas. Faltam: gates `proofs.md`/mutações, Verifier independente e `verification.md`
+- **Decisões do builder (revisar):** consumidor de reserva na mesma fila de entrada da Execução (`Sqs:LiberadasQueueUrl`, despacho por `tipo`); respostas ao OS pela fila `os-service`; comando repetido de outra mensagem da mesma OS devolve de novo `insumos.reservados.v1` sem reservar (reserva toda cancelada devolve `insumos.reserva-falhou.v1` sem itens); `POST /api/v1/orcamentos` da Cobrança ganhou `itens` (`servico`/`insumo`, `referenciaId`, `quantidade`) e mantém `valor` direto; Cobrança lê preços por `GET /api/v1/servicos` e `/insumos` da Execução (listagem até 500 itens; config `Execucao:BaseUrl` e `Execucao:BearerToken`); seed de 5 serviços e 5 insumos na migration; saldo máximo por insumo 1.000.000.000
 - **Abandoned:** none
 - **Walked:** none - backend, sem tela
