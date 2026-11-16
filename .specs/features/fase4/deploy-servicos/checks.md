@@ -164,6 +164,6 @@ Proof: `python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
-- **Boundary:** none
+- **Dispatched:** build S1 (C1–C9) a um subagente em 2026-11-15, base `4606034` no pai e `feature/deploy-servicos` em OS `a6663d1`, Cobrança `92156d6`, Execução `d83badf` — returned (C1–C9 verdes)
+- **Boundary:** C1–C9 fechados em OS `036c92f`, Cobrança `58d7b87`, Execução `4de8a07`, pai `ac1add8` (provas reexecutadas pelo autor em 15/11)
 - **Abandoned:** none
