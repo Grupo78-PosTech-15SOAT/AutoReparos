@@ -173,6 +173,12 @@ A plataforma mantém seu acervo de decisões arquiteturais estruturado sob os pa
 * **[ADR-003: Estratégia de Observabilidade Ponta a Ponta com OpenTelemetry](./ADR-003-end-to-end-observability-strategy.md)**  
   *Instrumentação vendor-agnostic baseada em W3C TraceContext e OpenTelemetry SDK (.NET 10), exportação OTLP e integração com New Relic/Datadog.*
 
+* **[ADR-004: Migrations por Job Helm antes do rollout de cada serviço](./ADR-004-migrations-por-job-pre-upgrade.md)** (Fase 4)  
+  *Modelo único de migration nos quatro microsserviços: Job `pre-upgrade` com a imagem do serviço, falha que não troca a versão em produção.*
+
+* **[ADR-005: Deploy independente por microsserviço](./ADR-005-deploy-independente-por-microsservico.md)** (Fase 4)  
+  *Pipeline, Terraform e chart Helm em cada repositório de serviço; o pai fica com a plataforma compartilhada.*
+
 * **[Seleção de Banco de Dados e Modelo de Dados](./database-selection-and-data-model.md)**  
   *Justificativa do PostgreSQL 16 (ACID, integridade referencial com Restrict/Cascade), modelo ER completo em Mermaid e dicionário das 8 tabelas.*
 

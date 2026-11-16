@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Api/Program.cs",
+    "old": "policy.RequireRole(\"Administrador\", \"Atendente\", \"Mecanico\", \"ServicoOS\")",
+    "new": "policy.RequireRole(\"Administrador\", \"Atendente\", \"Mecanico\", \"ServicoOS\", \"Cliente\")",
+    "proof": "dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Api.Tests --filter FullyQualifiedName~UnauthorizedOrderAccess",
+    "label": "C4: papel Cliente passa a ser autorizado (403 vira acesso)"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Api/Program.cs",
+    "old": ".OrderBy(h => h.RegistradoEm).ThenBy(h => h.Id)",
+    "new": ".OrderByDescending(h => h.RegistradoEm).ThenBy(h => h.Id)",
+    "proof": "dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~OrderHistoryIsChronological",
+    "label": "C3: historico em ordem cronologica inversa"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Api/CorpoJson.cs",
+    "old": "valor.Length <= LimiteObservacao",
+    "new": "valor.Length < LimiteObservacao",
+    "proof": "dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~InvalidOrderReturns422",
+    "label": "C2: limite de 2000 caracteres da observacao deslocado em um (fronteira 2000 aceita)"
+  }
+]

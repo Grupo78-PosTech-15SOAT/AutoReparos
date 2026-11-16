@@ -7,13 +7,13 @@ case $action in
   "update-tool")
     dotnet tool update --global dotnet-ef ;;
   "run")
-    dotnet run --project ./submodules/AutoReparos.App/AutoReparos.API/ ;;
+    dotnet run --project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/ ;;
   "watch")
-    dotnet watch --project ./submodules/AutoReparos.App/AutoReparos.API/ ;;
+    dotnet watch --project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/ ;;
   "db-update")
-    dotnet ef database update --project ./submodules/AutoReparos.App/AutoReparos.Infra/ --startup-project ./submodules/AutoReparos.App/AutoReparos.API/ ;;
+    dotnet ef database update --project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Infrastructure/ --startup-project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/ ;;
   "mig-add")
-    dotnet ef migrations add $name --project ./submodules/AutoReparos.App/AutoReparos.Infra/ --startup-project ./submodules/AutoReparos.App/AutoReparos.API/ ;;
+    dotnet ef migrations add $name --project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Infrastructure/ --startup-project ./submodules/AutoReparos.Cadastros/AutoReparos.Cadastros.Api/ ;;
   "restore")
     dotnet restore ;;
   "kube-config")

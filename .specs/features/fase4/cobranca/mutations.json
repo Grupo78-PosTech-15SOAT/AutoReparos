@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Application/Contratos.cs",
+    "old": "if (clienteId is not null && orcamento.ClienteId != clienteId)",
+    "new": "if (clienteId is not null && orcamento.ClienteId == clienteId)",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~ManualRetryAfterTerminalState",
+    "label": "checkout do cliente deixa de validar o vinculo com o dono do orcamento (porta 4)"
+  },
+  {
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Domain/Pagamento.cs",
+    "old": "valor + jaReembolsado > Valor ||",
+    "new": "valor > Valor ||",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~ApprovedRefundAudit",
+    "label": "reembolso deixa de somar o ja reembolsado (limite cumulativo)"
+  },
+  {
+    "file": "submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Infrastructure/Integracoes.cs",
+    "old": "\"approved\" => AutoReparos.Cobranca.Domain.StatusPagamento.Capturado,",
+    "new": "\"approved\" => AutoReparos.Cobranca.Domain.StatusPagamento.Rejeitado,",
+    "proof": "dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx -m:1 --no-restore -v q && dotnet test submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.Tests --no-build --no-restore --filter FullyQualifiedName~WebhookSignatureValidation",
+    "label": "status approved do Mercado Pago mapeado para Rejeitado em vez de Capturado"
+  }
+]

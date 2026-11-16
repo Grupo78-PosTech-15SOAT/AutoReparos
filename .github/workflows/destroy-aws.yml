@@ -48,23 +48,23 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: false
       - uses: ./.github/actions/checkout-submodules
         with:
           app-id: ${{ vars.SUBMODULES_APP_ID }}
           private-key: ${{ secrets.SUBMODULES_APP_PRIVATE_KEY }}
-      - uses: aws-actions/configure-aws-credentials@v6.3.0
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
-      - uses: hashicorp/setup-terraform@v4.0.1
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: 1.10.5
           terraform_wrapper: false
-      - uses: azure/setup-helm@v4.2.0
+      - uses: azure/setup-helm@fe7b79cd5ee1e45176fcad797de68ecaf3ca4814 # v4.2.0
         with:
           version: v3.16.4
       - name: Read state outputs required for ordered teardown
@@ -152,7 +152,6 @@ jobs:
             printf 'has_rds_instance=%s\n' "$(jq -r '.has_rds_instance' <<< "$database")" >> "$GITHUB_OUTPUT"
           fi
           if [ "$DELETE_NETWORK" = true ]; then
-            export_output "$network" ecr_api_repository_url ecr_api
             export_output "$network" ecr_web_repository_url ecr_web
           fi
 
@@ -181,6 +180,11 @@ jobs:
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name '${{ steps.ids.outputs.cluster_name }}' --region "$AWS_REGION"
+          # Os releases dos serviços também têm Ingress nos ALB internos; os namespaces deles são do stacks/base.
+          for servico in os cobranca execucao cadastros; do
+            helm uninstall "$servico" --namespace "$servico" --wait --timeout 10m || true
+            kubectl delete ingress --all --namespace "$servico" --wait=true --timeout=5m || true
+          done
           helm uninstall autoreparos --namespace '${{ vars.K8S_NAMESPACE }}' --wait --timeout 10m || true
           kubectl delete namespace '${{ vars.K8S_NAMESPACE }}' --wait=true --timeout=10m || true
           for _ in $(seq 1 60); do
@@ -190,6 +194,37 @@ jobs:
           done
           test -z "${lbs:-}" || { echo '::error::Load balancers remain; refusing to remove the AWS Load Balancer Controller'; exit 1; }
           echo 'Application secrets were deleted with the namespace; RDS secret/state are retained unless separately selected.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        with:
+          terraform_version: 1.15.8
+          terraform_wrapper: false
+      - name: Remove the service stacks (servicos/*)
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # ECR, IRSA, filas, tabelas e segredos de cada serviço têm state próprio (servicos/<servico>/production.tfstate,
+          # chave fixa no versions.tf do serviço) e saem antes da plataforma e da rede, de que a IRSA depende.
+          for par in os:OS cobranca:Cobranca execucao:Execucao cadastros:Cadastros; do
+            servico="${par%%:*}"
+            dir="submodules/AutoReparos.${par##*:}/infra/terraform"
+            terraform -chdir="$dir" init -reconfigure -input=false -no-color \
+              -backend-config="bucket=$TF_STATE_BUCKET" -backend-config="region=$AWS_REGION" \
+              -backend-config="dynamodb_table=$TF_LOCK_TABLE" -backend-config='encrypt=true'
+            gerenciado="$(terraform -chdir="$dir" state pull | jq -s 'length > 0 and any(.[0].resources[]?; .mode == "managed" and (.instances | length > 0))')"
+            if [ "$gerenciado" = true ]; then
+              terraform -chdir="$dir" destroy -auto-approve -input=false -no-color
+              echo "$servico: infraestrutura do serviço removida." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$servico: no managed resources in the service state." >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        if: ${{ steps.ids.outputs.has_network == 'true' }}
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
       - name: Remove Lambda
         if: ${{ steps.ids.outputs.has_lambda == 'true' }}
         working-directory: submodules/AutoReparos.AuthLambda/infra
@@ -213,6 +248,9 @@ jobs:
         run: |
           set -euo pipefail
           terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION"
+      - name: Package database provisioner
+        if: ${{ inputs.delete_database && steps.ids.outputs.has_database == 'true' }}
+        run: submodules/AutoReparos.Infra.Database/lambda/provisionador/empacotar.sh
       - name: Delete RDS, final snapshot and secret recovery retention
         if: ${{ inputs.delete_database && steps.ids.outputs.has_database == 'true' }}
         working-directory: submodules/AutoReparos.Infra.Database/terraform
@@ -222,7 +260,7 @@ jobs:
           HAS_RDS_INSTANCE: ${{ steps.ids.outputs.has_rds_instance }}
         run: |
           set -euo pipefail
-          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ steps.ids.outputs.cluster_sg }}' --arg lambda '${{ steps.ids.outputs.lambda_sg }}' '[$eks,$lambda]')"
+          export TF_VAR_allowed_security_group_ids="$(jq -cn --arg eks '${{ steps.ids.outputs.cluster_sg }}' '[$eks]')"
           snapshot="autoreparos-production-${GITHUB_RUN_ID}-final"
           if [ "$HAS_RDS_INSTANCE" = true ]; then
             plan="$(mktemp "$RUNNER_TEMP/rds-teardown.XXXXXX")"
@@ -248,7 +286,7 @@ jobs:
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name '${{ steps.ids.outputs.cluster_name }}' --region "$AWS_REGION" 2>/dev/null || true
-          for repository in '${{ steps.ids.outputs.ecr_api }}' '${{ steps.ids.outputs.ecr_web }}'; do
+          for repository in '${{ steps.ids.outputs.ecr_web }}'; do
             arn="$(aws ecr describe-repositories --repository-names "${repository##*/}" --region "$AWS_REGION" --query 'repositories[0].repositoryArn' --output text 2>/dev/null || true)"
             if [ -n "$arn" ] && [ "$arn" != None ]; then
               while true; do
@@ -259,7 +297,8 @@ jobs:
             fi
           done
           terraform destroy -auto-approve -input=false -no-color -var="aws_region=$AWS_REGION" \
-            -var="cluster_name=${{ steps.ids.outputs.cluster_name }}" -var='environment=production'
+            -var="cluster_name=${{ steps.ids.outputs.cluster_name }}" -var='environment=production' \
+            -var="tf_state_bucket=$TF_STATE_BUCKET" -var="tf_lock_table=$TF_LOCK_TABLE"
       - name: Report retained data and state
         if: success()
         run: |

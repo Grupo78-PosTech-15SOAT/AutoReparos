@@ -1,0 +1,1 @@
+The TLC Spec Lean package in this directory is adapted from Tech Leads Club, `github.com/tech-leads-club`, version 2.1.0, licensed CC-BY-4.0. See `SKILL.md` and `references/` for workflow guidance; run gates from `scripts/`.
