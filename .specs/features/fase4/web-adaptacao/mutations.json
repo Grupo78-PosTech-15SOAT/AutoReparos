@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Web/src/app/core/http/jwt.interceptor.ts",
+    "old": "return url.startsWith(PREFIXO_SURFACE);",
+    "new": "return url.includes('/api/');",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/core/http/jwt.interceptor.spec.ts --filter \"JwtInterceptor\"",
+    "label": "exigeToken prefixo /api/v1/ -> qualquer /api/ (vaza token no login e legado)"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/src/app/features/orcamento/pages/orcamento-page/orcamento-page.component.ts",
+    "old": "this.itens().reduce((acc, item) => acc + item.quantidade * item.precoUnitario, 0)",
+    "new": "this.itens().reduce((acc, item) => acc + item.precoUnitario, 0)",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/features/orcamento/pages/orcamento-page/orcamento-page.component.spec.ts --filter \"OrcamentoPage\"",
+    "label": "calculo do total do orcamento ignora quantidade do item"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/src/app/features/sagas/pages/sagas-page/sagas-page.component.ts",
+    "old": "if (!atual || atual.estado !== 'AguardandoInsumos' || !motivo || this.enviando()) {",
+    "new": "if (!atual || atual.estado !== 'AguardandoInsumos' || this.enviando()) {",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/features/sagas/pages/sagas-page/sagas-page.component.spec.ts --filter \"SagasPage lista e retenta\"",
+    "label": "retentativa de saga aceita envio com motivo em branco"
+  }
+]
