@@ -25,7 +25,7 @@ Combinados de implementação entre os lotes do S2 ao S5 (16/11). Não substitue
 
 ## Parâmetros SSM publicados pela plataforma (`/autoreparos/production/...`)
 
-Já existem no Terraform legado e precisam continuar publicados pelos stacks que o `provision-aws.yml` aplica: `vpc_id`, `subnets/private`, `security-groups/eks-nodes`, `apigateway/endpoint`, `database/endpoint`, `database/address`, `database/name`, `database/secret_arn`. Novos: `eks/cluster_name`, `eks/oidc_provider_arn`, `eks/oidc_provider_url` (**sem** `https://`, pronto para chave de condição) e `provisionador-db/url` (Function URL). Todos `String`. Os serviços leem só por `data "aws_ssm_parameter"` (D-53).
+Já existem no Terraform legado e precisam continuar publicados pelos stacks que o `provision-aws.yml` aplica: `vpc_id`, `subnets/private`, `security-groups/eks-nodes`, `apigateway/endpoint`, `database/endpoint`, `database/address`, `database/name`, `database/secret_arn`. Novos: `eks/cluster_name`, `eks/oidc_provider_arn`, `eks/oidc_provider_url` (**sem** `https://`, pronto para chave de condição) e `provisionador-db/url` (Function URL). Todos `String` (`subnets/private` deixou de ser `StringList`, separado por vírgula). Os serviços leem só por `data "aws_ssm_parameter"` (D-53).
 
 ## Segredo da database do serviço
 
@@ -53,6 +53,7 @@ Toda política que o simulador avalia fica num arquivo `.json.tftpl` renderizado
 - Cada serviço, nível repositório: variáveis `AWS_REGION=us-east-1`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE`. Environment `production`: revisores José e Enrico, só a branch `main`, variável `AWS_ROLE_ARN=arn:aws:iam::198903849859:role/autoreparos-deploy-<servico>`.
 - Cadastros, Environment `production`, segredos: `JWT_CHAVE_PRIVADA_PEM`, `CHAVE_INTERNA`, `SEED_USER_PASSWORD`, `SENDGRID_API_KEY`; variáveis `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SEED_USER_EMAIL`.
 - OS, Environment `production`, segredo `CHAVE_INTERNA` (o OS chama o Cadastros com `Cadastros:ChaveInterna`; `Cadastros:BaseUrl` = `http://cadastros.cadastros.svc.cluster.local:8080`).
+- Pai: `AWS_ROLE_ARN` como variável e como segredo nos Environments `production` e `aws-bootstrap` (o `bootstrap-aws.yml` lê o segredo). Variável `CHAVE_INTERNA_IMPRESSAO` (16 hex do SHA-256 da chave) no pai, no Cadastros e no OS, para o `--verificar` provar que a chave é a mesma sem ler segredo de volta. Senha do Grafana em `/autoreparos/production/plataforma/grafana-admin-password` (`SecureString`, versão 1).
 - Origem: `SecureString` em `/autoreparos/production/cadastros/{jwt-chave-privada-pem,chave-interna,seed-user-password}` (gerados uma vez, versão 1) e `sendgrid-*` (já existem). A `CHAVE_INTERNA` do pai sai do mesmo parâmetro.
 
 ## Chart e job `deploy`
@@ -60,3 +61,10 @@ Toda política que o simulador avalia fica num arquivo `.json.tftpl` renderizado
 - O chart só tem objetos que a `AmazonEKSEditPolicy` com escopo de namespace permite: sem `Namespace`, `Role`, `RoleBinding` ou objetos de cluster.
 - Ingress no grupo `autoreparos-internal` com as anotações do Ingress atual do guarda-chuva (`scheme: internal`, `target-type: ip`, healthcheck `/health`); `group.order`: OS 10, Cobrança 20, Execução 30, Cadastros 100, Web 1000. O Ingress `/internal` do Cadastros (grupo `autoreparos-cadastros-interno`) vai para o chart do Cadastros.
 - `Authentication__Authority` dos serviços e o emissor do Cadastros recebem `/autoreparos/production/apigateway/endpoint`, lido pelo job `deploy`.
+
+## Plataforma (entregue pelo lote B1, 16/11)
+
+- Boundary `autoreparos-servico-boundary` é o teto das roles IRSA: SQS (enviar, receber, apagar, visibilidade, atributos, URL, DLQ e move task) e DynamoDB (`*Item`, `Query`, `Scan`, `DescribeTable`) em `autoreparos-{os,cobranca,execucao,cadastros}-*`; Secrets Manager só leitura em `autoreparos/production/<servico>/*`.
+- Role de deploy: ECR em `autoreparos-<servico>` e `autoreparos-<servico>-*`; SSM só nos prefixos não secretos (`vpc_id`, `subnets`, `security-groups`, `eks`, `apigateway`, `database`, `provisionador-db`); `ListBucket` com `servicos/<servico>/*` e `env:/*`; lock com `dynamodb:LeadingKeys` em `<bucket>/servicos/<servico>/*`; nega explicitamente role sem o boundary, remoção do boundary e alteração da política de boundary.
+- Cluster com `access_config` `API_AND_CONFIG_MAP`; acesso humano de administrador para `role/managed/AccountFullAccessRole` (José e Enrico).
+- URL interna do Cadastros para a AuthLambda: os jobs `lambda` do pai procuram o Ingress do grupo `autoreparos-cadastros-interno` no namespace `cadastros`; sem ele, `vars.CADASTROS_INTERNAL_URL`. No primeiro provisionamento fica vazia; depois do deploy do Cadastros, `deploy-app.yml` atualiza a Lambda.
