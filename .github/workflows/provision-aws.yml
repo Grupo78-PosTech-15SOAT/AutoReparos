@@ -29,7 +29,8 @@ env:
 
 jobs:
   base-platform:
-    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'CONFIRMAR-PROVISIONAMENTO' && inputs.inventory_reviewed
+    # A branch é limitada pela política de branches da Environment production (só a main, salvo liberação temporária).
+    if: inputs.confirmation == 'CONFIRMAR-PROVISIONAMENTO' && inputs.inventory_reviewed
     runs-on: ubuntu-latest
     environment: production
     outputs:

@@ -23,7 +23,8 @@ env:
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY-PRODUCTION'
+    # A branch é limitada pela política de branches da Environment production (só a main, salvo liberação temporária).
+    if: inputs.confirmation == 'DEPLOY-PRODUCTION'
     runs-on: ubuntu-latest
     environment: production
     steps:
