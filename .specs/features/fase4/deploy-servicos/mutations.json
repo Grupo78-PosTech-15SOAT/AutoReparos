@@ -19,5 +19,26 @@
     "new": "  cobranca: autoreparos-cobranca-execucoes",
     "proof": "python3 scripts/specs/assert_deploy.py --check filas-produtor-consumidor",
     "label": "C35/porta 4: OS publica comandos da Saga na fila sem consumidor da Cobrança"
+  },
+  {
+    "file": "submodules/AutoReparos.Cadastros/.github/workflows/ci-cd.yml",
+    "old": "if: always() && github.ref == 'refs/heads/main' && needs.build.result == 'success' && needs.test.result == 'success' &&",
+    "new": "if: (success() || failure()) && github.ref == 'refs/heads/main' && needs.build.result == 'success' &&",
+    "proof": "python3 scripts/specs/assert_pipelines.py --check deploy-producao",
+    "label": "R2 C18/AC 15 (D-60): always() trocado por (success() || failure()) e sem exigir test verde no Cadastros"
+  },
+  {
+    "file": "submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl",
+    "old": "        \"ForAnyValue:StringEqualsIgnoreCase\": {\n          \"aws:TagKeys\": \"Servico\"\n        },\n        \"StringNotEquals\": {",
+    "new": "        \"ForAllValues:StringEqualsIgnoreCase\": {\n          \"aws:TagKeys\": \"Servico\"\n        },\n        \"StringNotEquals\": {",
+    "proof": "python3 scripts/specs/simular_iam.py --caso boundary",
+    "label": "R2 C39/porta 2: deny da tag Servico com ForAllValues (TagRole com Servico=os junto de outra chave passa)"
+  },
+  {
+    "file": "submodules/AutoReparos.Infra.K8s/terraform/stacks/base/politicas/deploy-servico.json.tftpl",
+    "old": "        \"iam:ListInstanceProfilesForRole\"\n      ],\n      \"Resource\": \"arn:aws:iam::${conta}:role/autoreparos-${servico}-*\"",
+    "new": "        \"iam:ListInstanceProfilesForRole\"\n      ],\n      \"Resource\": \"arn:aws:iam::${conta}:role/autoreparos-*\"",
+    "proof": "python3 scripts/specs/simular_iam.py --caso deploy",
+    "label": "R2 C24/C39 porta 2: role de deploy altera trust, política e tags das roles de outro serviço"
   }
 ]

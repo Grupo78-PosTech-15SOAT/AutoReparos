@@ -47,7 +47,7 @@
 
 ## 3. Arquitetura final
 
-🔲 Diagrama com os microsserviços, os bancos e a comunicação (REST e SQS). Partir do diagrama da [spec de separação](../../../.specs/features/fase4/especificacao/microsservicos/fase4_spec_separacao_microsservicos.md) e exportar para PNG ou SVG.
+Diagrama em [`arquitetura_e_justificativa.md`](arquitetura_e_justificativa.md) (seção 1). Imagem pronta para o PDF: ![Arquitetura final](diagrama_arquitetura.png) (também em `diagrama_arquitetura.svg`).
 
 ## 4. Estratégia da Saga
 
@@ -57,7 +57,7 @@ Comportamentos que valem registrar como estão no código: o pagamento recusado 
 
 ## 5. Justificativa
 
-🔲 Escrever, com base nas specs de [separação](../../../.specs/features/fase4/especificacao/microsservicos/fase4_spec_separacao_microsservicos.md), de bancos e de comunicação: por que essa divisão, por que PostgreSQL por serviço e DynamoDB para a Saga, por que SQS e por que orquestração.
+Texto em [`arquitetura_e_justificativa.md`](arquitetura_e_justificativa.md) (seções 2 a 6). 🔲 Revisão do grupo.
 
 ## 6. Qualidade e entrega contínua
 
