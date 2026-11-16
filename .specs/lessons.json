@@ -144,11 +144,191 @@
       ],
       "created": "2026-11-12T19:23:22Z",
       "last_seen": "2026-11-12T19:23:22Z"
+    },
+    {
+      "id": "L-009",
+      "key": "ac_gap::permissions boundary compartilhado entre servicos precisa se limitar ao servico tag do principal prove com politica allow sob o boundary no simulador do iam",
+      "text": "Permissions boundary compartilhado entre serviços precisa se limitar ao serviço (tag do principal); prove com política Allow * sob o boundary no simulador do IAM.",
+      "signal": "ac_gap",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md R1 ALTA boundary (iam)"
+      ],
+      "created": "2026-11-16T16:12:50Z",
+      "last_seen": "2026-11-16T16:12:50Z"
+    },
+    {
+      "id": "L-010",
+      "key": "ac_gap::lambda com function url aws iam negue lambda invokefunction sem lambda invokedviafunctionurl senao um evento forjado contorna a identidade do chamador",
+      "text": "Lambda com Function URL AWS_IAM: negue lambda:InvokeFunction sem lambda:InvokedViaFunctionUrl, senão um evento forjado contorna a identidade do chamador.",
+      "signal": "ac_gap",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md R1 InvokeFunction (iam)"
+      ],
+      "created": "2026-11-16T16:12:50Z",
+      "last_seen": "2026-11-16T16:12:50Z"
+    },
+    {
+      "id": "L-011",
+      "key": "surviving_mutant::condicao de job com funcao de status always failure cancelled desliga o gate implicito do needs a prova precisa exigir needs job result success explicito",
+      "text": "Condição de job com função de status (always, failure, cancelled) desliga o gate implícito do needs; a prova precisa exigir needs.<job>.result == 'success' explícito.",
+      "signal": "surviving_mutant",
+      "scope": "ci",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C18/AC 15 (D-60) (ci)"
+      ],
+      "created": "2026-11-16T16:12:50Z",
+      "last_seen": "2026-11-16T16:12:50Z"
+    },
+    {
+      "id": "L-012",
+      "key": "surviving_mutant::isolamento do state do terraform por servico precisa de caso negativo no simulador ler e gravar o state de outro servico nao so o positivo",
+      "text": "Isolamento do state do Terraform por serviço precisa de caso negativo no simulador (ler e gravar o state de outro serviço), não só o positivo.",
+      "signal": "surviving_mutant",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C24/porta 2-3 (iam)"
+      ],
+      "created": "2026-11-16T16:12:50Z",
+      "last_seen": "2026-11-16T16:12:50Z"
+    },
+    {
+      "id": "L-013",
+      "key": "surviving_mutant::conferir nome de fila case a chave do produtor com a fila que o consumidor de fato le nao so com alguma fila declarada por ele",
+      "text": "Conferir nome de fila: case a chave do produtor com a fila que o consumidor de fato lê, não só com alguma fila declarada por ele.",
+      "signal": "surviving_mutant",
+      "scope": "deploy",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "C35/porta 4 (deploy)"
+      ],
+      "created": "2026-11-16T16:12:50Z",
+      "last_seen": "2026-11-16T16:12:50Z"
+    },
+    {
+      "id": "L-014",
+      "key": "spec_deviation::mudanca de decisao no meio do build vira d xx no indice e 6 4 plano volta para revisao e o check novo e acrescentado nunca reescrito",
+      "text": "Mudança de decisão no meio do build vira D-xx no índice e § 6.4, plano volta para revisão e o check novo é acrescentado, nunca reescrito.",
+      "signal": "spec_deviation",
+      "scope": "specs",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md R1 BAIXA protocolo (specs)"
+      ],
+      "created": "2026-11-16T16:12:51Z",
+      "last_seen": "2026-11-16T16:12:51Z"
+    },
+    {
+      "id": "L-015",
+      "key": "ac_gap::chaves de tag de role iam nao distinguem caixa denies sobre aws tagkeys usam stringequalsignorecase e negue sts tagsession para a tag de sessao nao sobrepor a da role",
+      "text": "Chaves de tag de role IAM não distinguem caixa: denies sobre aws:TagKeys usam StringEqualsIgnoreCase e negue sts:TagSession para a tag de sessão não sobrepor a da role.",
+      "signal": "ac_gap",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md R2 ALTA tag caixa (iam)"
+      ],
+      "created": "2026-11-16T16:12:51Z",
+      "last_seen": "2026-11-16T16:12:51Z"
+    },
+    {
+      "id": "L-016",
+      "key": "surviving_mutant::deny com foranyvalue em aws tagkeys precisa de caso com varias chaves na mesma requisicao senao forallvalues passa despercebido",
+      "text": "Deny com ForAnyValue em aws:TagKeys precisa de caso com várias chaves na mesma requisição, senão ForAllValues passa despercebido.",
+      "signal": "surviving_mutant",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R2 C39/porta 2 (iam)"
+      ],
+      "created": "2026-11-16T16:12:51Z",
+      "last_seen": "2026-11-16T16:12:51Z"
+    },
+    {
+      "id": "L-017",
+      "key": "surviving_mutant::politica iam com resource por prefixo de servico precisa de casos negativos nas roles de outro servico e na propria role de deploy",
+      "text": "Política IAM com Resource por prefixo de serviço precisa de casos negativos nas roles de outro serviço e na própria role de deploy.",
+      "signal": "surviving_mutant",
+      "scope": "iam",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R2 C24/C39 porta 2 (iam)"
+      ],
+      "created": "2026-11-16T16:12:51Z",
+      "last_seen": "2026-11-16T16:12:51Z"
+    },
+    {
+      "id": "L-018",
+      "key": "surviving_mutant::ao fechar um achado sobre uma forma always cubra todas as formas equivalentes failure cancelled success failure",
+      "text": "Ao fechar um achado sobre uma forma (always()), cubra todas as formas equivalentes (failure(), cancelled(), success() || failure()).",
+      "signal": "surviving_mutant",
+      "scope": "ci",
+      "status": "candidate",
+      "features": [
+        "fase4/deploy-servicos"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "R2 C18/AC 15 (D-60) (ci)"
+      ],
+      "created": "2026-11-16T16:12:51Z",
+      "last_seen": "2026-11-16T16:12:51Z"
     }
   ],
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
   "schema": 1,
-  "next_id": 9
+  "next_id": 19
 }

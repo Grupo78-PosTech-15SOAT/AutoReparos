@@ -190,9 +190,11 @@ def checar_deploy_producao(servico, texto, erros):
         erros.append(f"{servico}: deploy precisa de needs: [build, test, quality] ({needs.group(0).strip() if needs else None})")
     if not so_na_main(job) or "develop" in condicao(job):
         erros.append(f"{servico}: deploy não fica restrito a refs/heads/main (if: {condicao(job)!r})")
-    if re.search(r"\balways\(\)", condicao(job)):
+    # Qualquer função de status além de success() (always(), failure(), cancelled(), !cancelled()) tira o gate
+    # implícito do needs.
+    if re.search(r"\b(always|failure|cancelled)\(\)", condicao(job)):
         for nome in gate_sob_always(job):
-            erros.append(f"{servico}: deploy com always() não exige needs.{nome}.result == 'success' (if: {condicao(job)!r})")
+            erros.append(f"{servico}: deploy com função de status não exige needs.{nome}.result == 'success' (if: {condicao(job)!r})")
     if not re.search(r"^    environment:\s*production\s*$", job, re.MULTILINE):
         erros.append(f"{servico}: deploy sem environment: production")
     permissoes = bloco(job, "permissions", 4) or ""
