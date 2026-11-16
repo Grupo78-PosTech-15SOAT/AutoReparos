@@ -52,6 +52,7 @@ Toda política que o simulador avalia fica num arquivo `.json.tftpl` renderizado
 
 - Cada serviço, nível repositório: variáveis `AWS_REGION=us-east-1`, `TF_STATE_BUCKET`, `TF_LOCK_TABLE`. Environment `production`: revisores José e Enrico, só a branch `main`, variável `AWS_ROLE_ARN=arn:aws:iam::198903849859:role/autoreparos-deploy-<servico>`.
 - Cadastros, Environment `production`, segredos: `JWT_CHAVE_PRIVADA_PEM`, `CHAVE_INTERNA`, `SEED_USER_PASSWORD`, `SENDGRID_API_KEY`; variáveis `SENDGRID_FROM_EMAIL`, `SENDGRID_FROM_NAME`, `SEED_USER_EMAIL`.
+- OS, Environment `production`, segredo `CHAVE_INTERNA` (o OS chama o Cadastros com `Cadastros:ChaveInterna`; `Cadastros:BaseUrl` = `http://cadastros.cadastros.svc.cluster.local:8080`).
 - Origem: `SecureString` em `/autoreparos/production/cadastros/{jwt-chave-privada-pem,chave-interna,seed-user-password}` (gerados uma vez, versão 1) e `sendgrid-*` (já existem). A `CHAVE_INTERNA` do pai sai do mesmo parâmetro.
 
 ## Chart e job `deploy`
