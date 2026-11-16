@@ -4,7 +4,7 @@ Mutations: 3
 Build: `dotnet build submodules/AutoReparos.OS/AutoReparos.OS.slnx`; `dotnet build submodules/AutoReparos.Cobranca/AutoReparos.Cobranca.slnx`; `dotnet build submodules/AutoReparos.Execucao/AutoReparos.Execucao.slnx`; `python3 scripts/specs/assert_deploy.py --check iac-formatado`
 Plan: `.specs/features/fase4/deploy-servicos/plan.md`
 
-40 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
+41 checks · 6 slices · 9 one-way doors · 2 open questions, 2 block go-live (nenhuma bloqueia S1 a S5)
 
 Derivados em 2026-11-15, depois da aprovação ("Plano está aprovado"). Regras de IaC, chart e workflow são provadas sem AWS (`terraform test` com `mock_provider`, `helm template`, asserts estáticos); as políticas IAM são avaliadas pelo simulador do IAM (`aws iam simulate-custom-policy`, perfil `autoreparos`, sem criar recursos); só o S6 exige o ambiente no ar.
 
@@ -146,6 +146,9 @@ Proof: `python3 scripts/specs/simular_iam.py --caso boundary`
 
 **C40** - A role de deploy da Cobrança é negada em `s3:GetObject` e `s3:PutObject` em `servicos/os/production.tfstate` e em `dynamodb:PutItem` na tabela de lock com `dynamodb:LeadingKeys` do state do OS, e permitida nos próprios (portas 2 e 3; acrescentado em 16/11: achado 4 do Verifier)
 Proof: `python3 scripts/specs/simular_iam.py --caso state`
+
+**C41** - Com `MERCADOPAGO_ACCESS_TOKEN` e `MERCADOPAGO_WEBHOOK_SECRET` no Environment `production` da Cobrança, o Deployment `cobranca` entrega `MercadoPago__AccessToken` e `MercadoPago__WebhookSecret` a partir do Secret `cobranca-segredos` (opcionais), o Secret tem as duas chaves, e `POST /api/v1/webhooks/mercado-pago` com corpo válido sem assinatura ou com assinatura falsa responde `401` pelo API Gateway (AC 29, D-62, derivado em 16/11 depois da aprovação)
+Proof: `scripts/specs/smoke_mercado_pago.sh`
 
 ## Coverage
 
