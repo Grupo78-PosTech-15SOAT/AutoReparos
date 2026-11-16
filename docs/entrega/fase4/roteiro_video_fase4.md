@@ -8,13 +8,17 @@
 
 | # | Verificação | Como |
 |---|---|---|
-| 1 | Serviços no ar | `scripts/smoke/rodar.sh` passa (C42 `aws-credenciais`, health dos 4 serviços) 🔲 |
-| 2 | Gateway responde | `https://8afyzjqfk2.execute-api.us-east-1.amazonaws.com` com token válido 🔲 |
-| 3 | Dados de demonstração | cliente, veículo e insumo com saldo; flag para provocar falha preparada |
-| 4 | Mercado Pago em modo teste | painel de testes aberto; comprador de teste pronto; webhook com `422` na simulação |
-| 5 | Tráfego contínuo | gerador rodando 10 min antes do bloco de monitoramento |
-| 6 | Abas logadas | GitHub (Actions e Settings → Branches), SonarCloud, Grafana, Jaeger, Postman |
-| 7 | Zoom do terminal e do navegador aumentado | narrar o que está na tela |
+| 1 | Perfil AWS na máquina de quem grava | `aws login --profile autoreparos` e `aws sts get-caller-identity --profile autoreparos` mostrando a conta `198903849859` 🔲 |
+| 2 | Cluster acessível | `aws eks update-kubeconfig --name AutoReparosEKS --region us-east-1 --profile autoreparos` e `kubectl get pods -A` com os namespaces `os`, `cobranca`, `execucao`, `cadastros` e `autoreparos` 🔲 |
+| 3 | Serviços no ar | `scripts/smoke/rodar.sh` passa (C42 `aws-credenciais`, health dos 4 serviços) 🔲 |
+| 4 | Gateway responde | `https://8afyzjqfk2.execute-api.us-east-1.amazonaws.com` com token válido 🔲 |
+| 5 | Dados de demonstração | cliente, veículo e insumo com saldo; flag para provocar falha preparada |
+| 6 | Mercado Pago em modo teste | pagamento com um **comprador de teste criado no painel** (não o vendedor); o webhook automático ainda não chega sozinho, então usar "Simular notificação" no painel com o id real do pagamento |
+| 7 | Grafana por port-forward | o serviço é ClusterIP: `kubectl port-forward -n autoreparos svc/<grafana> 3000:80`; a senha de admin está no SSM em `/autoreparos/production/plataforma/grafana-admin-password` 🔲 |
+| 8 | Tráfego contínuo | gerador rodando 10 min antes do bloco de monitoramento |
+| 9 | Abas logadas | GitHub (Actions e Settings → Branches), SonarCloud, Grafana, Jaeger, Postman |
+| 10 | Zoom do terminal e do navegador aumentado | narrar o que está na tela |
+| 11 | Ambiente estável | sem merge na `main` de nenhum repositório durante a gravação (cada merge dispara um deploy que espera aprovação no Environment `production`) |
 
 ## Blocos
 
@@ -33,6 +37,8 @@
 
 - **Pagamento recusado:** hoje só registra no histórico e deixa a Saga aguardando; não compensa. Mostrar como está, sem prometer reembolso automático.
 - **Falta de saldo na reserva:** a Saga fica em `AguardandoInsumos` com alerta; só o cancelamento compensa, e compensa apenas o orçamento.
+- **Deploy:** o job `deploy` espera a aprovação do Environment `production` (revisores: José e Enrico); mostrar essa aprovação no vídeo. Se o `/health` da versão nova falhar, o Helm volta sozinho para a anterior e o job fica vermelho (rollback automático).
+- **Pagamento:** a notificação do Mercado Pago precisa ser simulada no painel com o id real do pagamento; dizer isso em uma frase em vez de esperar o webhook.
 - **Rastreamento:** o tracing mostra as chamadas de cada serviço. A propagação do contexto de trace entre mensagens SQS não foi entregue (decisão registrada); dizer isso em uma frase se a banca perguntar.
 
 ## Depois de gravar
