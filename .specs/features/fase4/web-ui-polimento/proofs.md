@@ -1,7 +1,7 @@
 # fase4/web-ui-polimento proofs
 
-**HEAD**: 340b087
-**Tree**: dirty - .claude/
+**HEAD**: 0df862e
+**Tree**: clean
 **Result**: 29 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
