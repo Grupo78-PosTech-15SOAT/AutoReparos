@@ -117,9 +117,8 @@ def check_consistencia() -> None:
         botoes = re.findall(r"<button\b[^>]*>", corpo, re.DOTALL)
         excluir = [b for b in botoes if re.search(r"aria-label\]?=\"'Excluir ", b)]
         require(excluir, f"{nome}: nenhum botão com aria-label 'Excluir <nome>' na linha")
-        if pasta != "usuarios":
-            editar = [b for b in botoes if re.search(r"aria-label\]?=\"'Editar ", b)]
-            require(editar, f"{nome}: nenhum botão com aria-label 'Editar <nome>' na linha")
+        editar = [b for b in botoes if re.search(r"aria-label\]?=\"'Editar ", b)]
+        require(editar, f"{nome}: nenhum botão com aria-label 'Editar <nome>' na linha")
         for b in botoes:
             classes = re.search(r'class="([^"]*)"', b)
             classes_lista = (classes.group(1) if classes else "").split()
@@ -137,12 +136,19 @@ def check_consistencia() -> None:
     for classe in (".btn-success", ".btn-primary"):
         if _redefine(estilos_aprov, classe):
             violacoes.append(f"Aprovação redefine {classe} localmente")
+    template_aprov = aprovacao.split("template:", 1)[1].split("styles:", 1)[0]
+    classes_botoes = [c.split() for c in re.findall(r'<button\b[^>]*class="([^"]*)"', template_aprov, re.DOTALL)]
+    require(any({"btn", "btn-success"} <= set(c) for c in classes_botoes),
+            "Aprovação deve usar o btn-success global no botão de aprovar")
+    require(any({"btn", "btn-primary"} <= set(c) for c in classes_botoes),
+            "Aprovação deve usar o btn-primary global")
     require(re.search(r"<app-id-badge[^>]*pagamentoId", aprovacao) is not None,
             "Aprovação deve mostrar o pagamentoId em <app-id-badge>")
 
     nova = ler(APP / "features" / "ordens-servico" / "pages" / "os-nova-page" / "os-nova-page.component.ts")
-    require(re.search(r"placa", nova.split("veiculoOptions", 1)[-1] if "veiculoOptions" in nova else nova, re.IGNORECASE)
-            is not None, "Nova OS sem placa nas opções de veículo")
+    require(re.search(r"veiculoOptions\s*=\s*[^;]*opcaoDeVeiculo", nova) is not None
+            and re.search(r"function opcaoDeVeiculo[\s\S]*?formatarPlaca\(", nova) is not None,
+            "Nova OS deve montar as opções de veículo com a placa (opcaoDeVeiculo + formatarPlaca)")
 
     require(not violacoes, "Violações de consistência:\n- " + "\n- ".join(violacoes))
     print(f"PASS consistencia: {len(componentes)} componentes sem redefinições locais; ações de linha e Aprovação conformes")
@@ -190,7 +196,10 @@ def check_cobertura() -> None:
     abaixo = []
     total_h = total_f = 0
     for arquivo in arquivos:
-        h, f = cobertura.get(arquivo, (0, 0))
+        if arquivo not in cobertura:
+            abaixo.append(f"{arquivo} (ausente no lcov: nenhum teste o carrega)")
+            continue
+        h, f = cobertura[arquivo]
         if f == 0:
             continue
         total_h += h

@@ -4,7 +4,7 @@ Mutations: 3
 Build: `npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web build`
 Plan: `.specs/features/fase4/web-ui-polimento/plan.md`
 
-27 checks in 6 slices · 0 one-way doors · 0 open, of which 0 block
+28 checks in 6 slices · 0 one-way doors · 0 open, of which 0 block
 
 ## Checks
 
@@ -101,6 +101,9 @@ Proof: `python3 scripts/specs/assert_web_ui.py --check consistencia`
 **C27** - Os arquivos novos e alterados da feature têm pelo menos 80% de linhas cobertas e o build passa (AC 1 a AC 43, regra de cobertura da D-70)
 Proof: `python3 scripts/specs/assert_web_ui.py --check cobertura`
 
+**C28** - As opções de veículo da Nova OS trazem a placa formatada no rótulo (`ABC-1D23 · modelo (marca)`) (AC 43; acrescentado pelo achado do Verifier sobre C26)
+Proof: `npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/features/ordens-servico/pages/os-nova-page/os-nova-page.component.spec.ts --filter "OsNovaPage opcoes de veiculo"`
+
 ## Coverage
 
 | Set (size) | Member -> proof | Unproven |
@@ -134,7 +137,7 @@ Proof: `python3 scripts/specs/assert_web_ui.py --check cobertura`
 
 - **Settled mid-build:** none
 - **Nota de processo:** `check_commit.py` exige `type(scope):`; os commits seguem a AD-002 (`<gitmoji> <Descrição>`), que prevalece
-- **Dispatched:** Batch Worker A (S2, S3, S5: Sagas, Fila, Kanban, Navbar, Home, Detalhe) e Batch Worker B (S4, S6: Orçamento, Pagamento, Aprovação, cadastros, catálogo, Nova OS) a partir do Web `8d4a114` (S1), sem commit; ambos `returned` (A: 57 testes; B: 52 testes e 3 specs novos de Clientes, Veículos e Usuários)
+- **Dispatched:** Batch Worker A (S2, S3, S5: Sagas, Fila, Kanban, Navbar, Home, Detalhe) e Batch Worker B (S4, S6: Orçamento, Pagamento, Aprovação, cadastros, catálogo, Nova OS) a partir do Web `8d4a114` (S1), sem commit; ambos `returned` (A: 57 testes; B: 52 testes e 3 specs novos de Clientes, Veículos e Usuários); Verifier independente no pai `5e7454f` / Web `cae9e60`
 - **Boundary:** C1-C27 fechados no Web `cae9e60` (483 testes, cobertura agregada 97,19%, build ok)
 - **Abandoned:** none
 - **Ajustes durante o build:** Usuários ganhou edição de nome e perfil (reuso de `UsuarioService.atualizar`) porque o AC 40 pede "Editar <nome>"; `assert_web_ui.py` passou a tratar como redefinição só a regra cujo seletor é a própria classe (seletor descendente não conta)
