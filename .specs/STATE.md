@@ -86,6 +86,14 @@
 | AD-079 | D-74: Environment `production` do Web com política de branch `main`, aprovação obrigatória (JoseMD12 ou EnricoGollner) e as variáveis `AWS_ROLE_ARN`, `EKS_CLUSTER_NAME` e `AWS_REGION`. O job `deploy` do Web fica pendente de aprovação a cada push na `main` | José: "Igual ao OS (Recomendado)" (17/11) | active | 2026-11-17 |
 | AD-080 | D-75: `web-ui-polimento` só no Web; detalhe da Saga em `app-drawer`; `OsConhecidasService` junta as OS conhecidas (atalho local, sagas do Administrador, fila de execução) e busca veículo e cliente por id com cache, alimentando o seletor de OS (Orçamento e Pagamento) e os cards da Fila e do Kanban; navegação com um único item "Ordens de Serviço" | José: "Drawer lateral (Recomendado)", "Fila e Kanban também (Recomendado)", "Sim, aprovar junto (Recomendado)" (17/11) | active | 2026-11-17 |
 
+## Handoff: webhook automático do Mercado Pago (fechado) - 2026-11-17
+
+- **Resultado:** PASS (`deploy-servicos/smoke.md`, 19:13Z). Pagamento `190178250522` → notificação automática `202` no mesmo segundo → Saga `PagamentoCapturado` → OS `85bc9981` `Paga`, sem simulação.
+- **Causa dos `401`:** o Access Token é da aplicação `3270058957851035` do vendedor de teste `TESTUSER4451475770762391424` (quem assina as notificações reais), mas a assinatura na Cobrança era da aplicação `4447219265786581` da conta real (que só simula; sem credenciais de produção por exigir domínio). A simulação passava porque saía do painel da `4447219265786581`.
+- **Configuração válida:** token e assinatura secreta do Modo produtivo da aplicação `3270058957851035` (entrar no painel como o vendedor de teste); SSM `mercadopago-access-token` v3 e `mercadopago-webhook-secret` v5 → Environment `production` → run `44153969807`. Comprador: `TESTUSER1652459077548798288`. Não usar "Redefinir" na assinatura sem repetir SSM → GitHub → deploy.
+- **Checksum dos segredos exercitado:** a troca só da assinatura recriou o pod sozinha (`checksum/segredos` `e9e0900c` → `519b41ad`).
+- **Pendente:** OS `75a4a4b8` (pagamento `189085527037`) deve virar `Paga` na próxima retentativa do Mercado Pago (opcional conferir).
+
 ## Handoff: checkout com webhook em modo produtivo e checksum da Cobrança (fechado) - 2026-11-17
 
 - **Estado:** fechado. Pai `main` = `develop` pelo PR [Grupo78-PosTech-15SOAT/AutoReparos#65](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos/pull/65) (`3058239`, checks verdes, SonarCloud incluso), com o web-ui-polimento, os ponteiros de Web, OS e Cobrança na `main` e os registros abaixo. Ponteiros dos submódulos no pai batem com o que está em produção.
