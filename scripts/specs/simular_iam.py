@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Provas C13, C24, C39 e C40 de deploy-servicos: avalia políticas IAM no simulador da AWS, sem criar recursos.
 
-Uso: python3 scripts/specs/simular_iam.py --caso <irsa|deploy|boundary|state>
+Uso: python3 scripts/specs/simular_iam.py --caso <irsa|deploy|boundary|state|sns|web>
 
 As políticas ficam em arquivos `.json.tftpl` dos repositórios, renderizados pelo Terraform com
 `templatefile()`. Para que este script as avalie sem Terraform, os modelos usam só interpolação
@@ -25,13 +25,15 @@ from _repositorios import RAIZ, reportar
 import _iam_boundary
 import _iam_deploy
 import _iam_irsa
+import _iam_sns
 import _iam_state
+import _iam_web
 
 CONTA = "198903849859"
 REGIAO = "us-east-1"
 PERFIL = os.environ.get("AWS_PROFILE", "autoreparos")
 CASOS = {"irsa": _iam_irsa.casos, "deploy": _iam_deploy.casos, "boundary": _iam_boundary.casos,
-         "state": _iam_state.casos}
+         "state": _iam_state.casos, "sns": _iam_sns.casos, "web": _iam_web.casos}
 INTERPOLACAO = re.compile(r"\$\$\{|\$\{([^}]*)\}")
 
 

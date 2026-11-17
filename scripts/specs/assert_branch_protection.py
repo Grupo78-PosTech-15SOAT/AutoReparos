@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Provas C5 e C7 de infra-ci-observabilidade: proteção da main pela API do GitHub e evidência no README.
+"""Prova C25 de infra-ci-observabilidade (D-68): proteção da main pela API do GitHub; `readme` é a prova antiga (C7 de 11/11).
+
+Checks obrigatórios `build` e `test` (o `quality` roda mas não é obrigatório) e `enforce_admins` desligado,
+conforme a proposta do José na retomada de 16/11.
 
 Uso: python scripts/specs/assert_branch_protection.py --check <main|readme>
 """
@@ -8,6 +11,9 @@ import os
 import sys
 
 from _repositorios import JOBS_OBRIGATORIOS, SERVICOS, caminho_repositorio, gh_api, nome_completo, reportar
+
+
+CHECKS_DA_PROTECAO = ["build", "test"]
 
 
 def checar_main(servico, erros):
@@ -24,11 +30,11 @@ def checar_main(servico, erros):
     if not checks.get("strict"):
         erros.append(f"{servico}: status checks não são strict")
     contextos = set(checks.get("contexts") or []) | {c.get("context") for c in checks.get("checks") or []}
-    for job in JOBS_OBRIGATORIOS:
+    for job in CHECKS_DA_PROTECAO:
         if job not in contextos:
             erros.append(f"{servico}: status check `{job}` não é obrigatório")
-    if not (protecao.get("enforce_admins") or {}).get("enabled"):
-        erros.append(f"{servico}: regra não vale para administradores")
+    if (protecao.get("enforce_admins") or {}).get("enabled"):
+        erros.append(f"{servico}: enforce_admins ligado (o plano pede desligado)")
     if (protecao.get("allow_force_pushes") or {}).get("enabled"):
         erros.append(f"{servico}: force push permitido")
     if (protecao.get("allow_deletions") or {}).get("enabled"):

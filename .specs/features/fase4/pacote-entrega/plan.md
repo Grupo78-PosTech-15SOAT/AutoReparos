@@ -1,8 +1,8 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Approved**: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código atual sustenta; pagamento recusado e falta de saldo não compensam, D-63).
+**Revisão pendente de aprovação**: revisão de 17/11 (D-73 / AD-078) expandindo a suíte BDD para seis cenários (mão de obra sem insumos e cancelamento voluntário após reserva) e corrigindo validações do status `Concluida` e compensação em ordem inversa.
 
-Aprovação anterior: 2026-11-16 - user: "Aprovo e envie" (revisão de 10/11 com o BDD acrescentado em 16/11 pela D-63, "No OS, com harness (Recommended)"). Versão anterior aprovada em 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois desta aprovação.
+Aprovações anteriores: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código anterior sustentava; D-63); 2026-11-16 - user: "Aprovo e envie"; 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois da aprovação desta revisão.
 
 ## Problem
 
@@ -12,7 +12,7 @@ A conclusão da Fase 4 exige evidências técnicas e acadêmicas em cada reposit
 
 Esta entrega reúne evidências produzidas pelos serviços e infraestrutura e acrescenta o que faltava para o PDF: os cenários BDD no OS (D-63), os READMEs com a Saga justificada e a cobertura, e o Postman de OS, Cobrança e Execução. Não altera código de produto.
 
-0. Escrever os cenários BDD do fluxo completo e de duas compensações em `AutoReparos.OS.BddTests` (Reqnroll, `# language: pt`) sobre o `SagaHarness` (new, door 2).
+0. Escrever e refinar os 6 cenários BDD cobrindo fluxo feliz com e sem insumos, compensações em ordem inversa e não compensação em ações irreversíveis em `AutoReparos.OS.BddTests` (Reqnroll, `# language: pt`) sobre o `SagaHarness` (new, door 2).
 1. Completar README, documentação, API, cobertura e manifests dos repositórios OS, Cobranca, Execucao, Cadastros e Web (exists).
 2. Preparar roteiro cronometrado (alvo de 13 a 14 minutos) e vídeo público/não listado com demonstração de fluxo, falhas, código, deploy, proteção de branches e observabilidade (roteiro na spec de vídeo, exists).
 3. Preparar PDF com participantes, links, diagrama e justificativas e submetê-lo ao portal após revisão/autorização (door 1).
@@ -60,7 +60,7 @@ None - nothing consumed outside as a software route; leitores consomem README/do
 5. WHEN PDF final for preparado THEN SHALL conter participantes, links dos repositórios e vídeo, diagrama de serviços/bancos/comunicação, estratégia e justificativa da Saga e justificativas da divisão/tecnologias.
 6. IF participantes ou URLs finais estiverem ausentes THEN o pacote SHALL identificar cada entrada pendente e não submeter versão incompleta.
 7. IF for submetido conteúdo externamente THEN a equipe SHALL revisar e autorizar explicitamente a submissão.
-8. WHEN a suíte do OS rodar THEN SHALL executar com Reqnroll pelo menos quatro cenários, com Cobrança e Execução simuladas: o fluxo completo da OS com pagamento aprovado; o pagamento recusado, que só registra no histórico e deixa a Saga aguardando, sem compensar; a falta de saldo na reserva, que deixa a Saga em `AguardandoInsumos` com alerta e, ao cancelar, compensa só o orçamento; e a liberação recusada pelo Execução, que compensa a reserva e o orçamento em ordem inversa. A prova SHALL falhar se menos de quatro cenários forem executados ou se algum falhar (R19, D-63).
+8. WHEN a suíte do OS rodar THEN SHALL executar com Reqnroll pelo menos seis cenários, com Cobrança e Execução simuladas: (1) o fluxo completo da OS com pagamento aprovado e validação do status intermediário `Concluida`; (2) a OS sem insumos que pula a reserva e libera a execução diretamente; (3) o pagamento recusado, que só registra no histórico e deixa a Saga aguardando, sem compensar; (4) a falta de saldo na reserva, que deixa a Saga em `AguardandoInsumos` com alerta e, ao cancelar, compensa só o orçamento; (5) a liberação recusada pelo Execução, que compensa a reserva e o orçamento em ordem inversa com validação dos comandos despachados; e (6) o cancelamento voluntário pelo atendente com insumos já reservados, acionando a compensação em ordem inversa. A prova SHALL falhar se menos de seis cenários forem executados ou se algum falhar (R19, D-63, D-73).
 
 ## Out of scope
 

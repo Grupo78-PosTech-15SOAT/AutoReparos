@@ -39,6 +39,11 @@ def casos():
         _envio("OS", "autoreparos-os-saga-dlq", True),
         _envio("OS", "autoreparos-cobranca-execucoes", False),
         _envio("OS", "autoreparos-execucao-saida-dlq", False),
+        # C14 de infra-ci-observabilidade (D-66): o gauge saga_dlq_mensagens lê a profundidade da DLQ da Saga.
+        ("os lê a profundidade da DLQ da Saga", _modelo("OS"), VARIAVEIS, "sqs:GetQueueAttributes",
+         _fila("autoreparos-os-saga-dlq"), True, None),
+        ("os não lê a profundidade da DLQ da Execução", _modelo("OS"), VARIAVEIS, "sqs:GetQueueAttributes",
+         _fila("autoreparos-execucao-saida-dlq"), False, None),
         ("os lê a tabela da Saga", _modelo("OS"), VARIAVEIS, "dynamodb:GetItem",
          _tabela("autoreparos-os-saga"), True, None),
         # Cobrança: só a fila da Saga entre as filas de outros serviços.
