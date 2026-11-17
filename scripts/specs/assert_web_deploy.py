@@ -201,7 +201,8 @@ class Expressao:
         if nome == "failure":
             return any(r == "failure" for r in resultados)
         if nome == "cancelled":
-            return False
+            # O GitHub marca como cancelled os jobs de um run cancelado; aqui isso aparece no resultado dos needs.
+            return any(r == "cancelled" for r in resultados)
         raise ValueError(f"função não suportada: {nome}()")
 
     def propriedade(self, caminho):
@@ -460,6 +461,7 @@ CASOS_DEPLOY = [
     ("dispatch develop com input", "workflow_dispatch", "refs/heads/develop", "success", "success", "skipped", True, False),
     ("push develop", "push", "refs/heads/develop", "success", "success", "skipped", None, False),
     ("pull_request para main", "pull_request", "refs/pull/3/merge", "success", "success", "success", None, False),
+    ("dispatch main com input e run cancelado no quality", "workflow_dispatch", "refs/heads/main", "success", "success", "cancelled", True, False),
 ]
 
 
@@ -571,6 +573,9 @@ def checar_pai_sem_web():
     if helm is None:
         erros.append("deploy-app.yml sem `helm upgrade --install autoreparos submodules/AutoReparos.Infra.K8s/k8s`")
     junto = juntar_linhas(texto)
+    # O pai não pode religar o subchart do Web por --set (porta 1: o / é do release web).
+    for religar in re.findall(r"--set(?:-string)?[ =]['\"]?web\.[^\s'\"]*", junto):
+        erros.append(f"helm upgrade do pai mexe no subchart web: {religar}")
     for arquivo in ("k8s/values.yaml", "k8s/values-production.yaml"):
         if not re.search(rf"-f submodules/AutoReparos\.Infra\.K8s/{re.escape(arquivo)}\b", junto):
             erros.append(f"helm upgrade do pai sem -f .../{arquivo}")
@@ -745,7 +750,27 @@ def checar_quality_verde():
     if status != "OK":
         erros.append(f"quality gate da main no SonarCloud: {status}, esperado OK")
     print(f"run {run['databaseId']} ({run['headSha'][:7]}), quality gate {status}")
+    erros += checar_quality_ultimo_pr_para_main()
     return erros
+
+
+def checar_quality_ultimo_pr_para_main():
+    """AC 9 também vale em PR para a main: o quality do último PR com base main terminou verde."""
+    prs = gh_json("pr", "list", "--repo", REPO_WEB, "--base", "main", "--state", "all", "--limit", "1",
+                  "--json", "number,headRefOid")
+    if not prs:
+        return ["nenhum PR com base main no Web"]
+    pr = prs[0]
+    runs = gh_json("run", "list", "--repo", REPO_WEB, "--workflow", "ci-cd.yml", "--commit", pr["headRefOid"],
+                   "--event", "pull_request", "--status", "completed", "--limit", "5", "--json", "databaseId")
+    if not runs:
+        return [f"PR #{pr['number']}: nenhum run concluído do ci-cd.yml no evento pull_request"]
+    jobs = {j["name"]: j for j in gh_json("run", "view", str(runs[0]["databaseId"]), "--repo", REPO_WEB, "--json", "jobs")["jobs"]}
+    quality = jobs.get("quality")
+    if quality is None or quality.get("conclusion") != "success":
+        return [f"PR #{pr['number']} (run {runs[0]['databaseId']}): quality {quality and quality.get('conclusion')}, esperado success"]
+    print(f"PR #{pr['number']} para a main: quality success (run {runs[0]['databaseId']})")
+    return []
 
 
 def checar_rota_migrada():

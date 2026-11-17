@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Web/.github/workflows/ci-cd.yml",
+    "old": "needs.build.result == 'success' && needs.test.result == 'success' && (needs.quality.result",
+    "new": "needs.build.result == 'success' && (needs.quality.result",
+    "proof": "python3 scripts/specs/assert_web_deploy.py --check deploy-condicao",
+    "label": "C8/AC 7: deploy com always() e ignorar_quality deixa de exigir test verde"
+  },
+  {
+    "file": "submodules/AutoReparos.Infra.K8s/terraform/stacks/base/servicos.tf",
+    "old": "namespaces = [kubernetes_namespace_v1.web.metadata[0].name]",
+    "new": "namespaces = [kubernetes_namespace_v1.web.metadata[0].name, \"autoreparos\"]",
+    "proof": "scripts/specs/tf_test.sh submodules/AutoReparos.Infra.K8s/terraform/stacks/base web-deploy",
+    "label": "C1/porta 2: role do Web ganha edição também no namespace autoreparos (observabilidade)"
+  },
+  {
+    "file": ".github/workflows/deploy-app.yml",
+    "old": "--wait --timeout 10m",
+    "new": "--set web.enabled=true --wait --timeout 10m",
+    "proof": "python3 scripts/specs/assert_web_deploy.py --check pai-sem-web",
+    "label": "C14/AC 10, porta 1: deploy-app do pai religa o subchart web com --set web.enabled=true"
+  }
+]
