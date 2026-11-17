@@ -1,8 +1,8 @@
 # Fase 4 - Pacote acadêmico de entrega
 
-**Revisão pendente de aprovação**: revisão de 17/11 (D-73 / AD-078) expandindo a suíte BDD para seis cenários (mão de obra sem insumos e cancelamento voluntário após reserva) e corrigindo validações do status `Concluida` e compensação em ordem inversa.
+**Approved**: 2026-11-17 - user: "Tem um plano de BDD que precisa de aprovação e precisa ser implementado. Faça isto, o plano está aprovado!" (revisão de 17/11, D-73 / AD-078: seis cenários BDD, com mão de obra sem insumos e cancelamento voluntário após a reserva; status `Concluida` e compensação em ordem inversa validados).
 
-Aprovações anteriores: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código anterior sustentava; D-63); 2026-11-16 - user: "Aprovo e envie"; 2026-11-06 - user: "Pode seguir". Os `checks.md` são derivados de novo depois da aprovação desta revisão.
+Aprovações anteriores: 2026-11-16 - user: "Aprovo o AC 8" (AC 8 revisado para os quatro cenários que o código anterior sustentava; D-63); 2026-11-16 - user: "Aprovo e envie"; 2026-11-06 - user: "Pode seguir". Os `checks.md` foram derivados de novo depois da aprovação desta revisão (C4).
 
 ## Problem
 
