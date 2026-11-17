@@ -62,7 +62,7 @@ Proof: walk - registrar a autorização antes do envio
 ## Handoff
 
 - **Settled mid-build:** 16/11 - D-63 "No OS, com harness (Recommended)"; plano aprovado ("Aprovo e envie"); 17/11 - revisão D-73 aprovada ("Faça isto, o plano está aprovado!"), C4 rederivado para 6 cenários
-- **Dispatched:** none
+- **Dispatched:** Verifier do C4 (D-73) em `c27caa3` (OS `cd0e421`), 17/11
 - **Boundary:** C4 rederivado do plano aprovado em 17/11 (D-73); build do C4 em andamento
 - **Abandoned:** checks de 10/11 (scripts `assert_delivery_contents.py`, `assert_final_pdf.py` e `assert_package_readiness.py` nunca existiram)
 - **Walked:** none - C5 a C8 exigem o vídeo e o PDF finais
