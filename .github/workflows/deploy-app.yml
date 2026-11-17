@@ -60,7 +60,6 @@ jobs:
           echo "vpc_id=$(terraform output -raw vpc_id)" >> "$GITHUB_OUTPUT"
           echo "private_subnet_ids=$(terraform output -json private_subnet_ids | jq -c .)" >> "$GITHUB_OUTPUT"
           echo "lambda_security_group_id=$(terraform output -raw lambda_security_group_id)" >> "$GITHUB_OUTPUT"
-          echo "ecr_web_repository_url=$(terraform output -raw ecr_web_repository_url)" >> "$GITHUB_OUTPUT"
           echo "cluster_name=$(terraform output -raw cluster_name)" >> "$GITHUB_OUTPUT"
       - id: cadastros
         name: Resolve the internal Cadastros URL for the authentication Lambda
@@ -103,16 +102,6 @@ jobs:
           terraform apply -input=false -auto-approve "$RUNNER_TEMP/lambda.tfplan"
           rm -f "$RUNNER_TEMP/lambda.tfplan" "$LAMBDA_ZIP"
           unset TF_VAR_cadastros_chave_interna
-      - name: Build and push the Web image
-        env:
-          ECR_WEB: ${{ steps.network.outputs.ecr_web_repository_url }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          registry="${ECR_WEB%%/*}"
-          aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$registry"
-          docker build -t "$ECR_WEB:$IMAGE_TAG" -f submodules/AutoReparos.Web/Dockerfile submodules/AutoReparos.Web
-          docker push "$ECR_WEB:$IMAGE_TAG"
       - name: Connect to EKS and inject the observability secret
         env:
           GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
@@ -125,17 +114,14 @@ jobs:
           kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f -
           jq -n --arg namespace "$namespace" --arg password "$GRAFANA_ADMIN_PASSWORD" '{apiVersion:"v1",kind:"Secret",metadata:{name:"autoreparos-grafana-admin",namespace:$namespace},type:"Opaque",stringData:{"admin-password":$password}}' | kubectl apply -f -
           unset GRAFANA_ADMIN_PASSWORD
-      - name: Deploy chart and verify Web
-        env:
-          ECR_WEB: ${{ steps.network.outputs.ecr_web_repository_url }}
+      - name: Deploy the platform chart
         run: |
           set -euo pipefail
-          # OS, Cobrança, Execução e Cadastros são implantados pelos próprios repositórios (ADR-005).
+          # OS, Cobrança, Execução, Cadastros e Web são implantados pelos próprios repositórios (ADR-005, D-72);
+          # o guarda-chuva fica com a observabilidade (values-production.yaml desliga o subchart web).
           helm upgrade --install autoreparos submodules/AutoReparos.Infra.K8s/k8s \
             --namespace '${{ vars.K8S_NAMESPACE }}' --create-namespace \
             -f submodules/AutoReparos.Infra.K8s/k8s/values.yaml -f submodules/AutoReparos.Infra.K8s/k8s/values-production.yaml \
-            --set-string web.image.repository="$ECR_WEB" --set-string web.image.tag='${{ github.sha }}' \
             --wait --timeout 10m
-          kubectl rollout status deployment/autoreparos-web -n '${{ vars.K8S_NAMESPACE }}' --timeout=10m
           echo 'Registered parent/submodule revisions:' >> "$GITHUB_STEP_SUMMARY"
           git submodule status >> "$GITHUB_STEP_SUMMARY"

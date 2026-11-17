@@ -180,8 +180,8 @@ jobs:
         run: |
           set -euo pipefail
           aws eks update-kubeconfig --name '${{ steps.ids.outputs.cluster_name }}' --region "$AWS_REGION"
-          # Os releases dos serviços também têm Ingress nos ALB internos; os namespaces deles são do stacks/base.
-          for servico in os cobranca execucao cadastros; do
+          # Os releases dos serviços e do Web (D-72) também têm Ingress nos ALB internos; os namespaces deles são do stacks/base.
+          for servico in os cobranca execucao cadastros web; do
             helm uninstall "$servico" --namespace "$servico" --wait --timeout 10m || true
             kubectl delete ingress --all --namespace "$servico" --wait=true --timeout=5m || true
           done
