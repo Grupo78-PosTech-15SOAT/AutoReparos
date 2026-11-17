@@ -86,6 +86,13 @@
 | AD-079 | D-74: Environment `production` do Web com política de branch `main`, aprovação obrigatória (JoseMD12 ou EnricoGollner) e as variáveis `AWS_ROLE_ARN`, `EKS_CLUSTER_NAME` e `AWS_REGION`. O job `deploy` do Web fica pendente de aprovação a cada push na `main` | José: "Igual ao OS (Recomendado)" (17/11) | active | 2026-11-17 |
 | AD-080 | D-75: `web-ui-polimento` só no Web; detalhe da Saga em `app-drawer`; `OsConhecidasService` junta as OS conhecidas (atalho local, sagas do Administrador, fila de execução) e busca veículo e cliente por id com cache, alimentando o seletor de OS (Orçamento e Pagamento) e os cards da Fila e do Kanban; navegação com um único item "Ordens de Serviço" | José: "Drawer lateral (Recomendado)", "Fila e Kanban também (Recomendado)", "Sim, aprovar junto (Recomendado)" (17/11) | active | 2026-11-17 |
 
+## Handoff: checkout com webhook em modo produtivo - 2026-11-17
+
+- **Resultado:** PASS com ressalva (`deploy-servicos/smoke.md`, 16:58Z). Pagamento `189068305767`, OS `82342842` `Paga`, Saga `PagamentoCapturado`. O webhook automático do Mercado Pago agora chega ao gateway (16:30Z e 16:50Z), mas os dois levaram `401` porque a Cobrança tinha a assinatura do modo de teste; a entrega que passou (`202`) foi pelo painel, no modo produtivo, com o id real.
+- **Feito:** assinatura do modo produtivo no SSM (versão 4) → `MERCADOPAGO_WEBHOOK_SECRET` do Environment `production` → run `44127703263` da Cobrança → `kubectl rollout restart deployment/cobranca` (pod `cobranca-6cb84d6549-vjzn9`); C41 PASS.
+- **Achados:** (1) deploy da Cobrança sem imagem nova não reinicia o pod e a variável vinda de `cobranca-segredos` fica velha: falta anotação `checksum/secret` no Helm (ou `rollout restart` depois de trocar segredo); (2) Cadastros responde `500` em vez de `409` para telefone duplicado (`IX_Clientes_Telefone`); (3) os logs da Cobrança não registram webhook recusado (401), só o access log do gateway mostra.
+- **Pendente:** observar uma notificação automática com `202` (próximo pagamento real); decidir se os achados 1 a 3 entram antes da entrega.
+
 ## Handoff: web-ui-polimento (build e Verifier feitos) - 2026-11-17
 
 - **Estado:** plano aprovado ("Sim, aprovar junto (Recomendado)"), D-75 / AD-080. Web `feature/web-ui-polimento` local (sem push) a partir da `develop` `43d595f`: `8d4a114` (S1 fundação), `e2fff03` (Sagas), `b8a8a6d` (Fila), `f4aa318` (Orçamento e Pagamento), `5cf23ef` (navegação, Kanban, Detalhe, Home), `cae9e60` (cadastros, catálogo, Aprovação, Nova OS), `0857905` (achados do Verifier). Pai: `5e7454f`, `9132e76` e o fechamento.
