@@ -67,10 +67,12 @@ def todo_o_codigo(servico):
 def checar_meter_os(erros):
     nome = "AutoReparos.OS.Saga"
     api = fontes_cs("OS")
-    if f'"{nome}"' not in todo_o_codigo("OS"):
-        erros.append(f"OS: nenhum Meter chamado `{nome}`")
-    if ".AddMeter(" not in api:
-        erros.append("OS: o pipeline de métricas não chama AddMeter")
+    codigo = todo_o_codigo("OS")
+    # O Meter da Saga se chama exatamente `nome` e é ele (pela constante ou pelo literal) que o pipeline registra.
+    if not re.search(rf'const\s+string\s+NomeMeter\s*=\s*"{re.escape(nome)}"', codigo) or "new(NomeMeter)" not in codigo:
+        erros.append(f"OS: TelemetriaSaga não cria o Meter `{nome}` pela constante NomeMeter")
+    if not re.search(rf'\.AddMeter\(\s*(TelemetriaSaga\.NomeMeter|"{re.escape(nome)}")\s*\)', api):
+        erros.append(f"OS: o pipeline de métricas não registra o Meter `{nome}` (AddMeter)")
 
 
 def renderizar(chart, *args):

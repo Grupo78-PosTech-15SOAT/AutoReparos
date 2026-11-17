@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Application/Saga/ColetorMetricasSaga.cs",
+    "old": "inativas.Count(saga => !saga.Terminal)",
+    "new": "inativas.Count(saga => saga.Terminal)",
+    "proof": "dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~TelemetriaSagaTests",
+    "label": "C12 sagas_paradas conta as Sagas terminais em vez das não terminais"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Application/Saga/TelemetriaSaga.cs",
+    "old": "if (estadoAnterior != EstadoSaga.PagamentoCapturado && estadoAtual == EstadoSaga.PagamentoCapturado) Concluidas.Add(1);",
+    "new": "if (estadoAtual == EstadoSaga.PagamentoCapturado) Concluidas.Add(1);",
+    "proof": "dotnet test submodules/AutoReparos.OS/AutoReparos.OS.Tests --filter FullyQualifiedName~TelemetriaSagaTests",
+    "label": "C10 sagas_concluidas_total conta toda gravação em PagamentoCapturado, não só a transição"
+  },
+  {
+    "file": "submodules/AutoReparos.Execucao/AutoReparos.Execucao.Infrastructure/Integracoes.cs",
+    "old": "[AtributoTipo] = new() { DataType = \"String\", StringValue = mensagem.Tipo }",
+    "new": "[AtributoTipo] = new() { DataType = \"String\", StringValue = mensagem.Destino }",
+    "proof": "dotnet test submodules/AutoReparos.Execucao/AutoReparos.Execucao.Tests --filter FullyQualifiedName~PublicacaoSnsTests",
+    "label": "C17 atributo tipo da publicação SNS leva o Destino em vez do tipo do envelope"
+  }
+]
