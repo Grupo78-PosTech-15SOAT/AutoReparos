@@ -8,6 +8,8 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -67,7 +69,15 @@ def checar_api(erros):
             erros.append(f"{nome}: sem collection Postman nem arquivo OpenAPI versionado")
 
 
-BDD_MINIMO = 6  # AC 8: seis cenários (D-63, D-73)
+# AC 8: os seis cenários nomeados (D-63, D-73), conferidos pelo título no resultado do dotnet test.
+CENARIOS_BDD = (
+    "Pagamento aprovado conclui a Saga e marca a OS como paga",
+    "OS só de mão de obra pula a reserva e libera a execução direto",
+    "Pagamento recusado não dispara compensação e deixa a Saga aguardando",
+    "Falha na reserva de insumos aguarda saldo e o cancelamento compensa só o orçamento",
+    "Liberação recusada pelo Execução compensa a reserva e o orçamento em ordem inversa",
+    "Cancelamento pelo atendente com insumos reservados compensa em ordem inversa",
+)
 
 
 def checar_bdd(erros):
@@ -78,14 +88,25 @@ def checar_bdd(erros):
     if not list(projeto.rglob("*.feature")):
         erros.append("OS.BddTests: nenhum arquivo .feature")
     ambiente = dict(os.environ, DOTNET_CLI_UI_LANGUAGE="en")
-    exec_ = subprocess.run(["dotnet", "test", str(projeto), "--nologo", "-v", "q"],
-                           capture_output=True, text=True, env=ambiente)
-    saida = exec_.stdout + exec_.stderr
-    resumo = re.search(r"Failed:\s*(\d+),\s*Passed:\s*(\d+)", saida)
-    if not resumo:
-        erros.append("OS.BddTests: nenhum cenário executado (sem resumo do dotnet test)")
-    elif int(resumo.group(1)) or int(resumo.group(2)) < BDD_MINIMO or exec_.returncode:
-        erros.append(f"OS.BddTests: falhas={resumo.group(1)} passaram={resumo.group(2)} (esperado 0 e pelo menos {BDD_MINIMO})")
+    with tempfile.TemporaryDirectory() as pasta:
+        exec_ = subprocess.run(["dotnet", "test", str(projeto), "--nologo", "-v", "q",
+                                "--logger", "trx;LogFileName=bdd.trx", "--results-directory", pasta],
+                               capture_output=True, text=True, env=ambiente)
+        trx = list(Path(pasta).rglob("*.trx"))
+        resultados = {}
+        if trx:
+            ns = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
+            for r in ET.parse(trx[0]).getroot().iterfind(".//t:UnitTestResult", ns):
+                resultados[r.get("testName")] = r.get("outcome")
+    if not resultados:
+        erros.append("OS.BddTests: nenhum cenário executado (sem resultado do dotnet test)")
+        return
+    for titulo in CENARIOS_BDD:
+        if resultados.get(titulo) != "Passed":
+            erros.append(f"OS.BddTests: cenário '{titulo}' {resultados.get(titulo, 'não executado')}")
+    falhas = [n for n, o in resultados.items() if o != "Passed"]
+    if falhas or exec_.returncode:
+        erros.append(f"OS.BddTests: cenários sem sucesso {falhas} (código {exec_.returncode})")
 
 
 CHECAGENS = {"repos": checar_repos, "saga": checar_saga, "api": checar_api, "bdd": checar_bdd}
