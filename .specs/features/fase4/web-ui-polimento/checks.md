@@ -142,4 +142,4 @@ Proof: `npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch
 - **Gate:** `validate_verification.py` recusa só porque a árvore do pai está suja (ponteiros de submódulo: Web nesta feature, OS, Cobrança, Execução e Cadastros de outras sessões); o ponteiro do Web espera o push e a decisão do José
 - **Abandoned:** none
 - **Ajustes durante o build:** Usuários ganhou edição de nome e perfil (reuso de `UsuarioService.atualizar`) porque o AC 40 pede "Editar <nome>"; `assert_web_ui.py` passou a tratar como redefinição só a regra cujo seletor é a própria classe (seletor descendente não conta)
-- **Walked:** pendente - sem navegador headless na máquina; o José confere Sagas (drawer), Fila, Orçamento (seletor aberto sobre os catálogos), Kanban e um cadastro
+- **Walked:** feito pelo José em produção em 17/11 ("Já conferi está certo"): conferiu Sagas (drawer), Fila, Orçamento (seletor aberto sobre os catálogos), Kanban e um cadastro
