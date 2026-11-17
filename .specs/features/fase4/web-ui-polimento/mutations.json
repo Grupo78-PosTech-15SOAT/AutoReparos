@@ -1,0 +1,23 @@
+[
+  {
+    "file": "submodules/AutoReparos.Web/src/app/shared/utils/data-hora.utils.ts",
+    "old": "if (diff < MINUTO) return 'agora';",
+    "new": "if (diff <= MINUTO) return 'agora';",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/shared/utils/data-hora.utils.spec.ts --filter \"formatarDataHora\"",
+    "label": "C3 limite de 1 minuto deslocado (60 s exatos vira agora)"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/src/app/features/ordens-servico/services/os-conhecidas.service.ts",
+    "old": "return Array.from(new Set(todos.filter(Boolean))).slice(0, LIMITE_OS_CONHECIDAS);",
+    "new": "return todos.filter(Boolean).slice(0, LIMITE_OS_CONHECIDAS);",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/features/ordens-servico/services/os-conhecidas.service.spec.ts --filter \"OsConhecidas agregacao\"",
+    "label": "C9 sem deduplicacao dos ids de OS conhecidas"
+  },
+  {
+    "file": "submodules/AutoReparos.Web/src/app/shared/components/custom-select/custom-select.component.ts",
+    "old": "this.painelAnexado?.remove();",
+    "new": "void 0;",
+    "proof": "npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch=false --include src/app/shared/components/custom-select/custom-select.component.spec.ts --filter \"CustomSelect painel\"",
+    "label": "C7 destruir aberto nao remove o painel do body"
+  }
+]

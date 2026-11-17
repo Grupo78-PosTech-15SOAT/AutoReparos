@@ -138,7 +138,8 @@ Proof: `npx --offline yarn@1.22.22 --cwd submodules/AutoReparos.Web test --watch
 - **Settled mid-build:** none
 - **Nota de processo:** `check_commit.py` exige `type(scope):`; os commits seguem a AD-002 (`<gitmoji> <Descrição>`), que prevalece
 - **Dispatched:** Batch Worker A (S2, S3, S5: Sagas, Fila, Kanban, Navbar, Home, Detalhe) e Batch Worker B (S4, S6: Orçamento, Pagamento, Aprovação, cadastros, catálogo, Nova OS) a partir do Web `8d4a114` (S1), sem commit; ambos `returned` (A: 57 testes; B: 52 testes e 3 specs novos de Clientes, Veículos e Usuários); Verifier independente no pai `5e7454f` / Web `cae9e60`
-- **Boundary:** C1-C27 fechados no Web `cae9e60` (483 testes, cobertura agregada 97,19%, build ok)
+- **Boundary:** C1-C27 fechados no Web `cae9e60` (483 testes, cobertura agregada 97,19%, build ok); achados do Verifier fechados no Web `0857905` e no pai `9132e76` (486 testes, C28 acrescentado, 29 provas e 3/3 mutações mortas)
+- **Gate:** `validate_verification.py` recusa só porque a árvore do pai está suja (ponteiros de submódulo: Web nesta feature, OS, Cobrança, Execução e Cadastros de outras sessões); o ponteiro do Web espera o push e a decisão do José
 - **Abandoned:** none
 - **Ajustes durante o build:** Usuários ganhou edição de nome e perfil (reuso de `UsuarioService.atualizar`) porque o AC 40 pede "Editar <nome>"; `assert_web_ui.py` passou a tratar como redefinição só a regra cujo seletor é a própria classe (seletor descendente não conta)
 - **Walked:** pendente - sem navegador headless na máquina; o José confere Sagas (drawer), Fila, Orçamento (seletor aberto sobre os catálogos), Kanban e um cadastro
