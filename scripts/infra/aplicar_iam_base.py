@@ -111,25 +111,39 @@ def aplicar():
 
     for tipo, servico, documento in mudancas:
         if tipo == "deploy":
-            nome = f"autoreparos-deploy-{servico}"
-            aws("iam", "put-role-policy", "--role-name", nome, "--policy-name", nome,
-                "--policy-document", json.dumps(documento), saida_json=False)
-            confere = canonico(deploy_atual(servico)) == canonico(documento)
-            print(f"{'ok' if confere else 'DIVERGE'} put-role-policy {nome}")
+            aplicar_deploy(servico, documento)
         else:
-            versoes = aws("iam", "list-policy-versions", "--policy-arn", BOUNDARY_ARN)["Versions"]
-            if len(versoes) >= 5:
-                antiga = min((v for v in versoes if not v["IsDefaultVersion"]), key=lambda v: v["CreateDate"])
-                aws("iam", "delete-policy-version", "--policy-arn", BOUNDARY_ARN, "--version-id", antiga["VersionId"],
-                    saida_json=False)
-                print(f"apagada a versão antiga {antiga['VersionId']} do boundary (limite de 5)")
-            criada = aws("iam", "create-policy-version", "--policy-arn", BOUNDARY_ARN,
-                         "--policy-document", json.dumps(documento), "--set-as-default")["PolicyVersion"]["VersionId"]
-            nova_padrao, aplicado = boundary_atual()
-            confere = nova_padrao == criada and canonico(aplicado) == canonico(documento)
-            print(f"{'ok' if confere else 'DIVERGE'} boundary agora em {criada}")
+            aplicar_boundary(documento)
     if not mudancas:
         print("nada a aplicar")
+
+
+def aplicar_deploy(servico, documento):
+    nome = f"autoreparos-deploy-{servico}"
+    aws("iam", "put-role-policy", "--role-name", nome, "--policy-name", nome,
+        "--policy-document", json.dumps(documento), saida_json=False)
+    confere = canonico(deploy_atual(servico)) == canonico(documento)
+    print(f"{'ok' if confere else 'DIVERGE'} put-role-policy {nome}")
+
+
+def liberar_versao_do_boundary():
+    """Com 5 versões (limite da AWS), apaga a mais antiga que não é a padrão."""
+    versoes = aws("iam", "list-policy-versions", "--policy-arn", BOUNDARY_ARN)["Versions"]
+    if len(versoes) < 5:
+        return
+    antiga = min((v for v in versoes if not v["IsDefaultVersion"]), key=lambda v: v["CreateDate"])
+    aws("iam", "delete-policy-version", "--policy-arn", BOUNDARY_ARN, "--version-id", antiga["VersionId"],
+        saida_json=False)
+    print(f"apagada a versão antiga {antiga['VersionId']} do boundary (limite de 5)")
+
+
+def aplicar_boundary(documento):
+    liberar_versao_do_boundary()
+    criada = aws("iam", "create-policy-version", "--policy-arn", BOUNDARY_ARN,
+                 "--policy-document", json.dumps(documento), "--set-as-default")["PolicyVersion"]["VersionId"]
+    nova_padrao, aplicado = boundary_atual()
+    confere = nova_padrao == criada and canonico(aplicado) == canonico(documento)
+    print(f"{'ok' if confere else 'DIVERGE'} boundary agora em {criada}")
 
 
 def reverter(pasta):
