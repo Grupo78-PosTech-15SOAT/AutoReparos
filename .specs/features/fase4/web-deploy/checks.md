@@ -102,7 +102,7 @@ Proof: `python3 scripts/specs/assert_web_deploy.py --check raiz-publica`
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
+- **Dispatched:** Verifier em 17/11 sobre o pai `216a6d3` (Infra.K8s `71e67e0`, Web `c3165d7`), depois do passo (d): `deploy-app.yml` run `44026092269` verde na `main`; 21 provas verdes
 - **Boundary:** C1, C2, C4-C9 verdes local em 17/11 (Infra.K8s `b947a30` em `feature/web-deploy`; Web `687c3da`, `71e16a3`, `71d97d1` em `feature/web-deploy`; pai `1e34c89`, `1c93410`). C3, C10-C17 dependem da conta (apply do `stacks/base`, Environment, primeiro deploy, S5). Prova `deploy-job`: regex de `image.repository` corrigido para aceitar `${{ ... }}` (defeito do teste, claim igual)
 - **Abandoned:** none
 - **Walked:** n/a - nenhuma tela muda
