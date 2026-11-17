@@ -19,7 +19,7 @@ Proof: `python scripts/specs/assert_entrega.py --check saga`
 **C3** - OS, Cobrança e Execução têm Swagger/OpenAPI exposto ou uma collection Postman versionada no repositório (AC 1)
 Proof: `python scripts/specs/assert_entrega.py --check api`
 
-**C4** - A suíte `AutoReparos.OS.BddTests` executa pelo menos 4 cenários Reqnroll (fluxo completo com pagamento aprovado, pagamento recusado sem compensação, falta de saldo com compensação só do orçamento ao cancelar e liberação recusada com compensação em ordem inversa) e todos passam; menos de 4 executados reprova (AC 8, D-63)
+**C4** - A suíte `AutoReparos.OS.BddTests` executa pelo menos 6 cenários Reqnroll e todos passam: (1) fluxo completo com pagamento aprovado, passando pelo status `Concluida` antes de `Paga`; (2) OS sem insumos que não envia `execucao.reservar-insumos.v1` e libera a execução direto; (3) pagamento recusado sem compensação; (4) falta de saldo em `AguardandoInsumos` que, ao cancelar, compensa só o orçamento; (5) liberação recusada que compensa, nesta ordem, `execucao.cancelar-reserva.v1, cobranca.cancelar-orcamento.v1`; (6) cancelamento pelo atendente com insumos reservados que compensa, nesta ordem, `execucao.cancelar.v1, execucao.cancelar-reserva.v1, cobranca.cancelar-orcamento.v1` e termina em `Compensada` com a OS `Cancelada`; menos de 6 executados reprova (AC 8, D-63, D-73)
 Proof: `python scripts/specs/assert_entrega.py --check bdd`
 
 ### S2 - Vídeo, PDF e submissão
@@ -42,7 +42,7 @@ Proof: walk - registrar a autorização antes do envio
 | --- | --- | --- |
 | conteúdo do repositório (5) | Dockerfile C1 · manifests C1 · CI/CD C1 · README com arquitetura e cobertura C1 · Swagger/Postman C3 | - |
 | README (3) | Saga justificada C2 · papel na Saga C2 · Web C2 | - |
-| BDD (4) | fluxo completo C4 · pagamento recusado C4 · falta de saldo C4 · liberação recusada C4 | - |
+| BDD (6) | fluxo completo com `Concluida` C4 · sem insumos C4 · pagamento recusado C4 · falta de saldo C4 · liberação recusada em ordem inversa C4 · cancelamento após reserva em ordem inversa C4 | - |
 | vídeo (6) | plataforma C5 · visibilidade C5 · até 15 min C5 · fluxo, Saga e falha C6 · deploy com testes C6 · monitoramento e tracing C6 | - |
 | PDF (7) | participantes C7 · links C7 · vídeo C7 · diagrama C7 · Saga C7 · divisão C7 · tecnologias C7 | - |
 | salvaguardas (2) | entrada ausente C7 · autorização C8 | - |
@@ -61,8 +61,8 @@ Proof: walk - registrar a autorização antes do envio
 
 ## Handoff
 
-- **Settled mid-build:** 16/11 - D-63 "No OS, com harness (Recommended)"; plano aprovado ("Aprovo e envie")
+- **Settled mid-build:** 16/11 - D-63 "No OS, com harness (Recommended)"; plano aprovado ("Aprovo e envie"); 17/11 - revisão D-73 aprovada ("Faça isto, o plano está aprovado!"), C4 rederivado para 6 cenários
 - **Dispatched:** none
-- **Boundary:** checks derivados do plano aprovado em 16/11; build não iniciado
+- **Boundary:** C4 rederivado do plano aprovado em 17/11 (D-73); build do C4 em andamento
 - **Abandoned:** checks de 10/11 (scripts `assert_delivery_contents.py`, `assert_final_pdf.py` e `assert_package_readiness.py` nunca existiram)
 - **Walked:** none - C5 a C8 exigem o vídeo e o PDF finais

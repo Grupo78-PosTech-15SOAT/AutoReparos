@@ -67,6 +67,9 @@ def checar_api(erros):
             erros.append(f"{nome}: sem collection Postman nem arquivo OpenAPI versionado")
 
 
+BDD_MINIMO = 6  # AC 8: seis cenários (D-63, D-73)
+
+
 def checar_bdd(erros):
     projeto = repo("OS") / "AutoReparos.OS.BddTests"
     if not projeto.is_dir():
@@ -81,8 +84,8 @@ def checar_bdd(erros):
     resumo = re.search(r"Failed:\s*(\d+),\s*Passed:\s*(\d+)", saida)
     if not resumo:
         erros.append("OS.BddTests: nenhum cenário executado (sem resumo do dotnet test)")
-    elif int(resumo.group(1)) or int(resumo.group(2)) < 4 or exec_.returncode:
-        erros.append(f"OS.BddTests: falhas={resumo.group(1)} passaram={resumo.group(2)} (esperado 0 e pelo menos 4)")
+    elif int(resumo.group(1)) or int(resumo.group(2)) < BDD_MINIMO or exec_.returncode:
+        erros.append(f"OS.BddTests: falhas={resumo.group(1)} passaram={resumo.group(2)} (esperado 0 e pelo menos {BDD_MINIMO})")
 
 
 CHECAGENS = {"repos": checar_repos, "saga": checar_saga, "api": checar_api, "bdd": checar_bdd}

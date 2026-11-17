@@ -69,7 +69,7 @@ A suíte cobre 6 cenários divididos em duas features (`FluxoCompletoDaOS.featur
 3. **Pagamento recusado não dispara compensação e deixa a Saga aguardando** (Ação irreversível: preserva OS `Concluida` e não envia compensação).
 4. **Falha na reserva de insumos aguarda saldo e o cancelamento compensa só o orçamento** (Espera por reposição em `AguardandoInsumos`; cancelamento posterior compensa apenas o orçamento, pois insumos nunca foram reservados).
 5. **Liberação recusada pelo Execução compensa a reserva de insumos e o orçamento em ordem inversa** (Desfaz primeiro a reserva e em seguida o orçamento).
-6. **Cancelamento pelo atendente com insumos já reservados compensa a reserva e o orçamento** (Cancelamento antes do início do serviço físico desfaz reserva e orçamento na ordem inversa).
+6. **Cancelamento pelo atendente com insumos reservados compensa em ordem inversa** (Cancelamento antes do início do serviço físico: com a liberação já enviada, desfaz a execução, a reserva e o orçamento, nesta ordem: `execucao.cancelar.v1`, `execucao.cancelar-reserva.v1`, `cobranca.cancelar-orcamento.v1`).
 
 ### 4.3 Cobertura de 80% por serviço
 
