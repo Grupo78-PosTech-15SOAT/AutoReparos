@@ -60,48 +60,16 @@ Medição local em 04/11/2026 sobre a `origin/develop` (detalhes no [diagnóstic
 
 ### 4.2 D-14 — Onde fica o BDD
 
-**Recomendado:** no OS Service, que hospeda o orquestrador. Os cenários sobem o serviço com PostgreSQL e LocalStack em container e simulam Cobrança e Execução por consumidores de teste que respondem aos comandos. Isso roda no CI do próprio serviço e conta para a cobertura dele.
+Conforme D-63 e D-73, o BDD fica em `AutoReparos.OS.BddTests` no repositório do OS, executando com Reqnroll + xUnit sobre o `SagaHarness` (PostgreSQL e DynamoDB Local reais via Testcontainers, simulando Cobrança e Execução por mensageria). Roda no `ci-cd.yml` do OS e conta para a cobertura dele.
 
-Complemento opcional: os mesmos cenários executados no pai contra os 4 serviços reais (`docker compose`), de forma manual ou agendada.
+A suíte cobre 6 cenários divididos em duas features (`FluxoCompletoDaOS.feature` e `CompensacoesDaSaga.feature`):
 
-Esboço do fluxo exigido:
-
-```gherkin
-# language: pt
-Funcionalidade: Ciclo de vida da ordem de serviço
-  Como oficina
-  Quero que a OS percorra orçamento, reserva, execução e pagamento
-  Para que o cliente receba o veículo reparado com consistência entre os serviços
-
-  Contexto:
-    Dado um cliente "Leandro" com o veículo de placa "ABC1D23"
-    E o insumo "Óleo 5W30" com 10 unidades disponíveis
-
-  Cenário: Fluxo completo com pagamento aprovado
-    Quando o atendente abre uma ordem de serviço para o veículo "ABC1D23"
-    E o atendente gera o orçamento com "Troca de óleo" e 4 unidades de "Óleo 5W30"
-    E o cliente aprova o orçamento
-    Então 4 unidades de "Óleo 5W30" devem estar reservadas
-    Quando o mecânico conclui a execução
-    E o pagamento é aprovado pelo Mercado Pago
-    Então a ordem de serviço deve estar "ProntaParaRetirada"
-    E o insumo "Óleo 5W30" deve ter 6 unidades disponíveis e 0 reservadas
-
-  Cenário: Cancelamento depois da reserva aciona as compensações
-    Dado uma ordem de serviço com orçamento aprovado e 4 unidades de "Óleo 5W30" reservadas
-    Quando o atendente cancela a ordem de serviço
-    Então a ordem de serviço deve estar "Cancelada"
-    E o orçamento deve estar "Cancelado"
-    E o insumo "Óleo 5W30" deve ter 10 unidades disponíveis
-    E o histórico deve registrar as compensações "execucao.cancelar-reserva" e "cobranca.cancelar-orcamento"
-
-  Cenário: Execução fora do ar na liberação compensa a reserva
-    Dado uma ordem de serviço com orçamento aprovado
-    E o serviço de Execução reservou os insumos, mas não responde à liberação
-    Quando o prazo técnico da liberação se esgota
-    Então a reserva de "Óleo 5W30" deve estar "Cancelada"
-    E a Saga deve estar em "FalhaLiberacao" no console de administração
-```
+1. **Pagamento aprovado conclui a Saga e marca a OS como paga** (Fluxo feliz com insumos, validação do status intermediário `Concluida` e status final `Paga`).
+2. **Ordem de serviço sem insumos pula a reserva e vai direto para a liberação da execução** (Mão de obra pura, dispatch direto de `ordem-servico.liberada.v1`).
+3. **Pagamento recusado não dispara compensação e deixa a Saga aguardando** (Ação irreversível: preserva OS `Concluida` e não envia compensação).
+4. **Falha na reserva de insumos aguarda saldo e o cancelamento compensa só o orçamento** (Espera por reposição em `AguardandoInsumos`; cancelamento posterior compensa apenas o orçamento, pois insumos nunca foram reservados).
+5. **Liberação recusada pelo Execução compensa a reserva de insumos e o orçamento em ordem inversa** (Desfaz primeiro a reserva e em seguida o orçamento).
+6. **Cancelamento pelo atendente com insumos já reservados compensa a reserva e o orçamento** (Cancelamento antes do início do serviço físico desfaz reserva e orçamento na ordem inversa).
 
 ### 4.3 Cobertura de 80% por serviço
 
@@ -142,7 +110,7 @@ Alternativa: SonarQube self-hosted (já existe `docker-compose-sonar.yml`), que 
 ## 6. Critérios de aceite
 
 - [ ] Cada serviço tem testes unitários rodando no CI.
-- [ ] Pelo menos um fluxo completo da OS e duas compensações testados com BDD no CI.
+- [ ] Pelo menos um fluxo completo da OS (com e sem insumos) e compensações testados com BDD no CI (6 cenários Reqnroll, D-73).
 - [ ] Cada serviço com cobertura ≥ 80% no SonarCloud, com exclusões documentadas.
 - [ ] Quality gate do Sonar bloqueia o merge quando falha.
 - [ ] README de cada serviço mostra badge e print de cobertura.
