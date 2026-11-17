@@ -103,6 +103,6 @@ Proof: `python3 scripts/specs/assert_web_deploy.py --check raiz-publica`
 
 - **Settled mid-build:** none
 - **Dispatched:** none
-- **Boundary:** none
+- **Boundary:** C1, C2, C4-C9 verdes local em 17/11 (Infra.K8s `b947a30` em `feature/web-deploy`; Web `687c3da`, `71e16a3`, `71d97d1` em `feature/web-deploy`; pai `1e34c89`, `1c93410`). C3, C10-C17 dependem da conta (apply do `stacks/base`, Environment, primeiro deploy, S5). Prova `deploy-job`: regex de `image.repository` corrigido para aceitar `${{ ... }}` (defeito do teste, claim igual)
 - **Abandoned:** none
 - **Walked:** n/a - nenhuma tela muda
