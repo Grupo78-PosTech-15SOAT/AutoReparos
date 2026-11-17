@@ -435,3 +435,4 @@ opencode.json
 
 # Test State Files
 **/test_state.json
+scripts/infra/.backups-iam/
