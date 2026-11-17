@@ -383,7 +383,7 @@ def checar_deploy_job():
         erros.append("sem `helm upgrade --install web deploy/helm/web`")
     else:
         for opcao in (r"--namespace web\b", r"--atomic\b", r"--wait\b", r"--timeout 10m\b",
-                      r"image\.repository=\S*autoreparos-web", rf"image\.tag={sha}"):
+                      r"image\.repository=(?:\$\{\{[^}]*\}\}|\S)*autoreparos-web", rf"image\.tag={sha}"):
             if not re.search(opcao, helm):
                 erros.append(f"helm upgrade sem {opcao}: {helm.strip()}")
     indice_rollout, rollout = achar(r"kubectl rollout status deployment/autoreparos-web -n web\b")
