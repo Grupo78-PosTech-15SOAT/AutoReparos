@@ -1,7 +1,7 @@
 # fase4/web-ui-polimento proofs
 
-**HEAD**: 9132e76
-**Tree**: dirty - submodules/AutoReparos.Web, .claude/
+**HEAD**: 340b087
+**Tree**: dirty - .claude/
 **Result**: 29 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
