@@ -1,0 +1,30 @@
+[
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/SagaOS.cs",
+    "old": "private static double OrdemCompensacao(int numero) => numero == 5 ? 1.5 : numero;",
+    "new": "private static double OrdemCompensacao(int numero) => numero == 5 ? 2.5 : numero;",
+    "proof": "python scripts/specs/assert_entrega.py --check bdd",
+    "label": "reserva (etapa 5) compensada antes da execução (2): ordem inversa quebrada"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/SagaOS.cs",
+    "old": "if (Itens.Count > 0) IniciarReserva(agora);",
+    "new": "if (Itens.Count >= 0) IniciarReserva(agora);",
+    "proof": "python scripts/specs/assert_entrega.py --check bdd",
+    "label": "OS sem insumos também envia execucao.reservar-insumos.v1"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/SagaOS.cs",
+    "old": "if (status != StatusPagamento.Capturado)\n            return Aceitar(agora, TiposMensagem.PagamentoResultado, eventId, detalhe);",
+    "new": "if (status != StatusPagamento.Capturado)\n            return Transicao.Ok;",
+    "proof": "python scripts/specs/assert_entrega.py --check bdd",
+    "label": "pagamento recusado não é registrado no histórico da Saga"
+  },
+  {
+    "file": "submodules/AutoReparos.OS/AutoReparos.OS.Domain/SagaOS.cs",
+    "old": "        SincronizacoesPendentes.Add(StatusOS.Concluida);\n",
+    "new": "\n",
+    "proof": "python scripts/specs/assert_entrega.py --check bdd",
+    "label": "execução concluída não sincroniza a OS para Concluida"
+  }
+]
