@@ -79,6 +79,42 @@
 | AD-072 | D-67: tópico `autoreparos-execucao-eventos` no Terraform da Execução; assinaturas com `raw_message_delivery = true` e `filter_policy` em `tipo` criadas pelo Terraform do consumidor (OS: fila da Saga; Cadastros: notificações, só `execucao.concluida.v1`), com `aws_sqs_queue_policy` restrita ao `aws:SourceArn` do tópico; `stacks/base` libera `sns:*` em `autoreparos-${servico}-*` na política de deploy e `sns:Publish` em `autoreparos-${aws:PrincipalTag/Servico}-*` no boundary, aplicados por CLI iguais ao Terraform (com OK do José a cada comando). Ordem: IAM → Execução → OS e Cadastros | José: "Trace, depois SNS mínimo (Recommended)" e "AWS CLI, igual ao Terraform (Recommended)" (16/11) | active | 2026-11-16 |
 | AD-073 | D-68: plano de `infra-ci-observabilidade` revisado para os ACs 1, 2, 5 e 6; checks derivados de novo depois da aprovação | José: "Revisar infra-ci-obs (Recommended)" (16/11) | active | 2026-11-16 |
 | AD-074 | D-69: `web-adaptacao` retomada com escopo 100% Web-only (`submodules/AutoReparos.Web`), sem alterar `OS`, `Cobranca`, `Execucao` ou `Cadastros`; consome apenas as rotas já em produção (`/api/v1/...`, `/api/auth/login` e `POST /auth/cliente`), aprova orçamento autenticado como Cliente (`POST /auth/cliente` + `POST /api/v1/orcamentos/{id}/aprovacao`), remove dashboard, entregar, status manual, itens soltos da OS e busca por placa/CPF, traduz `{codigo}` nos erros HTTP e exige 80% de cobertura no código novo/alterado | José: "prefiro retomar o plano completo, atualize ele e as branches", "Your changes shouldn't be just web changes?" e "entendido pode continuar" (16/11) | active | 2026-11-16 |
+| AD-075 | D-70: nova feature TLC `fase4/web-coerencia-negocio` (100% Web-only em `submodules/AutoReparos.Web`, mantendo `web-adaptacao` congelada em PASS). Remove `/consulta-publica` do frontend (sem rota anônima no `OS`), estrutura cada fatia (`S1`–`S5`) em 4 pilares (Código coerente, Identidade Visual e componentes reutilizáveis incluindo `ModalDialogComponent` e `AlertBannerComponent`, Integrações reais sem mock, Permissões e cobertura ≥ 80%), corrige contratos reais (orçamento `valor: 0` + itens únicos, serviços `precoUnitario`, insumos `quantidadeDisponivel`/`quantidadeReservada`/`quantidadeInicial`, execução `descricao` em `/etapas` + `?mecanico=` + `EstadoExecucao`, veículos `chassi`/`renavam`, máscara `cpfCnpj`, `PUT /api/v1/usuarios/{id}`, catálogo completo de erros e `{ erro, detalhe }`) e conecta a jornada via `OsJornadaStore` (`localStorage`) | José: "Pode adicionar todos estes pontos que você mencionou no plano. Sim estamos falando agora de Web-only, se consulta publica já foi removida do backend então vamos tirar do front também. Sim pode criar a feature tlc" (16/11) | active | 2026-11-16 |
+| AD-076 | D-71: S5 de `fase4/web-coerencia-negocio` revista. Link de aprovação só com `orcamentoId` (cliente digita CPF e e-mail; nada pessoal em URL ou `localStorage`); `OsJornadaStore` é atalho local opcional, só IDs, limpo no logout; Administrador usa `GET /api/v1/admin/sagas/{osId}` como fonte de `orcamentoId`; `pagamentoId` manual quando faltar; `403` da fila para Atendente vira "sem acesso à execução". Etapa: `{ tipo, descricao }`; usuário: `tipo` numérico; AC 17 com 8 códigos a mais. Plano em revisão pendente de aprovação; `checks.md` derivado de novo após aprovação | José: "D-71 use a sua recomendação, passar o orçamentoId e o cliente passa suas próprias infos" (16/11) | active | 2026-11-16 |
+| AD-077 | D-72: feature `fase4/web-deploy`. Web com job `deploy` próprio (OIDC `autoreparos-deploy-web`, política só ECR `autoreparos-web` + `eks:DescribeCluster`, edição só no namespace `web`), chart `deploy/helm/web` (release `web`, Ingress `/` com `group.order: 999` para trocar sem janela fora do ar), `workflow_dispatch` + `ignorar_quality`, quality corrigido. O pai passa `web.enabled: false` e não monta mais a imagem do Web; `destroy-aws.yml` desinstala o release `web`. Substitui a parte "pai implanta o Web" do AD-048 | José: "Quero ajustar o Web para isto, crie a spec"; "Chart próprio no Web (Recommended)"; "Corrigir e ter escape (Recommended)"; "Fica para amanhã (Recommended)" (16/11) | active | 2026-11-16 |
+
+## Handoff: plano de web-deploy - 2026-11-16
+
+- **Estado:** `.specs/features/fase4/web-deploy/plan.md` escrito (D-72 / AD-077), aguarda aprovação; sem `checks.md`. Nenhum arquivo de código, Terraform ou GitHub alterado.
+- **Fatos levantados:** id do repositório Web `1454153026`; ECR `autoreparos-web` já no `stacks/base`; observabilidade no namespace `autoreparos`; quality vermelho no run `43251757645` (código 3 do scanner, log indisponível).
+- **Próximo passo:** aprovação → `checks.md` → ordem (a) `stacks/base`, (b) Environment do Web por `gh api` com confirmação, (c) primeiro deploy do Web, (d) pai com `web.enabled: false`.
+
+## Handoff: web-coerencia-negocio (Concluída com PASS) - 2026-11-16
+
+- **Contexto:** Alinhamento técnico, de negócio, contratos de microsserviços e identidade visual do Web (`AutoReparos.Web`) após a separação de microsserviços na Fase 4 (D-70, D-71, AD-075, AD-076).
+- **Submódulo `AutoReparos.Web`:** Branch `feature/web-coerencia-negocio` commitada com 8 commits atômicos (Gitmoji + Conventional Commits + Co-Authored-By), push remoto efetuado e Pull Request aberto exclusivamente para `develop`:
+  - PR: [Grupo78-PosTech-15SOAT/AutoReparos.Web#4](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web/pull/4) (base: `develop`, head: `feature/web-coerencia-negocio`).
+- **Fatias Implementadas (S1 a S5):**
+  1. **S1 (Visual e Consulta Pública):** Rota e componente de consulta pública removidos integralmente (door 2); componentes compartilhados `ModalDialogComponent` e `AlertBannerComponent` integrados e reutilizados com tokens CSS.
+  2. **S2 (Catálogo e Estoque):** `precoUnitario` em serviços e insumos, `quantidadeDisponivel`/`quantidadeReservada`/`quantidadeInicial`, `valor: 0` com agrupamento no modo de itens de orçamento e suporte a modo avulso, e permissões estritas por perfil.
+  3. **S3 (Fila de Execução):** Envio de `{ tipo, descricao }`, identificação visual de descrição automática, filtro `?mecanico=` e 5 estados reais de execução, retorno de `EtapaCriada`, tratamento de 403 da fila como restrito sem quebra silenciosa e banner de erro genérico (`<app-alert-banner>`) no Kanban para falhas na fila.
+  4. **S4 (Cadastros):** `chassi` de 17 caracteres e `renavam` de 11 dígitos em veículos, vínculo dinâmico veículo-cliente na abertura de OS, máscara dinâmica `cpfCnpj`, `PUT` com `{ nomeCompleto, tipo }` numérico em usuários recusando perfis não mapeados e remoção de campos/rotas legadas (`ROLE`).
+  5. **S5 (Jornada Conectada `OsJornadaStore` e Detalhe da OS):**
+     - `OsJornadaStore` armazena exclusivamente IDs (`osId, clienteId, veiculoId, orcamentoId, pagamentoId, atualizadoEm`) no `localStorage` (`autoreparos_os_jornada_v1`), limitado a 100 registros e limpo no `AuthService.logout` (door 1).
+     - Detalhe da OS exibe dados de cliente e veículo com badges dedicados e fallback gracioso para IDs, link direto para `/aprovar-orcamento?orcamentoId={id}` (sem dados pessoais em query params) e busca de `orcamentoId` em `admin/sagas/{osId}` para Administrador.
+     - Kanban combina fila de execução, sagas (Administrador) e OS do atalho revalidadas via `GET /api/v1/ordens-servico/{id}`, permitindo ao Atendente visualizar OS em `Recebida`.
+     - Orçamento e Pagamento oferecem seletor rápido `<app-custom-select>` com as OS do atalho com fallback manual de UUID.
+- **Validação Independente (`Verifier`, `author != verifier`):**
+  - Veredito: **PASS** formal registrado em [.specs/features/fase4/web-coerencia-negocio/validation.md](features/fase4/web-coerencia-negocio/validation.md).
+  - 364/364 testes unitários passando em 25 suítes (`yarn test --watch=false`).
+  - `yarn build` gerando bundle de produção sem erros.
+  - `assert_web_coerencia.py --check all`: 100% PASS (1.866/1.972 linhas, 94.62% agregado, todos os arquivos novos/alterados ≥ 80%).
+  - Sensor de discriminação: 3/3 mutações mortas pelos testes (`MAX_REGISTROS`, tipo mecânico e supressão de flag restrita).
+  - `verificar_links.py`: 82 arquivos, 314 links, 0 problemas.
+- **Próximos Passos:**
+  - Merge do PR #4 de `AutoReparos.Web` em `develop`.
+  - Atualização do ponteiro do submódulo `submodules/AutoReparos.Web` no repositório pai apenas após o merge em `develop`.
+  - Continuação para aprovação e implementação do plano de `web-deploy`.
 
 ## Handoff: web-adaptacao - 2026-11-16
 
@@ -312,3 +348,6 @@ O repositório principal usa submódulos fixados por commit. Em outro computador
 - **Estado das dependências (conferido em 13/11):** `insumos` está PASS na branch `feature/insumos` (worktree `.claude/worktrees/insumos`, proofs em `7a0c85f`); `cadastros` só tem o aviso conhecido de HEAD movido pelo commit do `proofs.md`.
 - Decisão de build: orçamento sem insumos (`itens` vazio) vai direto a `ExecucaoLiberada` e a compensação não publica `cancelar-reserva` (AC 4, "quando há reserva"); `itens` ausente no evento é inválido e vai à DLQ (C1).
 - Execução em `feature/insumos` não está na `develop`; a branch da saga parte dela.
+
+
+
