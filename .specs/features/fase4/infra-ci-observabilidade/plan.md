@@ -1,6 +1,6 @@
 # Fase 4 - Infraestrutura, CI/CD e observabilidade
 
-**Approved**: 2026-11-16 - user: "Se estiver no formato esperado, então plano está aprovado" (formato conferido: o PDF da Fase 4 não fixa formato de rastreamento; W3C Trace Context no envelope é o § 4.1 da spec de observabilidade). Revisão D-68: ACs 1, 2, 5 e 6; os ACs 3, 4 e 7 estão em [`deploy-servicos`](../deploy-servicos/plan.md) (D-40) e o staging saiu (D-41); AC 5 = D-65, D-66 e D-67.
+**Revisão pendente de aprovação** (17/11, D-76: proteção da `main` com 0 aprovações para o José gravar o vídeo sozinho). Aprovação anterior: 2026-11-16 - user: "Se estiver no formato esperado, então plano está aprovado" (formato conferido: o PDF da Fase 4 não fixa formato de rastreamento; W3C Trace Context no envelope é o § 4.1 da spec de observabilidade). Revisão D-68: ACs 1, 2, 5 e 6; os ACs 3, 4 e 7 estão em [`deploy-servicos`](../deploy-servicos/plan.md) (D-40) e o staging saiu (D-41); AC 5 = D-65, D-66 e D-67.
 
 Aprovações anteriores: 2026-11-11 - user: "Sim, aprovo e crio" (branch protegida só `main`; repositório Web criado nesta entrega); 2026-11-11 - user: "Pode seguir" (AC 5 sem DynamoDB Streams, D-26); 2026-11-06 - user: "Pode seguir".
 
@@ -58,7 +58,7 @@ Reaproveita o OTLP que os quatro serviços já exportam para o OTel Collector, o
 
 **AC 1, AC 2 e AC 6:**
 
-10. Push ou PR → `ci-cd.yml` (exists) roda `build`, `test` (cobertura de 80%) e `quality` (SonarCloud com quality gate). A proteção da `main` exige PR com 1 aprovação e os checks `build` e `test`.
+10. Push ou PR → `ci-cd.yml` (exists) roda `build`, `test` (cobertura de 80%) e `quality` (SonarCloud com quality gate). A proteção da `main` exige PR (0 aprovações, D-76) e os checks `build` e `test`.
 
 ```mermaid
 flowchart LR
@@ -107,7 +107,7 @@ None - nenhuma rota HTTP nova nem alterada. As superfícies operacionais são o 
 | 2 - assinatura pelo consumidor | No Terraform do consumidor: `aws_sns_topic_subscription` com `protocol = "sqs"`, `raw_message_delivery = true`, `filter_policy = jsonencode({ tipo = [...] })` e `aws_sqs_queue_policy` que só aceita `sqs:SendMessage` de `sns.amazonaws.com` com `aws:SourceArn` igual ao ARN do tópico. O ARN é montado pelo nome determinístico | Assinatura no Terraform do produtor, porque obriga a Execução a conhecer as filas dos consumidores e contradiz a D-46. Sem raw delivery, OS e Execução não leem o envelope do SNS |
 | 3 - IAM base para SNS | `deploy-servico.json.tftpl`: `sns:*` em `arn:aws:sns:us-east-1:<conta>:autoreparos-${servico}-*`, mais `sns:Subscribe`, `sns:Unsubscribe`, `sns:GetSubscriptionAttributes` e `sns:SetSubscriptionAttributes` em `arn:aws:sns:us-east-1:<conta>:autoreparos-*`; `servico-boundary.json.tftpl`: `sns:Publish` em `arn:aws:sns:us-east-1:<conta>:autoreparos-${aws:PrincipalTag/Servico}-*`. Aplicado por CLI igual ao Terraform | `sns:*` sem prefixo, porque deixaria um serviço publicar ou apagar o tópico de outro (L-009, L-017) |
 | 4 - campos do envelope | `"traceparent": "00-<32 hex>-<16 hex>-<2 hex>"` (W3C) e `"tracestate"` opcional, na raiz do JSON do envelope, ao lado de `eventId` e `tipo` | Atributos de mensagem SQS, porque a Outbox grava em segundo plano e perderia o contexto, e exigiria coluna nova em três bancos; coluna nova na Outbox pela mesma razão |
-| 5 - proteção da `main` | Em OS, Cobrança, Execução, Cadastros e Web: PR obrigatório com 1 aprovação, `dismiss_stale_reviews`, status checks `strict` com `build` e `test`, force push e exclusão bloqueados, `enforce_admins` desligado | Exigir `quality`, porque o quality do Web está vermelho desde 12/11 e travaria qualquer merge nele; `enforce_admins` ligado, porque impede o José de corrigir na véspera da entrega |
+| 5 - proteção da `main` | Em OS, Cobrança, Execução, Cadastros e Web: PR obrigatório com 0 aprovações (D-76), `dismiss_stale_reviews`, status checks `strict` com `build` e `test`, force push e exclusão bloqueados, `enforce_admins` desligado | Exigir `quality`, porque o quality do Web está vermelho desde 12/11 e travaria qualquer merge nele; `enforce_admins` ligado, porque impede o José de corrigir na véspera da entrega |
 
 - Nothing else in this change is hard to reverse
 
@@ -173,7 +173,7 @@ O que já roda passa a ter prova, e a `main` passa a barrar o que não passou.
 
 1. WHEN um PR para a `main` ou um push na `main` acontece em OS, Cobrança, Execução ou Cadastros THEN o workflow de CI/CD do repositório SHALL rodar `build`, `test` com cobertura mínima de 80% de linhas e `quality` com o quality gate do SonarCloud, e a última execução na `main` de cada um SHALL ter os três em `success`
 
-2. WHEN alguém tenta mesclar na `main` de OS, Cobrança, Execução, Cadastros ou Web THEN o GitHub SHALL exigir PR com 1 aprovação e os status checks `build` e `test` verdes (strict), bloquear force push e exclusão, e deixar `enforce_admins` desligado
+2. WHEN alguém tenta mesclar na `main` de OS, Cobrança, Execução, Cadastros ou Web THEN o GitHub SHALL exigir PR (0 aprovações, D-76) e os status checks `build` e `test` verdes (strict), bloquear force push e exclusão, e deixar `enforce_admins` desligado
    - PR com teste quebrado → botão de merge bloqueado pelo check `test`; PR sem aprovação → bloqueado
 
 6. IF uma mensagem falha no processamento até o limite THEN o serviço SHALL aplicar backoff exponencial com jitter entre tentativas e, ao esgotar, mover a mensagem para a DLQ da fila, sem perdê-la
@@ -200,7 +200,7 @@ O que já roda passa a ter prova, e a `main` passa a barrar o que não passou.
 | Ordem do trabalho | Trace, depois dashboard, depois SNS | Decisão do José | y - José: "Vamos fazer ambos, primeiro dash e depois SNS" |
 | Hora-limite do SNS | Deploy em produção até 00h30 de 17/11; depois disso fica em PR e vira dívida | Véspera da entrega; a Saga em produção não pode ficar instável na manhã da gravação | n |
 | Aplicação do IAM base | AWS CLI com o JSON igual ao Terraform, com OK a cada comando | Decisão do José; o `provision-aws.yml` roda a plataforma inteira (~35 min) | y - José: "AWS CLI, igual ao Terraform (Recommended)" |
-| Proteção da `main` | `build` e `test` obrigatórios, 1 aprovação, `enforce_admins` desligado, aplicada em 17/11 antes da gravação | Proposta do José na retomada | y - José: "Proposta: PR obrigatório, checks build e test (sem quality no Cadastros se o SonarCloud dele voltar a falhar), 1 aprovação, enforce_admins desligado" |
+| Proteção da `main` | `build` e `test` obrigatórios, PR com 0 aprovações (D-76), `enforce_admins` desligado, aplicada em 17/11 antes da gravação | Proposta do José na retomada | y - José: "Proposta: PR obrigatório, checks build e test (sem quality no Cadastros se o SonarCloud dele voltar a falhar), 1 aprovação, enforce_admins desligado" |
 | Sagas paradas | A mesma regra de prazo vencido que o console de Sagas e os lembretes do `saga-compensacoes` já usam | Não inventar uma segunda definição de "parada" | n |
 | Repositórios do AC 1 | OS, Cobrança, Execução e Cadastros (o Web tem `quality` vermelho e o frontend fica como está) | O AC 1 prova o que está em produção | n |
 

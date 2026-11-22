@@ -43,7 +43,7 @@
 
 ## 2. Vídeo
 
-🔲 Link do vídeo (YouTube ou Vimeo, não listado, até 15 min): *preencher depois da gravação*.
+[https://youtu.be/BqWcQaEuKAs](https://youtu.be/BqWcQaEuKAs) (YouTube, até 15 min).
 
 ## 3. Arquitetura final
 

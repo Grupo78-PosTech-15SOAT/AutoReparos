@@ -1072,7 +1072,7 @@ Especificações históricas em [`docs/specs/`](./docs/specs/) e enunciados ofic
 | Entregável | Link |
 | --- | --- |
 | Repositórios | [OS](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS) · [Cobrança](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca) · [Execução](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao) · [Cadastros](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros) · [Web](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web) · [AuthLambda](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda) · [Infra.K8s](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s) · [Infra.Database](https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database) |
-| Vídeo de demonstração (até 15 min) | *link a ser incluído após a gravação* |
+| Vídeo de demonstração (até 15 min) | [youtu.be/BqWcQaEuKAs](https://youtu.be/BqWcQaEuKAs) |
 | Arquitetura e justificativa | [`docs/entrega/fase4/arquitetura_e_justificativa.md`](./docs/entrega/fase4/arquitetura_e_justificativa.md) |
 | Desenho estratégico DDD (Miro) | [Miro](https://miro.com/app/board/uXjVGw2wAXY=/?share_link_id=246372446405) |
 | Qualidade | [SonarCloud — organização grupo78-postech-15soat](https://sonarcloud.io/organizations/grupo78-postech-15soat/projects) |

@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant CO as Cobrança
+    participant OS as OS<br/>orquestrador da Saga<br/>(estado no DynamoDB)
+    participant EX as Execução
+
+    Note over CO,EX: Caminho feliz: o OS decide cada passo; os serviços só respondem
+    CO-)OS: orcamento.aprovado.v1
+    OS-)EX: execucao.reservar-insumos.v1 (comando)
+    EX-)OS: insumos.reservados.v1
+    OS-)EX: ordem-servico.liberada.v1 (comando)
+    EX-)OS: execucao.concluida.v1
+    CO-)OS: pagamento.resultado.v1 (aprovado)
+    Note over OS: Saga PagamentoCapturado · OS Paga
+
+    Note over CO,EX: Falha: cancelamento depois da reserva, compensação em ordem inversa
+    OS-)EX: 1. execucao.cancelar.v1
+    EX-)OS: execucao.cancelada.v1
+    OS-)EX: 2. execucao.cancelar-reserva.v1
+    EX-)OS: insumos.reserva-cancelada.v1
+    OS-)CO: 3. cobranca.cancelar-orcamento.v1
+    CO-)OS: orcamento.cancelado.v1
+    Note over OS: Saga Compensada · OS Cancelada
