@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tech Challenge Fase 4 — AutoReparos</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  :root { --tinta: #1d2430; --suave: #5b6676; --linha: #d7dce3; --destaque: #1f4e8c; --fundo: #f4f6f9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: var(--tinta); background: #fff; font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  h1 { font-size: 22pt; margin: 0 0 4pt; color: var(--destaque); }
+  h2 { font-size: 14pt; color: var(--destaque); border-bottom: 1.5pt solid var(--destaque); padding-bottom: 3pt; margin: 18pt 0 8pt; break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 12pt 0 6pt; break-after: avoid; }
+  p { margin: 0 0 7pt; }
+  a { color: var(--destaque); text-decoration: none; word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 10pt; break-inside: auto; }
+  th, td { border: 0.75pt solid var(--linha); padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: var(--fundo); font-weight: 600; }
+  tr { break-inside: avoid; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; background: var(--fundo); padding: 0 2pt; border-radius: 2pt; }
+  ul { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  .capa { min-height: 245mm; display: flex; flex-direction: column; justify-content: center; break-after: page; }
+  .capa .sub { font-size: 13pt; color: var(--suave); margin-bottom: 26pt; }
+  .capa table th { width: 32%; }
+  .pendente { background: #fff3cd; border: 1pt solid #e0b84d; padding: 1pt 4pt; border-radius: 2pt; font-weight: 600; }
+  figure { margin: 6pt 0 10pt; text-align: center; break-inside: avoid; }
+  figure img { max-width: 100%; max-height: 205mm; }
+  figcaption { font-size: 9pt; color: var(--suave); margin-top: 4pt; }
+  .quebra { break-before: page; }
+</style>
+</head>
+<body>
+
+<section class="capa">
+  <h1>AutoReparos</h1>
+  <div class="sub">Sistema Integrado de Oficina Mecânica — Tech Challenge, Fase 4</div>
+  <table>
+    <tr><th>Curso</th><td>Pós-Graduação em Software Architecture (SOAT) — FIAP</td></tr>
+    <tr><th>Turma</th><td>15SOAT</td></tr>
+    <tr><th>Grupo</th><td>78</td></tr>
+    <tr><th>Fase</th><td>4 — Microsserviços, Saga e CI/CD</td></tr>
+    <tr><th>Data de entrega</th><td>17/11/2026</td></tr>
+  </table>
+  <h3>Integrantes</h3>
+  <table>
+    <tr><th>Nome</th><th>RM</th></tr>
+    <tr><td>Enrico Gollner</td><td>rm370737</td></tr>
+    <tr><td>José Dotta</td><td>rm372959</td></tr>
+    <tr><td>Júlia Santos</td><td>rm370364</td></tr>
+    <tr><td>Lucas Bastos</td><td>rm370749</td></tr>
+    <tr><td>Mateus Lecchi</td><td>rm371085</td></tr>
+  </table>
+</section>
+
+<h2>1. Vídeo de demonstração</h2>
+<p><b>Link:</b> <a href="https://youtu.be/BqWcQaEuKAs">https://youtu.be/BqWcQaEuKAs</a></p>
+<p>O vídeo tem até 15 minutos e mostra: o fluxo completo de uma OS pela Saga, da abertura ao pagamento pelo Mercado Pago; uma Saga com falha e as compensações em ordem inversa; o código do orquestrador, de uma compensação e da idempotência; o deploy automatizado de um serviço com os testes como gate; a proteção de branch bloqueando um PR; e o rastreamento no Jaeger, os logs no Loki e os dashboards do Grafana com tráfego real.</p>
+
+<h2>2. Repositórios</h2>
+<p>Todos os repositórios são públicos.</p>
+<table>
+  <tr><th>Repositório</th><th>Responsabilidade</th><th>URL</th></tr>
+  <tr><td>AutoReparos (pai)</td><td>Orquestração por submódulos, specs, scripts e documentação</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos">github.com/Grupo78-PosTech-15SOAT/AutoReparos</a></td></tr>
+  <tr><td>AutoReparos.OS</td><td>Ordens de serviço e orquestrador da Saga (PostgreSQL e DynamoDB)</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS">github.com/Grupo78-PosTech-15SOAT/AutoReparos.OS</a></td></tr>
+  <tr><td>AutoReparos.Cobranca</td><td>Orçamento, pagamento e Mercado Pago (PostgreSQL)</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cobranca</a></td></tr>
+  <tr><td>AutoReparos.Execucao</td><td>Fila de execução, catálogo e insumos (PostgreSQL)</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Execucao</a></td></tr>
+  <tr><td>AutoReparos.Cadastros</td><td>Clientes, veículos e usuários; emissão do JWT (PostgreSQL)</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Cadastros</a></td></tr>
+  <tr><td>AutoReparos.Web</td><td>Aplicação Angular</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Web</a></td></tr>
+  <tr><td>AutoReparos.AuthLambda</td><td>Autenticação serverless do cliente</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda">github.com/Grupo78-PosTech-15SOAT/AutoReparos.AuthLambda</a></td></tr>
+  <tr><td>AutoReparos.Infra.Database</td><td>Terraform do RDS e provisionador de databases</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.Database</a></td></tr>
+  <tr><td>AutoReparos.Infra.K8s</td><td>Terraform do EKS, API Gateway e charts da plataforma</td><td><a href="https://github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s">github.com/Grupo78-PosTech-15SOAT/AutoReparos.Infra.K8s</a></td></tr>
+</table>
+
+<h2 class="quebra">3. Arquitetura final</h2>
+<figure>
+  <img src="diagrama_arquitetura.png" alt="Diagrama da arquitetura final do AutoReparos: Web, API Gateway, AuthLambda e Mercado Pago na borda; OS, Cobrança, Execução e Cadastros no EKS; SQS com DLQ; PostgreSQL por serviço e DynamoDB para a Saga; observabilidade com OpenTelemetry, Prometheus, Grafana, Loki e Jaeger">
+  <figcaption>Linha cheia: chamada ou mensagem em uso. Tracejada: telemetria (OTLP) ou item não provisionado (fan-out por SNS, D-46). As quatro databases PostgreSQL ficam numa única instância RDS, cada uma com usuário próprio.</figcaption>
+</figure>
+
+<h2>4. Divisão dos microsserviços</h2>
+<p>A divisão segue o enunciado (OS, Cobrança e Execução) e acrescenta o Cadastros.</p>
+<table>
+  <tr><th>Serviço</th><th>Responsabilidade</th><th>Por que é um serviço próprio</th></tr>
+  <tr><td><b>OS</b></td><td>Abertura, status e histórico da ordem de serviço; orquestrador e estado da Saga</td><td>É o dono do ciclo de vida da OS e o único que conhece o fluxo inteiro. Concentrar a orquestração aqui evita que cada serviço precise saber o que vem antes e depois dele.</td></tr>
+  <tr><td><b>Cobrança</b></td><td>Orçamento, aprovação, pagamento (Mercado Pago) e reembolso</td><td>Tem integração externa e regras de dinheiro próprias. Isolar limita o impacto de uma falha do provedor.</td></tr>
+  <tr><td><b>Execução</b></td><td>Fila, diagnóstico, etapas, catálogo de serviços e insumos com reserva</td><td>A reserva de insumos é passo e compensação da Saga e precisa da mesma transação da execução.</td></tr>
+  <tr><td><b>Cadastros</b></td><td>Clientes, veículos, usuários, emissão do JWT e JWKS</td><td>Reaproveita o código testado do aplicativo original (93% de cobertura) em vez de reescrevê-lo. Os demais serviços só validam o token.</td></tr>
+</table>
+<p>Alternativas descartadas: um quinto serviço de Estoque (um repositório, pipeline, chart e Sonar a mais, sem ganho de domínio) e o Cadastros dentro do OS (reescreveria código já verificado dentro de um serviço crítico).</p>
+
+<h2>5. Bancos de dados</h2>
+<table>
+  <tr><th>Decisão</th><th>Justificativa</th></tr>
+  <tr><td><b>PostgreSQL por serviço</b>, numa instância RDS compartilhada, com database e usuário próprios</td><td>Garante que nenhum serviço acessa o banco de outro, sem o custo de uma instância por serviço. Um provisionador cria a database e o usuário de cada serviço, chamado pelo pipeline do próprio serviço.</td></tr>
+  <tr><td><b>DynamoDB para o estado da Saga</b></td><td>Atende ao requisito de um banco não relacional e combina com o acesso por chave: o estado é lido e gravado por <code>ordemServicoId</code>, com escrita condicional para evitar concorrência.</td></tr>
+  <tr><td><b>Sem leitura cruzada</b></td><td>Os serviços se consultam por REST (o OS valida cliente e veículo no Cadastros) e a AuthLambda chama um endpoint interno em vez de acessar o banco.</td></tr>
+</table>
+<p>O Cadastros usa a database <code>autoreparos_db</code> no RDS, herdada do aplicativo original.</p>
+
+<h2>6. Comunicação e mensageria</h2>
+<table>
+  <tr><th>Decisão</th><th>Justificativa</th></tr>
+  <tr><td><b>REST síncrono só onde há resposta imediata</b></td><td>Validação de cliente e veículo, consulta de dados e autenticação. O restante é assíncrono.</td></tr>
+  <tr><td><b>SQS com DLQ</b></td><td>Desacopla os serviços e tolera falha de um participante. Mensagem que esgota as tentativas vai para a DLQ e pode ser reprocessada.</td></tr>
+  <tr><td><b>AWSSDK.SQS com Outbox e Inbox</b>, sem MassTransit</td><td>A Outbox grava o evento na mesma transação do banco e a Inbox deduplica por <code>eventId</code>. Mantém o controle de retentativas e evita uma dependência a mais.</td></tr>
+  <tr><td><b>JWT assimétrico emitido pelo Cadastros</b></td><td>OS, Cobrança e Execução validam o token pela chave pública, sem compartilhar segredo de assinatura.</td></tr>
+  <tr><td><b>Pagamento depois da conclusão</b></td><td>Reflete o negócio da oficina: o cliente paga o serviço concluído, antes da entrega.</td></tr>
+  <tr><td><b>Mercado Pago Checkout Pro com webhook validado</b></td><td>Evita tratar dados de cartão e valida a origem das notificações pela assinatura.</td></tr>
+</table>
+
+<h2>7. Estratégia da Saga</h2>
+<p><b>Saga orquestrada</b>, com o OS como orquestrador. A OS tem passos sequenciais com compensação em ordem inversa (aprovar o orçamento, reservar insumos, liberar e concluir a execução, capturar o pagamento). Um ponto único que conhece o estado facilita travas, prazos, auditoria e intervenção manual. Na coreografia, esse conhecimento ficaria espalhado pelos eventos dos três serviços.</p>
+<ul>
+  <li><b>Estado persistido</b> em DynamoDB, com escrita condicional por versão.</li>
+  <li><b>Compensações</b> em ordem inversa: cancelar a execução, cancelar a reserva de insumos e cancelar o orçamento. Falha numa compensação leva a <code>CompensacaoFalhou</code>, que exige intervenção.</li>
+  <li><b>Idempotência</b> por <code>eventId</code> (Inbox): mensagem repetida é descartada. Cada passo tem prazo técnico com reenvio.</li>
+  <li><b>Operação:</b> console de Sagas para o administrador e reprocessamento da DLQ por serviço.</li>
+  <li><b>Ações irreversíveis não são compensadas:</b> o pagamento recusado só entra no histórico e deixa a Saga aguardando. A falta de saldo deixa a OS em <code>AguardandoInsumos</code> até o cancelamento, que compensa só o orçamento.</li>
+</ul>
+<p>Seis cenários BDD (Reqnroll, em português) em <code>AutoReparos.OS.BddTests</code> cobrem: o fluxo completo com pagamento aprovado; a OS sem insumos; o pagamento recusado; a falta de saldo na reserva; a liberação recusada pela Execução, com compensação em ordem inversa; e o cancelamento voluntário com insumos já reservados.</p>
+
+<h2>8. Tecnologias</h2>
+<table>
+  <tr><th>Camada</th><th>Tecnologia</th><th>Motivo</th></tr>
+  <tr><td>Serviços</td><td>.NET 10, EF Core</td><td>Base do projeto desde a Fase 1; código testado reaproveitado</td></tr>
+  <tr><td>Frontend</td><td>Angular</td><td>Aplicação existente, extraída para um repositório próprio</td></tr>
+  <tr><td>Dados</td><td>PostgreSQL (RDS), DynamoDB</td><td>Ver seção 5</td></tr>
+  <tr><td>Mensageria</td><td>SQS</td><td>Ver seção 6</td></tr>
+  <tr><td>Execução</td><td>AWS EKS, Helm, API Gateway HTTP v2, Lambda</td><td>Plataforma provisionada nas fases anteriores; um chart e um pipeline por serviço</td></tr>
+  <tr><td>IaC</td><td>Terraform</td><td>Infraestrutura própria de cada serviço no repositório dele</td></tr>
+  <tr><td>CI/CD</td><td>GitHub Actions, SonarCloud</td><td>Pipeline independente por serviço: build, testes com cobertura mínima de 80%, quality gate e deploy com aprovação</td></tr>
+  <tr><td>Qualidade</td><td>xUnit, Reqnroll</td><td>Testes unitários e de integração; BDD do fluxo da OS e das compensações</td></tr>
+  <tr><td>Observabilidade</td><td>OpenTelemetry, Prometheus, Grafana, Loki, Jaeger</td><td>Mesma stack da Fase 3, aplicada aos serviços</td></tr>
+</table>
+
+<h2>9. Qualidade e entrega contínua</h2>
+<ul>
+  <li>Cada serviço tem testes automatizados com cobertura mínima de 80% medida no CI e o SonarCloud como quality gate. A evidência de cobertura está no README de cada repositório.</li>
+  <li>Deploy independente por serviço no EKS, com aprovação manual no Environment <code>production</code> do GitHub.</li>
+  <li>A branch <code>main</code> de OS, Cobrança, Execução, Cadastros e Web só aceita merge por PR com as checagens <code>build</code> e <code>test</code> verdes.</li>
+</ul>
+
+</body>
+</html>
